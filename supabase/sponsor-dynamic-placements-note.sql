@@ -1,0 +1,4 @@
+-- No schema change required.
+-- Sponsor placements are stored as comma-separated text in public.sponsors.placement.
+-- The app now builds sponsor placement options from the live divisions/leagues in Supabase,
+-- so any newly created league/division can be selected as a sponsor placement.
