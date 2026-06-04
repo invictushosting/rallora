@@ -170,25 +170,46 @@ export default function RalloraOnboardingPage() {
 
   async function checkSession() {
     setUserState((prev) => ({ ...prev, loading: true }));
-    const { data: userData } = await supabase.auth.getUser();
-    const userEmail = userData.user?.email ?? null;
+    setAuthError(null);
 
-    if (!userEmail) {
+    try {
+      const sessionResult = await Promise.race([
+        supabase.auth.getUser(),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("Onboarding session check timed out. Please refresh or sign in again.")), 6000),
+        ),
+      ]);
+
+      const { data: userData, error: userError } = sessionResult;
+      if (userError) throw userError;
+
+      const userEmail = userData.user?.email ?? null;
+
+      if (!userEmail) {
+        setUserState({ email: null, isAdmin: false, loading: false });
+        return;
+      }
+
+      const { data: adminRows, error } = await supabase
+        .from("admin_users")
+        .select("email")
+        .ilike("email", userEmail)
+        .limit(1);
+
+      setUserState({
+        email: userEmail,
+        isAdmin: !error && Boolean(adminRows?.length),
+        loading: false,
+      });
+
+      if (error) {
+        setAuthError("Signed in, but admin access could not be verified.");
+      }
+    } catch (error) {
+      console.error("Onboarding session check failed", error);
+      setAuthError(error instanceof Error ? error.message : "Could not check onboarding session.");
       setUserState({ email: null, isAdmin: false, loading: false });
-      return;
     }
-
-    const { data: adminRows, error } = await supabase
-      .from("admin_users")
-      .select("email")
-      .ilike("email", userEmail)
-      .limit(1);
-
-    setUserState({
-      email: userEmail,
-      isAdmin: !error && Boolean(adminRows?.length),
-      loading: false,
-    });
   }
 
   async function signIn(event: React.FormEvent<HTMLFormElement>) {
