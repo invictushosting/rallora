@@ -2022,18 +2022,28 @@ function AdminPage({
     let mounted = true;
 
     async function loadAuth() {
-      const { data } = await supabase.auth.getUser();
-      if (!mounted) return;
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        if (!mounted) return;
+        if (error) throw error;
 
-      const authUser = data.user
-        ? { id: data.user.id, email: data.user.email ?? undefined }
-        : null;
-      setUser(authUser);
-      setAuthLoading(false);
+        const authUser = data.user
+          ? { id: data.user.id, email: data.user.email ?? undefined }
+          : null;
+        setUser(authUser);
 
-      if (authUser) {
-        const allowed = await checkAdminAccess();
-        if (allowed) await refreshAdminData();
+        if (authUser) {
+          const allowed = await checkAdminAccess();
+          if (allowed) await refreshAdminData();
+        }
+      } catch (error) {
+        if (mounted) {
+          setUser(null);
+          setIsAdmin(false);
+          showError(error instanceof Error ? error.message : "Could not check admin session.");
+        }
+      } finally {
+        if (mounted) setAuthLoading(false);
       }
     }
 
@@ -2046,6 +2056,7 @@ function AdminPage({
           : null;
         setUser(authUser);
         setIsAdmin(false);
+        setAuthLoading(false);
         if (authUser) {
           const allowed = await checkAdminAccess();
           if (allowed) await refreshAdminData();
@@ -5644,14 +5655,24 @@ function CaptainPage({ onDataChanged }: { onDataChanged: () => void }) {
     let mounted = true;
 
     async function loadAuth() {
-      const { data } = await supabase.auth.getUser();
-      if (!mounted) return;
-      const authUser = data.user
-        ? { id: data.user.id, email: data.user.email ?? undefined }
-        : null;
-      setUser(authUser);
-      setAuthLoading(false);
-      if (authUser) await loadCaptainData(authUser.email);
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        if (!mounted) return;
+        if (error) throw error;
+        const authUser = data.user
+          ? { id: data.user.id, email: data.user.email ?? undefined }
+          : null;
+        setUser(authUser);
+        if (authUser) await loadCaptainData(authUser.email);
+      } catch (error) {
+        if (mounted) {
+          setUser(null);
+          setCaptainRecord(null);
+          showError(error instanceof Error ? error.message : "Could not check captain session.");
+        }
+      } finally {
+        if (mounted) setAuthLoading(false);
+      }
     }
 
     loadAuth();
@@ -5663,6 +5684,7 @@ function CaptainPage({ onDataChanged }: { onDataChanged: () => void }) {
           : null;
         setUser(authUser);
         setCaptainRecord(null);
+        setAuthLoading(false);
         if (authUser) await loadCaptainData(authUser.email);
       },
     );
