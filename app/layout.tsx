@@ -1,23 +1,24 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./onboarding.css";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "GSM Padel League Hub",
-  description: "Private club league manager for GSM Padel",
+  title: "Rallora",
+  description: "Club league, fixtures, tables, results and sponsor management by Protego Solutions Ltd.",
   manifest: "/manifest.webmanifest",
   openGraph: {
-    title: "GSM Padel League Hub",
-    description: "Club padel league tables, fixtures, results and cup hub.",
+    title: "Rallora",
+    description: "Club league tables, fixtures, results and competition hub.",
     url: siteUrl,
-    siteName: "GSM Padel League Hub",
+    siteName: "Rallora",
     type: "website",
   },
   appleWebApp: {
     capable: true,
-    title: "GSM Padel",
+    title: "Rallora",
     statusBarStyle: "black-translucent",
   },
 };
