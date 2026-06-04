@@ -161,6 +161,7 @@ export default function RalloraOnboardingPage() {
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [createdSummary, setCreatedSummary] = useState<CreatedSummary | null>(null);
+  const [createDemoSetup, setCreateDemoSetup] = useState(true);
 
   useEffect(() => {
     checkSession();
@@ -402,13 +403,24 @@ export default function RalloraOnboardingPage() {
         console.warn("club_rules insert failed", rulesError.message);
       }
 
+      if (createDemoSetup) {
+        const { error: demoError } = await supabase.rpc("load_onboarding_demo_data", {
+          p_club_id: club.id,
+          p_season_id: season.id,
+          p_teams_per_league: Math.max(4, Math.min(12, Math.round(cleanLeagues[0]?.teamsPerLeague ?? 8))),
+          p_fixtures_per_team: Number(fixturesPerPack) || 3,
+        });
+
+        if (demoError) throw new Error(`Club was created, but demo setup failed: ${demoError.message}`);
+      }
+
       setCreatedSummary({
         clubName: club.name,
         clubSlug: club.slug,
         seasonName: season.name,
         leaguesCreated: createdDivisions?.map((division) => division.name) ?? cleanLeagues.map((league) => league.name),
       });
-      setSubmitMessage("Club setup created successfully.");
+      setSubmitMessage(createDemoSetup ? "Club setup and demo data created successfully." : "Club setup created successfully.");
       setStep(5);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Something went wrong creating the club setup.";
@@ -815,6 +827,10 @@ export default function RalloraOnboardingPage() {
                     <div className="text-xs font-black uppercase text-green-700">Leagues</div>
                     <div className="font-black">{createdSummary.leaguesCreated.join(", ")}</div>
                   </div>
+                  <div className="rounded-2xl bg-white p-4 md:col-span-2">
+                    <div className="text-xs font-black uppercase text-green-700">Demo setup</div>
+                    <div className="font-black">{createDemoSetup ? "Teams, fixtures, results, sponsors and cup rules loaded" : "Skipped"}</div>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -829,12 +845,31 @@ export default function RalloraOnboardingPage() {
                     <div className="flex justify-between gap-4"><dt className="text-slate-500">Rules preset</dt><dd className="font-black">{RULE_PRESETS.find((preset) => preset.value === rulePreset)?.label ?? "Custom Rules"}</dd></div>
                     <div className="flex justify-between gap-4"><dt className="text-slate-500">Score format</dt><dd className="font-black">{scoreFormat || "Custom"}</dd></div>
                     <div className="flex justify-between gap-4"><dt className="text-slate-500">Leagues</dt><dd className="font-black">{leagues.filter((league) => league.name.trim()).length}</dd></div>
+                    <div className="flex justify-between gap-4"><dt className="text-slate-500">Demo setup</dt><dd className="font-black">{createDemoSetup ? "Included" : "Skipped"}</dd></div>
                   </dl>
+                  <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-2xl border border-blue-200 bg-white p-4 text-sm font-bold text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={createDemoSetup}
+                      onChange={(event) => setCreateDemoSetup(event.target.checked)}
+                      className="mt-1 h-5 w-5"
+                    />
+                    <span>
+                      <span className="block font-black uppercase text-blue-950">Create demo setup</span>
+                      <span className="mt-1 block text-slate-500">
+                        Adds demo teams, captains, fixtures, two rounds of results, standings, sponsors and cup qualifier rules for sales demos.
+                      </span>
+                    </span>
+                  </label>
                 </div>
                 <div className="rounded-[1.5rem] border border-blue-200 bg-blue-50 p-5">
                   <Users className="h-8 w-8 text-blue-600" />
                   <h3 className="mt-3 font-black uppercase text-blue-950">What happens next?</h3>
-                  <p className="mt-2 text-sm font-semibold text-blue-900/70">After creation, go to the main admin area to add teams, captains, sponsors, fixtures and demo data for this club.</p>
+                  <p className="mt-2 text-sm font-semibold text-blue-900/70">
+                    {createDemoSetup
+                      ? "This club will be ready to demo immediately with teams, fixtures, results, standings, sponsors and cup setup."
+                      : "After creation, go to the main admin area to add teams, captains, sponsors, fixtures and results."}
+                  </p>
                 </div>
               </div>
             )}
