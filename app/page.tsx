@@ -3766,6 +3766,7 @@ function AdminPage({
           ["fixtures", "Fixture Generator"],
           ["captains", "Captains"],
           ["cup", "League Cup"],
+          ["rules", "Rules"],
           ["sponsors", "Sponsors"],
           ["demo", "Demo Tools"],
           ["manage", "Edit / Delete"],
@@ -3780,6 +3781,33 @@ function AdminPage({
           </button>
         ))}
       </div>
+
+      {activeAdminTab === "rules" && (
+        <div className="admin-grid two-col">
+          <Card>
+            <SectionTitle icon={ClipboardList} title="Club Rules" />
+            <p className="helper-text">Edit the rules shown on the public Rules page. This includes scoring format, fixture deadlines, forfeits, captain confirmation and custom club notes.</p>
+            <div className="button-row">
+              <button type="button" onClick={() => { window.location.href = "/admin/rules"; }}>
+                Edit Rules
+              </button>
+              <button type="button" className="secondary-button" onClick={() => { window.open("/rules", "_blank"); }}>
+                Preview Public Rules
+              </button>
+            </div>
+          </Card>
+          <Card>
+            <SectionTitle icon={ShieldCheck} title="Recommended Setup" />
+            <ul className="admin-clean-list">
+              <li>Set a clear score format for each club.</li>
+              <li>Explain fixture deadlines and monthly pack rules.</li>
+              <li>Confirm how forfeits and disputed results are handled.</li>
+              <li>Add custom notes for club-specific policies.</li>
+            </ul>
+          </Card>
+        </div>
+      )}
+
 
       {activeAdminTab === "overview" && (
         <div className="admin-overview-grid">
