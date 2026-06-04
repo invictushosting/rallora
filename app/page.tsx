@@ -1695,6 +1695,15 @@ function AdminPage({
   const [user, setUser] = useState<AdminUser | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
+
+  // Rallora auth failsafe: prevents Admin from freezing forever if Supabase auth stalls.
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setAuthLoading(false);
+    }, 6500);
+
+    return () => window.clearTimeout(timer);
+  }, []);
   const [adminLoading, setAdminLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -5535,6 +5544,15 @@ function CaptainPage({ onDataChanged }: { onDataChanged: () => void }) {
   const supabase = createClient();
   const [user, setUser] = useState<AdminUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+
+  // Rallora auth failsafe: prevents Captain from freezing forever if Supabase auth stalls.
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setAuthLoading(false);
+    }, 6500);
+
+    return () => window.clearTimeout(timer);
+  }, []);
   const [captainLoading, setCaptainLoading] = useState(false);
   const [captainRecord, setCaptainRecord] = useState<CaptainUserRecord | null>(null);
   const [captainDivisions, setCaptainDivisions] = useState<AdminDivision[]>([]);

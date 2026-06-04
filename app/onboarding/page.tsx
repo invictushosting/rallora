@@ -115,6 +115,15 @@ function Panel({ children, className = "" }: { children: React.ReactNode; classN
 export default function RalloraOnboardingPage() {
   const supabase = useMemo(() => createClient(), []);
   const [userState, setUserState] = useState<UserState>({ email: null, isAdmin: false, loading: true });
+
+  // Rallora onboarding failsafe: prevents the wizard from freezing forever on auth check.
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setUserState((prev) => ({ ...prev, loading: false }));
+    }, 6500);
+
+    return () => window.clearTimeout(timer);
+  }, []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
