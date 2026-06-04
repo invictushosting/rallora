@@ -1940,9 +1940,8 @@ function AdminPage({
           .returns<CaptainSubmissionRecord[]>(),
         supabase
           .from("club_rules")
-          .select("rule_preset, score_format, win_points, draw_points, loss_points, forfeit_win_points, forfeit_loss_points, double_forfeit_points, standings_tiebreaker, season_id")
+          .select("rule_preset, score_format, win_points, draw_points, loss_points, forfeit_win_points, forfeit_loss_points, double_forfeit_points, standings_tiebreaker, season_id, updated_at")
           .or(`season_id.eq.${activeSeason.id},season_id.is.null`)
-          .order("season_id", { ascending: false, nullsFirst: false })
           .order("updated_at", { ascending: false })
           .limit(1),
       ]);
@@ -3819,7 +3818,7 @@ function AdminPage({
               <div className="rule-summary-item"><span>Forfeit win/loss</span><strong>{clubRulesSummary?.forfeit_win_points ?? 3} / {clubRulesSummary?.forfeit_loss_points ?? 0}</strong></div>
             </div>
             <p className="helper-text"><strong>Tie-break:</strong> {clubRulesSummary?.standings_tiebreaker ?? "Points, wins, score difference, score for, head-to-head, alphabetical"}</p>
-            <div className="button-row">
+            <div className="button-row admin-rules-actions">
               <button className="primary-button" type="button" onClick={() => { window.location.href = "/admin/rules"; }}>
                 Edit Rules
               </button>
