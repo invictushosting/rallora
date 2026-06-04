@@ -194,3 +194,54 @@
   .actions { flex-direction: column; }
   .button { width: 100%; }
 }
+
+.ruleSection {
+  border: 1px solid #dbeafe;
+  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 72%);
+  border-radius: 22px;
+  padding: 18px;
+}
+.sectionHeading {
+  margin-bottom: 14px;
+}
+.sectionHeading h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 1000;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+.sectionHeading p {
+  margin: 0;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.pointsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.pointsList {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.pointsList span {
+  display: block;
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+  border-radius: 16px;
+  padding: 12px;
+  color: #0f172a;
+}
+.tieBreak {
+  display: block;
+  margin-top: 10px;
+  color: #475569;
+  line-height: 1.5;
+}
+@media (max-width: 760px) {
+  .pointsGrid, .pointsList { grid-template-columns: 1fr; }
+}

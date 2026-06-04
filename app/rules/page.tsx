@@ -26,6 +26,13 @@ type ClubRules = {
   captain_confirmation_rules: string | null;
   league_cup_rules: string | null;
   custom_rules: string | null;
+  win_points: number | null;
+  draw_points: number | null;
+  loss_points: number | null;
+  forfeit_win_points: number | null;
+  forfeit_loss_points: number | null;
+  double_forfeit_points: number | null;
+  standings_tiebreaker: string | null;
 };
 
 const FALLBACK_RULES: ClubRules = {
@@ -38,6 +45,13 @@ const FALLBACK_RULES: ClubRules = {
   captain_confirmation_rules: "Captains are responsible for arranging fixtures, submitting results and raising disputes quickly.",
   league_cup_rules: "Cup qualification may be automatic based on league position or manually selected by the organiser.",
   custom_rules: "",
+  win_points: 3,
+  draw_points: 1,
+  loss_points: 0,
+  forfeit_win_points: 3,
+  forfeit_loss_points: 0,
+  double_forfeit_points: 0,
+  standings_tiebreaker: "Points, wins, score difference, score for, head-to-head, alphabetical",
 };
 
 function ruleLabel(value?: string | null) {
@@ -104,7 +118,7 @@ export default function PublicRulesPage() {
 
       const { data: rulesData, error: rulesError } = await supabase
         .from("club_rules")
-        .select("rule_preset,score_format,fixture_rules,deadline_rules,forfeit_rules,result_submission_rules,captain_confirmation_rules,league_cup_rules,custom_rules")
+        .select("rule_preset,score_format,fixture_rules,deadline_rules,forfeit_rules,result_submission_rules,captain_confirmation_rules,league_cup_rules,custom_rules,win_points,draw_points,loss_points,forfeit_win_points,forfeit_loss_points,double_forfeit_points,standings_tiebreaker")
         .eq("club_id", clubData.id)
         .eq("season_id", seasonData?.id || null)
         .maybeSingle();
@@ -142,6 +156,17 @@ export default function PublicRulesPage() {
           <div className={styles.grid}>
             <RuleCard title="Rules Preset" badge={ruleLabel(rules.rule_preset)}>
               {rules.score_format || FALLBACK_RULES.score_format}
+            </RuleCard>
+            <RuleCard title="Points System" full>
+              <span className={styles.pointsList}>
+                <span><strong>Win:</strong> {rules.win_points ?? FALLBACK_RULES.win_points}</span>
+                <span><strong>Draw:</strong> {rules.draw_points ?? FALLBACK_RULES.draw_points}</span>
+                <span><strong>Loss:</strong> {rules.loss_points ?? FALLBACK_RULES.loss_points}</span>
+                <span><strong>Forfeit win:</strong> {rules.forfeit_win_points ?? FALLBACK_RULES.forfeit_win_points}</span>
+                <span><strong>Forfeit loss:</strong> {rules.forfeit_loss_points ?? FALLBACK_RULES.forfeit_loss_points}</span>
+                <span><strong>Double forfeit:</strong> {rules.double_forfeit_points ?? FALLBACK_RULES.double_forfeit_points}</span>
+              </span>
+              <span className={styles.tieBreak}>Tie-breakers: {rules.standings_tiebreaker || FALLBACK_RULES.standings_tiebreaker}</span>
             </RuleCard>
             <RuleCard title="Fixture Arrangement Rules">{rules.fixture_rules || FALLBACK_RULES.fixture_rules}</RuleCard>
             <RuleCard title="Deadline Rules">{rules.deadline_rules || FALLBACK_RULES.deadline_rules}</RuleCard>

@@ -18,6 +18,13 @@ type RulesForm = {
   captain_confirmation_rules: string;
   league_cup_rules: string;
   custom_rules: string;
+  win_points: string;
+  draw_points: string;
+  loss_points: string;
+  forfeit_win_points: string;
+  forfeit_loss_points: string;
+  double_forfeit_points: string;
+  standings_tiebreaker: string;
 };
 
 const DEFAULT_RULES: RulesForm = {
@@ -30,6 +37,13 @@ const DEFAULT_RULES: RulesForm = {
   captain_confirmation_rules: "Captains are responsible for arranging fixtures, submitting results and raising disputes quickly.",
   league_cup_rules: "Cup qualification can be automatic based on league position or manually selected by the organiser.",
   custom_rules: "",
+  win_points: "3",
+  draw_points: "1",
+  loss_points: "0",
+  forfeit_win_points: "3",
+  forfeit_loss_points: "0",
+  double_forfeit_points: "0",
+  standings_tiebreaker: "Points, wins, score difference, score for, head-to-head, alphabetical",
 };
 
 const PRESETS = [
@@ -143,7 +157,7 @@ export default function AdminRulesPage() {
 
     const { data: rulesData, error: rulesError } = await supabase
       .from("club_rules")
-      .select("rule_preset,score_format,fixture_rules,deadline_rules,forfeit_rules,result_submission_rules,captain_confirmation_rules,league_cup_rules,custom_rules")
+      .select("rule_preset,score_format,fixture_rules,deadline_rules,forfeit_rules,result_submission_rules,captain_confirmation_rules,league_cup_rules,custom_rules,win_points,draw_points,loss_points,forfeit_win_points,forfeit_loss_points,double_forfeit_points,standings_tiebreaker")
       .eq("club_id", clubData.id)
       .eq("season_id", seasonData?.id || null)
       .maybeSingle();
@@ -152,11 +166,31 @@ export default function AdminRulesPage() {
       setError(rulesError.message);
     }
 
-    setForm({ ...DEFAULT_RULES, ...(rulesData || {}) });
+    setForm({
+      ...DEFAULT_RULES,
+      ...(rulesData || {}),
+      win_points: normalisePoints(rulesData?.win_points, DEFAULT_RULES.win_points),
+      draw_points: normalisePoints(rulesData?.draw_points, DEFAULT_RULES.draw_points),
+      loss_points: normalisePoints(rulesData?.loss_points, DEFAULT_RULES.loss_points),
+      forfeit_win_points: normalisePoints(rulesData?.forfeit_win_points, DEFAULT_RULES.forfeit_win_points),
+      forfeit_loss_points: normalisePoints(rulesData?.forfeit_loss_points, DEFAULT_RULES.forfeit_loss_points),
+      double_forfeit_points: normalisePoints(rulesData?.double_forfeit_points, DEFAULT_RULES.double_forfeit_points),
+      standings_tiebreaker: rulesData?.standings_tiebreaker || DEFAULT_RULES.standings_tiebreaker,
+    });
     setLoadingRules(false);
   }
 
-  function updateForm(key: keyof RulesForm, value: string) {
+  function normalisePoints(value: unknown, fallback: string) {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? String(numberValue) : fallback;
+}
+
+function toPointNumber(value: string, fallback: number) {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? numberValue : fallback;
+}
+
+function updateForm(key: keyof RulesForm, value: string) {
     setForm((current) => ({ ...current, [key]: value }));
   }
 
@@ -179,6 +213,12 @@ export default function AdminRulesPage() {
       club_id: club.id,
       season_id: season?.id || null,
       ...form,
+      win_points: toPointNumber(form.win_points, 3),
+      draw_points: toPointNumber(form.draw_points, 1),
+      loss_points: toPointNumber(form.loss_points, 0),
+      forfeit_win_points: toPointNumber(form.forfeit_win_points, 3),
+      forfeit_loss_points: toPointNumber(form.forfeit_loss_points, 0),
+      double_forfeit_points: toPointNumber(form.double_forfeit_points, 0),
       updated_at: new Date().toISOString(),
     };
 
@@ -265,6 +305,39 @@ export default function AdminRulesPage() {
             <Field label="Score format">
               <input className={styles.input} value={form.score_format} onChange={(event) => updateForm("score_format", event.target.value)} />
             </Field>
+
+            <div className={`${styles.fieldFull} ${styles.ruleSection}`}>
+              <div className={styles.sectionHeading}>
+                <h3>Points system</h3>
+                <p>These values explain how the public league table is scored. Later we can wire these directly into automatic standings calculations per club.</p>
+              </div>
+              <div className={styles.pointsGrid}>
+                <Field label="Win points">
+                  <input className={styles.input} type="number" min="0" max="20" value={form.win_points} onChange={(event) => updateForm("win_points", event.target.value)} />
+                </Field>
+                <Field label="Draw points">
+                  <input className={styles.input} type="number" min="0" max="20" value={form.draw_points} onChange={(event) => updateForm("draw_points", event.target.value)} />
+                </Field>
+                <Field label="Loss points">
+                  <input className={styles.input} type="number" min="0" max="20" value={form.loss_points} onChange={(event) => updateForm("loss_points", event.target.value)} />
+                </Field>
+                <Field label="Forfeit win points">
+                  <input className={styles.input} type="number" min="0" max="20" value={form.forfeit_win_points} onChange={(event) => updateForm("forfeit_win_points", event.target.value)} />
+                </Field>
+                <Field label="Forfeit loss points">
+                  <input className={styles.input} type="number" min="-20" max="20" value={form.forfeit_loss_points} onChange={(event) => updateForm("forfeit_loss_points", event.target.value)} />
+                </Field>
+                <Field label="Double forfeit points">
+                  <input className={styles.input} type="number" min="-20" max="20" value={form.double_forfeit_points} onChange={(event) => updateForm("double_forfeit_points", event.target.value)} />
+                </Field>
+              </div>
+              <div className={styles.fieldFull}>
+                <Field label="Standings tie-breaker order" full>
+                  <input className={styles.input} value={form.standings_tiebreaker} onChange={(event) => updateForm("standings_tiebreaker", event.target.value)} />
+                </Field>
+              </div>
+            </div>
+
             <Field label="Fixture arrangement rules" full>
               <textarea className={styles.textarea} value={form.fixture_rules} onChange={(event) => updateForm("fixture_rules", event.target.value)} />
             </Field>

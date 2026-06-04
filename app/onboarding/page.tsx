@@ -144,6 +144,9 @@ export default function RalloraOnboardingPage() {
   const [drawPoints, setDrawPoints] = useState(1);
   const [lossPoints, setLossPoints] = useState(0);
   const [forfeitWinPoints, setForfeitWinPoints] = useState(3);
+  const [forfeitLossPoints, setForfeitLossPoints] = useState(0);
+  const [doubleForfeitPoints, setDoubleForfeitPoints] = useState(0);
+  const [standingsTiebreaker, setStandingsTiebreaker] = useState("Points, wins, score difference, score for, head-to-head, alphabetical");
   const [rulePreset, setRulePreset] = useState("standard");
   const [scoreFormat, setScoreFormat] = useState("Best of 3 sets");
   const [fixtureRules, setFixtureRules] = useState(DEFAULT_RULE_TEXT.fixtureRules);
@@ -375,6 +378,13 @@ export default function RalloraOnboardingPage() {
           season_id: season.id,
           rule_preset: rulePreset,
           score_format: scoreFormat.trim() || null,
+          win_points: Number(winPoints) || 3,
+          draw_points: Number(drawPoints) || 1,
+          loss_points: Number(lossPoints) || 0,
+          forfeit_win_points: Number(forfeitWinPoints) || 3,
+          forfeit_loss_points: Number(forfeitLossPoints) || 0,
+          double_forfeit_points: Number(doubleForfeitPoints) || 0,
+          standings_tiebreaker: standingsTiebreaker.trim() || null,
           fixture_rules: fixtureRules.trim() || null,
           deadline_rules: deadlineRules.trim() || null,
           forfeit_rules: forfeitRules.trim() || null,
@@ -729,6 +739,18 @@ export default function RalloraOnboardingPage() {
               <div>
                 <FieldLabel>Forfeit win points</FieldLabel>
                 <TextInput value={forfeitWinPoints} type="number" min={0} max={10} onChange={(event) => setForfeitWinPoints(Number(event.target.value))} />
+              </div>
+              <div>
+                <FieldLabel>Forfeit loss points</FieldLabel>
+                <TextInput value={forfeitLossPoints} type="number" min={-10} max={10} onChange={(event) => setForfeitLossPoints(Number(event.target.value))} />
+              </div>
+              <div>
+                <FieldLabel>Double forfeit points</FieldLabel>
+                <TextInput value={doubleForfeitPoints} type="number" min={-10} max={10} onChange={(event) => setDoubleForfeitPoints(Number(event.target.value))} />
+              </div>
+              <div className="lg:col-span-3">
+                <FieldLabel>Standings tie-breaker order</FieldLabel>
+                <TextInput value={standingsTiebreaker} onChange={(event) => setStandingsTiebreaker(event.target.value)} />
               </div>
             </div>
 
