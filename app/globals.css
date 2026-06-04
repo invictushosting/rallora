@@ -1703,3 +1703,225 @@ button:disabled {
     width: 100%;
   }
 }
+
+
+/* Rallora admin dashboard polish */
+.admin-dashboard-polish {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.admin-hero-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.35rem;
+  border-radius: 1.4rem;
+  background: linear-gradient(135deg, #06162e 0%, #0f3b78 58%, #1f7ae0 100%);
+  color: #fff;
+  box-shadow: 0 18px 45px rgba(7, 36, 83, 0.22);
+}
+
+.admin-hero-panel h2 {
+  margin: 0.25rem 0 0.4rem;
+  font-size: clamp(1.45rem, 3vw, 2.2rem);
+  line-height: 1;
+}
+
+.admin-hero-panel p {
+  margin: 0;
+  max-width: 760px;
+  color: rgba(255,255,255,0.78);
+}
+
+.admin-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  background: rgba(255,255,255,0.13);
+  color: rgba(255,255,255,0.86);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.admin-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  min-width: 260px;
+}
+
+.admin-hero-actions .secondary-button {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  border-color: rgba(255,255,255,0.22);
+}
+
+.admin-stat-grid.enhanced {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.admin-stat-card {
+  display: grid;
+  gap: 0.45rem;
+  min-height: 150px;
+  padding: 1rem;
+  border: 1px solid rgba(15, 68, 128, 0.12);
+  border-radius: 1.1rem;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.admin-stat-card svg {
+  color: var(--club-primary, #1f7ae0);
+}
+
+.admin-stat-card span {
+  color: #64748b;
+  font-size: 0.77rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.admin-stat-card strong {
+  color: #0f172a;
+  font-size: 1.35rem;
+  line-height: 1.05;
+}
+
+.admin-stat-card button {
+  align-self: end;
+  justify-self: start;
+  border: 0;
+  background: transparent;
+  color: var(--club-primary, #1f7ae0);
+  font-weight: 900;
+  cursor: pointer;
+  padding: 0;
+}
+
+.admin-overview-grid.polished {
+  grid-template-columns: minmax(0, 1.25fr) minmax(330px, 0.75fr);
+  align-items: start;
+}
+
+.admin-action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.admin-action-grid button {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "icon title"
+    "icon body";
+  column-gap: 0.75rem;
+  row-gap: 0.2rem;
+  width: 100%;
+  padding: 0.95rem;
+  border: 1px solid rgba(15, 68, 128, 0.12);
+  border-radius: 1rem;
+  background: #f8fafc;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.admin-action-grid button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(31, 122, 224, 0.28);
+  background: #eef6ff;
+}
+
+.admin-action-grid svg {
+  grid-area: icon;
+  margin-top: 0.1rem;
+  color: var(--club-primary, #1f7ae0);
+}
+
+.admin-action-grid strong {
+  grid-area: title;
+  color: #0f172a;
+}
+
+.admin-action-grid span {
+  grid-area: body;
+  color: #64748b;
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.setup-checklist-polished {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.setup-checklist-polished > div {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.75rem;
+  border-radius: 0.95rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.setup-checklist-polished > div.complete svg {
+  color: #16a34a;
+}
+
+.setup-checklist-polished > div.warning svg {
+  color: #f59e0b;
+}
+
+.setup-checklist-polished span {
+  color: #334155;
+  font-weight: 800;
+}
+
+.setup-checklist-polished strong {
+  color: #0f172a;
+  font-size: 0.9rem;
+}
+
+.checklist-actions {
+  margin-top: 1rem;
+}
+
+@media (max-width: 1100px) {
+  .admin-stat-grid.enhanced {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .admin-overview-grid.polished {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-hero-panel {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .admin-hero-actions {
+    justify-content: stretch;
+    min-width: 0;
+  }
+  .admin-hero-actions button {
+    width: 100%;
+  }
+  .admin-stat-grid.enhanced,
+  .admin-action-grid {
+    grid-template-columns: 1fr;
+  }
+}

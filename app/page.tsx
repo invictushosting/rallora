@@ -3844,27 +3844,148 @@ function AdminPage({
 
 
       {activeAdminTab === "overview" && (
-        <div className="admin-overview-grid">
-          <Card>
-            <SectionTitle icon={Trophy} title="Active Season" />
-            <h3>{allSeasons.find((season) => season.status === "active")?.name ?? "No active season"}</h3>
-            <p className="helper-text">Use Seasons & Leagues to create seasons, add leagues and sort league order.</p>
-          </Card>
-          <Card>
-            <SectionTitle icon={Users} title="Teams" />
-            <h3>{adminTeams.length}</h3>
-            <p className="helper-text">Active teams, players and captain emails are managed in Quick Add and Edit / Delete.</p>
-          </Card>
-          <Card>
-            <SectionTitle icon={CalendarDays} title="Fixtures" />
-            <h3>{adminFixtures.length}</h3>
-            <p className="helper-text">Generate full round-robin schedules or add individual fixtures.</p>
-          </Card>
-          <Card>
-            <SectionTitle icon={ClipboardList} title="Captain Submissions" />
-            <h3>{captainSubmissions.length}</h3>
-            <p className="helper-text">Approve, dispute or delete score submissions from captains.</p>
-          </Card>
+        <div className="admin-dashboard-polish">
+          <div className="admin-hero-panel">
+            <div>
+              <span className="admin-eyebrow">Rallora control centre</span>
+              <h2>{club.name} Admin Hub</h2>
+              <p>
+                Manage club setup, leagues, fixtures, captain submissions, sponsors, rules and demo tools from one organised dashboard.
+              </p>
+            </div>
+            <div className="admin-hero-actions">
+              <button type="button" className="primary-button" onClick={() => setActiveAdminTab("quick")}>
+                Add Teams / Fixtures
+              </button>
+              <button type="button" className="secondary-button" onClick={() => setActiveAdminTab("fixtures")}>
+                Generate Fixtures
+              </button>
+              <button type="button" className="secondary-button" onClick={() => { window.location.href = "/admin/rules"; }}>
+                Edit Rules
+              </button>
+            </div>
+          </div>
+
+          <div className="admin-stat-grid enhanced">
+            <div className="admin-stat-card">
+              <Trophy size={24} />
+              <span>Active Season</span>
+              <strong>{allSeasons.find((season) => season.status === "active")?.name ?? "No active season"}</strong>
+              <button type="button" onClick={() => setActiveAdminTab("setup")}>Manage seasons</button>
+            </div>
+            <div className="admin-stat-card">
+              <Swords size={24} />
+              <span>Leagues</span>
+              <strong>{adminDivisions.length}</strong>
+              <button type="button" onClick={() => setActiveAdminTab("setup")}>Sort / edit leagues</button>
+            </div>
+            <div className="admin-stat-card">
+              <Users size={24} />
+              <span>Teams</span>
+              <strong>{adminTeams.length}</strong>
+              <button type="button" onClick={() => setActiveAdminTab("quick")}>Add teams</button>
+            </div>
+            <div className="admin-stat-card">
+              <CalendarDays size={24} />
+              <span>Fixtures</span>
+              <strong>{adminFixtures.length}</strong>
+              <button type="button" onClick={() => setActiveAdminTab("fixtures")}>Fixture tools</button>
+            </div>
+            <div className="admin-stat-card">
+              <ClipboardList size={24} />
+              <span>Results</span>
+              <strong>{adminResults.length}</strong>
+              <button type="button" onClick={() => setActiveAdminTab("quick")}>Submit result</button>
+            </div>
+            <div className="admin-stat-card">
+              <Bell size={24} />
+              <span>Captain Submissions</span>
+              <strong>{captainSubmissions.length}</strong>
+              <button type="button" onClick={() => setActiveAdminTab("captains")}>Review submissions</button>
+            </div>
+          </div>
+
+          <div className="admin-overview-grid polished">
+            <Card>
+              <SectionTitle icon={Settings} title="Quick Actions" />
+              <div className="admin-action-grid">
+                <button type="button" onClick={() => setActiveAdminTab("settings")}>
+                  <Settings size={20} />
+                  <strong>Club Settings</strong>
+                  <span>Logo, colours, contact details and public copy.</span>
+                </button>
+                <button type="button" onClick={() => setActiveAdminTab("setup")}>
+                  <Trophy size={20} />
+                  <strong>Seasons & Leagues</strong>
+                  <span>Create seasons, add leagues and manage order.</span>
+                </button>
+                <button type="button" onClick={() => setActiveAdminTab("fixtures")}>
+                  <CalendarDays size={20} />
+                  <strong>Fixture Generator</strong>
+                  <span>Weekly rounds, monthly packs and fixture previews.</span>
+                </button>
+                <button type="button" onClick={() => setActiveAdminTab("cup")}>
+                  <Medal size={20} />
+                  <strong>League Cup</strong>
+                  <span>Qualification rules, manual qualifiers and cup setup.</span>
+                </button>
+                <button type="button" onClick={() => setActiveAdminTab("sponsors")}>
+                  <ShieldCheck size={20} />
+                  <strong>Sponsors</strong>
+                  <span>Logo uploads, placements and sponsor links.</span>
+                </button>
+                <button type="button" onClick={() => setActiveAdminTab("demo")}>
+                  <RefreshCw size={20} />
+                  <strong>Demo Tools</strong>
+                  <span>Load demo teams, fixtures and sample results.</span>
+                </button>
+              </div>
+            </Card>
+
+            <Card>
+              <SectionTitle icon={CheckCircle2} title="Setup Checklist" />
+              <div className="setup-checklist-polished">
+                <div className={club.logoUrl ? "complete" : "warning"}>
+                  <CheckCircle2 size={18} />
+                  <span>Club branding</span>
+                  <strong>{club.logoUrl ? "Ready" : "Add logo"}</strong>
+                </div>
+                <div className={clubRulesSummary ? "complete" : "warning"}>
+                  <CheckCircle2 size={18} />
+                  <span>Rules configured</span>
+                  <strong>{clubRulesSummary ? String(clubRulesSummary.win_points ?? 3) + " pts/win" : "Review"}</strong>
+                </div>
+                <div className={adminDivisions.length > 0 ? "complete" : "warning"}>
+                  <CheckCircle2 size={18} />
+                  <span>Leagues created</span>
+                  <strong>{adminDivisions.length}</strong>
+                </div>
+                <div className={adminTeams.length > 0 ? "complete" : "warning"}>
+                  <CheckCircle2 size={18} />
+                  <span>Teams added</span>
+                  <strong>{adminTeams.length}</strong>
+                </div>
+                <div className={adminFixtures.length > 0 ? "complete" : "warning"}>
+                  <CheckCircle2 size={18} />
+                  <span>Fixtures generated</span>
+                  <strong>{adminFixtures.length}</strong>
+                </div>
+                <div className={adminSponsors.length > 0 ? "complete" : "warning"}>
+                  <CheckCircle2 size={18} />
+                  <span>Sponsors added</span>
+                  <strong>{adminSponsors.length}</strong>
+                </div>
+              </div>
+              <div className="button-row checklist-actions">
+                <button type="button" className="secondary-button" onClick={handleManualRecalculate}>
+                  Recalculate Tables
+                </button>
+                <button type="button" className="secondary-button" onClick={() => { window.open("/rules", "_blank"); }}>
+                  View Public Rules
+                </button>
+              </div>
+            </Card>
+          </div>
         </div>
       )}
 
