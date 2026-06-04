@@ -42,6 +42,31 @@ const DEFAULT_LEAGUES: LeagueDraft[] = [
   { name: "Division 3", teamsPerLeague: 8 },
 ];
 
+const RULE_PRESETS = [
+  { value: "standard", label: "Standard Padel League Rules" },
+  { value: "monthly_pack", label: "Monthly Fixture Pack Rules" },
+  { value: "fast4", label: "Fast4 Rules" },
+  { value: "box_league", label: "Box League Rules" },
+  { value: "custom", label: "Custom Rules" },
+];
+
+const DEFAULT_RULE_TEXT = {
+  fixtureRules:
+    "Teams arrange their own fixture time. Matches should be played before the listed deadline unless agreed by the organiser.",
+  deadlineRules:
+    "Results should be submitted before the next fixture release or before the fixture pack deadline.",
+  forfeitRules:
+    "If one team fails to respond, arrange or attend, the organiser may award a forfeit win. If both teams fail to arrange, both teams may receive 0 points.",
+  resultSubmissionRules:
+    "One captain submits the score. The opposing captain or organiser can confirm, dispute or correct the result.",
+  captainConfirmationRules:
+    "Captains are responsible for arranging fixtures, submitting results and raising disputes quickly.",
+  leagueCupRules:
+    "Cup qualification can be automatic based on league position or manually selected by the organiser.",
+  customRules:
+    "",
+};
+
 function slugify(value: string) {
   return value
     .toLowerCase()
@@ -119,6 +144,15 @@ export default function RalloraOnboardingPage() {
   const [drawPoints, setDrawPoints] = useState(1);
   const [lossPoints, setLossPoints] = useState(0);
   const [forfeitWinPoints, setForfeitWinPoints] = useState(3);
+  const [rulePreset, setRulePreset] = useState("standard");
+  const [scoreFormat, setScoreFormat] = useState("Best of 3 sets");
+  const [fixtureRules, setFixtureRules] = useState(DEFAULT_RULE_TEXT.fixtureRules);
+  const [deadlineRules, setDeadlineRules] = useState(DEFAULT_RULE_TEXT.deadlineRules);
+  const [forfeitRules, setForfeitRules] = useState(DEFAULT_RULE_TEXT.forfeitRules);
+  const [resultSubmissionRules, setResultSubmissionRules] = useState(DEFAULT_RULE_TEXT.resultSubmissionRules);
+  const [captainConfirmationRules, setCaptainConfirmationRules] = useState(DEFAULT_RULE_TEXT.captainConfirmationRules);
+  const [leagueCupRules, setLeagueCupRules] = useState(DEFAULT_RULE_TEXT.leagueCupRules);
+  const [customRules, setCustomRules] = useState(DEFAULT_RULE_TEXT.customRules);
   const [leagues, setLeagues] = useState<LeagueDraft[]>(DEFAULT_LEAGUES);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
@@ -191,6 +225,44 @@ export default function RalloraOnboardingPage() {
 
   function removeLeague(index: number) {
     setLeagues((current) => current.filter((_, i) => i !== index));
+  }
+
+  function applyRulePreset(value: string) {
+    setRulePreset(value);
+
+    if (value === "standard") {
+      setScheduleStyle("weekly");
+      setScoreFormat("Best of 3 sets");
+      setFixtureRules(DEFAULT_RULE_TEXT.fixtureRules);
+      setDeadlineRules(DEFAULT_RULE_TEXT.deadlineRules);
+      setForfeitRules(DEFAULT_RULE_TEXT.forfeitRules);
+      setResultSubmissionRules(DEFAULT_RULE_TEXT.resultSubmissionRules);
+      setCaptainConfirmationRules(DEFAULT_RULE_TEXT.captainConfirmationRules);
+      setLeagueCupRules(DEFAULT_RULE_TEXT.leagueCupRules);
+    }
+
+    if (value === "monthly_pack") {
+      setScheduleStyle("monthly_pack");
+      setScoreFormat("Best of 3 sets");
+      setFixtureRules("Each team receives a monthly fixture pack and may play those matches in any order before the monthly deadline.");
+      setDeadlineRules("All matches in the pack must be completed by the final day of the fixture pack unless the organiser grants an extension.");
+      setForfeitRules(DEFAULT_RULE_TEXT.forfeitRules);
+    }
+
+    if (value === "fast4") {
+      setScoreFormat("Fast4");
+      setFixtureRules("Fast4 scoring is used for shorter match windows, cup days or one-day club events.");
+      setDeadlineRules("Matches must be completed within the event or fixture deadline set by the organiser.");
+      setForfeitRules("Late arrival, non-attendance or failure to arrange may result in a forfeit at the organiser's discretion.");
+    }
+
+    if (value === "box_league") {
+      setScheduleStyle("custom_pack");
+      setScoreFormat("Box league format");
+      setFixtureRules("Players or teams are grouped into boxes. Each box completes its assigned matches before the deadline.");
+      setDeadlineRules("Box matches must be completed by the published box deadline.");
+      setForfeitRules("Unplayed matches may be recorded as 0 points or organiser decision depending on club policy.");
+    }
   }
 
   async function createClubSetup() {
@@ -295,6 +367,29 @@ export default function RalloraOnboardingPage() {
       if (setupProfileError) {
         // Non-critical: core setup is already created.
         console.warn("club_setup_profiles insert failed", setupProfileError.message);
+      }
+
+      const { error: rulesError } = await supabase.from("club_rules").upsert(
+        {
+          club_id: club.id,
+          season_id: season.id,
+          rule_preset: rulePreset,
+          score_format: scoreFormat.trim() || null,
+          fixture_rules: fixtureRules.trim() || null,
+          deadline_rules: deadlineRules.trim() || null,
+          forfeit_rules: forfeitRules.trim() || null,
+          result_submission_rules: resultSubmissionRules.trim() || null,
+          captain_confirmation_rules: captainConfirmationRules.trim() || null,
+          league_cup_rules: leagueCupRules.trim() || null,
+          custom_rules: customRules.trim() || null,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "club_id,season_id" }
+      );
+
+      if (rulesError) {
+        // Non-critical: core setup is already created.
+        console.warn("club_rules insert failed", rulesError.message);
       }
 
       setCreatedSummary({
@@ -589,11 +684,20 @@ export default function RalloraOnboardingPage() {
             <div className="mb-5 flex items-center gap-3">
               <Settings2 className="h-7 w-7 text-blue-600" />
               <div>
-                <h2 className="text-2xl font-black uppercase">League defaults</h2>
-                <p className="text-sm text-slate-500">These are saved as setup defaults for the club.</p>
+                <h2 className="text-2xl font-black uppercase">Rules and scoring</h2>
+                <p className="text-sm text-slate-500">Choose a preset, then edit the public club rules to match how this club runs leagues.</p>
               </div>
             </div>
+
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div>
+                <FieldLabel>Rules preset</FieldLabel>
+                <Select value={rulePreset} onChange={(event) => applyRulePreset(event.target.value)}>
+                  {RULE_PRESETS.map((preset) => (
+                    <option key={preset.value} value={preset.value}>{preset.label}</option>
+                  ))}
+                </Select>
+              </div>
               <div>
                 <FieldLabel>Fixture style</FieldLabel>
                 <Select value={scheduleStyle} onChange={(event) => setScheduleStyle(event.target.value)}>
@@ -601,6 +705,10 @@ export default function RalloraOnboardingPage() {
                   <option value="monthly_pack">Monthly fixture pack</option>
                   <option value="custom_pack">Custom fixture pack</option>
                 </Select>
+              </div>
+              <div>
+                <FieldLabel>Score format</FieldLabel>
+                <TextInput value={scoreFormat} onChange={(event) => setScoreFormat(event.target.value)} placeholder="Example: Best of 3 sets / Fast4" />
               </div>
               <div>
                 <FieldLabel>Fixtures per pack</FieldLabel>
@@ -622,6 +730,43 @@ export default function RalloraOnboardingPage() {
                 <FieldLabel>Forfeit win points</FieldLabel>
                 <TextInput value={forfeitWinPoints} type="number" min={0} max={10} onChange={(event) => setForfeitWinPoints(Number(event.target.value))} />
               </div>
+            </div>
+
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <div>
+                <FieldLabel>Fixture arrangement rules</FieldLabel>
+                <TextArea value={fixtureRules} onChange={(event) => setFixtureRules(event.target.value)} />
+              </div>
+              <div>
+                <FieldLabel>Deadline rules</FieldLabel>
+                <TextArea value={deadlineRules} onChange={(event) => setDeadlineRules(event.target.value)} />
+              </div>
+              <div>
+                <FieldLabel>Forfeit rules</FieldLabel>
+                <TextArea value={forfeitRules} onChange={(event) => setForfeitRules(event.target.value)} />
+              </div>
+              <div>
+                <FieldLabel>Result submission rules</FieldLabel>
+                <TextArea value={resultSubmissionRules} onChange={(event) => setResultSubmissionRules(event.target.value)} />
+              </div>
+              <div>
+                <FieldLabel>Captain confirmation rules</FieldLabel>
+                <TextArea value={captainConfirmationRules} onChange={(event) => setCaptainConfirmationRules(event.target.value)} />
+              </div>
+              <div>
+                <FieldLabel>League Cup rules</FieldLabel>
+                <TextArea value={leagueCupRules} onChange={(event) => setLeagueCupRules(event.target.value)} />
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-[1.5rem] border border-blue-200 bg-blue-50 p-5">
+              <FieldLabel>Custom extra rules / club notes</FieldLabel>
+              <TextArea
+                value={customRules}
+                onChange={(event) => setCustomRules(event.target.value)}
+                placeholder="Add anything unique to this club, such as court booking rules, payment rules, late arrival policy, juniors/adaptive rules, or sponsor/event notes."
+              />
+              <p className="mt-3 text-sm font-semibold text-blue-900/70">These rules are stored against the club and can later power the public Rules page and club admin settings.</p>
             </div>
           </Panel>
         )}
@@ -659,6 +804,8 @@ export default function RalloraOnboardingPage() {
                     <div className="flex justify-between gap-4"><dt className="text-slate-500">Slug</dt><dd className="font-black">{slugify(slug || clubName)}</dd></div>
                     <div className="flex justify-between gap-4"><dt className="text-slate-500">Season</dt><dd className="font-black">{seasonName}</dd></div>
                     <div className="flex justify-between gap-4"><dt className="text-slate-500">Fixture style</dt><dd className="font-black">{scheduleStyle.replace("_", " ")}</dd></div>
+                    <div className="flex justify-between gap-4"><dt className="text-slate-500">Rules preset</dt><dd className="font-black">{RULE_PRESETS.find((preset) => preset.value === rulePreset)?.label ?? "Custom Rules"}</dd></div>
+                    <div className="flex justify-between gap-4"><dt className="text-slate-500">Score format</dt><dd className="font-black">{scoreFormat || "Custom"}</dd></div>
                     <div className="flex justify-between gap-4"><dt className="text-slate-500">Leagues</dt><dd className="font-black">{leagues.filter((league) => league.name.trim()).length}</dd></div>
                   </dl>
                 </div>
