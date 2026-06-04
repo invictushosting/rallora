@@ -5855,6 +5855,17 @@ function Sponsors({ sponsors, title = "Our Sponsors" }: { sponsors: Sponsor[]; t
 }
 
 function Footer({ setActive, club }: { setActive: (page: PageId) => void; club: ClubSettings }) {
+  const goToPage = (page: PageId) => {
+    setActive(page);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const footerLinks = nav.filter((item) =>
+    ["home", "tables", "fixtures", "results", "teams", "captain", "admin"].includes(item.id),
+  );
+
   return (
     <footer>
       <div className="footer-grid">
@@ -5864,9 +5875,9 @@ function Footer({ setActive, club }: { setActive: (page: PageId) => void; club: 
         </div>
         <div>
           <h4>Quick Links</h4>
-          {nav.slice(1, 5).map((item) => (
-            <button key={item.id} onClick={() => setActive(item.id)}>
-              {item.label}
+          {footerLinks.map((item) => (
+            <button key={item.id} onClick={() => goToPage(item.id)}>
+              {item.id === "admin" ? "Admin Login" : item.id === "captain" ? "Captain Login" : item.label}
             </button>
           ))}
         </div>
@@ -5900,6 +5911,14 @@ function MobileNav({
   const items = nav.filter((item) =>
     ["home", "tables", "fixtures", "teams", "captain", "admin"].includes(item.id),
   );
+
+  const goToPage = (page: PageId) => {
+    setActive(page);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
     <nav className="mobile-nav">
       {items.map((item) => {
@@ -5908,7 +5927,7 @@ function MobileNav({
           <button
             key={item.id}
             className={cx(active === item.id && "active")}
-            onClick={() => setActive(item.id)}
+            onClick={() => goToPage(item.id)}
           >
             <Icon size={21} />
             <span>{item.label}</span>
