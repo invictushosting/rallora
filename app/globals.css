@@ -151,7 +151,7 @@ footer button { display: block; border: 0; background: transparent; padding: 3px
   .page-hero { border-radius: 22px; padding: 20px; }
   .page-hero h1 { font-size: 33px; }
   .footer-grid { padding-bottom: 96px; }
-  .mobile-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); background: rgba(255,255,255,.96); border-top: 1px solid var(--line); backdrop-filter: blur(14px); }
+  .mobile-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); background: rgba(255,255,255,.96); border-top: 1px solid var(--line); backdrop-filter: blur(14px); }
   .mobile-nav button { border: 0; border-radius: 14px; background: transparent; color: #64748b; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 3px; font-size: 10px; font-weight: 900; text-transform: uppercase; }
   .mobile-nav button.active { background: var(--blue); color: white; }
 }
@@ -1597,4 +1597,11 @@ button:disabled {
   .team-profile-detail-grid {
     grid-template-columns: 1fr;
   }
+}
+
+
+/* Mobile admin access fix */
+@media (max-width: 640px) {
+  .mobile-nav { grid-template-columns: repeat(6, 1fr); }
+  .mobile-nav button { font-size: 9px; padding-left: 2px; padding-right: 2px; }
 }

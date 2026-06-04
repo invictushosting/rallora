@@ -638,6 +638,9 @@ export default function GsmPadelLeagueHub() {
       if (hash.startsWith("#team=")) setActive("teams");
       if (hash === "#fixtures") setActive("fixtures");
       if (hash === "#tables") setActive("tables");
+      if (hash === "#teams") setActive("teams");
+      if (hash === "#captain") setActive("captain");
+      if (hash === "#admin") setActive("admin");
       if (hash === "#cup") setActive("cup");
     }
 
@@ -766,8 +769,8 @@ function Header({
       <button className="admin-button" onClick={() => setActive("admin")}>
         <Lock size={16} /> Admin Login
       </button>
-      <button className="menu-button" aria-label="Open menu">
-        <Menu />
+      <button className="menu-button" aria-label="Admin login" onClick={() => setActive("admin")}>
+        <Lock />
       </button>
     </header>
   );
@@ -5895,7 +5898,7 @@ function MobileNav({
   setActive: (page: PageId) => void;
 }) {
   const items = nav.filter((item) =>
-    ["home", "tables", "fixtures", "captain", "teams"].includes(item.id),
+    ["home", "tables", "fixtures", "teams", "captain", "admin"].includes(item.id),
   );
   return (
     <nav className="mobile-nav">
