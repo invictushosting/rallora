@@ -344,7 +344,7 @@ function updateForm(key: keyof RulesForm, value: string) {
             Edit custom rules for {club?.name || "the active club"}{season?.name ? ` — ${season.name}` : ""}. These rules feed the public rules page.
           </p>
           <div className={styles.actions}>
-            <Link href="/admin" className={`${styles.button} ${styles.buttonSecondary}`}>Back to admin hub</Link>
+            <Link href="/#admin" className={`${styles.button} ${styles.buttonSecondary}`}>Back to admin hub</Link>
             <Link href="/rules" className={styles.button}>Preview public rules</Link>
             <button className={`${styles.button} ${styles.buttonSecondary}`} type="button" onClick={signOut}>Sign out {userState.email}</button>
           </div>
@@ -372,7 +372,7 @@ function updateForm(key: keyof RulesForm, value: string) {
             <div className={`${styles.fieldFull} ${styles.ruleSection}`}>
               <div className={styles.sectionHeading}>
                 <h3>Points system</h3>
-                <p>These values explain how the public league table is scored. Later we can wire these directly into automatic standings calculations per club.</p>
+                <p>These values explain how the public league table is scored. These values are used when standings are recalculated for the active season.</p>
               </div>
               <div className={styles.pointsGrid}>
                 <Field label="Win points">
