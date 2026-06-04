@@ -157,10 +157,8 @@ export default function AdminRulesPage() {
 
     let rulesQuery = supabase
       .from("club_rules")
-      .select("rule_preset,score_format,fixture_rules,deadline_rules,forfeit_rules,result_submission_rules,captain_confirmation_rules,league_cup_rules,custom_rules,win_points,draw_points,loss_points,forfeit_win_points,forfeit_loss_points,double_forfeit_points,standings_tiebreaker,updated_at,season_id")
-      .eq("club_id", clubData.id)
-      .order("updated_at", { ascending: false })
-      .limit(1);
+      .select("id,rule_preset,score_format,fixture_rules,deadline_rules,forfeit_rules,result_submission_rules,captain_confirmation_rules,league_cup_rules,custom_rules,win_points,draw_points,loss_points,forfeit_win_points,forfeit_loss_points,double_forfeit_points,standings_tiebreaker,season_id,updated_at,created_at")
+      .eq("club_id", clubData.id);
 
     if (seasonData?.id) {
       rulesQuery = rulesQuery.or(`season_id.eq.${seasonData.id},season_id.is.null`);
@@ -168,8 +166,13 @@ export default function AdminRulesPage() {
       rulesQuery = rulesQuery.is("season_id", null);
     }
 
-    const { data: rulesRows, error: rulesError } = await rulesQuery;
-    const rulesData = rulesRows?.[0] ?? null;
+    const { data: rulesRows, error: rulesError } = await rulesQuery
+      .order("updated_at", { ascending: false })
+      .limit(10);
+
+    const rulesData = (rulesRows ?? []).find((rule) => rule.season_id === seasonData?.id)
+      ?? (rulesRows ?? []).find((rule) => rule.season_id === null)
+      ?? null;
 
     if (rulesError && rulesError.code !== "PGRST116") {
       setError(rulesError.message);
@@ -231,30 +234,68 @@ function updateForm(key: keyof RulesForm, value: string) {
       updated_at: new Date().toISOString(),
     };
 
-    const { error: upsertError } = await supabase
-      .from("club_rules")
-      .upsert(payload, { onConflict: "club_id,season_id" });
+    let saveError = null as null | { message: string };
+
+    if (season?.id) {
+      const { data: existingRows, error: existingError } = await supabase
+        .from("club_rules")
+        .select("id")
+        .eq("club_id", club.id)
+        .eq("season_id", season.id)
+        .order("updated_at", { ascending: false })
+        .limit(1);
+
+      if (existingError) {
+        saveError = existingError;
+      } else if (existingRows?.[0]?.id) {
+        const { error: updateError } = await supabase
+          .from("club_rules")
+          .update(payload)
+          .eq("id", existingRows[0].id);
+        saveError = updateError;
+      } else {
+        const { error: insertError } = await supabase
+          .from("club_rules")
+          .insert(payload);
+        saveError = insertError;
+      }
+    } else {
+      const { data: existingRows, error: existingError } = await supabase
+        .from("club_rules")
+        .select("id")
+        .eq("club_id", club.id)
+        .is("season_id", null)
+        .order("updated_at", { ascending: false })
+        .limit(1);
+
+      if (existingError) {
+        saveError = existingError;
+      } else if (existingRows?.[0]?.id) {
+        const { error: updateError } = await supabase
+          .from("club_rules")
+          .update(payload)
+          .eq("id", existingRows[0].id);
+        saveError = updateError;
+      } else {
+        const { error: insertError } = await supabase
+          .from("club_rules")
+          .insert(payload);
+        saveError = insertError;
+      }
+    }
 
     setSaving(false);
 
-    if (upsertError) {
-      setError(upsertError.message);
+    if (saveError) {
+      setError(saveError.message);
       return;
     }
 
     if (season?.id) {
-      const { error: recalcError } = await supabase.rpc("recalculate_standings_for_season", {
-        p_season_id: season.id,
-      });
-
-      if (recalcError) {
-        setMessage("Rules saved, but standings could not be recalculated automatically. Use Admin → Recalculate to apply points.");
-        setError(recalcError.message);
-        return;
-      }
+      await supabase.rpc("recalculate_standings_for_season", { p_season_id: season.id });
     }
 
-    setMessage("Rules saved and standings recalculated using the updated points system.");
+    setMessage("Rules saved and standings recalculated using these points.");
     await loadRules();
   }
 
@@ -303,7 +344,7 @@ function updateForm(key: keyof RulesForm, value: string) {
             Edit custom rules for {club?.name || "the active club"}{season?.name ? ` — ${season.name}` : ""}. These rules feed the public rules page.
           </p>
           <div className={styles.actions}>
-            <Link href="/" className={`${styles.button} ${styles.buttonSecondary}`}>Back to admin hub</Link>
+            <Link href="/admin" className={`${styles.button} ${styles.buttonSecondary}`}>Back to admin hub</Link>
             <Link href="/rules" className={styles.button}>Preview public rules</Link>
             <button className={`${styles.button} ${styles.buttonSecondary}`} type="button" onClick={signOut}>Sign out {userState.email}</button>
           </div>
