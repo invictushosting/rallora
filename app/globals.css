@@ -1605,3 +1605,66 @@ button:disabled {
   .mobile-nav { grid-template-columns: repeat(6, 1fr); }
   .mobile-nav button { font-size: 9px; padding-left: 2px; padding-right: 2px; }
 }
+
+/* Rallora rules tab polish */
+.rule-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.rule-summary-item {
+  border: 1px solid #dbe3f3;
+  background: #f8fbff;
+  border-radius: 14px;
+  padding: 14px;
+  min-height: 78px;
+}
+
+.rule-summary-item span {
+  display: block;
+  color: #65758f;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.rule-summary-item strong {
+  color: #0f172a;
+  font-size: 18px;
+  line-height: 1.15;
+  text-transform: capitalize;
+}
+
+.checklist-card-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.checklist-card-list div {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #dbe3f3;
+  background: #f8fbff;
+  border-radius: 14px;
+  color: #334155;
+  font-weight: 700;
+}
+
+.checklist-card-list svg {
+  color: var(--brand-primary, #2860f0);
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+@media (max-width: 720px) {
+  .rule-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}

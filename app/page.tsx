@@ -373,6 +373,17 @@ type CaptainSubmissionRecord = {
   opponent_confirmed_by_email?: string | null;
   created_at: string;
 };
+type ClubRulesSummary = {
+  rule_preset: string | null;
+  score_format: string | null;
+  win_points: number | null;
+  draw_points: number | null;
+  loss_points: number | null;
+  forfeit_win_points: number | null;
+  forfeit_loss_points: number | null;
+  double_forfeit_points: number | null;
+  standings_tiebreaker: string | null;
+};
 type ResultType =
   | "home_win"
   | "away_win"
@@ -1753,6 +1764,7 @@ function AdminPage({
   const [manualQualifierSeed, setManualQualifierSeed] = useState("1");
   const [captainUsers, setCaptainUsers] = useState<CaptainUserRecord[]>([]);
   const [captainSubmissions, setCaptainSubmissions] = useState<CaptainSubmissionRecord[]>([]);
+  const [clubRulesSummary, setClubRulesSummary] = useState<ClubRulesSummary | null>(null);
 
   const [editingTeamId, setEditingTeamId] = useState("");
   const [editingTeamName, setEditingTeamName] = useState("");
@@ -1860,6 +1872,7 @@ function AdminPage({
         setCupRuleDrafts({});
         setCaptainUsers([]);
         setCaptainSubmissions([]);
+        setClubRulesSummary(null);
         return;
       }
 
@@ -1872,6 +1885,7 @@ function AdminPage({
         manualQualifiersResponse,
         captainUsersResponse,
         captainSubmissionsResponse,
+        clubRulesResponse,
       ] = await Promise.all([
         supabase
           .from("teams")
@@ -1924,6 +1938,13 @@ function AdminPage({
           )
           .order("created_at", { ascending: false })
           .returns<CaptainSubmissionRecord[]>(),
+        supabase
+          .from("club_rules")
+          .select("rule_preset, score_format, win_points, draw_points, loss_points, forfeit_win_points, forfeit_loss_points, double_forfeit_points, standings_tiebreaker, season_id")
+          .or(`season_id.eq.${activeSeason.id},season_id.is.null`)
+          .order("season_id", { ascending: false, nullsFirst: false })
+          .order("updated_at", { ascending: false })
+          .limit(1),
       ]);
 
       if (teamsResponse.error) throw teamsResponse.error;
@@ -1935,6 +1956,7 @@ function AdminPage({
       if (captainUsersResponse.error) throw captainUsersResponse.error;
       if (captainSubmissionsResponse.error)
         throw captainSubmissionsResponse.error;
+      if (clubRulesResponse.error) throw clubRulesResponse.error;
 
       setAdminTeams(teamsResponse.data ?? []);
       setAdminFixtures(fixturesResponse.data ?? []);
@@ -1959,6 +1981,7 @@ function AdminPage({
       );
       setCaptainUsers(captainUsersResponse.data ?? []);
       setCaptainSubmissions(captainSubmissionsResponse.data ?? []);
+      setClubRulesSummary((clubRulesResponse.data?.[0] as ClubRulesSummary | undefined) ?? null);
 
       if (!newTeamDivisionId && divisions[0])
         setNewTeamDivisionId(divisions[0].id);
@@ -3786,24 +3809,36 @@ function AdminPage({
         <div className="admin-grid two-col">
           <Card>
             <SectionTitle icon={ClipboardList} title="Club Rules" />
-            <p className="helper-text">Edit the rules shown on the public Rules page. This includes scoring format, fixture deadlines, forfeits, captain confirmation and custom club notes.</p>
+            <p className="helper-text">Edit the rules shown on the public Rules page and the points used when standings are recalculated.</p>
+            <div className="rule-summary-grid">
+              <div className="rule-summary-item"><span>Preset</span><strong>{clubRulesSummary?.rule_preset?.replaceAll("_", " ") ?? "Standard"}</strong></div>
+              <div className="rule-summary-item"><span>Score format</span><strong>{clubRulesSummary?.score_format ?? "Best of 3 sets"}</strong></div>
+              <div className="rule-summary-item"><span>Win</span><strong>{clubRulesSummary?.win_points ?? 3} pts</strong></div>
+              <div className="rule-summary-item"><span>Draw</span><strong>{clubRulesSummary?.draw_points ?? 1} pts</strong></div>
+              <div className="rule-summary-item"><span>Loss</span><strong>{clubRulesSummary?.loss_points ?? 0} pts</strong></div>
+              <div className="rule-summary-item"><span>Forfeit win/loss</span><strong>{clubRulesSummary?.forfeit_win_points ?? 3} / {clubRulesSummary?.forfeit_loss_points ?? 0}</strong></div>
+            </div>
+            <p className="helper-text"><strong>Tie-break:</strong> {clubRulesSummary?.standings_tiebreaker ?? "Points, wins, score difference, score for, head-to-head, alphabetical"}</p>
             <div className="button-row">
-              <button type="button" onClick={() => { window.location.href = "/admin/rules"; }}>
+              <button className="primary-button" type="button" onClick={() => { window.location.href = "/admin/rules"; }}>
                 Edit Rules
               </button>
               <button type="button" className="secondary-button" onClick={() => { window.open("/rules", "_blank"); }}>
                 Preview Public Rules
               </button>
+              <button type="button" className="secondary-button" onClick={handleManualRecalculate}>
+                Apply Points to Tables
+              </button>
             </div>
           </Card>
           <Card>
             <SectionTitle icon={ShieldCheck} title="Recommended Setup" />
-            <ul className="admin-clean-list">
-              <li>Set a clear score format for each club.</li>
-              <li>Explain fixture deadlines and monthly pack rules.</li>
-              <li>Confirm how forfeits and disputed results are handled.</li>
-              <li>Add custom notes for club-specific policies.</li>
-            </ul>
+            <div className="checklist-card-list">
+              <div><CheckCircle2 size={18} /><span>Set win/draw/loss points before loading real results.</span></div>
+              <div><CheckCircle2 size={18} /><span>Explain fixture deadlines and monthly pack rules clearly.</span></div>
+              <div><CheckCircle2 size={18} /><span>Confirm forfeit and disputed-result policies.</span></div>
+              <div><CheckCircle2 size={18} /><span>Click Apply Points to Tables after changing scoring rules.</span></div>
+            </div>
           </Card>
         </div>
       )}

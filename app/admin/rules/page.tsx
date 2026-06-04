@@ -233,7 +233,19 @@ function updateForm(key: keyof RulesForm, value: string) {
       return;
     }
 
-    setMessage("Rules saved. The public rules page will now show these club rules.");
+    if (season?.id) {
+      const { error: recalcError } = await supabase.rpc("recalculate_standings_for_season", {
+        p_season_id: season.id,
+      });
+
+      if (recalcError) {
+        setMessage("Rules saved, but standings could not be recalculated automatically. Use Admin → Recalculate to apply points.");
+        setError(recalcError.message);
+        return;
+      }
+    }
+
+    setMessage("Rules saved and standings recalculated using the updated points system.");
   }
 
   if (userState.loading) {
