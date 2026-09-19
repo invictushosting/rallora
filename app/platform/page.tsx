@@ -25,7 +25,7 @@ export default function PlatformControlCentre() {
     async function load() {
       try {
         const { data: { user }, error: authError } = await supabase.auth.getUser();
-        if (authError) throw authError;
+        if (authError && authError.name !== "AuthSessionMissingError") throw authError;
         if (!user) {
           if (current) setView({ status: "signed_out" });
           return;
