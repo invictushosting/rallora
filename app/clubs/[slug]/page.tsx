@@ -60,7 +60,8 @@ type SeasonData = {
   standings: Standing[];
 };
 type ClubState =
-  | { status: "loading" | "missing" }
+  | { status: "loading" }
+  | { status: "missing" }
   | { status: "error"; message: string }
   | { status: "ready"; club: Club; seasons: Season[] };
 
@@ -151,6 +152,8 @@ export default function ClubLeagueHub() {
       setDataError("This season does not belong to the selected club.");
       return;
     }
+    // Hold a stable, narrowed ID across the async load function.
+    const seasonId = season.id;
     let alive = true;
     setData(EMPTY);
     setDataStatus("loading");
@@ -160,24 +163,24 @@ export default function ClubLeagueHub() {
       try {
         const [divisionReply, fixtureReply, standingReply] = await Promise.all([
           supabase.from("divisions").select("id,season_id,name,sort_order")
-            .eq("season_id", season.id).order("sort_order", { ascending: true }),
+            .eq("season_id", seasonId).order("sort_order", { ascending: true }),
           supabase.from("fixtures")
             .select("id,season_id,division_id,home_team_id,away_team_id,play_by,week_number,fixture_group_name,status")
-            .eq("season_id", season.id).order("play_by", { ascending: true }),
+            .eq("season_id", seasonId).order("play_by", { ascending: true }),
           supabase.from("standings")
             .select("team_id,division_id,played,won,drawn,lost,points,score_diff")
-            .eq("season_id", season.id),
+            .eq("season_id", seasonId),
         ]);
         if (divisionReply.error) throw divisionReply.error;
         if (fixtureReply.error) throw fixtureReply.error;
         if (standingReply.error) throw standingReply.error;
 
         const divisions = ((divisionReply.data ?? []) as Division[])
-          .filter((division) => division.season_id === season.id);
+          .filter((division) => division.season_id === seasonId);
         const divisionIds = divisions.map((division) => division.id);
         const fixtures = ((fixtureReply.data ?? []) as Fixture[])
           .filter((fixture) =>
-            fixture.season_id === season.id && divisionIds.includes(fixture.division_id),
+            fixture.season_id === seasonId && divisionIds.includes(fixture.division_id),
           );
         const fixtureIds = fixtures.map((fixture) => fixture.id);
         // Never run an unfiltered .in() query when a club has no divisions or fixtures.
@@ -268,7 +271,7 @@ export default function ClubLeagueHub() {
           <span>Season</span>
           <select value={selectedSeason} onChange={(event) => setSelectedSeason(event.target.value)}>
             {seasons.map((season) =>
-              <option key={season.id} value={season.id}>{season.name} · {season.status}</option>,
+              <option key={seasonId} value={seasonId}>{season.name} · {season.status}</option>,
             )}
           </select>
         </label>}
