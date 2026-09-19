@@ -6,6 +6,10 @@ on:
     branches: [main]
 permissions:
   contents: read
+# Rapid draft commits should not queue multiple expensive superseded builds.
+concurrency:
+  group: rallora-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-latest
