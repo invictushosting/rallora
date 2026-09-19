@@ -3037,44 +3037,14 @@ function AdminPage({
     if (error) throw error;
   }
 
-  async function handleLoadFullDemo() {
-    const confirmed = window.confirm(
-      "Load full demo data for the active club/season? This replaces demo teams, fixtures, results, standings and demo sponsors for the active season.",
-    );
-    if (!confirmed) return;
-
-    setAdminLoading(true);
-    try {
-      const { error } = await supabase.rpc("load_demo_club_data");
-      if (error) throw error;
-      showSuccess("Demo club data loaded. The public site now has demo teams, fixtures, results, standings and sponsors.");
-      await refreshAdminData();
-      onDataChanged();
-    } catch (error) {
-      showError(error instanceof Error ? error.message : "Could not load demo data.");
-    } finally {
-      setAdminLoading(false);
-    }
+  // Legacy global demo RPCs choose the newest active season across ALL clubs.
+  // Never expose them while previews can still reach the production database.
+  function handleLoadFullDemo() {
+    showError("Demo data loading is disabled until staging is isolated and the RPC is club-scoped.");
   }
 
-  async function handleResetDemoData() {
-    const confirmed = window.confirm(
-      "Reset demo data for the active club/season? This removes demo teams, fixtures, results, standings, captain links and demo sponsors.",
-    );
-    if (!confirmed) return;
-
-    setAdminLoading(true);
-    try {
-      const { error } = await supabase.rpc("reset_demo_data");
-      if (error) throw error;
-      showSuccess("Demo data reset for the active club/season.");
-      await refreshAdminData();
-      onDataChanged();
-    } catch (error) {
-      showError(error instanceof Error ? error.message : "Could not reset demo data.");
-    } finally {
-      setAdminLoading(false);
-    }
+  function handleResetDemoData() {
+    showError("Demo reset is disabled until staging is isolated and the RPC is club-scoped.");
   }
 
   async function handleUpdateFixture(event: React.FormEvent<HTMLFormElement>) {
@@ -5198,17 +5168,19 @@ function AdminPage({
                 className="primary-button wide-field"
                 type="button"
                 onClick={handleLoadFullDemo}
-                disabled={adminLoading}
+                disabled
+                title="Disabled: legacy demo function is not club-scoped"
               >
-                Load Full Demo Club
+                Load Full Demo Club (disabled)
               </button>
               <button
                 className="danger-button wide-field"
                 type="button"
                 onClick={handleResetDemoData}
-                disabled={adminLoading}
+                disabled
+                title="Disabled: legacy demo function is not club-scoped"
               >
-                Reset Demo Data
+                Reset Demo Data (disabled)
               </button>
             </div>
           </Card>
