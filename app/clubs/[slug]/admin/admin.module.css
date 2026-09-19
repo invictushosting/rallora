@@ -1,0 +1,30 @@
+.page{min-height:100vh;background:#f4f7fb;color:#162b4a;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.shell{max-width:1240px;margin:auto;padding:25px 24px 65px}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:28px}
+.wordmark{display:flex;align-items:center;gap:11px;font-size:21px;font-weight:900;text-decoration:none;color:#163152}
+.logo{display:inline-grid;place-items:center;width:44px;height:44px;background:#2458ee;color:#fff;border-radius:13px;font-size:25px;font-weight:900}
+.badge{background:#e7efff;color:#29579b;border:1px solid #cdddf4;border-radius:30px;padding:10px 12px;font-size:10px;letter-spacing:1px;font-weight:900}
+.hero{background:linear-gradient(115deg,#142c50,#2459ba);border-radius:26px;padding:42px 44px;color:#fff}
+.eyebrow{color:#a8cdfd;font-size:11px;letter-spacing:1.8px;font-weight:850}
+.hero h1{font-size:clamp(32px,4vw,47px);letter-spacing:-1px;margin:18px 0}
+.hero p{color:#dbe7ff;font-size:15px;line-height:1.6}
+.hero a{display:inline-block;margin-top:15px;padding:11px 15px;border-radius:10px;background:#ffffff20;color:#fff;font-weight:750;text-decoration:none;border:1px solid #ffffff60}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:26px 0 34px}
+.metrics article,.card{background:white;border:1px solid #e0e8f2;border-radius:18px;padding:23px}
+.metrics article span{display:block;color:#6b7d94;font-size:12px;font-weight:750}
+.metrics article strong{display:block;font-size:30px;margin-top:10px;letter-spacing:-1px}
+.sectionHeading{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin:0 0 17px}
+.sectionHeading h2{font-size:25px;letter-spacing:-.6px}.sectionHeading p{color:#657a94;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.status{background:#e6f6ef;color:#157450;text-transform:capitalize;font-size:11px;font-weight:850;padding:7px 11px;border-radius:20px}
+.card h3{font-size:23px;letter-spacing:-.5px;margin:20px 0}
+.numbers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid #ecf0f6;gap:15px;padding-top:21px;margin:20px 0}
+.numbers span{font-size:12px;color:#71829a;display:flex;align-items:center;gap:8px}
+.numbers strong{font-size:22px;color:#17365c}
+.card a,.message a{color:#275cba;font-size:13px;font-weight:800}
+.note{margin-top:29px;max-width:740px;color:#687f9a;line-height:1.7;font-size:13px}
+.message{text-align:center;background:white;border:1px solid #e1e9f4;border-radius:24px;max-width:500px;margin:16vh auto;padding:40px 28px}
+.message p{line-height:1.7;color:#6b809a}
+.message a{display:inline-block;margin-top:12px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.sectionHeading{display:block}}
+@media(max-width:490px){.shell{padding:16px 13px 45px}.hero{padding:29px 22px}.metrics{gap:10px}.metrics article,.card{padding:17px}.badge{font-size:8px;padding:8px}.numbers{gap:8px}}
