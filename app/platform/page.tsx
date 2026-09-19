@@ -149,7 +149,8 @@ export default function PlatformControlCentre() {
               <span>{s.name}</span><em>{s.status}</em>
             </div>)}
             {!seasons.length && <p>No seasons created yet.</p>}
-            {club.slug === "gsm-padel" && <p><a href="/">View GSM public hub →</a></p>}
+            <p><a href={`/clubs/${encodeURIComponent(club.slug)}`}>View this club’s league hub →</a></p>
+            {club.slug === "gsm-padel" && <p><a href="/">Open existing GSM legacy hub →</a></p>}
           </article>)}
       </section>
       <p className={styles.footnote}>
