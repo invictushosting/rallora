@@ -271,7 +271,7 @@ export default function ClubLeagueHub() {
           <span>Season</span>
           <select value={selectedSeason} onChange={(event) => setSelectedSeason(event.target.value)}>
             {seasons.map((season) =>
-              <option key={seasonId} value={seasonId}>{season.name} · {season.status}</option>,
+              <option key={season.id} value={season.id}>{season.name} · {season.status}</option>,
             )}
           </select>
         </label>}
