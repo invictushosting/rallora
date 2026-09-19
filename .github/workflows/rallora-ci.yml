@@ -25,3 +25,31 @@ jobs:
       - run: node scripts/check-legacy-demo-rpcs.mjs
       - run: npx tsc --noEmit
       - run: npm run build
+  tenant-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Disposable synthetic database. Not a Supabase project, and NO production data.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: ci-only-test-password
+          POSTGRES_DB: rallora_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d rallora_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: localhost
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: ci-only-test-password
+      PGDATABASE: rallora_ci
+    steps:
+      - uses: actions/checkout@v4
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_fixture.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/001_club_scope_helpers.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_assertions.sql
