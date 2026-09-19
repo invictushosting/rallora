@@ -150,6 +150,7 @@ export default function PlatformControlCentre() {
             </div>)}
             {!seasons.length && <p>No seasons created yet.</p>}
             <p><a href={`/clubs/${encodeURIComponent(club.slug)}`}>View this club’s league hub →</a></p>
+            <p><a href={`/clubs/${encodeURIComponent(club.slug)}/admin`}>Open club administration →</a></p>
             {club.slug === "gsm-padel" && <p><a href="/">Open existing GSM legacy hub →</a></p>}
           </article>)}
       </section>
