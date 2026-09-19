@@ -22,5 +22,6 @@ jobs:
           node-version: "22"
           cache: npm
       - run: npm ci
+      - run: node scripts/check-legacy-demo-rpcs.mjs
       - run: npx tsc --noEmit
       - run: npm run build
