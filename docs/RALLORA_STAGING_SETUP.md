@@ -3,7 +3,8 @@
 **Required before enabling tenant writes or merging PR #1.** Rallora production: `vfebhddnjhylicapckro` (London). Unrelated Nebula Pay database: `vswyvcrtjvfxppiampsi`; do not touch.
 
 ## 1. Supabase staging project
-- Ask the owner to approve any cost before creating a new Supabase project or branch. Never silently create a chargeable resource.
+**Verified billing constraint (2026-09-20):** the connected Supabase organization is `Nebula Pay`, plan **Free**, with both free project slots already occupied by active Rallora and active Nebula Pay. Supabase's quote for another Free project is $0/month, but its Free plan grants only **two active free projects across organizations controlled by this account**. Another hosted Supabase staging project therefore requires an upgrade/extra plan capacity or explicitly authorised alternative; don't pause either live project, and don't imply a $0 quote guarantees quota. The recommended no-cost interim is the disposable synthetic PostgreSQL CI job for permission tests; it does **not** replace end-to-end Supabase Auth/Storage staging or Vercel Preview isolation. See the official Supabase billing guide: https://supabase.com/docs/guides/platform/billing-on-supabase.
+- Ask the owner which organization and approve any actual upgrade or project cost before provisioning. Never silently create a chargeable resource.
 - Create a NEW project named `rallora-staging`, preferably in London eu-west-2. Record its NEW ref. The new ref must differ from BOTH existing production project refs.
 - Keep Auth keys, service role secrets and database passwords in the staging secret manager, not GitHub, chat or commit history. Do not use actual participant passwords or live Auth session tokens.
 - Keep the production emergency snapshot private and encrypted. Do not publish it to the public repository or seed PII into a demo/staging environment that doesn't need it.
