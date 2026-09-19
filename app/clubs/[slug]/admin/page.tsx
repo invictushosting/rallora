@@ -37,7 +37,7 @@ export default function ClubAdministration() {
           return;
         }
         const { data: { user }, error: authError } = await supabase.auth.getUser();
-        if (authError) throw authError;
+        if (authError && authError.name !== "AuthSessionMissingError") throw authError;
         if (!user) {
           if (alive) setView({ status: "signed_out" });
           return;
