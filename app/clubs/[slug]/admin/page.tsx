@@ -8,12 +8,14 @@ import styles from "./admin.module.css";
 type Club = { id: string; slug: string; name: string };
 type Season = { id: string; club_id: string; name: string; status: string };
 type Membership = { club_id: string; user_id: string; role: string; status: string };
+type DivisionSummary = { id: string; name: string; teams: string[] };
 type Summary = {
   season: Season;
   divisions: number;
   teams: number;
   fixtures: number;
   confirmed: number;
+  divisionSummaries: DivisionSummary[];
 };
 type View =
   | { status: "loading" | "signed_out" | "forbidden" | "missing" }
@@ -110,8 +112,8 @@ export default function ClubAdministration() {
           .filter((season) => season.club_id === club.id);
         const summaries = await Promise.all(seasons.map(async (season) => {
           const [divisionReply, fixtureReply] = await Promise.all([
-            supabase.from("divisions").select("id")
-              .eq("season_id", season.id),
+            supabase.from("divisions").select("id,name,sort_order")
+              .eq("season_id", season.id).order("sort_order", { ascending: true }),
             supabase.from("fixtures").select("id,status")
               .eq("season_id", season.id),
           ]);
@@ -122,9 +124,9 @@ export default function ClubAdministration() {
           const fixtureIds = (fixtureReply.data ?? []).map((item) => item.id as string);
           const [teamsReply, resultsReply] = await Promise.all([
             divisionIds.length
-              ? supabase.from("teams").select("id", { count: "exact", head: true })
-                  .in("division_id", divisionIds)
-              : Promise.resolve({ count: 0, error: null }),
+              ? supabase.from("teams").select("id,division_id,name")
+                  .in("division_id", divisionIds).order("name", { ascending: true })
+              : Promise.resolve({ data: [] as { id: string; division_id: string; name: string }[], error: null }),
             fixtureIds.length
               ? supabase.from("results").select("fixture_id")
                   .in("fixture_id", fixtureIds).eq("status", "confirmed")
@@ -133,13 +135,22 @@ export default function ClubAdministration() {
           if (teamsReply.error) throw teamsReply.error;
           if (resultsReply.error) throw resultsReply.error;
           const knownFixtureIds = new Set(fixtureIds);
+          const roster = (teamsReply.data ?? []) as { id: string; division_id: string; name: string }[];
+          const divisionSummaries: DivisionSummary[] = (divisionReply.data ?? [])
+            .map((division) => ({
+              id: division.id as string,
+              name: division.name as string,
+              teams: roster.filter((team) => team.division_id === division.id)
+                .map((team) => team.name),
+            }));
           return {
             season,
             divisions: divisionIds.length,
-            teams: teamsReply.count ?? 0,
+            teams: roster.length,
             fixtures: fixtureIds.length,
             confirmed: (resultsReply.data ?? [])
               .filter((result) => knownFixtureIds.has(result.fixture_id)).length,
+            divisionSummaries,
           };
         }));
         if (alive) setView({
@@ -224,7 +235,7 @@ export default function ClubAdministration() {
     <div className={styles.sectionHeading}><h2>Club seasons</h2>
       <p>Each season below belongs to {view.club.name}.</p></div>
     <section className={styles.grid}>
-      {view.summaries.map(({ season, divisions, teams, fixtures, confirmed }) =>
+      {view.summaries.map(({ season, divisions, teams, fixtures, confirmed, divisionSummaries }) =>
         <article className={styles.card} key={season.id}>
           <span className={styles.status}>{season.status}</span>
           <h3>{season.name}</h3>
@@ -233,6 +244,16 @@ export default function ClubAdministration() {
             <span><strong>{teams}</strong> teams</span>
             <span><strong>{fixtures}</strong> fixtures</span>
             <span><strong>{confirmed}</strong> confirmed</span>
+          </div>
+          <div className={styles.divisionList}>
+            <h4>Divisions &amp; teams</h4>
+            {divisionSummaries.map((division) => <details key={division.id} className={styles.divisionRow}>
+              <summary>{division.name}<span>{division.teams.length} teams</span></summary>
+              {division.teams.length
+                ? <ul>{division.teams.map((name, index) => <li key={`${division.id}-${index}`}>{name}</li>)}</ul>
+                : <p>No teams yet.</p>}
+            </details>)}
+            {!divisionSummaries.length && <p>No divisions yet.</p>}
           </div>
           <a href={`/clubs/${encodeURIComponent(view.club.slug)}`}>View season in club hub →</a>
         </article>)}
