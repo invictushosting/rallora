@@ -35,3 +35,12 @@
 .loginForm button{border:0;border-radius:11px;background:#2458ee;color:white;padding:13px 17px;font-size:14px;font-weight:850;cursor:pointer}
 .loginForm button:disabled{opacity:.6;cursor:wait}
 .loginError{color:#ae2525!important;font-size:12px}
+
+.divisionList{border-top:1px solid #ecf0f6;margin:20px 0;padding-top:15px}
+.divisionList h4{font-size:13px;color:#647c9a;margin:3px 0 13px;letter-spacing:.3px}
+.divisionRow{border:1px solid #e5ecf5;border-radius:10px;margin-bottom:9px;overflow:hidden}
+.divisionRow summary{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px;cursor:pointer;font-size:13px;font-weight:800}
+.divisionRow summary span{font-size:11px;color:#63809f;white-space:nowrap;font-weight:750}
+.divisionRow ul{margin:0;padding:7px 12px 12px 30px;border-top:1px solid #ecf0f6}
+.divisionRow li{padding:5px 0;font-size:12px;color:#304e70}
+.divisionRow p{font-size:12px;color:#6e8199;padding:0 12px}
