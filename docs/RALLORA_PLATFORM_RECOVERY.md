@@ -26,3 +26,8 @@ Rallora platform admins are identified in `rallora_platform_admins`. Club users 
 
 ## Current recovered baseline
 2 clubs, 3 seasons, 89 teams, 132 fixtures, 65 results; preserve GSM and demo club distinctly.
+
+## Emergency application-data snapshot (2026-09-19)
+A PRIVATE, owner-only Google Drive document named **Rallora emergency application-data snapshot 2026-09-19 (not full restore)** was created in the folder **Rallora Private Recovery Snapshots**. It contains JSON exports of all 21 existing `public` tables (548 rows, all 21 table counts verified against production after export), public column/constraint/index/RLS policy/function definitions, both Auth user/identity reference IDs, and Storage bucket/object metadata. This is an offsite emergency recovery record, **NOT a tested or complete PostgreSQL restore**. It deliberately excludes Auth passwords/tokens/managed schema and the binary Storage object bytes. Do not copy this document or its contents to this public repository.
+
+Five Storage objects are currently recorded in the public `sponsor-logos` bucket; `club-logos` currently has none. Run `scripts/backup-rallora-storage.ps1` from a trusted Windows computer to download the current five public assets into a timestamped Documents folder with SHA-256 checksums and length validation. Verify the script against current Storage metadata if files have been added/replaced. SQL/roles export and Auth/Storage restore rehearsal remain outstanding. Keep production writes frozen for migration/release purposes, but safe work on the `develop` branch can continue.
