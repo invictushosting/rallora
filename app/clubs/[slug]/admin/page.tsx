@@ -25,6 +25,28 @@ export default function ClubAdministration() {
   const slug = typeof params.slug === "string" ? params.slug : "";
   const supabase = useMemo(() => createClient(), []);
   const [view, setView] = useState<View>({ status: "loading" });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [signInLoading, setSignInLoading] = useState(false);
+  const [signInError, setSignInError] = useState("");
+  async function signIn(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSignInError("");
+    setSignInLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (error) throw error;
+      setPassword("");
+      // onAuthStateChange refreshes membership-checked club state.
+    } catch (error) {
+      setSignInError(error instanceof Error ? error.message : "Could not sign in.");
+    } finally {
+      setSignInLoading(false);
+    }
+  }
 
   useEffect(() => {
     let alive = true;
@@ -155,15 +177,22 @@ export default function ClubAdministration() {
       view.status === "forbidden" ? "Access denied" :
       view.status === "missing" ? "Club not found" : "Unable to load this club";
     const explanation = view.status === "signed_out"
-      ? "Sign in through the existing Rallora administration area, then return here."
+      ? "Sign in to access this club’s administrative dashboard."
       : view.status === "forbidden"
         ? "Your account has no active administrative membership for this club."
         : view.status === "error" ? view.message
           : view.status === "missing" ? "This club could not be found." : "";
     return <main className={styles.page}><section className={styles.message} role="status">
       <span className={styles.logo}>R</span><h1>{title}</h1><p>{explanation}</p>
-      <a href={view.status === "signed_out" ? "/#admin" : "/"}>{view.status === "signed_out"
-        ? "Open existing admin sign-in" : "Back to Rallora"}</a>
+      {view.status === "signed_out" && <form className={styles.loginForm} onSubmit={signIn}>
+        <label>Email<input type="email" autoComplete="username" required value={email}
+          onChange={(event) => setEmail(event.target.value)} /></label>
+        <label>Password<input type="password" autoComplete="current-password" required
+          value={password} onChange={(event) => setPassword(event.target.value)} /></label>
+        {signInError && <p className={styles.loginError} role="alert">{signInError}</p>}
+        <button type="submit" disabled={signInLoading}>{signInLoading ? "Signing in…" : "Sign in"}</button>
+      </form>}
+      <a href={`/clubs/${encodeURIComponent(slug)}`}>Back to club hub</a>
     </section></main>;
   }
 
