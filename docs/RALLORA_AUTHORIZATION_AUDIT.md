@@ -50,3 +50,13 @@ The legacy `is_admin()` function is `SECURITY DEFINER` and checks the email in t
 8. Verify existing GSM data and legacy `/` workflows in staging before any production migration.
 
 **Next implementation order:** isolate staging and complete restorable backups -> write validated SQL functions and membership RLS in staging -> audit relational ownership constraints and RPCs -> enable club-specific UI edits -> invitation flow -> production rollout with rollback.
+
+## Supabase Security Advisor read-only inspection (2026-09-19)
+The connected project's Security Advisor reports **two informational RLS-without-policy findings** (`players`, `team_players`; these are currently inaccessible via the normal client, not automatically unsafe), **four functions with mutable search_path**, **nine exposed authenticated SECURITY DEFINER functions**, and **leaked-password protection disabled**. Do not bulk-grant read policies to quiet lints or revoke every helper without checking RLS dependencies. Remediate first on staging, then apply a reviewed migration to production after backup.
+- Supabase RLS guidance: https://supabase.com/docs/guides/database/postgres/row-level-security
+- Function path lint: https://supabase.com/docs/guides/database/database-linter?lint=0011_function_search_path_mutable
+- Exposed definer lint: https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable
+- Auth password security: https://supabase.com/docs/guides/auth/password-security
+
+## Disposable CI permission test (synthetic, not end-to-end staging)
+`scripts/staging/ci_fixture.sql` creates two fake clubs, separate user IDs/roles and two seasons/teams/fixtures in GitHub Actions' throwaway PostgreSQL service. It installs `scripts/staging/001_club_scope_helpers.sql`, applies a representative membership-scoped `teams` RLS policy and runs assertions for both owners, an unrelated user, a suspended member, a captain, no Auth user, the platform operator, denied cross-club UPDATE/INSERT and attempted reparenting. The fixture deliberately includes **no production PII or secrets**. Passing it proves these synthetic permission primitives, **not** that existing production policies, all other tables, Supabase Auth/JWT integration or Vercel Preview are safe.
