@@ -1,0 +1,217 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
+import { createClient } from "@/lib/supabase";
+import styles from "./admin.module.css";
+
+type Club = { id: string; slug: string; name: string };
+type Season = { id: string; club_id: string; name: string; status: string };
+type Membership = { club_id: string; user_id: string; role: string; status: string };
+type Summary = {
+  season: Season;
+  divisions: number;
+  teams: number;
+  fixtures: number;
+  confirmed: number;
+};
+type View =
+  | { status: "loading" | "signed_out" | "forbidden" | "missing" }
+  | { status: "error"; message: string }
+  | { status: "ready"; club: Club; role: string; summaries: Summary[]; sponsors: number };
+
+export default function ClubAdministration() {
+  const params = useParams();
+  const slug = typeof params.slug === "string" ? params.slug : "";
+  const supabase = useMemo(() => createClient(), []);
+  const [view, setView] = useState<View>({ status: "loading" });
+
+  useEffect(() => {
+    let alive = true;
+
+    async function load() {
+      if (alive) setView({ status: "loading" });
+      try {
+        if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+          if (alive) setView({ status: "missing" });
+          return;
+        }
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError) throw authError;
+        if (!user) {
+          if (alive) setView({ status: "signed_out" });
+          return;
+        }
+
+        const { data: club, error: clubError } = await supabase
+          .from("clubs").select("id,slug,name").eq("slug", slug).maybeSingle();
+        if (clubError) throw clubError;
+        if (!club) {
+          if (alive) setView({ status: "missing" });
+          return;
+        }
+
+        // Access is based on the verified Supabase Auth user ID, not email or URL.
+        // A club member can only inspect their own club; a platform admin can oversee all clubs.
+        const [memberReply, platformReply] = await Promise.all([
+          supabase.from("rallora_club_memberships")
+            .select("club_id,user_id,role,status")
+            .eq("club_id", club.id).eq("user_id", user.id)
+            .eq("status", "active").maybeSingle(),
+          supabase.from("rallora_platform_admins")
+            .select("user_id").eq("user_id", user.id).maybeSingle(),
+        ]);
+        if (memberReply.error) throw memberReply.error;
+        if (platformReply.error) throw platformReply.error;
+        const member = memberReply.data as Membership | null;
+        const isPlatformAdmin = Boolean(platformReply.data?.user_id === user.id);
+        const isClubMember = Boolean(
+          member && member.club_id === club.id && member.user_id === user.id &&
+          member.status === "active" &&
+          ["owner", "admin", "organiser"].includes(member.role),
+        );
+        if (!isClubMember && !isPlatformAdmin) {
+          if (alive) setView({ status: "forbidden" });
+          return;
+        }
+
+        const [seasonReply, sponsorReply] = await Promise.all([
+          supabase.from("seasons").select("id,club_id,name,status")
+            .eq("club_id", club.id).order("created_at", { ascending: false }),
+          supabase.from("sponsors").select("id", { count: "exact", head: true })
+            .eq("club_id", club.id).eq("is_active", true),
+        ]);
+        if (seasonReply.error) throw seasonReply.error;
+        if (sponsorReply.error) throw sponsorReply.error;
+
+        const seasons = ((seasonReply.data ?? []) as Season[])
+          .filter((season) => season.club_id === club.id);
+        const summaries = await Promise.all(seasons.map(async (season) => {
+          const [divisionReply, fixtureReply] = await Promise.all([
+            supabase.from("divisions").select("id")
+              .eq("season_id", season.id),
+            supabase.from("fixtures").select("id,status")
+              .eq("season_id", season.id),
+          ]);
+          if (divisionReply.error) throw divisionReply.error;
+          if (fixtureReply.error) throw fixtureReply.error;
+
+          const divisionIds = (divisionReply.data ?? []).map((item) => item.id as string);
+          const fixtureIds = (fixtureReply.data ?? []).map((item) => item.id as string);
+          const [teamsReply, resultsReply] = await Promise.all([
+            divisionIds.length
+              ? supabase.from("teams").select("id", { count: "exact", head: true })
+                  .in("division_id", divisionIds)
+              : Promise.resolve({ count: 0, error: null }),
+            fixtureIds.length
+              ? supabase.from("results").select("fixture_id")
+                  .in("fixture_id", fixtureIds).eq("status", "confirmed")
+              : Promise.resolve({ data: [] as { fixture_id: string }[], error: null }),
+          ]);
+          if (teamsReply.error) throw teamsReply.error;
+          if (resultsReply.error) throw resultsReply.error;
+          const knownFixtureIds = new Set(fixtureIds);
+          return {
+            season,
+            divisions: divisionIds.length,
+            teams: teamsReply.count ?? 0,
+            fixtures: fixtureIds.length,
+            confirmed: (resultsReply.data ?? [])
+              .filter((result) => knownFixtureIds.has(result.fixture_id)).length,
+          };
+        }));
+        if (alive) setView({
+          status: "ready",
+          club: club as Club,
+          role: isClubMember ? member!.role : "platform administrator",
+          summaries,
+          sponsors: sponsorReply.count ?? 0,
+        });
+      } catch (error) {
+        if (alive) setView({
+          status: "error",
+          message: error instanceof Error ? error.message : "Could not load club administration.",
+        });
+      }
+    }
+
+    void load();
+    // Only reload after the Supabase callback completes, avoiding auth-client deadlocks.
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const { data: listener } = supabase.auth.onAuthStateChange(() => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => { void load(); }, 0);
+    });
+    return () => {
+      alive = false;
+      if (timer) clearTimeout(timer);
+      listener.subscription.unsubscribe();
+    };
+  }, [slug, supabase]);
+
+  if (view.status !== "ready") {
+    const title = view.status === "loading" ? "Loading club administration…" :
+      view.status === "signed_out" ? "Sign in required" :
+      view.status === "forbidden" ? "Access denied" :
+      view.status === "missing" ? "Club not found" : "Unable to load this club";
+    const explanation = view.status === "signed_out"
+      ? "Sign in through the existing Rallora administration area, then return here."
+      : view.status === "forbidden"
+        ? "Your account has no active administrative membership for this club."
+        : view.status === "error" ? view.message
+          : view.status === "missing" ? "This club could not be found." : "";
+    return <main className={styles.page}><section className={styles.message} role="status">
+      <span className={styles.logo}>R</span><h1>{title}</h1><p>{explanation}</p>
+      <a href={view.status === "signed_out" ? "/#admin" : "/"}>{view.status === "signed_out"
+        ? "Open existing admin sign-in" : "Back to Rallora"}</a>
+    </section></main>;
+  }
+
+  const totals = view.summaries.reduce((acc, item) => ({
+    divisions: acc.divisions + item.divisions,
+    teams: acc.teams + item.teams,
+    fixtures: acc.fixtures + item.fixtures,
+    confirmed: acc.confirmed + item.confirmed,
+  }), { divisions: 0, teams: 0, fixtures: 0, confirmed: 0 });
+
+  return <main className={styles.page}><div className={styles.shell}>
+    <header className={styles.nav}>
+      <a href="/" className={styles.wordmark}><span className={styles.logo}>R</span> Rallora</a>
+      <span className={styles.badge}>READ-ONLY · CLUB ADMIN</span>
+    </header>
+    <section className={styles.hero}>
+      <span className={styles.eyebrow}>YOUR CLUB CONTROL CENTRE</span>
+      <h1>{view.club.name}</h1>
+      <p>League administration is scoped to this club. You are viewing as {view.role}.</p>
+      <a href={`/clubs/${encodeURIComponent(view.club.slug)}`}>View public club hub →</a>
+    </section>
+    <section className={styles.metrics} aria-label="Club totals">
+      {([["Seasons", view.summaries.length], ["Divisions", totals.divisions],
+        ["Teams", totals.teams], ["Fixtures", totals.fixtures],
+        ["Confirmed results", totals.confirmed], ["Sponsors", view.sponsors]] as [string, number][])
+        .map(([label, value]) => <article key={label}><span>{label}</span>
+          <strong>{value.toLocaleString("en-GB")}</strong></article>)}
+    </section>
+    <div className={styles.sectionHeading}><h2>Club seasons</h2>
+      <p>Each season below belongs to {view.club.name}.</p></div>
+    <section className={styles.grid}>
+      {view.summaries.map(({ season, divisions, teams, fixtures, confirmed }) =>
+        <article className={styles.card} key={season.id}>
+          <span className={styles.status}>{season.status}</span>
+          <h3>{season.name}</h3>
+          <div className={styles.numbers}>
+            <span><strong>{divisions}</strong> divisions</span>
+            <span><strong>{teams}</strong> teams</span>
+            <span><strong>{fixtures}</strong> fixtures</span>
+            <span><strong>{confirmed}</strong> confirmed</span>
+          </div>
+          <a href={`/clubs/${encodeURIComponent(view.club.slug)}`}>View season in club hub →</a>
+        </article>)}
+      {!view.summaries.length && <article className={styles.card}>
+        <h3>No seasons yet</h3><p>Club seasons will appear here when configured.</p>
+      </article>}
+    </section>
+    <p className={styles.note}>Editing, team management and result approvals will be enabled
+      only after club-scoped database permissions and an isolated staging environment are tested.</p>
+  </div></main>;
+}
