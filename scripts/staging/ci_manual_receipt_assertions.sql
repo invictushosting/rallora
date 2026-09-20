@@ -112,7 +112,7 @@ begin
  '00000000-0000-0000-0000-0000000008a2',
  '00000000-0000-0000-0000-0000000007a1',
  'captured',2500,'GBP',repeat('d',64),
- '00000000-0000-0000-0000-000000000a01'
+ '00000000-0000-0000-0000-000000000b01'
  );
  raise exception 'Other club claimed A receipt';
 exception when foreign_key_violation then null;
