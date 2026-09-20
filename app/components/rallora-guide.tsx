@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import styles from "./rallora-guide.module.css";
 
@@ -51,15 +52,12 @@ function replyTo(question: string, slug: string): Item {
  * Do not misrepresent this navigation guide as a connected generative AI service.
  */
 export default function RalloraGuide() {
-  const [path, setPath] = useState("");
+  const path = usePathname() ?? "";
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [history, setHistory] = useState<Item[]>(INITIAL);
   const bottom = useRef<HTMLDivElement>(null);
   const panelId = useId();
-  useEffect(() => {
-    setPath(window.location.pathname);
-  }, []);
   useEffect(() => {
     if (open) bottom.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [history, open]);
