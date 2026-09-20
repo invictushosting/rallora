@@ -183,13 +183,15 @@ create policy social_targets_edit_draft on public.rallora_social_post_targets
         and p.created_by = (select auth.uid())))
   with check (status = 'draft' and public.rallora_can_manage_club(club_id)
     and exists (select 1 from public.rallora_social_posts p
-      where p.id = post_id and p.club_id = club_id and p.status = 'draft'));
+      where p.id = post_id and p.club_id = club_id and p.status = 'draft'
+        and p.created_by = (select auth.uid())));
 
 create policy social_targets_delete_draft on public.rallora_social_post_targets
   for delete to authenticated
   using (status = 'draft' and public.rallora_can_manage_club(club_id)
     and exists (select 1 from public.rallora_social_posts p
-      where p.id = post_id and p.club_id = club_id and p.status = 'draft'));
+      where p.id = post_id and p.club_id = club_id and p.status = 'draft'
+        and p.created_by = (select auth.uid())));
 
 create policy social_connections_read on public.rallora_social_connections
   for select to authenticated using (public.rallora_can_manage_club(club_id));
