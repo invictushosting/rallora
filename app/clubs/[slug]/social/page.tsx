@@ -43,11 +43,18 @@ function colour(value: string | null) {
 }
 function cleanText(value: string) { return value.trim().replace(/\r/g, ""); }
 
+function shorten(value: string, limit: number) {
+  const chars = Array.from(value);
+  return chars.length > limit
+    ? chars.slice(0, limit - 1).join("").trimEnd() + "…" : value;
+}
 function format(channel: Channel, title: string, body: string, clubUrl: string) {
   const heading = cleanText(title);
   const text = cleanText(body);
-  if (channel === "WhatsApp") return `*${heading}*\n\n${text}\n\nFull details: ${clubUrl}`;
-  if (channel === "Instagram") return `${heading}\n\n${text}\n\n#Padel #Rallora`;
+  if (channel === "WhatsApp") return `*${heading}*\n\n${shorten(text, 1050)}\n\nFull details: ${clubUrl}`;
+  // Instagram descriptions do not offer clickable link posts; put the
+  // actionable information in the image and keep the caption compact.
+  if (channel === "Instagram") return `${heading}\n\n${shorten(text, 1700)}\n\n#Padel #Rallora`;
   if (channel === "Email") return `Subject: ${heading}\n\n${text}\n\nFull details: ${clubUrl}`;
   if (channel === "Club website") return `${heading}\n\n${text}`;
   return `${heading}\n\n${text}\n\n${clubUrl}`;
@@ -166,7 +173,7 @@ export default function ClubSocialStudio() {
                 score: `${r.home_score ?? "–"} : ${r.away_score ?? "–"}`,
                 confirmedAt: r.confirmed_at ?? f.play_by,
               }];
-            }).sort((a, b) => b.confirmedAt.localeCompare(a.confirmedAt)).slice(0, 30);
+            }).sort((a, b) => b.confirmedAt.localeCompare(a.confirmedAt));
           }
         }
         if (active) setView({
@@ -260,8 +267,21 @@ export default function ClubSocialStudio() {
       const week = view.matches.filter(m =>
         m.week === match.week && m.season === match.season);
       setTitle(`${match.season} · Week ${match.week} roundup`);
-      setBody(week.map(m => `${m.division}: ${m.home} ${m.score} ${m.away}`)
-        .join("\n") + "\n\nSee the latest standings on Rallora.");
+      const lines = week.map(m =>
+        `${m.division}: ${m.home} ${m.score} ${m.away}`);
+      const footer = "\n\nSee the latest standings on Rallora.";
+      const max = 3500 - footer.length;
+      let roundup = lines.join("\n");
+      if (roundup.length > max) {
+        const included: string[] = [];
+        for (const line of lines) {
+          if ((included.join("\n") + "\n" + line).length > max - 80) break;
+          included.push(line);
+        }
+        roundup = included.join("\n") +
+          "\n… Additional confirmed matches available in the club hub.";
+      }
+      setBody(roundup + footer);
     }
   }
 
