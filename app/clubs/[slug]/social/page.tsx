@@ -6,6 +6,10 @@ import { useParams } from "next/navigation";
 import RalloraLogo from "@/app/components/rallora-logo";
 import { createClient } from "@/lib/supabase";
 import styles from "./social.module.css";
+import {
+  SOCIAL_CHANNELS, formatSocialCaption, shortenSocial,
+  type SocialChannel,
+} from "@/lib/social/channels";
 
 type Club = { id: string; slug: string; name: string; short_name: string | null;
   primary_color: string | null };
@@ -22,8 +26,8 @@ type Ready = { kind: "ready"; club: Club; userId: string; role: string; matches:
 type View = Ready | { kind: "loading" | "signed_out" | "forbidden" | "missing" } |
   { kind: "error"; message: string };
 type PostType = "news" | "result" | "roundup";
-type Channel = "Facebook" | "Instagram" | "WhatsApp" | "Email" | "Club website";
-const CHANNELS: Channel[] = ["Facebook", "Instagram", "WhatsApp", "Email", "Club website"];
+type Channel = SocialChannel;
+const CHANNELS = SOCIAL_CHANNELS;
 const CLUB_ROLE = ["owner", "admin", "organiser"];
 type GraphicSize = "square" | "portrait" | "story";
 const GRAPHICS: Record<GraphicSize, { width: number; height: number; label: string }> = {
@@ -41,24 +45,8 @@ function draftKey(clubId: string, userId: string) {
 function colour(value: string | null) {
   return value && /^#[0-9a-f]{6}$/i.test(value) ? value : "#00B0FE";
 }
-function cleanText(value: string) { return value.trim().replace(/\r/g, ""); }
-
-function shorten(value: string, limit: number) {
-  const chars = Array.from(value);
-  return chars.length > limit
-    ? chars.slice(0, limit - 1).join("").trimEnd() + "…" : value;
-}
-function format(channel: Channel, title: string, body: string, clubUrl: string) {
-  const heading = cleanText(title);
-  const text = cleanText(body);
-  if (channel === "WhatsApp") return `*${heading}*\n\n${shorten(text, 1050)}\n\nFull details: ${clubUrl}`;
-  // Instagram descriptions do not offer clickable link posts; put the
-  // actionable information in the image and keep the caption compact.
-  if (channel === "Instagram") return `${heading}\n\n${shorten(text, 1700)}\n\n#Padel #Rallora`;
-  if (channel === "Email") return `Subject: ${heading}\n\n${text}\n\nFull details: ${clubUrl}`;
-  if (channel === "Club website") return `${heading}\n\n${text}`;
-  return `${heading}\n\n${text}\n\n${clubUrl}`;
-}
+// Platform-specific caption rules live in lib/social/channels.ts,
+ // where they are covered by lightweight Node tests.
 function wrap(ctx: CanvasRenderingContext2D, value: string, maxWidth: number) {
   const lines: string[] = [];
   for (const paragraph of value.split("\n")) {
@@ -300,7 +288,7 @@ export default function ClubSocialStudio() {
   async function copy(channel: Channel) {
     if (!valid) return;
     try {
-      await navigator.clipboard.writeText(format(channel, title, body, clubUrl));
+      await navigator.clipboard.writeText(formatSocialCaption(channel, title, body, clubUrl));
       setFeedback(`${channel} version copied. Paste it into your own account to publish.`);
     } catch {
       setFeedback("Copy was blocked. Select the preview text and copy it manually.");
@@ -317,7 +305,7 @@ export default function ClubSocialStudio() {
     try {
       await navigator.share({
         title: title.trim(),
-        text: shorten(body.trim(), 1050),
+        text: shortenSocial(body.trim(), 1050),
         url: clubUrl,
       });
       setFeedback("Your device’s share sheet was opened. Rallora has not published this post.");
@@ -481,10 +469,10 @@ export default function ClubSocialStudio() {
           {selected.map(channel => <article className={styles.channelPreview} key={channel}>
             <div className={styles.channelTop}><strong>{channel}</strong>
               <span>PREPARED · NOT PUBLISHED</span></div>
-            <pre>{format(channel, title, body, clubUrl)}</pre>
+            <pre>{formatSocialCaption(channel, title, body, clubUrl)}</pre>
             <button type="button" onClick={() => { void copy(channel); }}>Copy {channel} version</button>
             {channel === "WhatsApp" && <a target="_blank" rel="noopener noreferrer"
-              href={`https://wa.me/?text=${encodeURIComponent(format(channel,title,body,clubUrl))}`}>
+              href={`https://wa.me/?text=${encodeURIComponent(formatSocialCaption(channel,title,body,clubUrl))}`}>
               Open WhatsApp share ↗</a>}
           </article>)}
         </>}
