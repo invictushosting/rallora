@@ -49,7 +49,9 @@ to advertise to new clubs. Update it as each acceptance gate is completed.
   the verified Auth user and club ID, with an explicit clear control. It is NOT
   synced between devices, securely backed up or visible to other organisers.
   It also exports square (1080×1080), portrait (1080×1350) and Story (1080×1920)
-  branded graphics. Generated drafts do not auto-update if results are corrected.
+  branded graphics. The device-native share sheet can hand off a prepared
+  text announcement, and individual WhatsApp copies/links remain manual.
+  Generated drafts do not auto-update if results are corrected.
 - The **cloud-draft API** (`app/api/social/posts/route.ts`) is written but OFF
   by default (`RALLORA_SOCIAL_DB_ENABLED=false`). It uses only the verified
   user session, club membership checks and RLS-scoped anon access; it has
