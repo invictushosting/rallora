@@ -1,7 +1,7 @@
 {
-  "name": "GSM Padel League Hub",
-  "short_name": "GSM Padel",
-  "description": "Club padel league tables, fixtures, teams and cup hub.",
+  "name": "Rallora | Padel League Platform",
+  "short_name": "Rallora",
+  "description": "One Rallora platform for padel clubs, league tables, fixtures, results and captain tools.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
