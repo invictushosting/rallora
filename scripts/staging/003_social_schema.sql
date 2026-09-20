@@ -95,7 +95,8 @@ create or replace function public.rallora_social_fixture_is_confirmed(
 ) returns boolean
 language sql stable security definer set search_path = ''
 as $$
-  select p_fixture is null or exists (
+  select public.rallora_can_manage_club(p_club)
+    and (p_fixture is null or exists (
     select 1 from public.fixtures f
     join public.seasons s on s.id = f.season_id
     join public.results r on r.fixture_id = f.id
@@ -103,8 +104,8 @@ as $$
       and s.status in ('active','completed')
       and (f.available_from is null or f.available_from <= current_date)
       and r.status in ('confirmed','admin_override')
-  );
-$$;
+  ));
+$;
 
 revoke all on function public.rallora_social_fixture_is_confirmed(uuid,uuid)
   from public, anon, authenticated;
