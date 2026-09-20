@@ -108,3 +108,8 @@
 .exportActions button:focus-visible{outline:3px solid #00B0FE;outline-offset:3px}
 .exportNotice{font-size:12px;line-height:1.5;background:#e8f7ee;border:1px solid #bfe7ce;border-radius:10px;color:#265c3b;padding:11px}
 @media(max-width:540px){.exportActions{align-items:stretch;flex-direction:column}.exportActions button{width:100%}}
+
+.viewShare{display:flex;justify-content:space-between;align-items:center;gap:13px;flex-wrap:wrap;margin:-5px 0 18px;color:#617892;font-size:12px}
+.viewShare button{border:1px solid #cbdded;background:#fff;color:#0b5782;padding:10px 13px;border-radius:10px;font-size:12px;font-weight:850;cursor:pointer}
+.viewShare button:focus-visible{outline:2px solid #00B0FE;outline-offset:2px}
+@media(max-width:540px){.viewShare{align-items:stretch;flex-direction:column}.viewShare button{width:100%}}
