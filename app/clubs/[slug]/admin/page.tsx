@@ -249,7 +249,10 @@ export default function ClubAdministration() {
       seasons={view.summaries.map(({season,teams})=>({
         id:season.id,name:season.name,status:season.status,teams,
       }))} />
-    <PaymentSetup clubName={view.club.name} />
+    <PaymentSetup clubName={view.club.name}
+      seasons={view.summaries.map(({season})=>({
+        id:season.id,name:season.name,status:season.status,
+      }))} />
     <section className={styles.metrics} aria-label="Club totals">
       {([["Seasons", view.summaries.length], ["Divisions", totals.divisions],
         ["Teams", totals.teams], ["Fixtures", totals.fixtures],
