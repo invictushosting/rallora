@@ -102,7 +102,10 @@ isolated staging environment are ready. Do not mistake GitHub CI for hands-on UA
 - [ ] Only after separate real staging/backup/compliance gates: test
   registrations, verified receipts, refunds, duplicate webhook delivery,
   dispute, cancellation and prize payout reconciliation. Otherwise mark
-  BLOCKED / NOT TESTED.
+  BLOCKED / NOT TESTED. The manual audit must reject an unapproved bank
+  method, foreign-club verifier, duplicate receipt fingerprint, edited
+  original receipt and cross-club reversal. A reversal should preserve
+  the original event in the audit history.
 
 ## Session 4: Rallora Social core, manually
 
