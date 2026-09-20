@@ -1,3 +1,4 @@
+import RalloraLogo from "@/app/components/rallora-logo";
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -200,7 +201,7 @@ export default function ClubAdministration() {
         : view.status === "error" ? view.message
           : view.status === "missing" ? "This club could not be found." : "";
     return <main className={styles.page}><section className={styles.message} role="status">
-      <span className={styles.logo}>R</span><h1>{title}</h1><p>{explanation}</p>
+      <RalloraLogo variant="light" width={214} /><h1>{title}</h1><p>{explanation}</p>
       {view.status === "signed_out" && <form className={styles.loginForm} onSubmit={signIn}>
         <label>Email<input type="email" autoComplete="username" required value={email}
           onChange={(event) => setEmail(event.target.value)} /></label>
@@ -222,7 +223,7 @@ export default function ClubAdministration() {
 
   return <main className={styles.page}><div className={styles.shell}>
     <header className={styles.nav}>
-      <a href="/" className={styles.wordmark}><span className={styles.logo}>R</span> Rallora</a>
+      <a href="/" className={styles.wordmark}><RalloraLogo variant="light" width={218} /></a>
       <span className={styles.badge}>READ-ONLY · CLUB ADMIN</span>
     </header>
     <section className={styles.hero}>
