@@ -83,6 +83,7 @@ export default function RalloraHome() {
       <nav className={styles.nav} aria-label="Main navigation">
         <a href="#clubs">Find your club</a>
         <Link href="/products">Products</Link>
+        <Link href="/demo">Try the demo</Link>
         <Link href="/platform" className={styles.navButton}>Platform sign in →</Link>
       </nav>
     </header>
@@ -94,7 +95,7 @@ export default function RalloraHome() {
         <p>Fixtures, divisions, league tables and results, organised around your club.
           One Rallora platform, built to give each club its own identity.</p>
         <div className={styles.actions}>
-          <a href="#clubs" className={styles.primaryButton}>Explore clubs ↗</a>
+          <Link href="/demo" className={styles.primaryButton}>Try the demo ↗</Link>
           <Link href="/clubs/gsm-padel" className={styles.secondaryButton}>
             Open GSM Padel league →
           </Link>
