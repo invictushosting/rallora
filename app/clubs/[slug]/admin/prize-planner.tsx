@@ -69,6 +69,7 @@ export default function PrizePlanner({ clubName,seasons }:{
       <div className={styles.currencyField}>
         <span>{currency}</span>
         <input type="number" min="0" max="1000000" step="0.01"
+          disabled={freeEntry && ["entryPence","providerFeePence","platformFeePence"].includes(key)}
           value={moneyInput(value)} onChange={event=>
             update(parsePence(event.target.value))}
           aria-label={label} />
@@ -138,7 +139,8 @@ export default function PrizePlanner({ clubName,seasons }:{
           {numberField("Expected paying teams","paidTeams",paidTeams,
             setPaidTeams,10000)}
         </div>
-        <p className={styles.help}>The paying team count is an estimate,
+        <p className={styles.help}>Currency changes the display and entry denomination,
+          not an exchange rate. The paying team count is an estimate,
           not a count of confirmed transactions.
           {season && ` ${season.name} currently has ${projectedTeamCount} teams.
             That roster size is not evidence that anyone has paid.`}</p>
