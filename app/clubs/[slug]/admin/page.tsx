@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import styles from "./admin.module.css";
 import ClubEditor, { type EditableClub, type EditableSeason } from "./club-editor";
+import PrizePlanner from "./prize-planner";
 
 type Club = EditableClub;
 type Season = { id: string; club_id: string; name: string; status: string };
@@ -243,6 +244,10 @@ export default function ClubAdministration() {
       <a href={`/clubs/${encodeURIComponent(view.club.slug)}/social`}>
         Open Content Studio ↗</a>
     </section>
+    <PrizePlanner clubName={view.club.name}
+      seasons={view.summaries.map(({season,teams})=>({
+        id:season.id,name:season.name,status:season.status,teams,
+      }))} />
     <section className={styles.metrics} aria-label="Club totals">
       {([["Seasons", view.summaries.length], ["Divisions", totals.divisions],
         ["Teams", totals.teams], ["Fixtures", totals.fixtures],
