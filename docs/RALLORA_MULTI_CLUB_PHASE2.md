@@ -4,8 +4,10 @@ All Phase 2 work lives on the `develop` branch and the open **draft** PR #1. Not
 
 ## Read-only club routes built
 - `/platform`: platform-admin-only overview of the registered clubs and their seasons, with links to club hubs and their administration pages.
-- `/clubs/gsm-padel`: brandable public GSM overview, with an explicit season selector and read-only division standings / fixture summaries.
-- `/clubs/new-padel-club`: the same public view, populated strictly from the demo club's season and divisions.
+- `/clubs/gsm-padel`: complete original GSM full league, now under its own canonical club route; GSM-only season and content queries corrected in `develop`.
+- `/clubs/gsm-padel/overview`: brandable read-only GSM season/division standings/fixtures overview using the same shared hub component as other clubs.
+- `/`: new unified Rallora club-directory front door on `develop` (live `main` remains old GSM root).
+- `/clubs/new-padel-club`: the shared public read-only view populated strictly from the demo club's season and divisions.
 - `/clubs/gsm-padel/admin`: signed-in membership-checked club dashboard (GSM has a seeded owner membership).
 - `/clubs/new-padel-club/admin`: platform admins can review; other users require their own active membership for this specific club.
 - Club admin has a standalone existing-account email/password sign-in. No open self-signup, new admin invitation, team editing, result approval, or payment collection is enabled.
@@ -22,7 +24,7 @@ Resolve the club URL slug to its DB UUID. Resolve seasons only where `seasons.cl
 4. Sign in as an authenticated user with **no** admin/membership: both club admin URLs must deny access.
 5. Sign in with a test active member of demo club only: GSM admin must deny access, demo club admin must show demo club data only. Then suspend the demo membership and verify access is denied after a fresh login.
 6. On staging, submit result and edit fixtures through legacy routes and inspect Supabase RLS. Do not invite paying clubs until privilege checks are enforced at the database layer.
-7. Recheck mobile layout, season selection, and club admin sign-in, and confirm the old GSM `/` route still works as before.
+7. Recheck mobile layout, season selection, and club admin sign-in. Confirm old GSM features work at `/clubs/gsm-padel` on develop and existing root hash bookmarks redirect correctly; production `/` remains GSM until the approved switch.
 
 ## Outstanding release gates
 - Full restorable, encrypted offsite database backup including managed Auth and actual Storage bytes, with a restore rehearsal. A private emergency JSON snapshot currently exists, but is **partial**, not a complete database restore.
