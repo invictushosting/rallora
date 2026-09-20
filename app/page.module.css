@@ -1,20 +1,20 @@
-.page{--ink:#14243c;--muted:#68809c;min-height:100vh;background:#f7f9fe;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.page{--ink:#061A39;--muted:#68809c;min-height:100vh;background:#E8F2F9;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 .header{max-width:1330px;margin:auto;padding:22px 36px;display:flex;align-items:center;justify-content:space-between;gap:20px}
-.wordmark{display:inline-flex;align-items:center;gap:11px;color:#172e4d;font-size:27px;font-weight:900;letter-spacing:-1.3px;text-decoration:none}
-.logo{background:#245cfa;color:white;width:43px;height:43px;border-radius:13px;display:grid;place-items:center;font-size:26px;letter-spacing:0}
-.dot{color:#245cfa}.nav{display:flex;align-items:center;gap:25px}
+.wordmark{display:inline-flex;align-items:center;gap:11px;color:#061A39;font-size:27px;font-weight:900;letter-spacing:-1.3px;text-decoration:none}
+.logo{background:#00B0FE;color:white;width:43px;height:43px;border-radius:13px;display:grid;place-items:center;font-size:26px;letter-spacing:0}
+.dot{color:#00B0FE}.nav{display:flex;align-items:center;gap:25px}
 .nav a{color:#233853;text-decoration:none;font-size:13px;font-weight:750}
-.nav .navButton{color:#2453ad;border:1px solid #d5e2fc;border-radius:40px;padding:13px 17px;background:#edf3ff}
-.hero{max-width:1330px;margin:12px auto 0;min-height:510px;background:linear-gradient(120deg,#101f3c,#173c69 70%,#234f95);border-radius:30px;overflow:hidden;color:#fff;display:grid;grid-template-columns:1.12fr .88fr;box-shadow:0 25px 50px #1b3d721d}
+.nav .navButton{color:#061A39;border:1px solid #d5e2fc;border-radius:40px;padding:13px 17px;background:#E8F2F9}
+.hero{max-width:1330px;margin:12px auto 0;min-height:510px;background:#061A39;border-radius:30px;overflow:hidden;color:#fff;display:grid;grid-template-columns:1.12fr .88fr;box-shadow:0 25px 50px #1b3d721d}
 .heroContent{padding:67px 30px 28px 66px;position:relative;z-index:1;display:flex;flex-direction:column}
-.eyebrow{font-size:11px;font-weight:850;letter-spacing:2px;color:#447aee}
-.hero .eyebrow{color:#a3c0ff}
+.eyebrow{font-size:11px;font-weight:850;letter-spacing:2px;color:#00B0FE}
+.hero .eyebrow{color:#89DFFF}
 .hero h1{font-size:clamp(43px,5.4vw,74px);line-height:1.05;letter-spacing:-3px;margin:23px 0 23px;font-weight:900}
-.hero h1 span{color:#a9c6ff}
+.hero h1 span{color:#00B0FE}
 .heroContent>p{max-width:495px;font-size:15px;line-height:1.8;color:#d3e3ff}
 .actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:26px}
 .actions a{display:inline-block;padding:15px 19px;border-radius:11px;font-size:13px;font-weight:850;text-decoration:none}
-.primaryButton{background:#fff;color:#1e4a91}.secondaryButton{background:#ffffff19;border:1px solid #ffffff60;color:#fff}
+.primaryButton{background:#fff;color:#061A39}.secondaryButton{background:#ffffff19;border:1px solid #ffffff60;color:#fff}
 .heroFoot{border-top:1px solid #ffffff38;margin-top:auto;padding-top:23px;display:flex;gap:30px;color:#a5c7fa;font-size:10px;letter-spacing:1.2px;font-weight:800}
 .courtArt{position:relative;display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden}
 .courtOuter{width:330px;height:405px;transform:rotate(-20deg) perspective(500px) rotateY(-7deg);border:22px solid #608dea;border-radius:26px;box-shadow:0 0 0 6px #a7c1f660,0 34px 70px #010c2f78;opacity:.9}
@@ -40,7 +40,7 @@
 .clubDetails{display:grid;grid-template-columns:1fr 2fr;gap:12px;border-top:1px solid #edf1f8;border-bottom:1px solid #edf1f8;padding:19px 0}
 .clubDetails span{color:#7889a4;display:flex;flex-direction:column;gap:7px;font-size:10px;letter-spacing:1px;font-weight:750}
 .clubDetails strong{color:#1d3555;font-size:14px;letter-spacing:0;line-height:1.4}
-.clubLink{margin-top:22px;padding:15px;border-radius:11px;background:#ecf2ff;display:flex;justify-content:space-between;text-decoration:none;color:#244eb1;font-size:13px;font-weight:850}
+.clubLink{margin-top:22px;padding:15px;border-radius:11px;background:#E8F2F9;display:flex;justify-content:space-between;text-decoration:none;color:#061A39;font-size:13px;font-weight:850}
 .legacyLink{display:block;margin:15px 0 0;font-size:12px;color:#416cb8;font-weight:750}
 .notice{padding:20px;background:#fff;border-radius:15px;border:1px solid #e2eaf4;color:#596e86}
 .bottom{text-align:center;background:#10294c;color:white;padding:73px 20px 81px}
