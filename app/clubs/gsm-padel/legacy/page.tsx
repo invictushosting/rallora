@@ -1859,9 +1859,11 @@ function AdminPage({
   async function refreshAdminData() {
     setAdminLoading(true);
     try {
+      const gsmClubId = await loadGsmClubId();
       const { data: seasonRows, error: seasonError } = await supabase
         .from("seasons")
         .select("id, name, status, starts_on, ends_on")
+        .eq("club_id", gsmClubId)
         .eq("status", "active")
         .order("created_at", { ascending: false })
         .limit(1)
@@ -1875,6 +1877,7 @@ function AdminPage({
       const { data: allSeasonRows, error: allSeasonError } = await supabase
         .from("seasons")
         .select("id, name, status, starts_on, ends_on")
+        .eq("club_id", gsmClubId)
         .order("created_at", { ascending: false })
         .returns<SeasonRecord[]>();
 
@@ -1942,6 +1945,7 @@ function AdminPage({
         supabase
           .from("sponsors")
           .select("id, name, sponsor_type, placement, logo_url, website_url, sort_order, is_active")
+          .eq("club_id", gsmClubId)
           .order("sort_order", { ascending: true })
           .order("name", { ascending: true })
           .returns<AdminSponsor[]>(),
@@ -1972,6 +1976,7 @@ function AdminPage({
         supabase
           .from("club_rules")
           .select("rule_preset, score_format, win_points, draw_points, loss_points, forfeit_win_points, forfeit_loss_points, double_forfeit_points, standings_tiebreaker, season_id, updated_at")
+          .eq("club_id", gsmClubId)
           .or(`season_id.eq.${activeSeason.id},season_id.is.null`)
           .order("updated_at", { ascending: false })
           .limit(1),
