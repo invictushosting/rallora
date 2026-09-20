@@ -305,6 +305,27 @@ export default function ClubSocialStudio() {
     }
   }
 
+  async function shareViaDevice() {
+    if (!valid) return;
+    if (!navigator.share) {
+      await copy("WhatsApp");
+      setFeedback("Your device has no share sheet. The WhatsApp version was copied.");
+      return;
+    }
+    try {
+      await navigator.share({
+        title: title.trim(),
+        text: shorten(body.trim(), 1050),
+        url: clubUrl,
+      });
+      setFeedback("Your device’s share sheet was opened. Rallora has not published this post.");
+    } catch (error) {
+      if (error instanceof Error && error.name !== "AbortError") {
+        setFeedback("Could not open sharing. Copy a channel version instead.");
+      }
+    }
+  }
+
   async function downloadGraphic() {
     if (!ready || !valid || busy) return;
     setBusy(true); setFeedback("");
@@ -448,6 +469,10 @@ export default function ClubSocialStudio() {
           <button type="button" className={styles.download}
             disabled={busy} onClick={() => { void downloadGraphic(); }}>
             {busy ? "Preparing graphic…" : "Download branded post graphic ↓"}
+          </button>
+          <button type="button" className={styles.deviceShare}
+            onClick={() => { void shareViaDevice(); }}>
+            Share message using my device ↗
           </button>
           {selected.map(channel => <article className={styles.channelPreview} key={channel}>
             <div className={styles.channelTop}><strong>{channel}</strong>
