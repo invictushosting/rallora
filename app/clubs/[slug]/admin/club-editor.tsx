@@ -51,6 +51,7 @@ export default function ClubEditor({ club, seasons, onSaved }: Props) {
   const [fixtureAway, setFixtureAway] = useState("");
   const [fixtureWeek, setFixtureWeek] = useState("1");
   const [fixtureDeadline, setFixtureDeadline] = useState("");
+  const [fixturePublish, setFixturePublish] = useState(new Date().toISOString().slice(0, 10));
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -60,6 +61,20 @@ export default function ClubEditor({ club, seasons, onSaved }: Props) {
       season_name: season.name })));
   const selectedDivision = divisions.find((division) => division.id === fixtureDivisionId);
   const eligibleTeams = selectedDivision?.teams ?? [];
+
+  useEffect(() => {
+    if (!seasons.some((season) => season.id === divisionSeasonId)) {
+      setDivisionSeasonId(seasons[0]?.id ?? "");
+    }
+    if (!divisions.some((division) => division.id === teamDivisionId)) {
+      setTeamDivisionId(divisions[0]?.id ?? "");
+    }
+    if (!divisions.some((division) => division.id === fixtureDivisionId)) {
+      setFixtureDivisionId(divisions[0]?.id ?? "");
+      setFixtureHome("");
+      setFixtureAway("");
+    }
+  }, [seasons, divisionSeasonId, teamDivisionId, fixtureDivisionId, divisions]);
 
   useEffect(() => {
     setName(club.name);
@@ -178,10 +193,15 @@ export default function ClubEditor({ club, seasons, onSaved }: Props) {
         throw new Error("Week number must be between 1 and 1000.");
       if (!/^\d{4}-\d{2}-\d{2}$/.test(fixtureDeadline))
         throw new Error("Choose a play-by date.");
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(fixturePublish) ||
+        fixturePublish > fixtureDeadline) {
+        throw new Error("Publish date must be on or before the fixture deadline.");
+      }
       const { error: mutationError } = await supabase.from("fixtures").insert({
         season_id: division.season_id, division_id: division.id,
         home_team_id: fixtureHome, away_team_id: fixtureAway,
         week_number: week, play_by: fixtureDeadline, status: "open",
+        available_from: fixturePublish,
       });
       if (mutationError) throw mutationError;
       setFixtureHome(""); setFixtureAway("");
@@ -272,6 +292,8 @@ export default function ClubEditor({ club, seasons, onSaved }: Props) {
         onChange={(event) => setFixtureWeek(event.target.value)} /></label>
       <label>Play by<input type="date" required value={fixtureDeadline}
         onChange={(event) => setFixtureDeadline(event.target.value)} /></label>
+      <label>Publish on<input type="date" required value={fixturePublish}
+        onChange={(event) => setFixturePublish(event.target.value)} /></label>
       <button disabled={busy || eligibleTeams.length < 2}
         type="submit">Create fixture</button>
     </form>}
