@@ -83,6 +83,18 @@ isolated staging environment are ready. Do not mistake GitHub CI for hands-on UA
   than forecast receipts; organiser top-up must be clearly displayed.
 - [ ] Invalid percent splits, negative amounts, excessive fees and zero
   entries show an error or zero rather than fake collected balances.
+- [ ] Choose club bank transfer, pay at club or both in the separate
+  collection setup preview. Integrated Stripe/Mollie/PayPal/Revolut/Adyen
+  must be visibly PLANNED, not clickable checkout or automatically approved.
+- [ ] Plan cash, non-cash (rackets/vouchers/coaching) and mixed prizes;
+  check that physical prizes do not increase cash balances.
+- [ ] Confirm setup preview requires adequate entry and refund terms;
+  copy example setup brief and confirm this neither publishes payment
+  instructions nor captures card numbers or bank details.
+- [ ] Verify a paid pair that merely registers remains Payment pending.
+  In isolated staging only, replay the same verified receipt, send a
+  foreign-club/foreign-currency receipt, partial refund and dispute. A
+  duplicate webhook must not double-count as collected money.
 - [ ] Refresh and switch clubs: no draft prize money or paid status
   should be written to live Supabase, no payment credentials requested.
 - [ ] Check wording: projected/pledged is NOT confirmed/held, no payout
