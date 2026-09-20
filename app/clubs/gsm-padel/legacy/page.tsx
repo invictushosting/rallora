@@ -759,7 +759,7 @@ export default function GsmPadelLeagueHub() {
         ← All Rallora clubs
       </a>
       <span>GSM PADEL · FULL LEAGUE HUB</span>
-      <a href="/clubs/gsm-padel" style={{ color: "#b8ceff", textDecoration: "none" }}>
+      <a href="/clubs/gsm-padel/overview" style={{ color: "#b8ceff", textDecoration: "none" }}>
         View GSM club overview →
       </a>
     </nav>
