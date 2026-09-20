@@ -50,3 +50,16 @@
 @media(max-width:1370px){.hero{margin:12px 18px 0}}
 @media(max-width:850px){.hero{grid-template-columns:1fr}.heroContent{padding:50px 34px 28px}.courtArt{min-height:235px;max-height:290px}.courtOuter{width:250px;height:280px}.artLabel{display:none}.heroFoot{margin-top:35px}.clubs{padding-top:55px}}
 @media(max-width:540px){.header{padding:17px 16px}.wordmark{font-size:23px}.logo{height:36px;width:36px;font-size:21px}.nav>a:first-child{display:none}.nav .navButton{padding:10px;font-size:10px}.hero{margin:3px 10px 0;border-radius:20px}.heroContent{padding:38px 22px 27px}.hero h1{font-size:43px;letter-spacing:-2px}.courtArt{min-height:185px;max-height:200px}.courtOuter{height:250px}.clubs{padding:46px 12px 60px}.club{padding:23px}.footer{flex-direction:column;gap:9px}}
+
+.productFamily{max-width:1300px;margin:0 auto;padding:66px 20px 18px}
+.familyHeading h2{font-size:clamp(29px,4vw,46px);letter-spacing:-1.3px;margin:14px 0}
+.familyHeading p{font-size:14px;color:#647b96;margin:0 0 23px}
+.familyGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px}
+.familyCard{background:#fff;color:#061A39;border:1px solid #d6e5f2;border-radius:21px;padding:28px;text-decoration:none;min-height:252px;display:flex;flex-direction:column;box-shadow:0 8px 22px #061A3908;transition:transform .18s,border-color .18s}
+.familyCard:hover{transform:translateY(-3px);border-color:#00B0FE}
+.familyCard span{color:#008bc9;font-size:10px;letter-spacing:1.2px;font-weight:900}
+.familyCard h3{font-size:26px;letter-spacing:-.9px;margin:24px 0 9px}
+.familyCard p{color:#637b96;font-size:13px;line-height:1.7}
+.familyCard strong{font-size:13px;margin-top:auto;color:#007cba}
+@media(max-width:850px){.familyGrid{grid-template-columns:1fr}.familyCard{min-height:210px}}
+@media(max-width:540px){.productFamily{padding:46px 12px 5px}.header nav>a[href="/products"]{font-size:11px}}
