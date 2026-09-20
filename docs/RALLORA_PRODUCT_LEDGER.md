@@ -29,6 +29,31 @@ to advertise to new clubs. Update it as each acceptance gate is completed.
   fixture/result search and show-all pagination. No public captain emails fetched.
 - Platform-operator and per-club membership-checked read-only dashboards.
 
+## Product family and Social Studio (develop, not necessarily live on Vercel)
+
+- Product-family landing routes: `/products`, `/leagues`, `/social`,
+  and `/interclub`, linked from the Rallora home page.
+- Rallora Interclub is explicitly labelled a future product. There is NO
+  interclub invitation or shared event database yet.
+- Rallora AI is documented as a future cross-product assistant, not an active
+  AI chat service. No API account, key, usage costs or model calls are enabled.
+- Rallora Social first-release studio at `/clubs/[slug]/social`, accessible
+  via membership-checked club administration. It verifies Supabase Auth user
+  and club owner/admin/organiser or platform admin before showing data.
+- Social Studio allows club news, confirmed-result cards and latest-week roundups
+  from two latest published seasons of that club; editable text and selected
+  Facebook, Instagram, WhatsApp, email and club-site manual previews.
+  Users can copy channel captions, open the normal WhatsApp share composer,
+  and download a square club-branded graphic featuring official Rallora artwork.
+- Social Studio DOES NOT store drafts, connect social accounts, publish to the
+  club website, send WhatsApp Business messages, schedule posts, email players
+  or mutate production Supabase. No WhatsApp group/Status API claim.
+- This is a frontend-only incremental delivery while full backup/restore,
+  isolated staging, RLS and connected-social approvals are pending.
+- GitHub CI validates build and synthetic tenant safety; passing CI does not
+  resolve Vercel Hobby build-rate restrictions or justify merging develop into
+  GSM main. Check Vercel status separately.
+
 ## Built but OFF by default: club-owner editing
 
 `app/clubs/[slug]/admin/club-editor.tsx` implements club branding, draft season,
