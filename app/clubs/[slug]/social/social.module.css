@@ -43,3 +43,8 @@
 .empty>a{display:inline-block;margin:10px 20px 0 0;color:#0078b9;font-size:13px;font-weight:850}
 @media(max-width:900px){.grid{grid-template-columns:1fr}.footer{flex-direction:column}}
 @media(max-width:530px){.shell{padding:16px 12px 38px}.hero{padding:30px 22px}.editor,.preview{padding:20px}.header{align-items:start;flex-direction:column}.phase{font-size:9px}}
+
+.draftControls{display:flex;justify-content:space-between;align-items:center;gap:13px;flex-wrap:wrap;padding:14px 15px;margin:9px 0 25px;border:1px solid #d4e5f1;border-radius:12px;background:#f4f9fd}
+.draftControls span{color:#4b6681;font-size:11px;line-height:1.6;flex:1}
+.draftControls button{font-size:11px;font-weight:800;border:1px solid #cbdbe8;border-radius:9px;padding:10px 12px;color:#274966;background:#fff;cursor:pointer}
+.draftControls button:focus-visible{outline:2px solid #00B0FE;outline-offset:2px}
