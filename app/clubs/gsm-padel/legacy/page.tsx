@@ -748,6 +748,21 @@ export default function GsmPadelLeagueHub() {
   }, [active, leagueData, isLoading, loadError]);
 
   return (
+    <>
+    <nav aria-label="Rallora platform navigation" style={{
+      display: "flex", justifyContent: "space-between", alignItems: "center",
+      flexWrap: "wrap", gap: 12, padding: "11px 20px",
+      background: "#132b50", color: "#e4ecff", fontSize: 12,
+      fontWeight: 750,
+    }}>
+      <a href="/" style={{ color: "#fff", textDecoration: "none" }}>
+        ← All Rallora clubs
+      </a>
+      <span>GSM PADEL · FULL LEAGUE HUB</span>
+      <a href="/clubs/gsm-padel" style={{ color: "#b8ceff", textDecoration: "none" }}>
+        View GSM club overview →
+      </a>
+    </nav>
     <div
       className="app-shell"
       style={{
@@ -761,6 +776,7 @@ export default function GsmPadelLeagueHub() {
       <Footer setActive={setActive} club={clubSettings} />
       <MobileNav active={active} setActive={setActive} />
     </div>
+    </>
   );
 }
 
