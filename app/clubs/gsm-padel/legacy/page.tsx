@@ -1476,9 +1476,11 @@ function CupPage({
     async function loadCupSettings() {
       try {
         const supabase = createClient();
+        const gsmClubId = await loadGsmClubId();
         const { data: seasonRows } = await supabase
           .from("seasons")
           .select("id")
+          .eq("club_id", gsmClubId)
           .eq("status", "active")
           .order("created_at", { ascending: false })
           .limit(1);
@@ -2240,11 +2242,16 @@ function AdminPage({
 
     setAdminLoading(true);
     try {
-      await supabase.from("seasons").update({ status: "draft" }).eq("status", "active");
+      const gsmClubId = await loadGsmClubId();
+      const { error: draftError } = await supabase.from("seasons")
+        .update({ status: "draft" })
+        .eq("club_id", gsmClubId).eq("status", "active");
+      if (draftError) throw draftError;
 
       const { data: season, error: seasonError } = await supabase
         .from("seasons")
         .insert({
+          club_id: gsmClubId,
           name: newSeasonName.trim(),
           status: "active",
           starts_on: newSeasonStart || null,
@@ -2284,15 +2291,21 @@ function AdminPage({
     if (!targetSeasonId) return;
     setAdminLoading(true);
     try {
+      const gsmClubId = await loadGsmClubId();
+      if (!allSeasons.some((season) => season.id === targetSeasonId)) {
+        throw new Error("The selected season does not belong to GSM Padel.");
+      }
       const { error: draftError } = await supabase
         .from("seasons")
         .update({ status: "draft" })
+        .eq("club_id", gsmClubId)
         .neq("id", targetSeasonId);
       if (draftError) throw draftError;
 
       const { error: activeError } = await supabase
         .from("seasons")
         .update({ status: "active" })
+        .eq("club_id", gsmClubId)
         .eq("id", targetSeasonId);
       if (activeError) throw activeError;
 
@@ -5584,6 +5597,7 @@ function CaptainPage({ onDataChanged }: { onDataChanged: () => void }) {
 
     setCaptainLoading(true);
     try {
+      const gsmClubId = await loadGsmClubId();
       const { data: captainRows, error: captainError } = await supabase
         .from("captain_users")
         .select("id, email, team_id, display_name, created_at")
@@ -5603,6 +5617,7 @@ function CaptainPage({ onDataChanged }: { onDataChanged: () => void }) {
       const { data: seasonRows, error: seasonError } = await supabase
         .from("seasons")
         .select("id, name, status, starts_on, ends_on")
+        .eq("club_id", gsmClubId)
         .eq("status", "active")
         .order("created_at", { ascending: false })
         .limit(1)
