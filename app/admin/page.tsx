@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
 export default function AdminRoutePage() {
-  redirect("/#admin");
+  // Existing /admin bookmarks must still reach the GSM management tools.
+  redirect("/clubs/gsm-padel#admin");
 }

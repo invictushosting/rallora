@@ -1,0 +1,24 @@
+.dock{position:fixed;bottom:23px;right:23px;z-index:90;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#061A39}
+.launch{display:flex;align-items:center;gap:9px;justify-content:center;margin-left:auto;background:#00B0FE;color:#061A39;box-shadow:0 11px 35px #061A3940;border:2px solid #061A39;border-radius:35px;padding:14px 19px;font-size:13px;font-weight:900;cursor:pointer}
+.launch span{font-size:20px;line-height:1}
+.launch:focus-visible,.heading button:focus-visible,.form button:focus-visible{outline:3px solid #00B0FE;outline-offset:3px}
+.panel{display:flex;flex-direction:column;width:min(375px,calc(100vw - 30px));height:min(560px,calc(100dvh - 115px));background:#fff;border:1px solid #c4d9e9;border-radius:20px;box-shadow:0 23px 65px #061A3950;overflow:hidden;margin-bottom:11px}
+.heading{background:#061A39;color:#fff;padding:17px 19px;display:flex;justify-content:space-between;align-items:center}
+.heading div{display:flex;flex-direction:column;gap:4px}
+.heading strong{font-size:16px;letter-spacing:-.2px}
+.heading span{color:#a9d7f4;font-size:10px;letter-spacing:.5px}
+.heading button{cursor:pointer;color:#fff;font-size:25px;line-height:1;border:0;background:transparent;padding:3px 8px}
+.thread{flex:1;overflow:auto;padding:19px;background:#f6faff}
+.thread>div{max-width:94%;padding:12px 14px;border-radius:15px;margin-bottom:12px;font-size:12px;line-height:1.6}
+.thread p{margin:0;white-space:pre-wrap}
+.thread a{display:inline-block;color:#006aaa;font-size:12px;font-weight:850;text-decoration:none;margin-top:9px}
+.guide{background:white;border:1px solid #e0ecf5;margin-right:auto}
+.you{background:#061A39;color:#fff;margin-left:auto}
+.form{padding:15px 16px 9px;background:#fff;border-top:1px solid #d9e7f2}
+.form label{display:block;font-size:11px;color:#5d7289;font-weight:800;margin-bottom:7px}
+.form>div{display:flex;gap:8px}
+.form input{flex:1;min-width:0;padding:12px 11px;font:inherit;font-size:12px;border:1px solid #caddea;border-radius:10px;outline-color:#00B0FE;background:#fff;color:#061A39}
+.form button{border:0;background:#00B0FE;color:#061A39;padding:11px 12px;font-size:12px;font-weight:900;border-radius:9px;cursor:pointer}
+.form button:disabled{opacity:.45;cursor:not-allowed}
+.privacy{background:#fff;font-size:9px;line-height:1.5;color:#667c95;margin:0;padding:3px 17px 14px}
+@media(max-width:540px){.dock{bottom:13px;right:12px}.launch{padding:12px 15px;font-size:12px}.panel{width:calc(100vw - 24px);height:min(520px,calc(100dvh - 105px));border-radius:16px}}

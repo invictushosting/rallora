@@ -1,12 +1,12 @@
 {
-  "name": "GSM Padel League Hub",
-  "short_name": "GSM Padel",
-  "description": "Club padel league tables, fixtures, teams and cup hub.",
+  "name": "Rallora | Padel League Platform",
+  "short_name": "Rallora",
+  "description": "Rallora. Padel, connected. Clubs, leagues, fixtures and results.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#2458ff",
+  "background_color": "#061A39",
+  "theme_color": "#061A39",
   "orientation": "portrait-primary",
   "icons": [
     {

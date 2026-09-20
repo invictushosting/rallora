@@ -93,6 +93,7 @@ export default function PublicRulesPage() {
       const { data: clubData, error: clubError } = await supabase
         .from("clubs")
         .select("id,name,short_name")
+        .eq("slug", "gsm-padel")
         .eq("is_active", true)
         .order("created_at", { ascending: true })
         .limit(1)
@@ -109,6 +110,7 @@ export default function PublicRulesPage() {
       const { data: seasonData } = await supabase
         .from("seasons")
         .select("id,name")
+        .eq("club_id", clubData.id)
         .eq("status", "active")
         .order("created_at", { ascending: false })
         .limit(1)
@@ -144,7 +146,7 @@ export default function PublicRulesPage() {
             Public league rules for players, captains and organisers{season?.name ? ` during ${season.name}` : ""}.
           </p>
           <div className={styles.actions}>
-            <Link href="/" className={`${styles.button} ${styles.buttonSecondary}`}>Back to league hub</Link>
+            <Link href="/clubs/gsm-padel" className={`${styles.button} ${styles.buttonSecondary}`}>Back to GSM league</Link>
             <Link href="/admin/rules" className={styles.button}>Admin: edit rules</Link>
           </div>
         </section>

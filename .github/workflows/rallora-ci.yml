@@ -1,0 +1,75 @@
+name: Rallora quality gates
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+# Rapid draft commits should not queue multiple expensive superseded builds.
+concurrency:
+  group: rallora-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Deliberately NOT production: builds must not contact the live league database.
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-not-a-real-supabase-key
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: node scripts/check-legacy-demo-rpcs.mjs
+      - run: node --experimental-strip-types --test tests/social-channels.test.mjs
+      - run: node --experimental-strip-types --test tests/leagues-exports.test.mjs
+      - run: node --experimental-strip-types --test tests/leagues-prize-budget.test.mjs
+      - run: node --experimental-strip-types --test tests/leagues-payments.test.mjs
+      - run: npx tsc --noEmit
+      - run: npm run build
+  tenant-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Disposable synthetic database. Not a Supabase project, and NO production data.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: ci-only-test-password
+          POSTGRES_DB: rallora_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d rallora_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: localhost
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: ci-only-test-password
+      PGDATABASE: rallora_ci
+    steps:
+      - uses: actions/checkout@v4
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_fixture.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/001_club_scope_helpers.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_policies.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_core_schema.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/002_core_tenant_rls.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_core_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/003_social_schema.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_social_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/004_league_entry_prizes.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_league_prizes_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/005_payment_options_noncash.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_payment_options_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/006_manual_receipt_ledger.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_manual_receipt_assertions.sql
