@@ -12,7 +12,7 @@
 .form input,.form select,.form textarea{background:#fff;border:1px solid #cddbed;border-radius:11px;color:#173354;padding:11px 12px;font:inherit;font-size:13px;min-width:0;width:100%;outline-color:#3467bc}
 .form input[type=color]{width:86px;height:43px;padding:3px}
 .form textarea{resize:vertical}
-.form button{grid-column:1/-1;cursor:pointer;border:0;background:#2458ee;border-radius:10px;padding:14px 20px;font-size:13px;font-weight:850;color:white;justify-self:start}
+.form button{grid-column:1/-1;cursor:pointer;border:0;background:#00B0FE;border-radius:10px;padding:14px 20px;font-size:13px;font-weight:850;color:white;justify-self:start}
 .form button:disabled{opacity:.5;cursor:not-allowed}
 .form h3{grid-column:1/-1;margin:4px 0 0;font-size:18px}
 .form p{grid-column:1/-1;margin:0;color:#6b809b;font-size:12px}
