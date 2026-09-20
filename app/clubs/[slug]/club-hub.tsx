@@ -356,7 +356,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
         <h2>GSM Padel’s full league is still here</h2>
         <p>Open the existing GSM experience for complete league navigation,
           captain submissions and current management features.</p>
-        <p><a href="/clubs/gsm-padel/legacy">Open full GSM league →</a></p>
+        <p><a href="/clubs/gsm-padel">Open full GSM league →</a></p>
       </section>}
       <footer className={styles.footer}>
         <p>{club.footer_text || "Your club. Your league."}</p><p>Powered by Rallora</p>
