@@ -2,7 +2,7 @@
 .shell{max-width:1240px;margin:auto;padding:25px 24px 65px}
 .nav{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:28px}
 .wordmark{display:flex;align-items:center;gap:11px;font-size:21px;font-weight:900;text-decoration:none;color:#061A39}
-.logo{display:inline-grid;place-items:center;width:44px;height:44px;background:#00B0FE;color:#fff;border-radius:13px;font-size:25px;font-weight:900}
+.logo{display:inline-grid;place-items:center;width:44px;height:44px;background:#061A39;color:#00B0FE;border-radius:13px;font-size:25px;font-weight:900}
 .badge{background:#E8F2F9;color:#29579b;border:1px solid #cdddf4;border-radius:30px;padding:10px 12px;font-size:10px;letter-spacing:1px;font-weight:900}
 .hero{background:#061A39;border-radius:26px;padding:42px 44px;color:#fff}
 .eyebrow{color:#a8cdfd;font-size:11px;letter-spacing:1.8px;font-weight:850}
