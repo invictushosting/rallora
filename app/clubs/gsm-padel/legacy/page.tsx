@@ -850,7 +850,9 @@ function HomePage({
     (total, division) => total + division.teams.length,
     0,
   );
-  const firstDivision = data.divisions[0] ?? fallbackData.divisions[0];
+  const firstDivision: Division = data.divisions[0] ?? {
+    id: "", name: "No divisions available", sortOrder: 0, teams: [],
+  };
   const currentWeek = data.fixtures[0]?.week ?? "Weekly";
 
   return (
@@ -869,7 +871,7 @@ function HomePage({
           <p>{club.welcomeText}</p>
           {loadError && (
             <p className="live-warning">
-              Live data did not load, showing demo data: {loadError}
+              Live data could not be loaded. No demo results are shown: {loadError}
             </p>
           )}
           <div className="hero-actions">
