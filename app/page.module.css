@@ -1,0 +1,52 @@
+.page{--ink:#14243c;--muted:#68809c;min-height:100vh;background:#f7f9fe;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.header{max-width:1330px;margin:auto;padding:22px 36px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.wordmark{display:inline-flex;align-items:center;gap:11px;color:#172e4d;font-size:27px;font-weight:900;letter-spacing:-1.3px;text-decoration:none}
+.logo{background:#245cfa;color:white;width:43px;height:43px;border-radius:13px;display:grid;place-items:center;font-size:26px;letter-spacing:0}
+.dot{color:#245cfa}.nav{display:flex;align-items:center;gap:25px}
+.nav a{color:#233853;text-decoration:none;font-size:13px;font-weight:750}
+.nav .navButton{color:#2453ad;border:1px solid #d5e2fc;border-radius:40px;padding:13px 17px;background:#edf3ff}
+.hero{max-width:1330px;margin:12px auto 0;min-height:510px;background:linear-gradient(120deg,#101f3c,#173c69 70%,#234f95);border-radius:30px;overflow:hidden;color:#fff;display:grid;grid-template-columns:1.12fr .88fr;box-shadow:0 25px 50px #1b3d721d}
+.heroContent{padding:67px 30px 28px 66px;position:relative;z-index:1;display:flex;flex-direction:column}
+.eyebrow{font-size:11px;font-weight:850;letter-spacing:2px;color:#447aee}
+.hero .eyebrow{color:#a3c0ff}
+.hero h1{font-size:clamp(43px,5.4vw,74px);line-height:1.05;letter-spacing:-3px;margin:23px 0 23px;font-weight:900}
+.hero h1 span{color:#a9c6ff}
+.heroContent>p{max-width:495px;font-size:15px;line-height:1.8;color:#d3e3ff}
+.actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:26px}
+.actions a{display:inline-block;padding:15px 19px;border-radius:11px;font-size:13px;font-weight:850;text-decoration:none}
+.primaryButton{background:#fff;color:#1e4a91}.secondaryButton{background:#ffffff19;border:1px solid #ffffff60;color:#fff}
+.heroFoot{border-top:1px solid #ffffff38;margin-top:auto;padding-top:23px;display:flex;gap:30px;color:#a5c7fa;font-size:10px;letter-spacing:1.2px;font-weight:800}
+.courtArt{position:relative;display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden}
+.courtOuter{width:330px;height:405px;transform:rotate(-20deg) perspective(500px) rotateY(-7deg);border:22px solid #608dea;border-radius:26px;box-shadow:0 0 0 6px #a7c1f660,0 34px 70px #010c2f78;opacity:.9}
+.courtInner{position:relative;width:100%;height:100%;border:5px solid #ffffff90;background:linear-gradient(130deg,#2860a4,#256a9b);overflow:hidden}
+.courtInner::after{content:"";position:absolute;top:50%;left:0;width:100%;height:3px;background:#ffffffb0}
+.courtInner::before{content:"";position:absolute;left:50%;top:0;width:3px;height:100%;background:#ffffffb0}
+.courtNet{position:absolute;left:0;top:29%;width:100%;height:2px;background:white;z-index:2;box-shadow:0 8px #ffffff50}
+.courtCircle{position:absolute;top:15%;left:25%;width:50%;height:70%;border:2px solid #ffffff35;border-radius:50%}
+.ball{position:absolute;width:36px;height:36px;border-radius:50%;background:#dcf764;right:16%;top:25%;box-shadow:0 0 32px #d5ff8a83}
+.artLabel{position:absolute;bottom:35px;right:25px;color:#aecdfd;font-size:10px;letter-spacing:1.7px;font-weight:800}
+.clubs{max-width:1300px;margin:0 auto;padding:72px 20px 86px;scroll-margin-top:30px}
+.sectionTop{display:flex;justify-content:space-between;align-items:center;gap:18px;margin:0 0 27px}
+.sectionTop h2{font-size:clamp(28px,3.5vw,43px);letter-spacing:-1.3px;margin:11px 0}
+.sectionTop p{font-size:14px;color:#6e829b}.count{font-size:11px;letter-spacing:1.2px;font-weight:850;color:#486ab2;border:1px solid #d5e1fa;border-radius:40px;padding:11px 17px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:19px}
+.club{min-width:0;background:white;border:1px solid #e2eaf4;border-radius:22px;padding:29px;box-shadow:0 8px 28px #25447309}
+.clubHead{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.clubMark{width:57px;height:57px;border-radius:14px;background:var(--club-accent);display:grid;place-items:center;color:white;font-size:21px;font-weight:900}
+.activeBadge{padding:8px 10px;border-radius:30px;font-size:9px;letter-spacing:1.1px;font-weight:850;background:#ebf6f0;color:#208165}
+.club h3{font-size:27px;letter-spacing:-.7px;margin:26px 0 5px}
+.slug{font-size:12px;color:#8a9bb0;margin:0}
+.description{color:#617791;line-height:1.75;font-size:13px;min-height:48px;margin:20px 0 25px}
+.clubDetails{display:grid;grid-template-columns:1fr 2fr;gap:12px;border-top:1px solid #edf1f8;border-bottom:1px solid #edf1f8;padding:19px 0}
+.clubDetails span{color:#7889a4;display:flex;flex-direction:column;gap:7px;font-size:10px;letter-spacing:1px;font-weight:750}
+.clubDetails strong{color:#1d3555;font-size:14px;letter-spacing:0;line-height:1.4}
+.clubLink{margin-top:22px;padding:15px;border-radius:11px;background:#ecf2ff;display:flex;justify-content:space-between;text-decoration:none;color:#244eb1;font-size:13px;font-weight:850}
+.legacyLink{display:block;margin:15px 0 0;font-size:12px;color:#416cb8;font-weight:750}
+.notice{padding:20px;background:#fff;border-radius:15px;border:1px solid #e2eaf4;color:#596e86}
+.bottom{text-align:center;background:#10294c;color:white;padding:73px 20px 81px}
+.bottom .eyebrow{color:#add0ff}.bottom h2{font-size:clamp(28px,4vw,44px);line-height:1.17;letter-spacing:-1.4px}
+.bottom p{font-size:14px;line-height:1.8;color:#cadcf9}.bottom a{display:inline-block;margin-top:17px;color:#163c6f;background:white;padding:15px 20px;border-radius:11px;text-decoration:none;font-weight:850;font-size:13px}
+.footer{display:flex;justify-content:space-between;gap:20px;max-width:1330px;margin:auto;padding:32px 25px;color:#647d99;font-size:12px}.footer strong{color:#17375e}
+@media(max-width:1370px){.hero{margin:12px 18px 0}}
+@media(max-width:850px){.hero{grid-template-columns:1fr}.heroContent{padding:50px 34px 28px}.courtArt{min-height:235px;max-height:290px}.courtOuter{width:250px;height:280px}.artLabel{display:none}.heroFoot{margin-top:35px}.clubs{padding-top:55px}}
+@media(max-width:540px){.header{padding:17px 16px}.wordmark{font-size:23px}.logo{height:36px;width:36px;font-size:21px}.nav>a:first-child{display:none}.nav .navButton{padding:10px;font-size:10px}.hero{margin:3px 10px 0;border-radius:20px}.heroContent{padding:38px 22px 27px}.hero h1{font-size:43px;letter-spacing:-2px}.courtArt{min-height:185px;max-height:200px}.courtOuter{height:250px}.clubs{padding:46px 12px 60px}.club{padding:23px}.footer{flex-direction:column;gap:9px}}
