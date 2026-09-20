@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 type RalloraLogoProps = {
   variant?: "light" | "dark";
   width?: number;
@@ -12,7 +14,7 @@ type RalloraLogoProps = {
 export default function RalloraLogo({
   variant = "light", width = 218, className,
 }: RalloraLogoProps) {
-  return <img
+  return <Image
     src={`/brand/rallora-horizontal-${variant}.svg`}
     alt="Rallora"
     width={width}

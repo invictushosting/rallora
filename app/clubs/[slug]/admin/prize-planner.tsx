@@ -42,7 +42,7 @@ export default function PrizePlanner({ clubName,seasons }:{
   const [runnerUpPct,setRunnerUpPct] = useState(30);
   const season = seasons.find(s=>s.id===seasonId);
   const projectedTeamCount = season?.teams ?? 0;
-  const draft = {
+  const draft = useMemo(() => ({
     ...DEFAULT_PRIZE_ESTIMATE,currency,entryUnit,
     paidTeams,playersPerTeam,
     entryPence:freeEntry?0:entryPence,
@@ -50,7 +50,9 @@ export default function PrizePlanner({ clubName,seasons }:{
     platformFeePence:freeEntry?0:platformFeePence,
     sponsorPence,potMode,prizeSharePct,guaranteedPotPence,
     winnerPct,runnerUpPct,
-  };
+  }), [currency,entryUnit,paidTeams,playersPerTeam,entryPence,freeEntry,
+    providerFeePence,platformFeePence,sponsorPence,potMode,prizeSharePct,
+    guaranteedPotPence,winnerPct,runnerUpPct]);
   const outcome = useMemo(()=>{
     try {
       return { value:estimatePrizeBudget(draft),error:"" };
@@ -58,9 +60,7 @@ export default function PrizePlanner({ clubName,seasons }:{
       return { value:null,error:err instanceof Error
         ? err.message:"Please review the budget inputs." };
     }
-  },[currency,entryUnit,paidTeams,playersPerTeam,entryPence,freeEntry,
-    providerFeePence,platformFeePence,sponsorPence,potMode,prizeSharePct,
-    guaranteedPotPence,winnerPct,runnerUpPct]);
+  },[draft]);
 
   function cashField(label:string,key:AmountKey,value:number,
     update:(pence:number)=>void,help?:string) {

@@ -1,7 +1,7 @@
 name: Rallora quality gates
 on:
   push:
-    branches: [develop]
+    branches: [main, develop]
   pull_request:
     branches: [main]
 permissions:
@@ -31,7 +31,8 @@ jobs:
       - run: node --experimental-strip-types --test tests/leagues-exports.test.mjs
       - run: node --experimental-strip-types --test tests/leagues-prize-budget.test.mjs
       - run: node --experimental-strip-types --test tests/leagues-payments.test.mjs
-      - run: npx tsc --noEmit
+      - run: npm run lint
+      - run: npm run typecheck
       - run: npm run build
   tenant-safety:
     runs-on: ubuntu-latest

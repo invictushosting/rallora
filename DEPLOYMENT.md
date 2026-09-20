@@ -1,47 +1,32 @@
-# GSM Padel League Hub — Vercel Deployment Guide
+# Rallora — Production Deployment Guide
 
-## 1. Apply this update
+## 1. Prepare the repository
 
-```powershell
-cd C:\Users\invic\Downloads\gsm-padel-league-hub-starter\gsm-padel-league-hub
-Expand-Archive "$env:USERPROFILE\Downloads\gsm-padel-production-deployment-prep-update.zip" -DestinationPath . -Force
+```bash
+git checkout main
+git pull --ff-only
+npm ci
 ```
 
-## 2. Run the production safety SQL
+## 2. Verify database changes
 
-Open:
-
-```powershell
-notepad .\supabase\production-safety-check.sql
-```
-
-Copy everything into:
-
-```text
-Supabase → SQL Editor → New Query → Run
-```
+Only files in `supabase/migrations/` form the deployable migration chain. Review
+new migrations, test them against disposable PostgreSQL, and confirm rollback
+and backup coverage before changing production. Do not run every historical SQL
+file directly under `supabase/`.
 
 ## 3. Test production build locally
 
-```powershell
-npm run build
+```bash
+npm run check
 ```
 
 If it completes successfully, the project is ready to deploy.
 
-## 4. Push to GitHub
+## 4. Deploy through GitHub
 
-Create a new GitHub repo and upload/push the project folder.
-
-## 5. Import into Vercel
-
-In Vercel:
-
-```text
-Add New Project → Import GitHub repo → Deploy
-```
-
-Use the default Next.js settings.
+Open a pull request into `main`. Merge only after both GitHub quality-gate jobs
+pass. The canonical Rallora Vercel project should deploy `main` automatically.
 
 ## 6. Add Vercel environment variables
 
@@ -58,6 +43,8 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-or-publishable-key
 NEXT_PUBLIC_SITE_URL=https://your-vercel-project.vercel.app
 NEXT_PUBLIC_CLUB_SLUG=gsm-padel
+NEXT_PUBLIC_RALLORA_ENABLE_CLUB_WRITES=false
+RALLORA_SOCIAL_DB_ENABLED=false
 ```
 
 Then redeploy.
@@ -90,5 +77,7 @@ http://localhost:3000/**
 - Admin login works.
 - Captain login works.
 - Sponsor upload works.
-- Demo Tools work.
+- Disabled demo/reset actions remain unavailable.
+- Club and social writes remain disabled unless their authorization release has
+  separately passed.
 - Mobile view looks clean.
