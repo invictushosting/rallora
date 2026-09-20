@@ -48,6 +48,12 @@ to advertise to new clubs. Update it as each acceptance gate is completed.
   (`scripts/staging/005_payment_options_noncash.sql`) with isolated fake
   tenant tests. Browser roles cannot approve a provider or mark a prize
   delivered. This SQL has NOT been run on actual production Supabase.
+- Staged manual bank/cash reconciliation design
+  (`scripts/staging/006_manual_receipt_ledger.sql`) adds backend-only,
+  append-only receipt events with authorised club finance verification,
+  duplicate-reference blocking and audited reversal instead of edits.
+  It is not installed on real Supabase; no player charge or receipt
+  reconciliation API exists.
 - Financial compliance and collection approval remain explicit launch gates;
   a provider being listed is not provider permission to process paid
   cash-prize competitions.
