@@ -241,10 +241,10 @@ export default function ClubSocialStudio() {
           ? line.slice(0, 42) + "…" : line, 75, start + n * 52));
       ctx.fillStyle = "#00B0FE"; ctx.fillRect(75, 892, 930, 2);
       const logo = new Image();
-      logo.src = "/brand/rallora-horizontal-dark.svg";
       await new Promise<void>((resolve, reject) => {
         logo.onload = () => resolve();
         logo.onerror = () => reject(new Error("Could not load Rallora artwork."));
+        logo.src = "/brand/rallora-horizontal-dark.svg";
       });
       ctx.drawImage(logo, 75, 928, 290, 83);
       ctx.fillStyle = "#b9d3e9"; ctx.font = "24px Arial";
