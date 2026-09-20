@@ -129,13 +129,13 @@ grant select on public.rallora_league_manual_receipt_events to authenticated;
 -- club_id to m.club_id inside the membership subquery (an interclub data leak).
 create or replace function public.rallora_finance_can_read_club(p_club uuid)
 returns boolean language sql stable security definer set search_path=''
-as $
+as $$
   select exists(select 1 from public.rallora_platform_admins p
     where p.user_id=(select auth.uid()))
     or exists(select 1 from public.rallora_club_memberships m
       where m.user_id=(select auth.uid()) and m.club_id=p_club
         and m.status='active' and m.role in ('owner','admin'));
-$;
+$$;
 revoke all on function public.rallora_finance_can_read_club(uuid)
   from public,anon,authenticated;
 grant execute on function public.rallora_finance_can_read_club(uuid)
