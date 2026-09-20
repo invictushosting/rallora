@@ -133,6 +133,7 @@ export default function AdminRulesPage() {
     const { data: clubData, error: clubError } = await supabase
       .from("clubs")
       .select("id,name")
+      .eq("slug", "gsm-padel")
       .eq("is_active", true)
       .order("created_at", { ascending: true })
       .limit(1)
@@ -147,6 +148,7 @@ export default function AdminRulesPage() {
     const { data: seasonData } = await supabase
       .from("seasons")
       .select("id,name")
+      .eq("club_id", clubData.id)
       .eq("status", "active")
       .order("created_at", { ascending: false })
       .limit(1)
