@@ -1,7 +1,7 @@
 .page{--ink:#061A39;--muted:#68809c;min-height:100vh;background:#E8F2F9;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 .header{max-width:1330px;margin:auto;padding:22px 36px;display:flex;align-items:center;justify-content:space-between;gap:20px}
 .wordmark{display:inline-flex;align-items:center;gap:11px;color:#061A39;font-size:27px;font-weight:900;letter-spacing:-1.3px;text-decoration:none}
-.logo{background:#00B0FE;color:white;width:43px;height:43px;border-radius:13px;display:grid;place-items:center;font-size:26px;letter-spacing:0}
+.logo{background:#00B0FE;color:#061A39;width:43px;height:43px;border-radius:13px;display:grid;place-items:center;font-size:26px;letter-spacing:0}
 .dot{color:#00B0FE}.nav{display:flex;align-items:center;gap:25px}
 .nav a{color:#233853;text-decoration:none;font-size:13px;font-weight:750}
 .nav .navButton{color:#061A39;border:1px solid #d5e2fc;border-radius:40px;padding:13px 17px;background:#E8F2F9}
