@@ -24,7 +24,7 @@ test("CSV exports only requested results and handles quotation / injection", () 
 
 test("CSV treats whitespace-prefixed spreadsheet formulas as text", () => {
   for (const attack of ["=2+2","  +CMD","-1+2","@SUM(1)","\t=IMPORTXML()"]) {
-    assert.match(safeCsvCell(attack), /^"'"/);
+    assert.ok(safeCsvCell(attack).startsWith("\"'"));
   }
   assert.equal(safeCsvCell('A,"B"'), '"A,""B"""');
 });
