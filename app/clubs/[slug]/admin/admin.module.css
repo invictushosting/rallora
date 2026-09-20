@@ -44,3 +44,9 @@
 .divisionRow ul{margin:0;padding:7px 12px 12px 30px;border-top:1px solid #ecf0f6}
 .divisionRow li{padding:5px 0;font-size:12px;color:#304e70}
 .divisionRow p{font-size:12px;color:#6e8199;padding:0 12px}
+
+.socialInvite{background:#061A39;color:#fff;padding:30px 32px;border-radius:20px;margin:25px 0}
+.socialInvite span{color:#00B0FE;font-size:10px;font-weight:900;letter-spacing:1.6px}
+.socialInvite h2{font-size:clamp(24px,3vw,32px);letter-spacing:-1px;line-height:1.2;max-width:720px;margin:13px 0}
+.socialInvite p{color:#d3e4f5;font-size:13px;line-height:1.75;max-width:690px}
+.socialInvite a{display:inline-block;margin-top:10px;border-radius:10px;background:#00B0FE;color:#061A39;text-decoration:none;font-weight:850;font-size:13px;padding:13px 17px}
