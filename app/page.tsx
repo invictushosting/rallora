@@ -132,15 +132,19 @@ export default function RalloraHome() {
           const clubSeasons = state.seasons.filter((season) => season.club_id === club.id);
           const activeSeason = clubSeasons.find((season) => season.status === "active");
           const color = safeColor(club.primary_color);
+          const isDemo = club.slug === "new-padel-club";
           return <article className={styles.club} key={club.id}
             style={{ "--club-accent": color } as React.CSSProperties}>
             <div className={styles.clubHead}>
               <span className={styles.clubMark}>{(club.short_name || club.name).slice(0, 2).toUpperCase()}</span>
-              <span className={styles.activeBadge}>CLUB HUB</span>
+              <span className={styles.activeBadge}>
+                {isDemo ? "DEMO CLUB" : "CLUB HUB"}</span>
             </div>
             <h3>{club.name}</h3>
             <p className={styles.slug}>rallora / {club.slug}</p>
-            <p className={styles.description}>{club.welcome_text || "Your club's league, all in one place."}</p>
+            <p className={styles.description}>{isDemo
+              ? "Explore a demonstration club with sample competition data."
+              : club.welcome_text || "Your club's league, all in one place."}</p>
             <div className={styles.clubDetails}>
               <span>SEASONS <strong>{clubSeasons.length}</strong></span>
               <span>NOW PLAYING <strong>{activeSeason?.name || "Coming soon"}</strong></span>
