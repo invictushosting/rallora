@@ -1,5 +1,6 @@
-import RalloraLogo from "@/app/components/rallora-logo";
 "use client";
+
+import RalloraLogo from "@/app/components/rallora-logo";
 
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase";
