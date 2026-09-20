@@ -97,6 +97,7 @@ as $$
     join public.results r on r.fixture_id = f.id
     where f.id = p_fixture and s.club_id = p_club
       and s.status in ('active','completed')
+      and (f.available_from is null or f.available_from <= current_date)
       and r.status in ('confirmed','admin_override')
   );
 $$;
