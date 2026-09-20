@@ -225,7 +225,7 @@ export default function ClubAdministration() {
       <p>League administration is scoped to this club. You are viewing as {view.role}.</p>
       <a href={`/clubs/${encodeURIComponent(view.club.slug)}`}>View public club hub →</a>
       {view.club.slug === "gsm-padel" &&
-        <a href="/clubs/gsm-padel/legacy#admin">Open existing GSM management tools →</a>}
+        <a href="/clubs/gsm-padel#admin">Open existing GSM management tools →</a>}
     </section>
     <section className={styles.metrics} aria-label="Club totals">
       {([["Seasons", view.summaries.length], ["Divisions", totals.divisions],
