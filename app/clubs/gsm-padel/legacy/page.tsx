@@ -430,12 +430,25 @@ function prettyStatus(value: string): Fixture["status"] {
   return "Open";
 }
 
+async function loadGsmClubId() {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("clubs").select("id").eq("slug", "gsm-padel")
+    .eq("is_active", true).single<{ id: string }>();
+  if (error) throw error;
+  if (!data?.id) throw new Error("GSM Padel club not found.");
+  return data.id;
+}
+
 async function loadLeagueData(): Promise<LeagueData> {
   const supabase = createClient();
+  // Never select the newest active season globally; another club can be newer.
+  const gsmClubId = await loadGsmClubId();
 
   const { data: seasonRows, error: seasonError } = await supabase
     .from("seasons")
     .select("id, name")
+    .eq("club_id", gsmClubId)
     .eq("status", "active")
     .order("created_at", { ascending: false })
     .limit(1)
@@ -458,7 +471,10 @@ async function loadLeagueData(): Promise<LeagueData> {
   const divisionIds = divisionsFromDb.map((division) => division.id);
 
   if (divisionIds.length === 0) {
-    return { ...fallbackData, seasonName: season.name };
+    return {
+      seasonName: season.name, divisions: [], fixtures: [],
+      results: [], sponsors: [], announcements: [],
+    };
   }
 
   const [
@@ -494,12 +510,14 @@ async function loadLeagueData(): Promise<LeagueData> {
     supabase
       .from("sponsors")
       .select("id, name, sponsor_type, placement, logo_url, website_url, sort_order, is_active")
+      .eq("club_id", gsmClubId)
       .eq("is_active", true)
       .order("sort_order", { ascending: true })
       .returns<SponsorRecord[]>(),
     supabase
       .from("announcements")
       .select("title, body")
+      .eq("club_id", gsmClubId)
       .eq("is_published", true)
       .order("created_at", { ascending: false })
       .limit(5)
@@ -627,10 +645,8 @@ async function loadLeagueData(): Promise<LeagueData> {
     divisions,
     fixtures,
     results,
-    sponsors: sponsors.length ? sponsors : fallbackData.sponsors,
-    announcements: announcements.length
-      ? announcements
-      : fallbackData.announcements,
+    sponsors,
+    announcements,
   };
 }
 
