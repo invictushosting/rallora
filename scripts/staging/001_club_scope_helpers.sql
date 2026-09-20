@@ -19,6 +19,17 @@ as $$
     );
 $$;
 
+-- Compatibility for legacy policies/RPCs while their callers are migrated.
+-- Authorization remains UUID-backed; the old admin_users email table is not
+-- consulted.
+create or replace function public.is_admin()
+returns boolean
+language sql stable security definer
+set search_path = ''
+as $$
+  select public.rallora_is_platform_admin();
+$$;
+
 create or replace function public.rallora_can_manage_club(p_club_id uuid)
 returns boolean
 language sql stable security definer
@@ -93,6 +104,7 @@ as $$
 $$;
 
 revoke all on function public.rallora_is_platform_admin() from public, anon, authenticated;
+revoke all on function public.is_admin() from public, anon, authenticated;
 revoke all on function public.rallora_can_manage_club(uuid) from public, anon, authenticated;
 revoke all on function public.rallora_can_manage_season(uuid) from public, anon, authenticated;
 revoke all on function public.rallora_can_manage_division(uuid) from public, anon, authenticated;
@@ -100,6 +112,7 @@ revoke all on function public.rallora_can_manage_team(uuid) from public, anon, a
 revoke all on function public.rallora_can_manage_fixture(uuid) from public, anon, authenticated;
 
 grant execute on function public.rallora_is_platform_admin() to authenticated;
+grant execute on function public.is_admin() to authenticated;
 grant execute on function public.rallora_can_manage_club(uuid) to authenticated;
 grant execute on function public.rallora_can_manage_season(uuid) to authenticated;
 grant execute on function public.rallora_can_manage_division(uuid) to authenticated;

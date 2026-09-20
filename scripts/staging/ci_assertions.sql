@@ -8,6 +8,9 @@ begin
   if not has_function_privilege('authenticated', 'public.rallora_can_manage_club(uuid)', 'EXECUTE') then
     raise exception 'FAIL: authenticated cannot execute management helper';
   end if;
+  if has_function_privilege('anon', 'public.is_admin()', 'EXECUTE') then
+    raise exception 'FAIL: anon can execute legacy admin compatibility helper';
+  end if;
 end $$;
 
 set role authenticated;
@@ -17,6 +20,9 @@ declare
   blocked boolean := false;
   n integer;
 begin
+  if public.is_admin() then
+    raise exception 'FAIL: club owner inherited platform-wide legacy admin access';
+  end if;
   if not public.rallora_can_manage_club('00000000-0000-0000-0000-0000000000a1')
      or public.rallora_can_manage_club('00000000-0000-0000-0000-0000000000b2') then
     raise exception 'FAIL: Club A owner can access wrong club';
@@ -115,6 +121,7 @@ select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000999
 do $$
 begin
   if not public.rallora_is_platform_admin()
+     or not public.is_admin()
      or not public.rallora_can_manage_club('00000000-0000-0000-0000-0000000000a1')
      or not public.rallora_can_manage_club('00000000-0000-0000-0000-0000000000b2') then
     raise exception 'FAIL: platform operator lacks intended oversight';
