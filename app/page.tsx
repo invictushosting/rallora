@@ -1,3 +1,4 @@
+import RalloraLogo from "@/app/components/rallora-logo";
 "use client";
 
 import Link from "next/link";
@@ -76,7 +77,7 @@ export default function RalloraHome() {
   return <main className={styles.page}>
     <header className={styles.header}>
       <Link href="/" className={styles.wordmark} aria-label="Rallora home">
-        <span className={styles.logo}>R</span><span>rallora<span className={styles.dot}>.</span></span>
+        <RalloraLogo variant="light" width={218} />
       </Link>
       <nav className={styles.nav} aria-label="Main navigation">
         <a href="#clubs">Find your club</a>
