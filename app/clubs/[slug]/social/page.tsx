@@ -443,7 +443,9 @@ export default function ClubSocialStudio() {
           automatically change if that result is corrected later. Re-select the
           fixture before sharing. These are manual sharing destinations.
           Accounts are not connected and this page does not send, schedule or publish
-          messages on your behalf. Website publishing will require approved club writes.</p>
+          messages on your behalf. Check that player names may be published,
+          particularly for junior competitions. Website publishing will require
+          approved club writes.</p>
       </section>
       <section className={styles.preview} aria-labelledby="preview-title">
         <span className={styles.step}>03 / PREVIEW & SHARE</span>
