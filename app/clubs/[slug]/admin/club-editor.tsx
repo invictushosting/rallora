@@ -1,0 +1,279 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { createClient } from "@/lib/supabase";
+import styles from "./editor.module.css";
+
+export type EditableClub = {
+  id: string; slug: string; name: string;
+  short_name: string | null; primary_color: string | null;
+  welcome_text: string | null;
+};
+export type EditableDivision = {
+  id: string; name: string; sort_order: number;
+  teams: { id: string; name: string }[];
+};
+export type EditableSeason = {
+  id: string; club_id: string; name: string; status: string;
+  divisions: EditableDivision[];
+};
+
+type Props = {
+  club: EditableClub;
+  seasons: EditableSeason[];
+  onSaved: () => void;
+};
+
+function failOnWriteOff() {
+  // All writes require the reviewed staging-to-production RLS migration,
+  // complete offsite backup and explicit environment approval.
+  if (process.env.NEXT_PUBLIC_RALLORA_ENABLE_CLUB_WRITES !== "true") {
+    throw new Error("Club editing is not enabled for this deployment.");
+  }
+}
+
+export default function ClubEditor({ club, seasons, onSaved }: Props) {
+  const supabase = useMemo(() => createClient(), []);
+  const [activeTab, setActiveTab] = useState<"branding" | "seasons" | "teams" | "fixtures">("branding");
+  const [name, setName] = useState(club.name);
+  const [shortName, setShortName] = useState(club.short_name ?? "");
+  const [colour, setColour] = useState(club.primary_color || "#2458ff");
+  const [welcomeText, setWelcomeText] = useState(club.welcome_text ?? "");
+  const [newSeason, setNewSeason] = useState("");
+  const [newDivision, setNewDivision] = useState("");
+  const [divisionSeasonId, setDivisionSeasonId] = useState(seasons[0]?.id ?? "");
+  const [teamDivisionId, setTeamDivisionId] = useState(seasons[0]?.divisions[0]?.id ?? "");
+  const [teamName, setTeamName] = useState("");
+  const [playerOne, setPlayerOne] = useState("");
+  const [playerTwo, setPlayerTwo] = useState("");
+  const [fixtureDivisionId, setFixtureDivisionId] = useState(seasons[0]?.divisions[0]?.id ?? "");
+  const [fixtureHome, setFixtureHome] = useState("");
+  const [fixtureAway, setFixtureAway] = useState("");
+  const [fixtureWeek, setFixtureWeek] = useState("1");
+  const [fixtureDeadline, setFixtureDeadline] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  const divisions = seasons.flatMap((season) =>
+    season.divisions.map((division) => ({ ...division, season_id: season.id,
+      season_name: season.name })));
+  const selectedDivision = divisions.find((division) => division.id === fixtureDivisionId);
+  const eligibleTeams = selectedDivision?.teams ?? [];
+
+  useEffect(() => {
+    setName(club.name);
+    setShortName(club.short_name ?? "");
+    setColour(club.primary_color || "#2458ff");
+    setWelcomeText(club.welcome_text ?? "");
+  }, [club.id, club.name, club.short_name, club.primary_color, club.welcome_text]);
+
+  async function submit(action: () => Promise<void>, success: string) {
+    setError("");
+    setMessage("");
+    setBusy(true);
+    try {
+      failOnWriteOff();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) throw new Error("Sign in again to edit this club.");
+      const [{ data: member, error: memberError }, { data: platform, error: platformError }] =
+        await Promise.all([
+          supabase.from("rallora_club_memberships").select("role,status")
+            .eq("club_id", club.id).eq("user_id", user.id).eq("status", "active")
+            .maybeSingle(),
+          supabase.from("rallora_platform_admins").select("user_id")
+            .eq("user_id", user.id).maybeSingle(),
+        ]);
+      if (memberError) throw memberError;
+      if (platformError) throw platformError;
+      if (!platform && !["owner", "admin", "organiser"].includes(member?.role ?? "")) {
+        throw new Error("Your account cannot edit this club.");
+      }
+      await action();
+      setMessage(success);
+      onSaved();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Change could not be saved.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function saveBranding(event: React.FormEvent) {
+    event.preventDefault();
+    await submit(async () => {
+      if (!name.trim() || name.trim().length > 100)
+        throw new Error("Club name must be 1–100 characters.");
+      if (!/^#[\da-fA-F]{6}$/.test(colour)) throw new Error("Choose a valid colour.");
+      if (welcomeText.length > 1000) throw new Error("Introduction is too long.");
+      const { data, error: mutationError } = await supabase.from("clubs")
+        .update({
+          name: name.trim(), short_name: shortName.trim() || null,
+          primary_color: colour, welcome_text: welcomeText.trim() || null,
+        }).eq("id", club.id).eq("slug", club.slug).select("id");
+      if (mutationError) throw mutationError;
+      if (data?.length !== 1) throw new Error("No club was updated. Check permissions.");
+    }, "Club branding saved.");
+  }
+
+  async function createSeason(event: React.FormEvent) {
+    event.preventDefault();
+    await submit(async () => {
+      const title = newSeason.trim();
+      if (!title || title.length > 100) throw new Error("Season name must be 1–100 characters.");
+      const { error: mutationError } = await supabase.from("seasons").insert({
+        club_id: club.id, name: title, status: "draft",
+      });
+      if (mutationError) throw mutationError;
+      setNewSeason("");
+    }, "Draft season created. It will not be public until activated.");
+  }
+
+  async function createDivision(event: React.FormEvent) {
+    event.preventDefault();
+    await submit(async () => {
+      const season = seasons.find((item) => item.id === divisionSeasonId &&
+        item.club_id === club.id);
+      if (!season) throw new Error("Select a season owned by your club.");
+      if (!newDivision.trim() || newDivision.trim().length > 100)
+        throw new Error("Division name must be 1–100 characters.");
+      const nextOrder = Math.max(0, ...season.divisions.map((item) => item.sort_order)) + 1;
+      const { error: mutationError } = await supabase.from("divisions").insert({
+        season_id: season.id, name: newDivision.trim(), sort_order: nextOrder,
+      });
+      if (mutationError) throw mutationError;
+      setNewDivision("");
+    }, "Division created for the chosen club season.");
+  }
+
+  async function createTeam(event: React.FormEvent) {
+    event.preventDefault();
+    await submit(async () => {
+      const division = divisions.find((item) => item.id === teamDivisionId);
+      if (!division) throw new Error("Select a division belonging to your club.");
+      if (!teamName.trim() || teamName.trim().length > 100)
+        throw new Error("Team name must be 1–100 characters.");
+      const { error: mutationError } = await supabase.from("teams").insert({
+        division_id: division.id, name: teamName.trim(),
+        player_one_name: playerOne.trim() || null,
+        player_two_name: playerTwo.trim() || null, is_active: true,
+      });
+      if (mutationError) throw mutationError;
+      setTeamName(""); setPlayerOne(""); setPlayerTwo("");
+    }, "Team added to the selected division.");
+  }
+
+  async function createFixture(event: React.FormEvent) {
+    event.preventDefault();
+    await submit(async () => {
+      const division = divisions.find((item) => item.id === fixtureDivisionId);
+      if (!division) throw new Error("Choose a division belonging to your club.");
+      if (!fixtureHome || !fixtureAway || fixtureHome === fixtureAway)
+        throw new Error("Choose two different teams from the same division.");
+      if (![fixtureHome, fixtureAway].every((id) =>
+        division.teams.some((team) => team.id === id)))
+        throw new Error("Both teams must belong to the selected division.");
+      const week = Number(fixtureWeek);
+      if (!Number.isInteger(week) || week < 1 || week > 1000)
+        throw new Error("Week number must be between 1 and 1000.");
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(fixtureDeadline))
+        throw new Error("Choose a play-by date.");
+      const { error: mutationError } = await supabase.from("fixtures").insert({
+        season_id: division.season_id, division_id: division.id,
+        home_team_id: fixtureHome, away_team_id: fixtureAway,
+        week_number: week, play_by: fixtureDeadline, status: "open",
+      });
+      if (mutationError) throw mutationError;
+      setFixtureHome(""); setFixtureAway("");
+    }, "Fixture created. Confirm its publication timing before announcing.");
+  }
+
+  return <section className={styles.editor}>
+    <div className={styles.editorHead}><div>
+      <span className={styles.eyebrow}>CLUB MANAGEMENT</span>
+      <h2>Manage {club.name}</h2>
+      <p>Changes affect this club only, subject to database membership checks.</p>
+    </div><span className={styles.badge}>EDITING ENABLED</span></div>
+    <div className={styles.tabs}>
+      {([["branding","Branding"],["seasons","Seasons & divisions"],
+        ["teams","Teams"],["fixtures","Fixtures"]] as const).map(([id,label]) =>
+        <button type="button" key={id} onClick={() => {
+          setActiveTab(id); setMessage(""); setError("");
+        }} className={activeTab === id ? styles.selected : ""}>{label}</button>)}
+    </div>
+    {message && <p className={styles.success} role="status">{message}</p>}
+    {error && <p className={styles.error} role="alert">{error}</p>}
+    {activeTab === "branding" && <form className={styles.form} onSubmit={saveBranding}>
+      <label>Club name<input required maxLength={100} value={name}
+        onChange={(event) => setName(event.target.value)} /></label>
+      <label>Short name<input maxLength={35} value={shortName}
+        onChange={(event) => setShortName(event.target.value)} /></label>
+      <label>Brand colour<input type="color" value={colour}
+        onChange={(event) => setColour(event.target.value)} /></label>
+      <label className={styles.wide}>Welcome message<textarea rows={3}
+        maxLength={1000} value={welcomeText}
+        onChange={(event) => setWelcomeText(event.target.value)} /></label>
+      <button disabled={busy} type="submit">{busy ? "Saving…" : "Save club branding"}</button>
+    </form>}
+    {activeTab === "seasons" && <div className={styles.columns}>
+      <form className={styles.form} onSubmit={createSeason}>
+        <h3>Add a season</h3><p>New seasons start as drafts.</p>
+        <label>Season name<input required maxLength={100}
+          value={newSeason} placeholder="Autumn 2026"
+          onChange={(event) => setNewSeason(event.target.value)} /></label>
+        <button disabled={busy} type="submit">Create draft season</button>
+      </form>
+      <form className={styles.form} onSubmit={createDivision}>
+        <h3>Add a division</h3>
+        <label>Season<select value={divisionSeasonId}
+          onChange={(event) => setDivisionSeasonId(event.target.value)}>
+          {seasons.map((item) => <option value={item.id} key={item.id}>
+            {item.name} · {item.status}</option>)}</select></label>
+        <label>Division name<input required maxLength={100} value={newDivision}
+          onChange={(event) => setNewDivision(event.target.value)} /></label>
+        <button disabled={busy || !seasons.length} type="submit">Add division</button>
+      </form>
+    </div>}
+    {activeTab === "teams" && <form className={styles.form} onSubmit={createTeam}>
+      <h3>Add a team</h3>
+      <label>Division<select value={teamDivisionId}
+        onChange={(event) => setTeamDivisionId(event.target.value)}>
+        {divisions.map((item) => <option value={item.id} key={item.id}>
+          {item.season_name} · {item.name}</option>)}</select></label>
+      <label>Team name<input required maxLength={100} value={teamName}
+        onChange={(event) => setTeamName(event.target.value)} /></label>
+      <label>Player one<input maxLength={100} value={playerOne}
+        onChange={(event) => setPlayerOne(event.target.value)} /></label>
+      <label>Player two<input maxLength={100} value={playerTwo}
+        onChange={(event) => setPlayerTwo(event.target.value)} /></label>
+      <button disabled={busy || !divisions.length} type="submit">Add team</button>
+    </form>}
+    {activeTab === "fixtures" && <form className={styles.form} onSubmit={createFixture}>
+      <h3>Create a fixture</h3>
+      <label>Division<select value={fixtureDivisionId}
+        onChange={(event) => {
+          setFixtureDivisionId(event.target.value);
+          setFixtureHome(""); setFixtureAway("");
+        }}>
+        {divisions.map((item) => <option value={item.id} key={item.id}>
+          {item.season_name} · {item.name}</option>)}</select></label>
+      <label>Home team<select value={fixtureHome}
+        onChange={(event) => setFixtureHome(event.target.value)}>
+        <option value="">Choose a team</option>
+        {eligibleTeams.map((team) => <option value={team.id}
+          key={team.id}>{team.name}</option>)}</select></label>
+      <label>Away team<select value={fixtureAway}
+        onChange={(event) => setFixtureAway(event.target.value)}>
+        <option value="">Choose a team</option>
+        {eligibleTeams.map((team) => <option value={team.id}
+          key={team.id}>{team.name}</option>)}</select></label>
+      <label>Week number<input type="number" min={1} max={1000}
+        value={fixtureWeek}
+        onChange={(event) => setFixtureWeek(event.target.value)} /></label>
+      <label>Play by<input type="date" required value={fixtureDeadline}
+        onChange={(event) => setFixtureDeadline(event.target.value)} /></label>
+      <button disabled={busy || eligibleTeams.length < 2}
+        type="submit">Create fixture</button>
+    </form>}
+  </section>;
+}
