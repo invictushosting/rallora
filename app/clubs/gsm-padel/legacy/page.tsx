@@ -2671,7 +2671,9 @@ function AdminPage({
 
     setAdminLoading(true);
     try {
+      const gsmClubId = await loadGsmClubId();
       const payload = {
+        club_id: gsmClubId,
         name: sponsorName.trim(),
         sponsor_type: sponsorType.trim() || null,
         placement: sponsorPlacement,
@@ -2682,7 +2684,8 @@ function AdminPage({
       };
 
       const query = editingSponsorId
-        ? supabase.from("sponsors").update(payload).eq("id", editingSponsorId)
+        ? supabase.from("sponsors").update(payload)
+            .eq("club_id", gsmClubId).eq("id", editingSponsorId)
         : supabase.from("sponsors").insert(payload);
 
       const { error } = await query;
@@ -2703,7 +2706,9 @@ function AdminPage({
     if (!window.confirm(`Delete sponsor ${sponsor.name}?`)) return;
     setAdminLoading(true);
     try {
-      const { error } = await supabase.from("sponsors").delete().eq("id", sponsor.id);
+      const gsmClubId = await loadGsmClubId();
+      const { error } = await supabase.from("sponsors")
+        .delete().eq("club_id", gsmClubId).eq("id", sponsor.id);
       if (error) throw error;
       showSuccess("Sponsor deleted.");
       await refreshAdminData();
@@ -2718,9 +2723,11 @@ function AdminPage({
   async function handleToggleSponsorActive(sponsor: AdminSponsor) {
     setAdminLoading(true);
     try {
+      const gsmClubId = await loadGsmClubId();
       const { error } = await supabase
         .from("sponsors")
         .update({ is_active: !(sponsor.is_active ?? true) })
+        .eq("club_id", gsmClubId)
         .eq("id", sponsor.id);
       if (error) throw error;
       showSuccess("Sponsor status updated.");
