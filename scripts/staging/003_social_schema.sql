@@ -13,6 +13,8 @@ create table if not exists public.rallora_social_posts (
   title text not null check (char_length(btrim(title)) between 1 and 140),
   body text not null check (char_length(btrim(body)) between 1 and 3500),
   source_fixture_id uuid references public.fixtures(id),
+  constraint social_result_needs_fixture check
+    (kind <> 'result' or source_fixture_id is not null),
   status text not null default 'draft'
     check (status in ('draft','awaiting_approval','scheduled','publishing',
        'published','failed','archived')),
@@ -35,6 +37,7 @@ create table if not exists public.rallora_social_post_targets (
     check (status in ('draft','ready','queued','sent','failed','cancelled')),
   created_at timestamptz not null default now(),
   unique(id, club_id),
+  unique(id, club_id, post_id),
   constraint social_post_target_club_fk foreign key(post_id, club_id)
     references public.rallora_social_posts(id,club_id) on delete cascade
 );
@@ -72,8 +75,9 @@ create table if not exists public.rallora_social_delivery_jobs (
   created_at timestamptz not null default now(),
   constraint social_delivery_post_club_fk foreign key(post_id,club_id)
     references public.rallora_social_posts(id,club_id),
-  constraint social_delivery_target_club_fk foreign key(target_id,club_id)
-    references public.rallora_social_post_targets(id,club_id)
+  constraint social_delivery_target_post_club_fk
+    foreign key(target_id,club_id,post_id)
+    references public.rallora_social_post_targets(id,club_id,post_id)
 );
 
 create index if not exists rallora_social_posts_club_idx
@@ -116,9 +120,15 @@ revoke all on public.rallora_social_posts,public.rallora_social_post_targets,
   public.rallora_social_connections,public.rallora_social_delivery_jobs
   from public,anon,authenticated;
 
-grant select,insert,update,delete on
+grant select,insert,delete on
   public.rallora_social_posts,public.rallora_social_post_targets
   to authenticated;
+-- No authenticated user may reassign a draft to another club or author,
+-- change a publication state or overwrite a published delivery status.
+grant update(title,body,kind,source_fixture_id,updated_at)
+  on public.rallora_social_posts to authenticated;
+grant update(caption)
+  on public.rallora_social_post_targets to authenticated;
 grant select on
   public.rallora_social_connections,public.rallora_social_delivery_jobs
   to authenticated;
@@ -138,7 +148,8 @@ create policy social_posts_create_draft on public.rallora_social_posts
 
 create policy social_posts_edit_draft on public.rallora_social_posts
   for update to authenticated
-  using (status = 'draft' and public.rallora_can_manage_club(club_id))
+  using (status = 'draft' and created_by = (select auth.uid())
+    and public.rallora_can_manage_club(club_id))
   with check (
     status = 'draft' and scheduled_for is null
     and public.rallora_can_manage_club(club_id)
@@ -148,7 +159,8 @@ create policy social_posts_edit_draft on public.rallora_social_posts
 
 create policy social_posts_delete_draft on public.rallora_social_posts
   for delete to authenticated
-  using (status = 'draft' and public.rallora_can_manage_club(club_id));
+  using (status = 'draft' and created_by = (select auth.uid())
+    and public.rallora_can_manage_club(club_id));
 
 create policy social_targets_read on public.rallora_social_post_targets
   for select to authenticated
@@ -159,14 +171,16 @@ create policy social_targets_create_draft on public.rallora_social_post_targets
   with check (
     status = 'draft' and public.rallora_can_manage_club(club_id)
     and exists (select 1 from public.rallora_social_posts p
-      where p.id = post_id and p.club_id = club_id and p.status = 'draft')
+      where p.id = post_id and p.club_id = club_id and p.status = 'draft'
+        and p.created_by = (select auth.uid()))
   );
 
 create policy social_targets_edit_draft on public.rallora_social_post_targets
   for update to authenticated
   using (status = 'draft' and public.rallora_can_manage_club(club_id)
     and exists (select 1 from public.rallora_social_posts p
-      where p.id = post_id and p.club_id = club_id and p.status = 'draft'))
+      where p.id = post_id and p.club_id = club_id and p.status = 'draft'
+        and p.created_by = (select auth.uid())))
   with check (status = 'draft' and public.rallora_can_manage_club(club_id)
     and exists (select 1 from public.rallora_social_posts p
       where p.id = post_id and p.club_id = club_id and p.status = 'draft'));
