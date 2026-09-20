@@ -48,3 +48,6 @@
 .draftControls span{color:#4b6681;font-size:11px;line-height:1.6;flex:1}
 .draftControls button{font-size:11px;font-weight:800;border:1px solid #cbdbe8;border-radius:9px;padding:10px 12px;color:#274966;background:#fff;cursor:pointer}
 .draftControls button:focus-visible{outline:2px solid #00B0FE;outline-offset:2px}
+
+.deviceShare{display:block;width:100%;border:1px solid #c5dbea;background:#f0f8fe;color:#164768;border-radius:10px;padding:13px 17px;margin:-10px 0 24px;font-size:12px;font-weight:900;cursor:pointer}
+.deviceShare:focus-visible{outline:2px solid #00B0FE;outline-offset:2px}
