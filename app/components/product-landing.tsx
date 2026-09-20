@@ -18,6 +18,7 @@ const PRODUCTS: Record<ProductKey, {
       { title: "Fixtures & results", text: "Give players a clear place to see their next match and confirmed scores." },
       { title: "Tables & cup places", text: "Standings and club-defined qualification in one view." },
       { title: "Club identity", text: "Every club retains its own colours, sponsors and league community." },
+      { title: "Entry fees & prizes", text: "Plan free or paid league entry, sponsor contributions and cash or physical prizes. Checkout is not yet enabled." },
     ],
     primaryLabel: "Find your club", primaryHref: "/#clubs",
   },
