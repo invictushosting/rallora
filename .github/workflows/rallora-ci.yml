@@ -61,3 +61,5 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_core_schema.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/002_core_tenant_rls.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_core_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/003_social_schema.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_social_assertions.sql
