@@ -29,6 +29,29 @@ to advertise to new clubs. Update it as each acceptance gate is completed.
   fixture/result search and show-all pagination. No public captain emails fetched.
 - Platform-operator and per-club membership-checked read-only dashboards.
 
+## Optional season entry fees and prize pot planning (develop; not live)
+
+- A verified club organiser now has an **Entry & Prize Pot** preview in the
+  club admin dashboard. It models free/paid seasons, per-player/pair entries,
+  GBP/EUR/USD, sponsor pledges, entry percentage or fixed guaranteed prizes,
+  potential top-up liabilities, proposed payment and platform fees and splits.
+- Budget numbers are PROJECTED, not actual paid registrations, receipts,
+  ring-fenced funds or an Rallora promise to pay prizes. No provider selected,
+  no platform commission set, no signup/checkout or transfer APIs enabled.
+- `lib/leagues/prize-budget.ts` calculates in minor currency units, with
+  synthetic tests covering fees, free sponsored contests, winner split,
+  incomplete guarantee and invalid input.
+- Proposed fee rules, registrations, provider receipt audit events and prize
+  awards are STAGED ONLY in `scripts/staging/004_league_entry_prizes.sql`,
+  not in production migrations or real Supabase staging. Club draft-write RLS,
+  team-season checks and server-only financial records are tested with fake
+  two-club CI fixtures.
+- Payment provider policies and legal classification must be reviewed for
+  paid-prize sport, with explicit provider confirmation BEFORE live checkout.
+  Club-managed payment reconciliation is also NOT enabled yet.
+- Full product and compliance notes: `docs/RALLORA_ENTRY_PRIZE_POTS.md`;
+  manual tests were added to `docs/RALLORA_MANUAL_TEST_DAY.md`.
+
 ## Leagues core export/share sprint (develop; Vercel may lag)
 
 - Public club league hub now offers filtered, confirmed-only results CSV exports,
