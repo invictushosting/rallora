@@ -109,8 +109,10 @@ create policy "tenant_fixtures_member_insert" on public.fixtures for insert to a
       select 1 from public.divisions d
       join public.teams h on h.division_id=d.id
       join public.teams a on a.division_id=d.id
-      where d.id=division_id and d.season_id=season_id
-        and h.id=home_team_id and a.id=away_team_id
+      where d.id=public.fixtures.division_id
+        and d.season_id=public.fixtures.season_id
+        and h.id=public.fixtures.home_team_id
+        and a.id=public.fixtures.away_team_id
     )
   );
 create policy "tenant_fixtures_member_update" on public.fixtures for update to authenticated
@@ -122,8 +124,10 @@ create policy "tenant_fixtures_member_update" on public.fixtures for update to a
       select 1 from public.divisions d
       join public.teams h on h.division_id=d.id
       join public.teams a on a.division_id=d.id
-      where d.id=division_id and d.season_id=season_id
-        and h.id=home_team_id and a.id=away_team_id
+      where d.id=public.fixtures.division_id
+        and d.season_id=public.fixtures.season_id
+        and h.id=public.fixtures.home_team_id
+        and a.id=public.fixtures.away_team_id
     )
   );
 create policy "tenant_fixtures_member_delete" on public.fixtures for delete to authenticated
