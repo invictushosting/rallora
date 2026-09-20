@@ -20,7 +20,7 @@ type Result = { fixture_id: string; home_score: string | null;
   away_score: string | null; status: string; confirmed_at: string | null };
 type Team = { id: string; name: string; division_id: string };
 type Division = { id: string; name: string; season_id: string };
-type Match = { id: string; season: string; week: number; division: string;
+type Match = { id: string; seasonId: string; season: string; week: number; division: string;
   home: string; away: string; score: string; confirmedAt: string };
 type Ready = { kind: "ready"; club: Club; userId: string; role: string; matches: Match[] };
 type View = Ready | { kind: "loading" | "signed_out" | "forbidden" | "missing" } |
@@ -157,7 +157,8 @@ export default function ClubSocialStudio() {
               if (!r || !names.has(f.home_team_id) || !names.has(f.away_team_id) ||
                   !divNames.has(f.division_id) || !seasonNames.has(f.season_id)) return [];
               return [{
-                id: f.id, season: seasonNames.get(f.season_id)!,
+                id: f.id, seasonId: f.season_id,
+                season: seasonNames.get(f.season_id)!,
                 week: f.week_number, division: divNames.get(f.division_id)!,
                 home: names.get(f.home_team_id)!, away: names.get(f.away_team_id)!,
                 score: `${r.home_score ?? "–"} : ${r.away_score ?? "–"}`,
@@ -280,9 +281,14 @@ export default function ClubSocialStudio() {
       ? list.filter(item => item !== channel) : [...list, channel]);
   }
   const ready = view.kind === "ready" ? view : null;
-  const clubUrl = ready && typeof window !== "undefined"
-    ? `${window.location.origin}/clubs/${encodeURIComponent(ready.club.slug)}`
-    : `/clubs/${encodeURIComponent(slug)}`;
+  const clubPath = ready?.club.slug === "gsm-padel"
+    ? "/clubs/gsm-padel/overview"
+    : `/clubs/${encodeURIComponent(ready?.club.slug ?? slug)}`;
+  const postSeasonId = ready?.matches.find(match => match.id === matchId)?.seasonId;
+  const resultsView = type !== "news" && postSeasonId
+    ? `?view=results&season=${encodeURIComponent(postSeasonId)}` : "";
+  const clubUrl = (typeof window !== "undefined" ? window.location.origin : "") +
+    clubPath + resultsView;
   const valid = Boolean(title.trim() && body.trim() && selected.length);
 
   async function copy(channel: Channel) {
