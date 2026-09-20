@@ -45,11 +45,31 @@ to advertise to new clubs. Update it as each acceptance gate is completed.
   Facebook, Instagram, WhatsApp, email and club-site manual previews.
   Users can copy channel captions, open the normal WhatsApp share composer,
   and download a square club-branded graphic featuring official Rallora artwork.
-- Social Studio DOES NOT store drafts, connect social accounts, publish to the
-  club website, send WhatsApp Business messages, schedule posts, email players
-  or mutate production Supabase. No WhatsApp group/Status API claim.
-- This is a frontend-only incremental delivery while full backup/restore,
-  isolated staging, RLS and connected-social approvals are pending.
+- Social Studio now automatically saves a **device-only local draft** scoped to
+  the verified Auth user and club ID, with an explicit clear control. It is NOT
+  synced between devices, securely backed up or visible to other organisers.
+  It also exports square (1080×1080), portrait (1080×1350) and Story (1080×1920)
+  branded graphics. Generated drafts do not auto-update if results are corrected.
+- The **cloud-draft API** (`app/api/social/posts/route.ts`) is written but OFF
+  by default (`RALLORA_SOCIAL_DB_ENABLED=false`). It uses only the verified
+  user session, club membership checks and RLS-scoped anon access; it has
+  no service-role key. Do not enable it on the live shared database.
+- The proposed Social schema in `scripts/staging/003_social_schema.sql`
+  includes club-scoped posts, post targets, safe connection metadata and
+  backend-only delivery jobs. It has NOT been deployed to production or a
+  real isolated Supabase staging project. Disposable synthetic CI tests
+  `ci_social_assertions.sql` exercise draft-only writes, blocked client
+  scheduling/publishing, suspended members and cross-club leakage.
+- Social Studio DOES NOT connect social accounts, publish to the club website,
+  send WhatsApp Business messages, schedule posts or email players. No
+  WhatsApp group/Status API claim. No real delivery worker or provider
+  tokens are active. The staging schema is not a shipped cloud service.
+- The floating Rallora Guide is **rule-based navigation**, not a connected
+  generative AI chatbot. It does not receive private records, make model API
+  requests, persist chats, or answer live scores from unseen data. It is hidden
+  on the original GSM legacy route.
+- Work remains gated by full backup/restore, isolated staging, complete tenant
+  RLS, OAuth approvals, messaging consent and a reviewed delivery pipeline.
 - GitHub CI validates build and synthetic tenant safety; passing CI does not
   resolve Vercel Hobby build-rate restrictions or justify merging develop into
   GSM main. Check Vercel status separately.
