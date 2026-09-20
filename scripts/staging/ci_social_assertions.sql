@@ -75,6 +75,58 @@ begin
 exception when insufficient_privilege then null;
 end $$;
 
+-- A second legitimate organiser can read shared club drafts but cannot
+-- hijack, overwrite, publish or delete a draft authored by another organiser.
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-000000000a03';
+do $
+declare n integer;
+begin
+  if (select count(*) from public.rallora_social_posts) <> 1 then
+    raise exception 'Second A administrator cannot read own club drafts';
+  end if;
+  update public.rallora_social_posts set title='Hijacked A draft'
+    where id='00000000-0000-0000-0000-0000000007a1';
+  get diagnostics n = row_count;
+  if n <> 0 then raise exception 'Non-author edited another administrator draft'; end if;
+  delete from public.rallora_social_post_targets
+    where id='00000000-0000-0000-0000-0000000008a1';
+  get diagnostics n = row_count;
+  if n <> 0 then raise exception 'Non-author deleted another administrator target'; end if;
+  delete from public.rallora_social_posts
+    where id='00000000-0000-0000-0000-0000000007a1';
+  get diagnostics n = row_count;
+  if n <> 0 then raise exception 'Non-author deleted another administrator draft'; end if;
+end $;
+
+-- Tests block attempted changes to tenant ID and author even by own draft author.
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-000000000a01';
+do $
+begin
+  update public.rallora_social_posts
+  set club_id='00000000-0000-0000-0000-0000000000b2'
+  where id='00000000-0000-0000-0000-0000000007a1';
+  raise exception 'Owner illegally changed draft club';
+exception when insufficient_privilege then null;
+end $;
+do $
+begin
+  update public.rallora_social_posts
+  set created_by='00000000-0000-0000-0000-000000000a03'
+  where id='00000000-0000-0000-0000-0000000007a1';
+  raise exception 'Owner illegally changed original draft author';
+exception when insufficient_privilege then null;
+end $;
+do $
+begin
+  insert into public.rallora_social_posts
+    (club_id, created_by, kind, title, body)
+  values ('00000000-0000-0000-0000-0000000000a1',
+    '00000000-0000-0000-0000-000000000a01',
+    'result','Result lacking confirmed fixture','Must reject');
+  raise exception 'A result post with no fixture source was accepted';
+exception when check_violation then null;
+end $;
+
 -- Suspended user has no write access or read access even within club A.
 set local request.jwt.claim.sub = '00000000-0000-0000-0000-000000000a02';
 do $$
