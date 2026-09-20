@@ -69,6 +69,29 @@ isolated staging environment are ready. Do not mistake GitHub CI for hands-on UA
   fixture creation, validation and denial for non-members. If club-write flag
   is still OFF, mark these **BLOCKED / NOT TESTED**, not passed.
 
+## Session 3.5: Free/paid entry and prize pot planning
+
+- [ ] Open club administration as A organiser; find Entry & Prize Pot
+  planner, switch between A seasons, free entry and paid entry, per
+  player and per team pricing, GBP/EUR/USD, no prize/percentage/guarantee.
+- [ ] Check 20 paid pairs × £25 = £500 gross, zero explicitly entered
+  costs, 80% prizes = £400 projected pot, £100 club estimate, and
+  60/30/10 = £240 / £120 / £40. Verify GBP minor-unit rounding.
+- [ ] Add a provider fee and hypothetical Rallora fee to the budget;
+  net income and club balance must decrease appropriately.
+- [ ] Add sponsor commitment, funded free events and a fixed pot larger
+  than forecast receipts; organiser top-up must be clearly displayed.
+- [ ] Invalid percent splits, negative amounts, excessive fees and zero
+  entries show an error or zero rather than fake collected balances.
+- [ ] Refresh and switch clubs: no draft prize money or paid status
+  should be written to live Supabase, no payment credentials requested.
+- [ ] Check wording: projected/pledged is NOT confirmed/held, no payout
+  guarantee from Rallora and no provider is presented as already approved.
+- [ ] Only after separate real staging/backup/compliance gates: test
+  registrations, verified receipts, refunds, duplicate webhook delivery,
+  dispute, cancellation and prize payout reconciliation. Otherwise mark
+  BLOCKED / NOT TESTED.
+
 ## Session 4: Rallora Social core, manually
 
 - [ ] Club A organiser enters news, then refreshes: draft restores only on
