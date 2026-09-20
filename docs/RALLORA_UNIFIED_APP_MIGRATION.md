@@ -34,3 +34,6 @@ The old root queried the *newest active season across all clubs*. In production,
 7. Obtain owner acceptance of the platform front door and GSM migration, then merge/deploy with documented rollback (old `main` commit plus database restore/rollback). Keep the live GSM application untouched until then.
 
 The goal is **one product / one deployment / one multi-tenant database** with a platform operator and per-club dashboards, not duplicate Rallora installations for each customer.
+
+## Fresh Vercel host (provisioned by owner, 2026-09-20)
+A separate new Vercel project named `rallora` under `nebula dev's projects` has been created from the EXISTING GitHub repository, with temporary project domain `rallora-rho.vercel.app`. Its Production environment branch tracking was changed by the owner from `main` to `develop`. No custom domain has been attached to the new project. Supabase production secrets are configured only for the new project's deployment and must not be copied to another service. The owner explicitly requested use of GitHub-linked deployment rather than continued manual setup; this documentation commit also triggers the linked `develop` deployment if the Vercel Git webhook is functioning. Verify deployment separately; GitHub CI alone does not certify Vercel rollout.
