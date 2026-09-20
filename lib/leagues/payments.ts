@@ -77,13 +77,20 @@ export function paymentStatusFromVerifiedEvents(
   }
   if (feePence === 0) return cancelled ? "cancelled" : "not_required";
   if (cancelled) return "cancelled";
-  const seen = new Set<string>();
+  const seen = new Map<string,string>();
   let charged = 0;
   let refunded = 0;
   let disputed = 0;
   for (const event of events) {
-    if (!event.id || seen.has(event.id)) continue;
-    seen.add(event.id);
+    if (!event.id) throw new RangeError("Verified event must have a unique ID");
+    const signature = JSON.stringify(event);
+    if (seen.has(event.id)) {
+      if (seen.get(event.id) !== signature) {
+        throw new RangeError("Conflicting payment events share an ID");
+      }
+      continue;
+    }
+    seen.set(event.id,signature);
     if (!Number.isSafeInteger(event.amountPence) || event.amountPence <= 0) {
       throw new RangeError("Invalid verified event amount");
     }
@@ -97,6 +104,7 @@ export function paymentStatusFromVerifiedEvents(
   if (refunded > charged || disputed < 0 || disputed > charged - refunded) {
     throw new RangeError("Inconsistent receipt/refund/dispute history");
   }
+  if (charged === 0) return "awaiting_payment";
   if (disputed > 0) return "disputed";
   if (charged > 0 && refunded === charged) return "refunded";
   if (charged > 0 && refunded > 0) return "partially_refunded";
