@@ -82,6 +82,7 @@ export default function RalloraHome() {
       </Link>
       <nav className={styles.nav} aria-label="Main navigation">
         <a href="#clubs">Find your club</a>
+        <Link href="/products">Products</Link>
         <Link href="/platform" className={styles.navButton}>Platform sign in →</Link>
       </nav>
     </header>
@@ -108,6 +109,31 @@ export default function RalloraHome() {
         </div></div>
         <div className={styles.ball} />
         <span className={styles.artLabel}>YOUR COURT. YOUR LEAGUE.</span>
+      </div>
+    </section>
+
+    <section className={styles.productFamily} aria-labelledby="rallora-family">
+      <div className={styles.familyHeading}>
+        <span className={styles.eyebrow}>ONE RALLORA PLATFORM</span>
+        <h2 id="rallora-family">Three products. One connected game.</h2>
+        <p>Run your league, share your story and connect with other clubs.</p>
+      </div>
+      <div className={styles.familyGrid}>
+        <Link href="/leagues" className={styles.familyCard}>
+          <span>01 / COMPETE</span><h3>Rallora Leagues</h3>
+          <p>Fixtures, results, tables and club competitions.</p>
+          <strong>Explore Leagues ↗</strong>
+        </Link>
+        <Link href="/social" className={styles.familyCard}>
+          <span>02 / SHARE</span><h3>Rallora Social</h3>
+          <p>Create club news and branded posts for the channels players use.</p>
+          <strong>Explore Social ↗</strong>
+        </Link>
+        <Link href="/interclub" className={styles.familyCard}>
+          <span>03 / CONNECT · COMING LATER</span><h3>Rallora Interclub</h3>
+          <p>A future home for challenges and champions versus champions.</p>
+          <strong>Discover Interclub ↗</strong>
+        </Link>
       </div>
     </section>
 
