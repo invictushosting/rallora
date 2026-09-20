@@ -232,8 +232,16 @@ export default function ClubAdministration() {
       <h1>{view.club.name}</h1>
       <p>League administration is scoped to this club. You are viewing as {view.role}.</p>
       <a href={`/clubs/${encodeURIComponent(view.club.slug)}`}>View public club hub →</a>
+      <a href={`/clubs/${encodeURIComponent(view.club.slug)}/social`}>Open Rallora Social Studio →</a>
       {view.club.slug === "gsm-padel" &&
         <a href="/clubs/gsm-padel#admin">Open existing GSM management tools →</a>}
+    </section>
+    <section className={styles.socialInvite}>
+      <span>RALLORA SOCIAL</span><h2>Turn league updates into share-ready club stories.</h2>
+      <p>Create news, prepare a confirmed result or weekly roundup, preview each channel
+        and download a branded graphic. Manual sharing only for this first release.</p>
+      <a href={`/clubs/${encodeURIComponent(view.club.slug)}/social`}>
+        Open Content Studio ↗</a>
     </section>
     <section className={styles.metrics} aria-label="Club totals">
       {([["Seasons", view.summaries.length], ["Divisions", totals.divisions],
