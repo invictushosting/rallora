@@ -6,6 +6,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import styles from "./club.module.css";
+import {
+  makeFixtureDeadlineIcs, makeResultsCsv, type ExportFixture,
+} from "@/lib/leagues/exports";
 
 type Club = {
   id: string; slug: string; name: string; short_name: string | null;
@@ -106,6 +109,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
   const [divisionFilter, setDivisionFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [showAll, setShowAll] = useState(false);
+  const [exportNotice, setExportNotice] = useState("");
 
   useEffect(() => {
     let alive = true;
@@ -352,6 +356,54 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
       </div>
     </li>;
   }
+  function publicFixture(fixture: Fixture): ExportFixture {
+    const result = results.get(fixture.id);
+    const division = data.divisions.find((value) =>
+      value.id === fixture.division_id);
+    return {
+      id: fixture.id,
+      division: division?.name ?? "Division",
+      home: teamLabel(fixture.home_team_id, teamNames),
+      away: teamLabel(fixture.away_team_id, teamNames),
+      playBy: fixture.play_by.slice(0, 10),
+      week: fixture.week_number,
+      court: fixture.court,
+      ...(isConfirmed(result)
+        ? { score: `${result?.home_score ?? "–"} : ${result?.away_score ?? "–"}` }
+        : {}),
+    };
+  }
+
+  function download(content: string, filename: string, mediaType: string) {
+    try {
+      const object = URL.createObjectURL(new Blob([content], { type: mediaType }));
+      const anchor = document.createElement("a");
+      anchor.href = object;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(object), 5000);
+      setExportNotice("Download prepared from this club’s visible published matches.");
+    } catch {
+      setExportNotice("Download unavailable on this device. Try another browser.");
+    }
+  }
+
+  function exportFilteredMatches() {
+    if (!currentSeason || !sortedFixtures.length) return;
+    const matches = sortedFixtures.map(publicFixture);
+    const prefix = `rallora-${slug}-${currentSeason.id}`;
+    if (tab === "results") {
+      download(makeResultsCsv(club.name, currentSeason.name, matches),
+        `${prefix}-results.csv`, "text/csv;charset=utf-8");
+    } else if (tab === "fixtures") {
+      download(makeFixtureDeadlineIcs(club.name, currentSeason.name,
+        club.slug, window.location.origin, matches),
+        `${prefix}-deadlines.ics`, "text/calendar;charset=utf-8");
+    }
+  }
+
   function tableFor(division: Division) {
     const rows = standings(division.id);
     return <div className={styles.tableWrap}><table>
@@ -478,6 +530,18 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
                 </label>}
             </div>
             {(tab === "fixtures" || tab === "results") && <div className={styles.card}>
+              <div className={styles.exportActions}>
+                <p>{tab === "fixtures"
+                  ? "Export the play-by deadlines shown by your filters. These are not booked match times."
+                  : "Export only confirmed results shown by your filters. No player contacts are included."}</p>
+                <button type="button" disabled={!sortedFixtures.length}
+                  onClick={exportFilteredMatches}>
+                  {tab === "results" ? "Download results CSV ↓"
+                    : "Download deadline calendar ↓"}
+                </button>
+              </div>
+              {exportNotice && <p className={styles.exportNotice} role="status">
+                {exportNotice}</p>}
               {!sortedFixtures.length
                 ? <p className={styles.empty}>No matching {tab} for this season.</p>
                 : <ul className={styles.fixtures}>{visibleFixtures.map(fixtureRow)}</ul>}
