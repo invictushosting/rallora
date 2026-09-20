@@ -1912,6 +1912,16 @@ function AdminPage({
         return;
       }
 
+      const [{ data: scopeFixtureRows, error: scopeFixtureError },
+        { data: scopeTeamRows, error: scopeTeamError }] = await Promise.all([
+        supabase.from("fixtures").select("id").eq("season_id", activeSeason.id),
+        supabase.from("teams").select("id").in("division_id", divisionIds),
+      ]);
+      if (scopeFixtureError) throw scopeFixtureError;
+      if (scopeTeamError) throw scopeTeamError;
+      const fixtureIds = (scopeFixtureRows ?? []).map((row) => row.id);
+      const teamIds = (scopeTeamRows ?? []).map((row) => row.id);
+
       const [
         teamsResponse,
         fixturesResponse,
@@ -1943,6 +1953,7 @@ function AdminPage({
           .select(
             "id, fixture_id, home_score, away_score, winner_team_id, notes, status",
           )
+          .in("fixture_id", fixtureIds)
           .returns<AdminResult[]>(),
         supabase
           .from("sponsors")
@@ -1966,6 +1977,7 @@ function AdminPage({
         supabase
           .from("captain_users")
           .select("id, email, team_id, display_name, created_at")
+          .in("team_id", teamIds)
           .order("email", { ascending: true })
           .returns<CaptainUserRecord[]>(),
         supabase
@@ -1973,6 +1985,7 @@ function AdminPage({
           .select(
             "id, fixture_id, submitting_team_id, submitted_by_email, home_score, away_score, winner_team_id, notes, status, opponent_confirmed_by_email, created_at",
           )
+          .in("fixture_id", fixtureIds)
           .order("created_at", { ascending: false })
           .returns<CaptainSubmissionRecord[]>(),
         supabase
