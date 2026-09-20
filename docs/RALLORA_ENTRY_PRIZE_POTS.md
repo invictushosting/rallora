@@ -79,6 +79,27 @@ collect card credentials or private banking details in notes.
 **No offline status writer is enabled in current code.** The initial planner
 is read-only and stores nothing in Supabase.
 
+### Staged manual receipt reconciliation (not a live feature)
+
+`scripts/staging/006_manual_receipt_ledger.sql` defines a proposed
+append-only receipt audit for an approved bank-transfer or cash-at-club
+option. A future trusted worker would write only after an authorised club
+owner/admin checks evidence, amount, registration, currency and source. Each
+unique source reference must be fingerprinted server-side, not saved as a raw
+bank statement reference; the same source cannot be counted twice within
+the same club and season. Correct an erroneous receipt with a same-club,
+same-registration reversal, never by overwriting the original.
+
+Browser sessions, captains and ordinary organisers receive no INSERT,
+UPDATE or DELETE privilege. Only owner/admin and platform operators
+can read the detailed receipt audit. The synthetic CI fixture tests
+duplicate reference, unapproved method, foreign-club verifier, cross-club
+references, reversal, immutability, and suspended-user visibility. **No
+real Supabase migration, receipt verifier API or live paid-registration
+status update is enabled.** The original payment-events ledger in 004 and
+the manual audit in 006 will need a single reconciler for actual balances
+before a real checkout or money dashboard can launch.
+
 ## Phase 2: optional integrated checkout, only after written provider approval
 
 One possible architecture is a provider-managed connected-club onboarding
