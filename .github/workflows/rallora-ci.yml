@@ -29,6 +29,7 @@ jobs:
       - run: node scripts/check-legacy-demo-rpcs.mjs
       - run: node --experimental-strip-types --test tests/social-channels.test.mjs
       - run: node --experimental-strip-types --test tests/leagues-exports.test.mjs
+      - run: node --experimental-strip-types --test tests/leagues-prize-budget.test.mjs
       - run: npx tsc --noEmit
       - run: npm run build
   tenant-safety:
@@ -65,3 +66,5 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_core_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/003_social_schema.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_social_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/004_league_entry_prizes.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_league_prizes_assertions.sql
