@@ -99,3 +99,12 @@
  .teamCard{padding:17px}
  .filterBar label{max-width:unset}
 }
+
+/* Read-only, club-scoped fixture deadline and result exports */
+.exportActions{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:0 0 15px;margin:0 0 12px;border-bottom:1px solid #e2ecf5}
+.exportActions p{max-width:530px;font-size:12px;color:#56708b;line-height:1.65;margin:0;flex:1}
+.exportActions button{border:0;background:#061A39;color:#fff;font-size:12px;font-weight:850;padding:12px 14px;border-radius:10px;cursor:pointer}
+.exportActions button:disabled{opacity:.5;cursor:not-allowed}
+.exportActions button:focus-visible{outline:3px solid #00B0FE;outline-offset:3px}
+.exportNotice{font-size:12px;line-height:1.5;background:#e8f7ee;border:1px solid #bfe7ce;border-radius:10px;color:#265c3b;padding:11px}
+@media(max-width:540px){.exportActions{align-items:stretch;flex-direction:column}.exportActions button{width:100%}}
