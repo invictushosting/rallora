@@ -105,7 +105,7 @@ as $$
       and (f.available_from is null or f.available_from <= current_date)
       and r.status in ('confirmed','admin_override')
   ));
-$;
+$$;
 
 revoke all on function public.rallora_social_fixture_is_confirmed(uuid,uuid)
   from public, anon, authenticated;
