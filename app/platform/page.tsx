@@ -1,3 +1,4 @@
+import RalloraLogo from "@/app/components/rallora-logo";
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -104,7 +105,7 @@ export default function PlatformControlCentre() {
   };
   return <main className={styles.page}><div className={styles.shell}>
     <nav className={styles.nav}>
-      <span className={styles.mark}>R</span><span><b>Rallora</b><br />Platform Control Centre</span>
+      <RalloraLogo variant="light" width={218} /><span>Platform Control Centre</span>
       <span className={styles.badge}>READ-ONLY · PHASE 1</span>
     </nav>
     <header className={styles.hero}>
