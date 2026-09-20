@@ -32,7 +32,7 @@ export default function RalloraHome() {
     // without creating a second live app or an endless redirect loop.
     const legacyHash = /^(#admin|#captain|#fixtures|#tables|#teams|#cup|#team=)/i;
     if (legacyHash.test(window.location.hash)) {
-      window.location.replace(`/clubs/gsm-padel/legacy${window.location.hash}`);
+      window.location.replace(`/clubs/gsm-padel${window.location.hash}`);
       return;
     }
 
@@ -92,7 +92,7 @@ export default function RalloraHome() {
           One Rallora platform, built to give each club its own identity.</p>
         <div className={styles.actions}>
           <a href="#clubs" className={styles.primaryButton}>Explore clubs ↗</a>
-          <Link href="/clubs/gsm-padel/legacy" className={styles.secondaryButton}>
+          <Link href="/clubs/gsm-padel" className={styles.secondaryButton}>
             Open GSM Padel league →
           </Link>
         </div>
@@ -149,7 +149,7 @@ export default function RalloraHome() {
               Explore club <span>↗</span>
             </Link>
             {club.slug === "gsm-padel" && <Link className={styles.legacyLink}
-              href="/clubs/gsm-padel/legacy">Full GSM league and captain tools →</Link>}
+              href="/clubs/gsm-padel/overview">View GSM league overview →</Link>}
           </article>;
         })}
       </div>}
