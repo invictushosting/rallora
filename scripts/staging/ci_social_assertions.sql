@@ -153,6 +153,11 @@ begin
  if (select count(*) from public.rallora_social_post_targets) <> 0 then
    raise exception 'B owner leaked A channel target';
  end if;
+ if public.rallora_social_fixture_is_confirmed(
+   '00000000-0000-0000-0000-0000000000a1',
+   '00000000-0000-0000-0000-0000000004a1') then
+   raise exception 'B owner probed A confirmed result via definer helper';
+ end if;
 end $$;
 insert into public.rallora_social_posts
 (id,club_id,created_by,title,body)
