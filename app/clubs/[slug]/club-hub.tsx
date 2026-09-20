@@ -164,7 +164,12 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
               announcements: (announcementsReply.data ?? []) as Announcement[],
             },
           });
-          setSeasonId(seasons[0]?.id ?? "");
+          const query = new URLSearchParams(window.location.search);
+          const linkedSeason = query.get("season");
+          const linkedView = query.get("view");
+          setSeasonId(seasons.find(value => value.id === linkedSeason)?.id ??
+            seasons[0]?.id ?? "");
+          setTab(TABS.find(value => value.id === linkedView)?.id ?? "overview");
         }
       } catch (error) {
         if (alive) setClubState({
@@ -260,6 +265,11 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
         );
         const publishedFixtureIds = new Set(publishedFixtures.map((fixture) => fixture.id));
         if (alive) {
+          const query = new URLSearchParams(window.location.search);
+          const linkedDivision = query.get("division");
+          const linkedSearch = query.get("q");
+          setDivisionFilter(divisions.find(d => d.id === linkedDivision)?.id ?? "all");
+          setSearch(linkedSearch?.slice(0, 80) ?? "");
           setData({
             divisions, teams, fixtures: publishedFixtures,
             standings: ((standingReply.data ?? []) as Standing[])
@@ -356,6 +366,23 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
       </div>
     </li>;
   }
+  async function copyViewLink() {
+    const link = new URL(window.location.href);
+    const params = new URLSearchParams();
+    if (tab !== "overview") params.set("view", tab);
+    if (seasonId) params.set("season", seasonId);
+    if (divisionFilter !== "all") params.set("division", divisionFilter);
+    if (search.trim()) params.set("q", search.trim().slice(0, 80));
+    link.search = params.toString();
+    link.hash = "";
+    try {
+      await navigator.clipboard.writeText(link.href);
+      setExportNotice("Shareable link copied for this season, section and filters.");
+    } catch {
+      setExportNotice("Select and copy this link: " + link.href);
+    }
+  }
+
   function publicFixture(fixture: Fixture): ExportFixture {
     const result = results.get(fixture.id);
     const division = data.divisions.find((value) =>
@@ -529,6 +556,14 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
                     onChange={(event) => { setSearch(event.target.value); setShowAll(false); }} />
                 </label>}
             </div>
+            <div className={styles.viewShare}>
+              <span>Help players find this section of the league.</span>
+              <button type="button" onClick={() => { void copyViewLink(); }}>
+                Copy link to this view ↗
+              </button>
+            </div>
+            {exportNotice && <p className={styles.exportNotice} role="status">
+              {exportNotice}</p>}
             {(tab === "fixtures" || tab === "results") && <div className={styles.card}>
               <div className={styles.exportActions}>
                 <p>{tab === "fixtures"
@@ -540,8 +575,6 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
                     : "Download deadline calendar ↓"}
                 </button>
               </div>
-              {exportNotice && <p className={styles.exportNotice} role="status">
-                {exportNotice}</p>}
               {!sortedFixtures.length
                 ? <p className={styles.empty}>No matching {tab} for this season.</p>
                 : <ul className={styles.fixtures}>{visibleFixtures.map(fixtureRow)}</ul>}
