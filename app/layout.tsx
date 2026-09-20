@@ -7,11 +7,11 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: "Rallora",
-  description: "Club league, fixtures, tables, results and sponsor management by Protego Solutions Ltd.",
+  description: "Rallora. The connected padel league platform for clubs, players and communities.",
   manifest: "/manifest.webmanifest",
   openGraph: {
     title: "Rallora",
-    description: "Club league tables, fixtures, results and competition hub.",
+    description: "Fixtures, league tables, results and club competitions. Padel, connected.",
     url: siteUrl,
     siteName: "Rallora",
     type: "website",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#2458ff",
+  themeColor: "#061A39",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
