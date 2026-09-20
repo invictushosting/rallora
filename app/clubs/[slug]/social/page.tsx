@@ -390,6 +390,21 @@ export default function ClubSocialStudio() {
         You are creating content for <strong>{ready.club.name}</strong> as {ready.role}.</p>
       <span className={styles.phase}>FIRST RELEASE · MANUAL SHARING ONLY</span>
     </section>
+    <details className={styles.connectionHelp}>
+      <summary><span>CONNECTED ACCOUNTS</span>
+        <strong>Manual sharing is ready. Automatic publishing setup comes next.</strong>
+        <span>Check platform requirements ▾</span></summary>
+      <div className={styles.connectionGrid}>
+        <div><strong>Facebook Page</strong><p>Use the official Meta connection when the
+          Rallora app and publishing permissions are approved. Club passwords are never needed.</p></div>
+        <div><strong>Instagram</strong><p>Use an eligible professional account. Our planned
+          combined Facebook Login flow also requires a linked Facebook Page.</p></div>
+        <div><strong>WhatsApp group / Status</strong><p>Use the share button yourself.
+          Group and Status auto-posting is not offered by our planned Business API integration.</p></div>
+        <div><strong>WhatsApp Business / Email</strong><p>Opted-in individual recipients,
+          applicable approved templates, unsubscribe controls and cost approval come first.</p></div>
+      </div>
+    </details>
     <div className={styles.grid}>
       <section className={styles.editor} aria-labelledby="compose-title">
         <span className={styles.step}>01 / CREATE</span>
