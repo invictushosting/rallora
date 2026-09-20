@@ -483,7 +483,6 @@ async function loadLeagueData(): Promise<LeagueData> {
     fixturesResponse,
     sponsorsResponse,
     announcementsResponse,
-    resultsResponse,
   ] = await Promise.all([
     supabase
       .from("teams")
@@ -522,12 +521,6 @@ async function loadLeagueData(): Promise<LeagueData> {
       .order("created_at", { ascending: false })
       .limit(5)
       .returns<AnnouncementRecord[]>(),
-    supabase
-      .from("results")
-      .select("id, fixture_id, home_score, away_score, status, winner_team_id")
-      .order("created_at", { ascending: false })
-      .limit(20)
-      .returns<ResultRecord[]>(),
   ]);
 
   if (teamsResponse.error) throw teamsResponse.error;
@@ -535,12 +528,25 @@ async function loadLeagueData(): Promise<LeagueData> {
   if (fixturesResponse.error) throw fixturesResponse.error;
   if (sponsorsResponse.error) throw sponsorsResponse.error;
   if (announcementsResponse.error) throw announcementsResponse.error;
-  if (resultsResponse.error) throw resultsResponse.error;
 
   const teams = teamsResponse.data ?? [];
   const standings = standingsResponse.data ?? [];
   const fixtureRows = fixturesResponse.data ?? [];
-  const resultRows = resultsResponse.data ?? [];
+  const fixtureIds = fixtureRows.map((fixture) => fixture.id);
+  // A global latest-20 result query can display a DIFFERENT club's result.
+  const resultRows: ResultRecord[] = fixtureIds.length
+    ? await (async () => {
+      const { data, error } = await supabase
+        .from("results")
+        .select("id, fixture_id, home_score, away_score, status, winner_team_id")
+        .in("fixture_id", fixtureIds)
+        .order("created_at", { ascending: false })
+        .limit(20)
+        .returns<ResultRecord[]>();
+      if (error) throw error;
+      return data ?? [];
+    })()
+    : [];
 
   const teamById = new Map(teams.map((team) => [team.id, team]));
   const divisionById = new Map(
