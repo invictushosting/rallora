@@ -29,6 +29,29 @@ to advertise to new clubs. Update it as each acceptance gate is completed.
   fixture/result search and show-all pagination. No public captain emails fetched.
 - Platform-operator and per-club membership-checked read-only dashboards.
 
+## Payment methods and non-cash prize preview (develop; not live)
+
+- Verified club-admin dashboard now includes a season-by-season collection
+  setup PREVIEW covering club-managed bank transfers/pay-at-club and future
+  Stripe Connect, Mollie Connect, PayPal, Revolut Business and Adyen options.
+  Provider cards are explicitly PLANNED, never claimed approved or connected.
+- Organisers can plan cash, non-cash (rackets/vouchers/coaching) or mixed prizes,
+  prepare entry/eligibility/refund text and copy an example setup brief.
+  No bank details, merchant tokens, customer cards or payment identifiers are
+  entered or saved. Switching season resets this ephemeral preview.
+- Shared `lib/leagues/payments.ts` contains a typed method catalog,
+  method readiness gating and verified-event-only payment status logic. Node
+  tests cover unpaid registration, partial receipt, refund, dispute, duplicate
+  event, cross-club/season and currency mismatches. No real webhook or
+  player-facing checkout exists.
+- Draft-only payment method and noncash prize tables are STAGING SQL
+  (`scripts/staging/005_payment_options_noncash.sql`) with isolated fake
+  tenant tests. Browser roles cannot approve a provider or mark a prize
+  delivered. This SQL has NOT been run on actual production Supabase.
+- Financial compliance and collection approval remain explicit launch gates;
+  a provider being listed is not provider permission to process paid
+  cash-prize competitions.
+
 ## Optional season entry fees and prize pot planning (develop; not live)
 
 - A verified club organiser now has an **Entry & Prize Pot** preview in the
