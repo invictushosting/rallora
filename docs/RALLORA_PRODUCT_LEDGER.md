@@ -29,6 +29,24 @@ to advertise to new clubs. Update it as each acceptance gate is completed.
   fixture/result search and show-all pagination. No public captain emails fetched.
 - Platform-operator and per-club membership-checked read-only dashboards.
 
+## Leagues core export/share sprint (develop; Vercel may lag)
+
+- Public club league hub now offers filtered, confirmed-only results CSV exports,
+  escaping spreadsheet formula-looking names and excluding player contacts.
+- Open fixture export produces date-only ICS **play-by deadline** calendar entries
+  rather than inventing booked match times. Exports respect published
+  season/fixture scope and current division/search filters.
+- Club sections can be deep-linked by published season, tab, division and search.
+  Copy View Link helps clubs share precisely the public league view they want;
+  invalid requested seasons/divisions fall back to authorised public records.
+- Rallora Social confirmed-result and weekly-roundup captions now link to
+  the relevant club season's published Results view.
+- These are client-only read-only enhancements. Synthetic unit tests check CSV
+  formula injection, quoting/Unicode, correct ICS all-day dates and UTF-8 line
+  folding. Real calendar import/Excel behaviour remains a manual UAT item.
+- A full manual-testing day checklist is in
+  `docs/RALLORA_MANUAL_TEST_DAY.md`. The test day has NOT happened yet.
+
 ## Product family and Social Studio (develop, not necessarily live on Vercel)
 
 - Product-family landing routes: `/products`, `/leagues`, `/social`,
