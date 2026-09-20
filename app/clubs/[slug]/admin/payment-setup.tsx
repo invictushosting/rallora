@@ -23,11 +23,15 @@ export default function PaymentSetup({ clubName }:{clubName:string}) {
   const [confirmation,setConfirmation] = useState(false);
   const [message,setMessage] = useState("");
 
+  const prizeDescriptionRequired = prizeType !== "cash";
+  const termsReady = confirmation && terms.trim().length>=20 &&
+    refundTerms.trim().length>=20 &&
+    (!prizeDescriptionRequired || nonCash.trim().length>=8);
   const ready = useMemo(() => manualMethods.map(key => ({
     key,readiness:"approved",clubEnabled:true,
-    seasonEnabled:true,termsPublished:confirmation,
+    seasonEnabled:true,termsPublished:termsReady,
     merchantReady:false,
-  } satisfies CollectionOption)),[manualMethods,confirmation]);
+  } satisfies CollectionOption)),[manualMethods,termsReady]);
   const visible = ready.filter(canShowRegistrationMethod);
 
   function toggle(key: PaymentMethodKey) {
@@ -36,10 +40,6 @@ export default function PaymentSetup({ clubName }:{clubName:string}) {
       ? existing.filter(item=>item!==key) : [...existing,key]);
     setMessage("");
   }
-  const prizeDescriptionRequired = prizeType !== "cash";
-  const termsReady = confirmation && terms.trim().length>=20 &&
-    refundTerms.trim().length>=20 &&
-    (!prizeDescriptionRequired || nonCash.trim().length>=8);
   function buildBrief() {
     const result = [
       `${clubName} · Example competition entry setup`,
