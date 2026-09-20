@@ -137,7 +137,9 @@ export default function ClubSocialStudio() {
           const [fixturesReply, divisionsReply] = await Promise.all([
             supabase.from("fixtures")
               .select("id,season_id,division_id,home_team_id,away_team_id,week_number,play_by")
-              .in("season_id", seasonIds).order("play_by", { ascending: false }).limit(400),
+              .in("season_id", seasonIds)
+              .or(`available_from.is.null,available_from.lte.${new Date().toISOString().slice(0,10)}`)
+              .order("play_by", { ascending: false }).limit(400),
             supabase.from("divisions").select("id,name,season_id").in("season_id", seasonIds),
           ]);
           if (fixturesReply.error) throw fixturesReply.error;
