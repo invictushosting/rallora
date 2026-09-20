@@ -52,7 +52,8 @@ type LeagueData = {
   cupRules: CupRule[]; cupQualifiers: CupQualifier[];
 };
 type ClubState =
-  | { kind: "loading" | "missing" }
+  | { kind: "loading" }
+  | { kind: "missing" }
   | { kind: "error"; message: string }
   | { kind: "ready"; club: Club; seasons: Season[]; content: ClubContent };
 type Tab = "overview" | "tables" | "fixtures" | "results" | "teams" | "cup";
