@@ -7,15 +7,15 @@ The original GitHub repository `invictushosting/rallora`, Next.js application an
 | Route on develop | Purpose |
 |---|---|
 | `/` | New Rallora platform landing page listing active clubs from the same Supabase project. |
-| `/clubs/[slug]` | Each club's new read-only, slug/ID/season scoped hub. |
+| `/clubs/[slug]` | Each non-GSM club's new read-only, slug/ID/season scoped hub. |
 | `/clubs/[slug]/admin` | New membership-checked read-only club control centre. |
-| `/clubs/gsm-padel/legacy` | **Complete original GSM league UI**, preserved for existing functions while we gradually migrate each to tenant-safe routes. |
+| `/clubs/gsm-padel` | **Complete original GSM league UI**, the canonical GSM club route inside Rallora. |\n| `/clubs/gsm-padel/overview` | New read-only GSM season/standings/fixtures overview using the same shared club hub as other clubs. |\n| `/clubs/gsm-padel/legacy` | Temporary compatibility route to the same complete original GSM league UI; no separate deployment. |
 | `/platform` | Read-only platform-operator dashboard. |
-| `/admin` | Compatibility redirect to `/clubs/gsm-padel/legacy#admin`. |
+| `/admin` | Compatibility redirect to `/clubs/gsm-padel#admin`. |
 | `/rules`, `/admin/rules` | Existing GSM rules pages; their club and active-season lookups now require `gsm-padel` explicitly. |
 | `/onboarding` | Existing operator onboarding workflow, NOT self-service; must remain gated until an isolated staging/backup release. |
 
-On `develop`, legacy root hash links such as `/#captain` and `/#admin` redirect to the preserved GSM legacy route with the original hash. The legacy view also links back to Rallora's club directory and its new GSM overview. GSM remains the initial real tenant, not a second app/site.
+On `develop`, legacy root hash links such as `/#captain` and `/#admin` redirect to the canonical GSM club route with the original hash. The legacy view also links back to Rallora's club directory and its new GSM overview. GSM remains the initial real tenant, not a second app/site.
 
 ## Important legacy defect corrected in develop
 
