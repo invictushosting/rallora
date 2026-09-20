@@ -59,9 +59,20 @@ to advertise to new clubs. Update it as each acceptance gate is completed.
 - The proposed Social schema in `scripts/staging/003_social_schema.sql`
   includes club-scoped posts, post targets, safe connection metadata and
   backend-only delivery jobs. It has NOT been deployed to production or a
-  real isolated Supabase staging project. Disposable synthetic CI tests
-  `ci_social_assertions.sql` exercise draft-only writes, blocked client
-  scheduling/publishing, suspended members and cross-club leakage.
+  real isolated Supabase staging project. Synthetic tests
+  `ci_social_assertions.sql` now also exercise same-club draft ownership,
+  immutable author/tenant identifiers, confirmed-only result sources,
+  cross-post delivery references, suspended members, and blocked
+  client-controlled scheduling/publishing.
+- The Social Studio actively excludes unreleased fixture results even when
+  the existing live database RLS might otherwise permit reading them.
+  Captions are prepared in shared `lib/social/channels.ts` with Node unit
+  tests for WhatsApp, Instagram, Facebook, email and club news.
+- Connected publishing requirements and provider setup are specified in
+  `docs/RALLORA_SOCIAL_CONNECTED_PUBLISHING.md`: official Meta account
+  connection, consent and token vault, idempotent delivery/retry, and clear
+  differences between manual WhatsApp group sharing and opt-in Business API.
+  **No external platform integration has been connected or charged.**
 - Social Studio DOES NOT connect social accounts, publish to the club website,
   send WhatsApp Business messages, schedule posts or email players. No
   WhatsApp group/Status API claim. No real delivery worker or provider
