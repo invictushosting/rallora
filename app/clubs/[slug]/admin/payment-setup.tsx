@@ -14,7 +14,11 @@ const MANUAL: readonly PaymentMethodKey[] = ["bank_transfer","cash_at_club"];
  * This preview contains no account credentials, bank numbers, registration
  * writer, payment link, billing API or persistent financial records.
  */
-export default function PaymentSetup({ clubName }:{clubName:string}) {
+type Season = { id: string; name: string; status: string };
+export default function PaymentSetup({ clubName,seasons }:{
+  clubName:string;seasons:Season[];
+}) {
+  const [seasonId,setSeasonId] = useState("");
   const [manualMethods,setManualMethods] = useState<PaymentMethodKey[]>([]);
   const [prizeType,setPrizeType] = useState<PrizeType>("cash");
   const [nonCash,setNonCash] = useState("");
@@ -22,6 +26,7 @@ export default function PaymentSetup({ clubName }:{clubName:string}) {
   const [refundTerms,setRefundTerms] = useState("");
   const [confirmation,setConfirmation] = useState(false);
   const [message,setMessage] = useState("");
+  const chosenSeason = seasons.find(season=>season.id===seasonId);
 
   const prizeDescriptionRequired = prizeType !== "cash";
   const termsReady = confirmation && terms.trim().length>=20 &&
@@ -42,7 +47,7 @@ export default function PaymentSetup({ clubName }:{clubName:string}) {
   }
   function buildBrief() {
     const result = [
-      `${clubName} · Example competition entry setup`,
+      `${clubName} · ${chosenSeason?.name??"Illustrative new competition"} · Example entry setup`,
       "DRAFT PREVIEW · NOT AVAILABLE TO PLAYERS",
       "Collection options: " + (manualMethods.map(key=>
         PAYMENT_METHODS.find(item=>item.key===key)?.label).filter(Boolean).join(", ")||"None selected"),
@@ -69,6 +74,20 @@ export default function PaymentSetup({ clubName }:{clubName:string}) {
     </header>
     <div className={styles.content}>
       <section aria-labelledby="manual-heading">
+        <label className={styles.field}>Competition to plan
+          <select className={styles.season} value={seasonId}
+            onChange={event=>{
+              setSeasonId(event.target.value);
+              setManualMethods([]); setPrizeType("cash"); setNonCash("");
+              setTerms("");setRefundTerms("");setConfirmation(false);setMessage("");
+            }}>
+            <option value="">Illustrative new competition</option>
+            {seasons.map(season=><option key={season.id} value={season.id}>
+              {season.name} · {season.status}</option>)}
+          </select>
+          <small>This is a preview for one competition at a time.
+            Switching season resets the example, without saving data.</small>
+        </label>
         <span className={styles.step}>01 / CLUB-MANAGED OPTIONS</span>
         <h3 id="manual-heading">Manual collection</h3>
         <p className={styles.help}>These will require an organiser to check a
@@ -139,7 +158,8 @@ export default function PaymentSetup({ clubName }:{clubName:string}) {
         {message&&<p role="status" className={styles.feedback}>{message}</p>}
         <aside className={styles.example}>
           <span className={styles.step}>PLAYER EXPERIENCE · FUTURE PREVIEW</span>
-          <h4>Choose how to pay {clubName}</h4>
+          <h4>Choose how to pay {clubName}
+            {chosenSeason?` · ${chosenSeason.name}`:""}</h4>
           {visible.length
             ? visible.map(method=><div key={method.key}>
               <strong>{PAYMENT_METHODS.find(x=>x.key===method.key)?.label}</strong>
