@@ -124,14 +124,26 @@ revoke all on public.rallora_league_manual_receipt_events
 -- Club owner and administrator may VIEW source-verification audit events.
 -- Organiser roles do not see bank/cash receipt-level data by default.
 grant select on public.rallora_league_manual_receipt_events to authenticated;
+
+-- Explicit helper parameter prevents correlated SQL accidentally resolving
+-- club_id to m.club_id inside the membership subquery (an interclub data leak).
+create or replace function public.rallora_finance_can_read_club(p_club uuid)
+returns boolean language sql stable security definer set search_path=''
+as $
+  select exists(select 1 from public.rallora_platform_admins p
+    where p.user_id=(select auth.uid()))
+    or exists(select 1 from public.rallora_club_memberships m
+      where m.user_id=(select auth.uid()) and m.club_id=p_club
+        and m.status='active' and m.role in ('owner','admin'));
+$;
+revoke all on function public.rallora_finance_can_read_club(uuid)
+  from public,anon,authenticated;
+grant execute on function public.rallora_finance_can_read_club(uuid)
+  to authenticated;
+
 create policy finance_receipts_manager_read
   on public.rallora_league_manual_receipt_events
   for select to authenticated
-  using(exists(select 1 from public.rallora_platform_admins p
-    where p.user_id=(select auth.uid()))
-    or exists(select 1 from public.rallora_club_memberships m
-      where m.user_id=(select auth.uid())
-        and m.club_id=club_id and m.status='active'
-        and m.role in ('owner','admin')));
+  using(public.rallora_finance_can_read_club(club_id));
 
 commit;
