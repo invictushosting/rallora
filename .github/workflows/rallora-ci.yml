@@ -69,3 +69,5 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_social_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/004_league_entry_prizes.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_league_prizes_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/005_payment_options_noncash.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_payment_options_assertions.sql
