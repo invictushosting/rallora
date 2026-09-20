@@ -146,7 +146,7 @@ export default function PublicRulesPage() {
             Public league rules for players, captains and organisers{season?.name ? ` during ${season.name}` : ""}.
           </p>
           <div className={styles.actions}>
-            <Link href="/clubs/gsm-padel/legacy" className={`${styles.button} ${styles.buttonSecondary}`}>Back to GSM league</Link>
+            <Link href="/clubs/gsm-padel" className={`${styles.button} ${styles.buttonSecondary}`}>Back to GSM league</Link>
             <Link href="/admin/rules" className={styles.button}>Admin: edit rules</Link>
           </div>
         </section>
