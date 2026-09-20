@@ -49,11 +49,12 @@ function icsText(value: string): string {
 
 /** Fold by UTF-8 *bytes*, including the one-byte ICS continuation prefix. */
 function fold(line: string): string {
+  const encoder = new TextEncoder();
   const segments: string[] = [];
   let part = "";
   let bytes = 0;
   for (const char of line) {
-    const size = Buffer.byteLength(char, "utf8");
+    const size = encoder.encode(char).length;
     if (bytes + size > 75) {
       segments.push(part);
       part = " ";
