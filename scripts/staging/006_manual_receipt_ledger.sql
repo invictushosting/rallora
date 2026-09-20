@@ -14,7 +14,10 @@ create table if not exists public.rallora_league_manual_receipt_events (
   season_id uuid not null,
   registration_id uuid not null,
   option_id uuid not null,
-  kind text not null check(kind in ('captured','refunded','part_refunded','voided')),
+  kind text not null check(kind in ('captured','refunded','part_refunded','reversed')),
+  related_event_id uuid,
+  constraint manual_reversal_has_source check(
+    (kind='reversed') = (related_event_id is not null)),
   amount_pence bigint not null check(amount_pence between 1 and 100000000),
   currency text not null check(currency in ('GBP','EUR','USD')),
   -- Server-side hash of source receipt reference. Do not persist card numbers,
@@ -25,7 +28,12 @@ create table if not exists public.rallora_league_manual_receipt_events (
   verified_at timestamptz not null default now(),
   created_at timestamptz not null default now(),
   unique(club_id,season_id,receipt_fingerprint),
+  unique(related_event_id),
   unique(id,club_id,season_id),
+  constraint manual_reversal_same_club_fk foreign key
+    (related_event_id,club_id,season_id)
+    references public.rallora_league_manual_receipt_events
+      (id,club_id,season_id),
   constraint manual_receipt_registration_fk
     foreign key(registration_id,club_id,season_id,currency)
     references public.rallora_league_paid_registrations
@@ -43,6 +51,7 @@ as $$
 declare
   method text;
   enabled_status text;
+  reversed_event public.rallora_league_manual_receipt_events%rowtype;
 begin
   select o.method,o.status into method,enabled_status
     from public.rallora_league_collection_options o
@@ -52,6 +61,21 @@ begin
       or enabled_status <> 'approved' then
     raise exception 'Verified manual receipt requires an approved club collection option'
       using errcode='23514';
+  end if;
+  if new.kind='reversed' then
+    select * into reversed_event
+      from public.rallora_league_manual_receipt_events e
+      where e.id=new.related_event_id
+        and e.club_id=new.club_id and e.season_id=new.season_id;
+    if not found
+      or reversed_event.kind='reversed'
+      or reversed_event.registration_id<>new.registration_id
+      or reversed_event.option_id<>new.option_id
+      or reversed_event.currency<>new.currency
+      or reversed_event.amount_pence<>new.amount_pence then
+      raise exception 'Reversal must reference an identical earlier event'
+        using errcode='23514';
+    end if;
   end if;
   if not (
     exists (select 1 from public.rallora_platform_admins p
