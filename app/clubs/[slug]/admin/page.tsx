@@ -4,11 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import styles from "./admin.module.css";
+import ClubEditor, { type EditableClub, type EditableSeason } from "./club-editor";
 
-type Club = { id: string; slug: string; name: string };
+type Club = EditableClub;
 type Season = { id: string; club_id: string; name: string; status: string };
 type Membership = { club_id: string; user_id: string; role: string; status: string };
-type DivisionSummary = { id: string; name: string; teams: string[] };
+type DivisionSummary = { id: string; name: string; sort_order: number;
+  teams: { id: string; name: string }[] };
 type Summary = {
   season: Season;
   divisions: number;
@@ -27,6 +29,7 @@ export default function ClubAdministration() {
   const slug = typeof params.slug === "string" ? params.slug : "";
   const supabase = useMemo(() => createClient(), []);
   const [view, setView] = useState<View>({ status: "loading" });
+  const [revision, setRevision] = useState(0);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [signInLoading, setSignInLoading] = useState(false);
@@ -68,7 +71,9 @@ export default function ClubAdministration() {
         }
 
         const { data: club, error: clubError } = await supabase
-          .from("clubs").select("id,slug,name").eq("slug", slug).maybeSingle();
+          .from("clubs")
+          .select("id,slug,name,short_name,primary_color,welcome_text")
+          .eq("slug", slug).maybeSingle();
         if (clubError) throw clubError;
         if (!club) {
           if (alive) setView({ status: "missing" });
@@ -140,8 +145,9 @@ export default function ClubAdministration() {
             .map((division) => ({
               id: division.id as string,
               name: division.name as string,
+              sort_order: division.sort_order as number,
               teams: roster.filter((team) => team.division_id === division.id)
-                .map((team) => team.name),
+                .map((team) => ({ id: team.id, name: team.name })),
             }));
           return {
             season,
@@ -180,7 +186,7 @@ export default function ClubAdministration() {
       if (timer) clearTimeout(timer);
       listener.subscription.unsubscribe();
     };
-  }, [slug, supabase]);
+  }, [slug, supabase, revision]);
 
   if (view.status !== "ready") {
     const title = view.status === "loading" ? "Loading club administration…" :
@@ -234,6 +240,15 @@ export default function ClubAdministration() {
         .map(([label, value]) => <article key={label}><span>{label}</span>
           <strong>{value.toLocaleString("en-GB")}</strong></article>)}
     </section>
+    {process.env.NEXT_PUBLIC_RALLORA_ENABLE_CLUB_WRITES === "true" && <ClubEditor
+      club={view.club}
+      seasons={view.summaries.map((summary): EditableSeason => ({
+        id: summary.season.id, name: summary.season.name,
+        club_id: summary.season.club_id, status: summary.season.status,
+        divisions: summary.divisionSummaries,
+      }))}
+      onSaved={() => setRevision((value) => value + 1)}
+    />}
     <div className={styles.sectionHeading}><h2>Club seasons</h2>
       <p>Each season below belongs to {view.club.name}.</p></div>
     <section className={styles.grid}>
@@ -252,7 +267,7 @@ export default function ClubAdministration() {
             {divisionSummaries.map((division) => <details key={division.id} className={styles.divisionRow}>
               <summary>{division.name}<span>{division.teams.length} teams</span></summary>
               {division.teams.length
-                ? <ul>{division.teams.map((name, index) => <li key={`${division.id}-${index}`}>{name}</li>)}</ul>
+                ? <ul>{division.teams.map((name, index) => <li key={`${division.id}-${index}`}>{name.name}</li>)}</ul>
                 : <p>No teams yet.</p>}
             </details>)}
             {!divisionSummaries.length && <p>No divisions yet.</p>}
