@@ -43,6 +43,10 @@ isolated staging environment are ready. Do not mistake GitHub CI for hands-on UA
 - [ ] Pending results are NOT shown as final; disputed records do not falsely
   appear as confirmed. Score corrections don't leave old published cards.
 - [ ] Filters and show-all behaviour are correct after season/tab switches.
+- [ ] Copy a link to a filtered season/section/division/search view, open in
+  private mode and another browser, and confirm the correct public view loads.
+  Invalid season/division IDs or unknown sections must be ignored rather than
+  exposing another club's records.
 - [ ] Check deadline language: `play_by` is a **deadline**, never marketed as
   a booked court/start time.
 - [ ] Export filtered CONFIRMED results as CSV and inspect data/column order,
@@ -74,6 +78,9 @@ isolated staging environment are ready. Do not mistake GitHub CI for hands-on UA
   roundup; verify it excludes embargoed or unconfirmed scores. Deliberately
   correct source result in staging, then re-select: stale draft must not be
   silently presented as a refreshed score.
+- [ ] Social result and weekly roundup captions link to the chosen
+  published club season's Results view. GSM links should open its overview
+  rather than silently redirect to a different section of the legacy hub.
 - [ ] Test Facebook, Instagram, WhatsApp, email and club-website previews,
   plain-text copy, WhatsApp share and native device share (including cancelled
   share sheet). Never describe these as API delivery.
