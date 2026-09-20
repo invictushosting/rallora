@@ -38,3 +38,6 @@
 .example b{color:#173b5c}
 @media(max-width:970px){.content{grid-template-columns:1fr}.intro{padding:26px}.content{padding:20px}}
 @media(max-width:540px){.intro{padding:24px 20px}.content{padding:16px}.method{flex-wrap:wrap}.future{order:2}.method span:not(.future){flex:1}.example{padding:15px}}
+
+.field .season{font:inherit;font-size:12px;border:1px solid #cedeea;border-radius:10px;background:#fff;color:#061A39;padding:12px;width:100%;min-width:0}
+.field .season:focus-visible{outline:2px solid #00B0FE;outline-offset:2px}
