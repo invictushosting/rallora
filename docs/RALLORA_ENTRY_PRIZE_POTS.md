@@ -36,6 +36,37 @@ Real provider fees and refunds change this example.
 No Rallora transaction fee has been set. Provider cost fields are user
 inputs, not a quote or approval. Never advertise zero fees as a promise.
 
+## Development sprint: choosing payment methods and prize formats
+
+A club-only, ephemeral **Collection Methods** panel now exists beside the
+Entry & Prize Pot calculator, accessible only through the verified organiser
+dashboard. It lets a club plan bank transfer, cash at club, or both, and
+shows Stripe Connect, Mollie Connect, PayPal, Revolut Business and Adyen
+clearly as future integrations, NOT connected processors.
+
+The club can draft eligibility, refund and cancellation wording and note
+cash, physical/voucher/coaching, or mixed prizes. Example setup text can
+be copied, but is not published or persisted; the page collects NO IBAN,
+account number, merchant token or card information. Non-cash prizes are
+not added to the numeric cash pot. The prize budget calculator is still
+independent, so clubs should choose **no cash prizes** there if their event
+awards only physical items; unify the two configurations before real season
+publication.
+
+`lib/leagues/payments.ts` supplies a typed provider catalog, readiness
+checks and an *internal-only* verified-event payment-state model.
+No registration or client request can automatically mark itself as paid.
+A real server must validate receipt authenticity, club, competition, amount,
+currency and registration against trusted sources before adding an event.
+Duplicate notifications cannot count twice; conflicts fail closed.
+
+Proposed extra tables `scripts/staging/005_payment_options_noncash.sql`
+record club/season-scoped payment-method and physical prize drafts.
+No browser role is permitted to mark merchant approvals or delivery complete.
+Synthetic two-club CI tests are NOT a replacement for real Supabase staging.
+The code does not submit payment forms, connect merchant accounts, hold funds
+or write payment details to any live database.
+
 ## Phase 1: club-managed collections, Rallora tracks only after approval
 
 Consider an optional organiser-managed offline route with explicit manually
