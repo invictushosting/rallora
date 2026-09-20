@@ -409,9 +409,13 @@ export default function ClubSocialStudio() {
         <h2 id="preview-title">Ready for your channels</h2>
         {!valid && <p className={styles.notice}>Enter a headline and message, then select at least one destination.</p>}
         {valid && <>
-          <div className={styles.graphicPreview} style={{borderTopColor:colour(ready.club.primary_color)}}>
+          <div className={styles.graphicPreview}
+            style={{ borderTopColor:colour(ready.club.primary_color),
+              aspectRatio: `1080 / ${GRAPHICS[graphicSize].height}` }}>
             <span>{ready.club.name.toUpperCase()}</span><h3>{title}</h3>
-            <p>{body.length > 260 ? body.slice(0, 260) + "…" : body}</p>
+            <p>{body.length > (graphicSize === "square" ? 260 : graphicSize === "portrait" ? 400 : 640)
+              ? body.slice(0, graphicSize === "square" ? 260 : graphicSize === "portrait" ? 400 : 640) + "…"
+              : body}</p>
             <RalloraLogo variant="dark" width={154} />
           </div>
           <label className={styles.field}>Graphic layout
