@@ -1,3 +1,4 @@
+import RalloraLogo from "@/app/components/rallora-logo";
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -286,7 +287,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
       clubState.message;
     return <main className={styles.page}><div className={styles.center}
       role={clubState.kind === "error" ? "alert" : "status"}>
-      <span className={styles.brand}><span>R</span> rallora.</span>
+      <span className={styles.brand}><RalloraLogo variant="light" width={210} /></span>
       <h1>{clubState.kind === "missing" ? "Club not found" :
         clubState.kind === "error" ? "Could not load club" : "Finding your club"}</h1>
       <p>{message}</p><a href="/">Back to Rallora →</a>
@@ -374,7 +375,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
     <div className={styles.shell}>
       <header className={styles.header}>
         <a href="/" className={styles.brand} aria-label="Rallora home">
-          <span>R</span> rallora.</a>
+          <RalloraLogo variant="light" width={210} /></a>
         <a href={`/clubs/${encodeURIComponent(slug)}/admin`}
           className={styles.adminLink}>Club administration ↗</a>
       </header>
