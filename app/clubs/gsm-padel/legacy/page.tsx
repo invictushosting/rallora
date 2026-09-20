@@ -5643,7 +5643,7 @@ function CaptainPage({ onDataChanged }: { onDataChanged: () => void }) {
 
       if (captainError) throw captainError;
       const captain = captainRows?.[0] ?? null;
-      setCaptainRecord(captain);
+      setCaptainRecord(null);
       if (!captain) {
         setCaptainFixtures([]);
         setCaptainSubmissions([]);
@@ -5690,6 +5690,17 @@ function CaptainPage({ onDataChanged }: { onDataChanged: () => void }) {
 
       if (teamsResponse.error) throw teamsResponse.error;
       if (fixturesResponse.error) throw fixturesResponse.error;
+      // An email can match a captain on another club. Verify the captain's
+      // team is genuinely in GSM's active season before enabling any tools.
+      if (!(teamsResponse.data ?? []).some((team) => team.id === captain.team_id)) {
+        setCaptainDivisions([]);
+        setCaptainTeams([]);
+        setCaptainFixtures([]);
+        setCaptainSubmissions([]);
+        setCaptainRecord(null);
+        return;
+      }
+      setCaptainRecord(captain);
 
       const fixtures = fixturesResponse.data ?? [];
       const fixtureIds = fixtures.map((fixture) => fixture.id);
