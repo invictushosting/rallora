@@ -1,43 +1,42 @@
-# GSM Padel League Hub
+# Rallora
 
-A mobile-first private league web app starter for GSM Padel.
+Rallora is a multi-club padel league management platform by Protego Solutions.
+The current production release includes the public club experience, fixtures,
+results, standings, rules, captain/admin access, league planning, exports and
+feature-gated social/payment tooling.
 
-## What is included
+## Local development
 
-- GSM branded homepage
-- League tables
-- Fixtures
-- Results
-- Teams
-- League Cup section
-- Rules
-- Admin dashboard mockup
-- Supabase database schema starter
-
-## Run locally
+Requirements: Node.js 22 and npm.
 
 ```bash
-npm install
+npm ci
+cp .env.example .env.local
 npm run dev
 ```
 
-Then open `http://localhost:3000`.
+Use a non-production Supabase project or placeholder values for local builds.
+Never commit service-role keys, database passwords, or real participant data.
 
-## Supabase setup
+## Quality gates
 
-1. Create a Supabase project.
-2. Open the SQL editor.
-3. Paste and run `supabase/schema.sql`.
-4. Copy `.env.example` to `.env.local`.
-5. Add your Supabase URL and anon key.
+```bash
+npm run check
+```
 
-The current UI uses local demo data. The next phase is wiring the pages into Supabase so admins can create seasons, teams, fixtures and results.
+The GitHub workflow also runs tenant-isolation assertions against a disposable
+PostgreSQL 17 service. Those synthetic tests do not replace end-to-end Supabase
+Auth and Storage testing.
 
-## Suggested MVP order
+## Deployment and database changes
 
-1. Public league hub using demo data.
-2. Admin login.
-3. Admin CRUD for teams/divisions/fixtures.
-4. Captain login and score submission.
-5. Opponent confirmation and admin disputes.
-6. Automated tables and League Cup qualification.
+- `main` is the production source branch.
+- Database changes belong in `supabase/migrations/`; files directly under
+  `supabase/` are historical/reference SQL and are not a sequential migration
+  chain.
+- Club writes and social database writes remain off by default. Do not enable
+  them until the authorization and recovery gates are complete.
+- Review [DEPLOYMENT.md](DEPLOYMENT.md),
+  [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md), and
+  [docs/RALLORA_AUTHORIZATION_AUDIT.md](docs/RALLORA_AUTHORIZATION_AUDIT.md)
+  before a production release.

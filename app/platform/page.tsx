@@ -3,6 +3,7 @@
 import RalloraLogo from "@/app/components/rallora-logo";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import styles from "./platform.module.css";
 
@@ -117,7 +118,7 @@ export default function PlatformControlCentre() {
     {view.status === "loading" && <p className={styles.notice} role="status">Checking administrator access and loading clubs…</p>}
     {view.status === "signed_out" && <section className={styles.notice}>
       <h2>Sign in required</h2><p>Sign in using the existing Rallora admin area.</p>
-      <a href="/#admin">Open administrator sign-in →</a>
+      <Link href="/#admin">Open administrator sign-in →</Link>
     </section>}
     {view.status === "forbidden" && <section className={styles.notice} role="alert">
       <h2>Access denied</h2><p>This area is available only to Rallora platform administrators.</p>
@@ -153,7 +154,7 @@ export default function PlatformControlCentre() {
             {!seasons.length && <p>No seasons created yet.</p>}
             <p><a href={`/clubs/${encodeURIComponent(club.slug)}`}>View this club’s league hub →</a></p>
             <p><a href={`/clubs/${encodeURIComponent(club.slug)}/admin`}>Open club administration →</a></p>
-            {club.slug === "gsm-padel" && <p><a href="/clubs/gsm-padel">Open full GSM league →</a></p>}
+            {club.slug === "gsm-padel" && <p><Link href="/clubs/gsm-padel">Open full GSM league →</Link></p>}
           </article>)}
       </section>
       <p className={styles.footnote}>

@@ -1,4 +1,4 @@
-# GSM Padel League Hub — Production Checklist
+# Rallora — Production Checklist
 
 ## Before deploying
 
@@ -7,14 +7,20 @@
 - Never add the Supabase service_role key to `.env.local` or Vercel.
 - Confirm the admin account is listed in `public.admin_users`.
 - Confirm captain users are not admins unless intentionally added to `admin_users`.
-- Run `npm run build` locally once before deploying.
+- Run `npm run check` locally once before deploying.
+- Confirm dependencies are pinned and `package-lock.json` is committed.
+- Confirm club/social write flags remain `false` unless their security release
+  has separately passed.
 
 ## Supabase checks
 
 - Authentication users created for admin/captains.
 - RLS enabled on admin-only tables.
 - Sponsor upload bucket exists.
-- Run `supabase/production-safety-check.sql` once before deployment.
+- Review only the new files in `supabase/migrations/`; do not bulk-run the
+  historical SQL files under `supabase/`.
+- Confirm the latest backup covers Postgres, Auth metadata and Storage bytes.
+- Run Security and Performance Advisors after every DDL change.
 
 ## After Vercel deployment
 
@@ -25,5 +31,5 @@
 - Test admin login.
 - Test captain login.
 - Test sponsor logo upload.
-- Test demo data manager.
+- Confirm legacy demo/reset RPCs are not callable by ordinary signed-in users.
 - Test public site on mobile.

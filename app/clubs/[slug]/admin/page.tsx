@@ -4,6 +4,7 @@ import RalloraLogo from "@/app/components/rallora-logo";
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import styles from "./admin.module.css";
 import ClubEditor, { type EditableClub, type EditableSeason } from "./club-editor";
@@ -226,7 +227,7 @@ export default function ClubAdministration() {
 
   return <main className={styles.page}><div className={styles.shell}>
     <header className={styles.nav}>
-      <a href="/" className={styles.wordmark}><RalloraLogo variant="light" width={218} /></a>
+      <Link href="/" className={styles.wordmark}><RalloraLogo variant="light" width={218} /></Link>
       <span className={styles.badge}>READ-ONLY · CLUB ADMIN</span>
     </header>
     <section className={styles.hero}>
@@ -236,7 +237,7 @@ export default function ClubAdministration() {
       <a href={`/clubs/${encodeURIComponent(view.club.slug)}`}>View public club hub →</a>
       <a href={`/clubs/${encodeURIComponent(view.club.slug)}/social`}>Open Rallora Social Studio →</a>
       {view.club.slug === "gsm-padel" &&
-        <a href="/clubs/gsm-padel#admin">Open existing GSM management tools →</a>}
+        <Link href="/clubs/gsm-padel#admin">Open existing GSM management tools →</Link>}
     </section>
     <section className={styles.socialInvite}>
       <span>RALLORA SOCIAL</span><h2>Turn league updates into share-ready club stories.</h2>

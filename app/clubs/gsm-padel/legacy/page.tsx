@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import Link from "next/link";
 import {
   Bell,
   CalendarDays,
@@ -762,13 +763,13 @@ export default function GsmPadelLeagueHub() {
       background: "#132b50", color: "#e4ecff", fontSize: 12,
       fontWeight: 750,
     }}>
-      <a href="/" style={{ color: "#fff", textDecoration: "none" }}>
+      <Link href="/" style={{ color: "#fff", textDecoration: "none" }}>
         ← All Rallora clubs
-      </a>
+      </Link>
       <span>GSM PADEL · FULL LEAGUE HUB</span>
-      <a href="/clubs/gsm-padel/overview" style={{ color: "#b8ceff", textDecoration: "none" }}>
+      <Link href="/clubs/gsm-padel/overview" style={{ color: "#b8ceff", textDecoration: "none" }}>
         View GSM club overview →
-      </a>
+      </Link>
     </nav>
     <div
       className="app-shell"

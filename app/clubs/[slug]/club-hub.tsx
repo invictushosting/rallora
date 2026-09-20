@@ -4,6 +4,7 @@ import RalloraLogo from "@/app/components/rallora-logo";
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import styles from "./club.module.css";
 import {
@@ -305,7 +306,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
       <span className={styles.brand}><RalloraLogo variant="light" width={210} /></span>
       <h1>{clubState.kind === "missing" ? "Club not found" :
         clubState.kind === "error" ? "Could not load club" : "Finding your club"}</h1>
-      <p>{message}</p><a href="/">Back to Rallora →</a>
+      <p>{message}</p><Link href="/">Back to Rallora →</Link>
     </div></main>;
   }
 
@@ -454,8 +455,8 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
     style={{ "--club-color": safeColor(club.primary_color) } as React.CSSProperties}>
     <div className={styles.shell}>
       <header className={styles.header}>
-        <a href="/" className={styles.brand} aria-label="Rallora home">
-          <RalloraLogo variant="light" width={210} /></a>
+        <Link href="/" className={styles.brand} aria-label="Rallora home">
+          <RalloraLogo variant="light" width={210} /></Link>
         <a href={`/clubs/${encodeURIComponent(slug)}/admin`}
           className={styles.adminLink}>Club administration ↗</a>
       </header>
@@ -660,11 +661,11 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
         <h2>GSM Padel’s full league hub</h2>
         <p>The original GSM experience includes captain submissions and
           established league-management tools.</p>
-        <a href="/clubs/gsm-padel">Open full GSM league →</a>
+        <Link href="/clubs/gsm-padel">Open full GSM league →</Link>
       </section>}
       <footer className={styles.footer}>
         <p>{club.footer_text || "Your club. Your league."}</p>
-        <a href="/">Powered by Rallora ↗</a>
+        <Link href="/">Powered by Rallora ↗</Link>
       </footer>
     </div>
   </main>;
