@@ -101,7 +101,7 @@ export function estimatePrizeBudget(input: PrizeEstimateInput): PrizeEstimate {
   const prizeFromEntriesPence = input.potMode === "entry_percentage"
     ? Math.floor(netEntryPence * input.prizeSharePct / 100)
     : input.potMode === "guaranteed"
-      ? Math.min(input.guaranteedPotPence, netEntryPence)
+      ? Math.min(Math.max(0,input.guaranteedPotPence - input.sponsorPence), netEntryPence)
       : 0;
   const prizePotPence = input.potMode === "guaranteed"
     ? input.guaranteedPotPence
@@ -109,7 +109,9 @@ export function estimatePrizeBudget(input: PrizeEstimateInput): PrizeEstimate {
       ? prizeFromEntriesPence + input.sponsorPence : 0;
   const clubBalancePence = input.potMode === "guaranteed"
     ? Math.max(0, netEntryPence + input.sponsorPence - prizePotPence)
-    : netEntryPence - prizeFromEntriesPence;
+    : input.potMode === "no_prize"
+      ? netEntryPence + input.sponsorPence
+      : netEntryPence - prizeFromEntriesPence;
   const organiserTopUpPence = input.potMode === "guaranteed"
     ? Math.max(0, prizePotPence - netEntryPence - input.sponsorPence) : 0;
   const winnerPence = Math.floor(prizePotPence * input.winnerPct / 100);
