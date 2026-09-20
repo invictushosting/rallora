@@ -25,7 +25,6 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import {
-  fallbackData,
   type Announcement,
   type Division,
   type Fixture,
@@ -658,7 +657,9 @@ async function loadLeagueData(): Promise<LeagueData> {
 
 export default function GsmPadelLeagueHub() {
   const [active, setActive] = useState<PageId>("home");
-  const [leagueData, setLeagueData] = useState<LeagueData>(fallbackData);
+  const [leagueData, setLeagueData] = useState<LeagueData>({
+    seasonName: "", divisions: [], fixtures: [], results: [], sponsors: [], announcements: [],
+  });
   const [clubSettings, setClubSettings] = useState<ClubSettings>(defaultClubSettings);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -702,7 +703,13 @@ export default function GsmPadelLeagueHub() {
           error instanceof Error
             ? error.message
             : "Could not load live Supabase data.";
-        if (!cancelled) setLoadError(message);
+        if (!cancelled) {
+          setLeagueData({
+            seasonName: "", divisions: [], fixtures: [],
+            results: [], sponsors: [], announcements: [],
+          });
+          setLoadError(message);
+        }
       } finally {
         if (!cancelled) setIsLoading(false);
       }
