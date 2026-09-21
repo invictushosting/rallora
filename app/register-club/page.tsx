@@ -1,16 +1,6 @@
 "use client";
-import { useMemo, useState } from "react";
-import Link from "next/link";
-import { createClient } from "@/lib/supabase";
-
-export default function RegisterClub() {
- const supabase=useMemo(()=>createClient(),[]); const [message,setMessage]=useState(""); const [error,setError]=useState("");
- async function submit(e:React.FormEvent<HTMLFormElement>){e.preventDefault();setError(""); const form=new FormData(e.currentTarget); const {data:{user}}=await supabase.auth.getUser();
-  if(!user){setError("Create or sign in to your Rallora account before registering a club.");return;}
-  const name=String(form.get("name")||"").trim(); const slug=String(form.get("slug")||"").trim().toLowerCase();
-  const {error}=await supabase.from("rallora_club_applications").insert({applicant_user_id:user.id,club_name:name,requested_slug:slug,contact_email:user.email,plan_code:String(form.get("plan"))});
-  if(error){setError(error.message);return;} setMessage("Application received. A Rallora administrator will review it before your club is activated.");
- }
- return <main style={{maxWidth:620,margin:"50px auto",padding:24}}><Link href="/">← Rallora</Link><h1>Register your club</h1><p>Choose a starting plan. Your account is activated only after Rallora approves the application.</p>
- <form onSubmit={submit} style={{display:"grid",gap:16}}><label>Club name<input name="name" required minLength={2}/></label><label>Club web address<input name="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="your-club"/></label><label>Plan<select name="plan"><option value="starter">Starter</option><option value="league">League</option><option value="pro">Pro</option></select></label><button>Submit application</button></form>{error&&<p role="alert">{error}</p>}{message&&<p role="status">{message}</p>}</main>;
-}
+import Link from "next/link"; import {useMemo,useState} from "react"; import {createClient} from "@/lib/supabase"; import styles from "./register-club.module.css";
+const plans=[["starter","Starter","Launch your first league","Core league · Player registration"],["league","League","For established club leagues","Everything in Starter · Captain results · Social Studio"],["pro","Pro","For ambitious club operations","Everything in League · Sponsors · Reminders"]];
+export default function RegisterClub(){const s=useMemo(()=>createClient(),[]),[plan,setPlan]=useState("league"),[message,setMessage]=useState(""),[error,setError]=useState("");
+async function submit(e:React.FormEvent<HTMLFormElement>){e.preventDefault();const f=new FormData(e.currentTarget),{data:{user}}=await s.auth.getUser();if(!user){setError("Sign in or create a Rallora account first.");return}const {error}=await s.from("rallora_club_applications").insert({applicant_user_id:user.id,club_name:String(f.get("name")).trim(),requested_slug:String(f.get("slug")).trim().toLowerCase(),contact_email:user.email,plan_code:plan});if(error)setError(error.message);else setMessage("Application received. Rallora will review your club before activation.")}
+return <main className={styles.page}><div className={styles.shell}><header><Link href="/">RALLORA</Link><Link href="/register">Find a league</Link></header><section className={styles.hero}><span>BUILD YOUR CLUB LEAGUE</span><h1>One platform.<br/>Every club.</h1><p>Choose the tools your club needs. No billing is taken until your application is approved.</p></section><section className={styles.plans}>{plans.map(([id,title,tag,features])=><button type="button" className={plan===id?styles.selected:""} onClick={()=>setPlan(id)} key={id}><small>{id==="league"?"MOST POPULAR":"RALLORA "+title.toUpperCase()}</small><h2>{title}</h2><strong>{tag}</strong><p>{features}</p><span>{plan===id?"Selected":"Choose plan"}</span></button>)}</section><form onSubmit={submit}><h2>Tell us about your club</h2><label>Club name<input name="name" required minLength={2}/></label><label>Club web address<input name="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="your-club"/></label><button>Submit club application</button>{error&&<p role="alert">{error}</p>}{message&&<p role="status">{message}</p>}</form></div></main>}
