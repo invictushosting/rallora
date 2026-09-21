@@ -13,16 +13,22 @@ type Season = {
   status: "draft" | "active" | "completed";
 };
 type ClubSummary = { club: Club; seasons: Season[]; teams: number; fixtures: number };
+type Application = { id:string; club_name:string; requested_slug:string; contact_email:string; plan_code:string; status:string; created_at:string };
 type View =
   | { status: "loading" | "signed_out" | "forbidden" }
   | { status: "error"; message: string }
-  | { status: "ready"; clubs: ClubSummary[] };
+  | { status: "ready"; clubs: ClubSummary[]; applications: Application[] };
 
 /** Initial read-only overview. Authorization for future write actions must be server-side
  * and enforced with club-scoped RLS; rendering this page is not a write authorization. */
 export default function PlatformControlCentre() {
   const supabase = useMemo(() => createClient(), []);
   const [view, setView] = useState<View>({ status: "loading" });
+  async function approveApplication(id:string) {
+    const { error } = await supabase.rpc("rallora_approve_club_application", { p_application_id: id });
+    if (error) { alert(error.message); return; }
+    window.location.reload();
+  }
   useEffect(() => {
     let current = true;
     async function load() {
@@ -75,7 +81,10 @@ export default function PlatformControlCentre() {
             };
           }),
         );
-        if (current) setView({ status: "ready", clubs: summaries });
+        const applicationsReply = await supabase.from("rallora_club_applications")
+          .select("id,club_name,requested_slug,contact_email,plan_code,status,created_at").order("created_at",{ascending:false});
+        if (applicationsReply.error) throw applicationsReply.error;
+        if (current) setView({ status: "ready", clubs: summaries, applications: (applicationsReply.data ?? []) as Application[] });
       } catch (e) {
         if (current) setView({
           status: "error",
@@ -156,6 +165,16 @@ export default function PlatformControlCentre() {
             <p><a href={`/clubs/${encodeURIComponent(club.slug)}/admin`}>Open club administration →</a></p>
             {club.slug === "gsm-padel" && <p><Link href="/clubs/gsm-padel">Open full GSM league →</Link></p>}
           </article>)}
+      </section>
+      <h2>Club applications</h2>
+      <section className={styles.grid} aria-label="Club applications">
+        {view.applications.map(application => <article className={styles.card} key={application.id}>
+          <span className={styles.status}>{application.status}</span>
+          <h3>{application.club_name}</h3><p className={styles.slug}>/{application.requested_slug}</p>
+          <p>{application.contact_email}</p><p>Requested plan: <strong>{application.plan_code}</strong></p>
+          {application.status === "pending" && <button onClick={() => void approveApplication(application.id)}>Approve & activate club</button>}
+        </article>)}
+        {!view.applications.length && <article className={styles.card}><h3>No club applications</h3><p>New applications appear here for approval.</p></article>}
       </section>
       <p className={styles.footnote}>
         Club editing and self-service onboarding remain disabled until club-scoped
