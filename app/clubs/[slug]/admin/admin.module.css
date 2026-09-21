@@ -50,3 +50,4 @@
 .socialInvite h2{font-size:clamp(24px,3vw,32px);letter-spacing:-1px;line-height:1.2;max-width:720px;margin:13px 0}
 .socialInvite p{color:#d3e4f5;font-size:13px;line-height:1.75;max-width:690px}
 .socialInvite a{display:inline-block;margin-top:10px;border-radius:10px;background:#00B0FE;color:#061A39;text-decoration:none;font-weight:850;font-size:13px;padding:13px 17px}
+.actionRow{display:flex;gap:9px;margin-top:16px}.actionRow button{border:0;border-radius:9px;background:#0b5d42;color:#fff;padding:10px 12px;font:inherit;font-weight:800;cursor:pointer}.actionRow button+button{background:#8b2635}
