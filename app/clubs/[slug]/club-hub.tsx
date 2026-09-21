@@ -457,8 +457,11 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
       <header className={styles.header}>
         <Link href="/" className={styles.brand} aria-label="Rallora home">
           <RalloraLogo variant="light" width={210} /></Link>
-        <a href={`/clubs/${encodeURIComponent(slug)}/admin`}
-          className={styles.adminLink}>Club administration ↗</a>
+        <div className={styles.headerLinks}>
+          <Link href={`/clubs/${encodeURIComponent(slug)}/register`} className={styles.registerLink}>Join a team</Link>
+          <a href={`/clubs/${encodeURIComponent(slug)}/admin`}
+            className={styles.adminLink}>Club administration ↗</a>
+        </div>
       </header>
       <section className={styles.hero}>
         <span className={styles.eyebrow}>{club.short_name || "PADEL"} · LEAGUE HUB</span>
