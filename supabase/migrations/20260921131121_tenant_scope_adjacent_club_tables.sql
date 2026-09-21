@@ -69,7 +69,8 @@ create policy "tenant_club_rules_anon_read" on public.club_rules
 for select to anon using (
   exists (select 1 from public.clubs c where c.id=club_id and c.is_active)
   and (season_id is null or exists (
-    select 1 from public.seasons s where s.id=season_id and s.club_id=club_id
+    select 1 from public.seasons s where s.id=public.club_rules.season_id
+      and s.club_id=public.club_rules.club_id
       and s.status in ('active','completed')
   ))
 );
@@ -77,7 +78,8 @@ create policy "tenant_club_rules_authenticated_read" on public.club_rules
 for select to authenticated using (
   (exists (select 1 from public.clubs c where c.id=club_id and c.is_active)
    and (season_id is null or exists (
-     select 1 from public.seasons s where s.id=season_id and s.club_id=club_id
+     select 1 from public.seasons s where s.id=public.club_rules.season_id
+       and s.club_id=public.club_rules.club_id
        and s.status in ('active','completed')
    ))) or public.rallora_can_manage_club(club_id)
 );
@@ -85,7 +87,8 @@ create policy "tenant_club_rules_insert" on public.club_rules
 for insert to authenticated with check (
   public.rallora_can_manage_club(club_id)
   and (season_id is null or exists (
-    select 1 from public.seasons s where s.id=season_id and s.club_id=club_id
+    select 1 from public.seasons s where s.id=public.club_rules.season_id
+      and s.club_id=public.club_rules.club_id
   ))
 );
 create policy "tenant_club_rules_update" on public.club_rules
@@ -93,7 +96,8 @@ for update to authenticated using (public.rallora_can_manage_club(club_id))
 with check (
   public.rallora_can_manage_club(club_id)
   and (season_id is null or exists (
-    select 1 from public.seasons s where s.id=season_id and s.club_id=club_id
+    select 1 from public.seasons s where s.id=public.club_rules.season_id
+      and s.club_id=public.club_rules.club_id
   ))
 );
 create policy "tenant_club_rules_delete" on public.club_rules
@@ -104,7 +108,8 @@ create policy "tenant_setup_profiles_anon_read" on public.club_setup_profiles
 for select to anon using (
   exists (select 1 from public.clubs c where c.id=club_id and c.is_active)
   and (season_id is null or exists (
-    select 1 from public.seasons s where s.id=season_id and s.club_id=club_id
+    select 1 from public.seasons s where s.id=public.club_setup_profiles.season_id
+      and s.club_id=public.club_setup_profiles.club_id
       and s.status in ('active','completed')
   ))
 );
@@ -112,7 +117,8 @@ create policy "tenant_setup_profiles_authenticated_read" on public.club_setup_pr
 for select to authenticated using (
   (exists (select 1 from public.clubs c where c.id=club_id and c.is_active)
    and (season_id is null or exists (
-     select 1 from public.seasons s where s.id=season_id and s.club_id=club_id
+     select 1 from public.seasons s where s.id=public.club_setup_profiles.season_id
+       and s.club_id=public.club_setup_profiles.club_id
        and s.status in ('active','completed')
    ))) or public.rallora_can_manage_club(club_id)
 );
@@ -120,7 +126,8 @@ create policy "tenant_setup_profiles_insert" on public.club_setup_profiles
 for insert to authenticated with check (
   public.rallora_can_manage_club(club_id)
   and (season_id is null or exists (
-    select 1 from public.seasons s where s.id=season_id and s.club_id=club_id
+    select 1 from public.seasons s where s.id=public.club_setup_profiles.season_id
+      and s.club_id=public.club_setup_profiles.club_id
   ))
 );
 create policy "tenant_setup_profiles_update" on public.club_setup_profiles
@@ -128,7 +135,8 @@ for update to authenticated using (public.rallora_can_manage_club(club_id))
 with check (
   public.rallora_can_manage_club(club_id)
   and (season_id is null or exists (
-    select 1 from public.seasons s where s.id=season_id and s.club_id=club_id
+    select 1 from public.seasons s where s.id=public.club_setup_profiles.season_id
+      and s.club_id=public.club_setup_profiles.club_id
   ))
 );
 create policy "tenant_setup_profiles_delete" on public.club_setup_profiles
