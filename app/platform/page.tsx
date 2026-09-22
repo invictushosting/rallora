@@ -134,6 +134,7 @@ export default function PlatformControlCentre() {
   return <main className={styles.page}><div className={styles.shell}>
     <nav className={styles.nav}>
       <RalloraLogo variant="light" width={218} /><span>Platform Control Centre</span>
+      <Link href="/notifications">Notifications</Link>
       <span className={styles.badge}>PLATFORM ADMIN</span>
     </nav>
     <header className={styles.hero}>
