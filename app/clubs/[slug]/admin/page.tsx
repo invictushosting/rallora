@@ -236,6 +236,7 @@ export default function ClubAdministration() {
       <p>League administration is scoped to this club. You are viewing as {view.role}.</p>
       <a href={`/clubs/${encodeURIComponent(view.club.slug)}`}>View public club hub →</a>
       <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/registrations`}>Review player registration requests →</Link>
+      <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/captain`}>Open captain result centre →</Link>
       <a href={`/clubs/${encodeURIComponent(view.club.slug)}/social`}>Open Rallora Social Studio →</a>
       {view.club.slug === "gsm-padel" &&
         <Link href="/clubs/gsm-padel#admin">Open existing GSM management tools →</Link>}
