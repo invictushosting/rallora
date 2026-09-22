@@ -130,7 +130,7 @@ export default function RalloraHome() {
           <strong>Explore Social ↗</strong>
         </Link>
         <Link href="/interclub" className={styles.familyCard}>
-          <span>03 / CONNECT · COMING LATER</span><h3>Rallora Interclub</h3>
+          <span>03 / CONNECT · COMING SOON</span><h3>Rallora Interclub</h3>
           <p>A future home for challenges and champions versus champions.</p>
           <strong>Discover Interclub ↗</strong>
         </Link>
