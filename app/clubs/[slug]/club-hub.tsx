@@ -459,6 +459,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
           <RalloraLogo variant="light" width={210} /></Link>
         <div className={styles.headerLinks}>
           <Link href={`/clubs/${encodeURIComponent(slug)}/register`} className={styles.registerLink}>Join a team</Link>
+          <Link href={`/clubs/${encodeURIComponent(slug)}/captain`} className={styles.adminLink}>Captain centre</Link>
           <a href={`/clubs/${encodeURIComponent(slug)}/admin`}
             className={styles.adminLink}>Club administration ↗</a>
         </div>

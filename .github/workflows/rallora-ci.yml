@@ -70,6 +70,9 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260921131121_tenant_scope_adjacent_club_tables.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_adjacent_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260921140000_rallora_player_registration_approval.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_captain_schema.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260922071024_rallora_authenticated_captain_access.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260922072854_rallora_captain_assignment_and_result_workflow.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/003_social_schema.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_social_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/004_league_entry_prizes.sql
