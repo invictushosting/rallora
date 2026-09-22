@@ -7,7 +7,9 @@ import styles from "./editor.module.css";
 export type EditableClub = {
   id: string; slug: string; name: string;
   short_name: string | null; primary_color: string | null;
-  welcome_text: string | null;
+  welcome_text: string | null; logo_url:string|null; website_url:string|null;
+  contact_email:string|null; venue_name:string|null; address_line_1:string|null;
+  town:string|null; postcode:string|null; player_registration_terms:string|null;
 };
 export type EditableDivision = {
   id: string; name: string; sort_order: number;
@@ -39,6 +41,14 @@ export default function ClubEditor({ club, seasons, onSaved }: Props) {
   const [shortName, setShortName] = useState(club.short_name ?? "");
   const [colour, setColour] = useState(club.primary_color || "#2458ff");
   const [welcomeText, setWelcomeText] = useState(club.welcome_text ?? "");
+  const [logoUrl,setLogoUrl]=useState(club.logo_url??"");
+  const [websiteUrl,setWebsiteUrl]=useState(club.website_url??"");
+  const [contactEmail,setContactEmail]=useState(club.contact_email??"");
+  const [venueName,setVenueName]=useState(club.venue_name??"");
+  const [address,setAddress]=useState(club.address_line_1??"");
+  const [town,setTown]=useState(club.town??"");
+  const [postcode,setPostcode]=useState(club.postcode??"");
+  const [registrationTerms,setRegistrationTerms]=useState(club.player_registration_terms??"");
   const [newSeason, setNewSeason] = useState("");
   const [newDivision, setNewDivision] = useState("");
   const [divisionSeasonId, setDivisionSeasonId] = useState(seasons[0]?.id ?? "");
@@ -81,7 +91,10 @@ export default function ClubEditor({ club, seasons, onSaved }: Props) {
     setShortName(club.short_name ?? "");
     setColour(club.primary_color || "#2458ff");
     setWelcomeText(club.welcome_text ?? "");
-  }, [club.id, club.name, club.short_name, club.primary_color, club.welcome_text]);
+    setLogoUrl(club.logo_url??"");setWebsiteUrl(club.website_url??"");setContactEmail(club.contact_email??"");
+    setVenueName(club.venue_name??"");setAddress(club.address_line_1??"");setTown(club.town??"");
+    setPostcode(club.postcode??"");setRegistrationTerms(club.player_registration_terms??"");
+  }, [club]);
 
   async function submit(action: () => Promise<void>, success: string) {
     setError("");
@@ -121,10 +134,15 @@ export default function ClubEditor({ club, seasons, onSaved }: Props) {
         throw new Error("Club name must be 1–100 characters.");
       if (!/^#[\da-fA-F]{6}$/.test(colour)) throw new Error("Choose a valid colour.");
       if (welcomeText.length > 1000) throw new Error("Introduction is too long.");
+      if(registrationTerms.length>3000) throw new Error("Player terms are too long.");
       const { data, error: mutationError } = await supabase.from("clubs")
         .update({
           name: name.trim(), short_name: shortName.trim() || null,
           primary_color: colour, welcome_text: welcomeText.trim() || null,
+          logo_url:logoUrl.trim()||null,website_url:websiteUrl.trim()||null,
+          contact_email:contactEmail.trim()||null,venue_name:venueName.trim()||null,
+          address_line_1:address.trim()||null,town:town.trim()||null,postcode:postcode.trim()||null,
+          player_registration_terms:registrationTerms.trim()||null,
         }).eq("id", club.id).eq("slug", club.slug).select("id");
       if (mutationError) throw mutationError;
       if (data?.length !== 1) throw new Error("No club was updated. Check permissions.");
@@ -230,9 +248,19 @@ export default function ClubEditor({ club, seasons, onSaved }: Props) {
         onChange={(event) => setShortName(event.target.value)} /></label>
       <label>Brand colour<input type="color" value={colour}
         onChange={(event) => setColour(event.target.value)} /></label>
+      <label>Logo URL<input type="url" value={logoUrl} onChange={event=>setLogoUrl(event.target.value)} /></label>
+      <label>Website<input type="url" value={websiteUrl} onChange={event=>setWebsiteUrl(event.target.value)} /></label>
+      <label>Contact email<input type="email" value={contactEmail} onChange={event=>setContactEmail(event.target.value)} /></label>
+      <label>Venue name<input value={venueName} maxLength={160} onChange={event=>setVenueName(event.target.value)} /></label>
+      <label>Address<input value={address} maxLength={200} onChange={event=>setAddress(event.target.value)} /></label>
+      <label>Town or city<input value={town} maxLength={100} onChange={event=>setTown(event.target.value)} /></label>
+      <label>Postcode<input value={postcode} maxLength={20} onChange={event=>setPostcode(event.target.value)} /></label>
       <label className={styles.wide}>Welcome message<textarea rows={3}
         maxLength={1000} value={welcomeText}
         onChange={(event) => setWelcomeText(event.target.value)} /></label>
+      <label className={styles.wide}>Player registration terms<textarea rows={5} maxLength={3000}
+        value={registrationTerms} onChange={event=>setRegistrationTerms(event.target.value)}
+        placeholder="For example: all league matches must be played at this venue." /></label>
       <button disabled={busy} type="submit">{busy ? "Saving…" : "Save club branding"}</button>
     </form>}
     {activeTab === "seasons" && <div className={styles.columns}>

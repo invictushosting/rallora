@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import styles from "./register.module.css";
 
-type Club = { id: string; slug: string; name: string };
+type Club = { id: string; slug: string; name: string; venue_name:string|null;town:string|null;postcode:string|null;player_registration_terms:string|null };
 type Season = { id: string; name: string };
 type Division = { id: string; name: string; sort_order: number };
 type Team = { id: string; name: string; division_id: string };
@@ -36,7 +36,7 @@ export default function PlayerRegistrationPage() {
     async function load() {
       const [{ data: auth }, clubReply] = await Promise.all([
         supabase.auth.getUser(),
-        supabase.from("clubs").select("id,slug,name").eq("slug", slug).eq("is_active", true).maybeSingle(),
+        supabase.from("clubs").select("id,slug,name,venue_name,town,postcode,player_registration_terms").eq("slug", slug).eq("is_active", true).maybeSingle(),
       ]);
       if (!alive) return;
       setUserId(auth.user?.id ?? null);
@@ -105,8 +105,9 @@ export default function PlayerRegistrationPage() {
     <Link href={club ? `/clubs/${club.slug}` : "/"} className={styles.back}>← Back to club</Link>
     <span className={styles.eyebrow}>PLAYER REGISTRATION</span>
     <h1>{club ? `Join ${club.name}` : "Join a club team"}</h1>
+    {club&&(club.venue_name||club.town)&&<p><strong>{[club.venue_name,club.town,club.postcode].filter(Boolean).join(" · ")}</strong></p>}
     <p>Submit your request and a club organiser will approve or decline it. You are not added automatically.</p>
-    <aside className={styles.terms}><strong>Before you join</strong><p>{rules?.fixture_rules || "Matches must be arranged and played in line with this club’s league rules."}</p>{rules?.custom_rules && <p>{rules.custom_rules}</p>}</aside>
+    <aside className={styles.terms}><strong>Before you join</strong><p>{club?.player_registration_terms||rules?.fixture_rules || "Matches must be arranged and played in line with this club’s league rules."}</p>{rules?.custom_rules && <p>{rules.custom_rules}</p>}</aside>
     <form onSubmit={submit}>
       <label>Full name<input required minLength={2} maxLength={120} value={name} onChange={(e) => setName(e.target.value)} /></label>
       <label>Phone <small>(optional)</small><input maxLength={40} value={phone} onChange={(e) => setPhone(e.target.value)} /></label>
