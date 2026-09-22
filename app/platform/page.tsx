@@ -22,13 +22,13 @@ type View =
   | { status: "error"; message: string }
   | { status: "ready"; clubs: ClubSummary[]; applications: Application[] };
 
-/** Initial read-only overview. Authorization for future write actions must be server-side
- * and enforced with club-scoped RLS; rendering this page is not a write authorization. */
 export default function PlatformControlCentre() {
   const supabase = useMemo(() => createClient(), []);
   const [view, setView] = useState<View>({ status: "loading" });
   const [busy,setBusy]=useState("");
   const [notice,setNotice]=useState("");
+  const [email,setEmail]=useState("");
+  const [password,setPassword]=useState("");
   const load=useCallback(async()=>{
       try {
         const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -122,6 +122,8 @@ export default function PlatformControlCentre() {
   function setClubStatus(id:string,value:boolean){return action(`club-${id}`,supabase.rpc("rallora_platform_set_club_status",{p_club_id:id,p_is_active:value}),value?"Club activated.":"Club suspended.");}
   function setPlan(id:string,plan:string,status:string){return action(`plan-${id}`,supabase.rpc("rallora_platform_set_plan",{p_club_id:id,p_plan_code:plan,p_status:status}),"Subscription updated.");}
   function setFeature(id:string,feature:string,enabled:boolean){return action(`feature-${id}-${feature}`,supabase.rpc("rallora_platform_set_feature",{p_club_id:id,p_feature_key:feature,p_enabled:enabled}),"Feature access updated.");}
+  async function signIn(event:React.FormEvent<HTMLFormElement>){event.preventDefault();setBusy("sign-in");setNotice("");const {error}=await supabase.auth.signInWithPassword({email:email.trim(),password});if(error){setNotice(error.message);setBusy("");return}setPassword("");setBusy("");await load()}
+  async function signOut(){setBusy("sign-out");await supabase.auth.signOut();setBusy("");setView({status:"signed_out"})}
 
   const summaries = view.status === "ready" ? view.clubs : [];
   const totals = {
@@ -135,6 +137,7 @@ export default function PlatformControlCentre() {
     <nav className={styles.nav}>
       <RalloraLogo variant="light" width={218} /><span>Platform Control Centre</span>
       <Link href="/notifications">Notifications</Link>
+      {view.status==="ready"&&<button className={styles.signOut} disabled={busy==="sign-out"} onClick={()=>void signOut()}>Sign out</button>}
       <span className={styles.badge}>PLATFORM ADMIN</span>
     </nav>
     <header className={styles.hero}>
@@ -144,11 +147,11 @@ export default function PlatformControlCentre() {
     </header>
     {view.status === "loading" && <p className={styles.notice} role="status">Checking administrator access and loading clubs…</p>}
     {view.status === "signed_out" && <section className={styles.notice}>
-      <h2>Sign in required</h2><p>Sign in using the existing Rallora admin area.</p>
-      <Link href="/#admin">Open administrator sign-in →</Link>
+      <h2>Rallora administrator sign in</h2><p>Use your Rallora platform account. Club organisers sign in through their own club dashboard.</p>
+      <form className={styles.loginForm} onSubmit={signIn}><label>Email<input type="email" autoComplete="username" required value={email} onChange={event=>setEmail(event.target.value)} /></label><label>Password<input type="password" autoComplete="current-password" required value={password} onChange={event=>setPassword(event.target.value)} /></label><button disabled={busy==="sign-in"}>{busy==="sign-in"?"Signing in…":"Sign in to Rallora"}</button>{notice&&<p role="alert">{notice}</p>}</form>
     </section>}
     {view.status === "forbidden" && <section className={styles.notice} role="alert">
-      <h2>Access denied</h2><p>This area is available only to Rallora platform administrators.</p>
+      <h2>Access denied</h2><p>This area is available only to Rallora platform administrators.</p><button className={styles.switchAccount} onClick={()=>void signOut()}>Sign out and use another account</button>
     </section>}
     {view.status === "error" && <section className={styles.notice} role="alert">
       <h2>Could not load the control centre</h2><p>{view.message}</p>

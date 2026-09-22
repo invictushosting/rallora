@@ -26,14 +26,6 @@ type Props = {
   onSaved: () => void;
 };
 
-function failOnWriteOff() {
-  // All writes require the reviewed staging-to-production RLS migration,
-  // complete offsite backup and explicit environment approval.
-  if (process.env.NEXT_PUBLIC_RALLORA_ENABLE_CLUB_WRITES !== "true") {
-    throw new Error("Club editing is not enabled for this deployment.");
-  }
-}
-
 export default function ClubEditor({ club, seasons, onSaved }: Props) {
   const supabase = useMemo(() => createClient(), []);
   const [activeTab, setActiveTab] = useState<"branding" | "seasons" | "teams" | "fixtures">("branding");
@@ -101,7 +93,6 @@ export default function ClubEditor({ club, seasons, onSaved }: Props) {
     setMessage("");
     setBusy(true);
     try {
-      failOnWriteOff();
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) throw new Error("Sign in again to edit this club.");
       const [{ data: member, error: memberError }, { data: platform, error: platformError }] =

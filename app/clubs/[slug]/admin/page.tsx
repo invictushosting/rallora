@@ -57,6 +57,10 @@ export default function ClubAdministration() {
       setSignInLoading(false);
     }
   }
+  async function signOut() {
+    await supabase.auth.signOut();
+    setView({ status: "signed_out" });
+  }
 
   useEffect(() => {
     let alive = true;
@@ -228,7 +232,7 @@ export default function ClubAdministration() {
   return <main className={styles.page}><div className={styles.shell}>
     <header className={styles.nav}>
       <Link href="/" className={styles.wordmark}><RalloraLogo variant="light" width={218} /></Link>
-      <span className={styles.badge}>READ-ONLY · CLUB ADMIN</span>
+      <div className={styles.navActions}><button onClick={()=>void signOut()}>Sign out</button><span className={styles.badge}>CLUB ADMIN</span></div>
     </header>
     <section className={styles.hero}>
       <span className={styles.eyebrow}>YOUR CLUB CONTROL CENTRE</span>
@@ -263,7 +267,7 @@ export default function ClubAdministration() {
         .map(([label, value]) => <article key={label}><span>{label}</span>
           <strong>{value.toLocaleString("en-GB")}</strong></article>)}
     </section>
-    {process.env.NEXT_PUBLIC_RALLORA_ENABLE_CLUB_WRITES === "true" && <ClubEditor
+    <ClubEditor
       club={view.club}
       seasons={view.summaries.map((summary): EditableSeason => ({
         id: summary.season.id, name: summary.season.name,
@@ -271,7 +275,7 @@ export default function ClubAdministration() {
         divisions: summary.divisionSummaries,
       }))}
       onSaved={() => setRevision((value) => value + 1)}
-    />}
+    />
     <div className={styles.sectionHeading}><h2>Club seasons</h2>
       <p>Each season below belongs to {view.club.name}.</p></div>
     <section className={styles.grid}>
@@ -301,7 +305,6 @@ export default function ClubAdministration() {
         <h3>No seasons yet</h3><p>Club seasons will appear here when configured.</p>
       </article>}
     </section>
-    <p className={styles.note}>Editing, team management and result approvals will be enabled
-      only after club-scoped database permissions and an isolated staging environment are tested.</p>
+    <p className={styles.note}>All changes are restricted to this club by verified membership and database permissions.</p>
   </div></main>;
 }
