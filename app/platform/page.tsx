@@ -2,7 +2,7 @@
 
 import RalloraLogo from "@/app/components/rallora-logo";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import styles from "./platform.module.css";
@@ -12,7 +12,10 @@ type Season = {
   id: string; club_id: string; name: string;
   status: "draft" | "active" | "completed";
 };
-type ClubSummary = { club: Club; seasons: Season[]; teams: number; fixtures: number };
+type Subscription = { plan_code:string; status:string };
+type Entitlement = { feature_key:string; is_enabled:boolean };
+type ClubSummary = { club: Club; seasons: Season[]; teams: number; fixtures: number;
+  members:number; players:number; subscription:Subscription|null; features:Entitlement[] };
 type Application = { id:string; club_name:string; requested_slug:string; contact_email:string; plan_code:string; status:string; created_at:string };
 type View =
   | { status: "loading" | "signed_out" | "forbidden" }
@@ -24,19 +27,14 @@ type View =
 export default function PlatformControlCentre() {
   const supabase = useMemo(() => createClient(), []);
   const [view, setView] = useState<View>({ status: "loading" });
-  async function approveApplication(id:string) {
-    const { error } = await supabase.rpc("rallora_approve_club_application", { p_application_id: id });
-    if (error) { alert(error.message); return; }
-    window.location.reload();
-  }
-  useEffect(() => {
-    let current = true;
-    async function load() {
+  const [busy,setBusy]=useState("");
+  const [notice,setNotice]=useState("");
+  const load=useCallback(async()=>{
       try {
         const { data: { user }, error: authError } = await supabase.auth.getUser();
         if (authError && authError.name !== "AuthSessionMissingError") throw authError;
         if (!user) {
-          if (current) setView({ status: "signed_out" });
+          setView({ status: "signed_out" });
           return;
         }
         const { data: admin, error: adminError } = await supabase
@@ -44,7 +42,7 @@ export default function PlatformControlCentre() {
           .eq("user_id", user.id).maybeSingle();
         if (adminError) throw adminError;
         if (!admin) {
-          if (current) setView({ status: "forbidden" });
+          setView({ status: "forbidden" });
           return;
         }
         const { data: rows, error: clubsError } = await supabase
@@ -58,7 +56,16 @@ export default function PlatformControlCentre() {
               .eq("club_id", club.id).order("created_at", { ascending: false });
             if (seasonError) throw seasonError;
             const seasons = (seasonRows ?? []) as Season[];
-            if (!seasons.length) return { club, seasons, teams: 0, fixtures: 0 };
+            const [membershipCount,playerCount,subscriptionReply,featureReply]=await Promise.all([
+              supabase.from("rallora_club_memberships").select("id",{count:"exact",head:true}).eq("club_id",club.id).eq("status","active"),
+              supabase.from("rallora_team_roster_memberships").select("id",{count:"exact",head:true}).eq("club_id",club.id),
+              supabase.from("rallora_club_subscriptions").select("plan_code,status").eq("club_id",club.id).maybeSingle(),
+              supabase.from("rallora_club_feature_entitlements").select("feature_key,is_enabled").eq("club_id",club.id),
+            ]);
+            if(membershipCount.error||playerCount.error||subscriptionReply.error||featureReply.error) throw membershipCount.error||playerCount.error||subscriptionReply.error||featureReply.error;
+            const common={club,seasons,members:membershipCount.count??0,players:playerCount.count??0,
+              subscription:subscriptionReply.data as Subscription|null,features:(featureReply.data??[])as Entitlement[]};
+            if (!seasons.length) return { ...common, teams: 0, fixtures: 0 };
             const ids = seasons.map(s => s.id);
             const { data: divisionRows, error: divisionError } = await supabase
               .from("divisions").select("id").in("season_id", ids);
@@ -75,7 +82,7 @@ export default function PlatformControlCentre() {
             if (fixtureCount.error) throw fixtureCount.error;
             if (teamCount.error) throw teamCount.error;
             return {
-              club, seasons,
+              ...common,
               teams: teamCount.count ?? 0,
               fixtures: fixtureCount.count ?? 0,
             };
@@ -84,14 +91,15 @@ export default function PlatformControlCentre() {
         const applicationsReply = await supabase.from("rallora_club_applications")
           .select("id,club_name,requested_slug,contact_email,plan_code,status,created_at").order("created_at",{ascending:false});
         if (applicationsReply.error) throw applicationsReply.error;
-        if (current) setView({ status: "ready", clubs: summaries, applications: (applicationsReply.data ?? []) as Application[] });
+        setView({ status: "ready", clubs: summaries, applications: (applicationsReply.data ?? []) as Application[] });
       } catch (e) {
-        if (current) setView({
+        setView({
           status: "error",
           message: e instanceof Error ? e.message : "Could not load clubs.",
         });
       }
-    }
+  },[supabase]);
+  useEffect(() => {
     void load();
     // Defer rechecking until outside the Supabase auth callback.
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -100,11 +108,20 @@ export default function PlatformControlCentre() {
       timer = setTimeout(() => { void load(); }, 0);
     });
     return () => {
-      current = false;
       if (timer) clearTimeout(timer);
       listener.subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, [supabase,load]);
+
+  async function action(key:string,request:PromiseLike<{error:Error|null}>,success:string){
+    setBusy(key);setNotice("");const {error}=await request;if(error){setNotice(error.message);setBusy("");return;}
+    setNotice(success);setBusy("");await load();
+  }
+  function approveApplication(id:string){return action(`application-${id}`,supabase.rpc("rallora_approve_club_application",{p_application_id:id}),"Club approved and activated.");}
+  function declineApplication(id:string){return action(`application-${id}`,supabase.rpc("rallora_platform_decline_application",{p_application_id:id}),"Application declined.");}
+  function setClubStatus(id:string,value:boolean){return action(`club-${id}`,supabase.rpc("rallora_platform_set_club_status",{p_club_id:id,p_is_active:value}),value?"Club activated.":"Club suspended.");}
+  function setPlan(id:string,plan:string,status:string){return action(`plan-${id}`,supabase.rpc("rallora_platform_set_plan",{p_club_id:id,p_plan_code:plan,p_status:status}),"Subscription updated.");}
+  function setFeature(id:string,feature:string,enabled:boolean){return action(`feature-${id}-${feature}`,supabase.rpc("rallora_platform_set_feature",{p_club_id:id,p_feature_key:feature,p_enabled:enabled}),"Feature access updated.");}
 
   const summaries = view.status === "ready" ? view.clubs : [];
   const totals = {
@@ -117,7 +134,7 @@ export default function PlatformControlCentre() {
   return <main className={styles.page}><div className={styles.shell}>
     <nav className={styles.nav}>
       <RalloraLogo variant="light" width={218} /><span>Platform Control Centre</span>
-      <span className={styles.badge}>READ-ONLY · PHASE 1</span>
+      <span className={styles.badge}>PLATFORM ADMIN</span>
     </nav>
     <header className={styles.hero}>
       <small>ONE PLATFORM. EVERY CLUB.</small>
@@ -136,6 +153,7 @@ export default function PlatformControlCentre() {
       <h2>Could not load the control centre</h2><p>{view.message}</p>
     </section>}
     {view.status === "ready" && <>
+      {notice&&<p className={styles.notice} role="status">{notice}</p>}
       <section className={styles.metrics} aria-label="Platform summary">
         {([["Clubs", summaries.length], ["Active clubs", totals.activeClubs],
           ["Active seasons", totals.activeSeasons], ["Teams", totals.teams],
@@ -146,7 +164,7 @@ export default function PlatformControlCentre() {
       </section>
       <h2>Registered clubs</h2>
       <section className={styles.grid} aria-label="Registered clubs">
-        {summaries.map(({ club, seasons, teams, fixtures }) =>
+        {summaries.map(({ club, seasons, teams, fixtures, members, players, subscription, features }) =>
           <article className={styles.card} key={club.id}>
             <span className={styles.clubIcon}>{club.name.slice(0, 1).toUpperCase()}</span>
             <span className={styles.status}>{club.is_active ? "ACTIVE" : "INACTIVE"}</span>
@@ -155,7 +173,20 @@ export default function PlatformControlCentre() {
               <div><dt>Seasons</dt><dd>{seasons.length}</dd></div>
               <div><dt>Teams</dt><dd>{teams}</dd></div>
               <div><dt>Fixtures</dt><dd>{fixtures}</dd></div>
+              <div><dt>Organisers</dt><dd>{members}</dd></div>
+              <div><dt>Players</dt><dd>{players}</dd></div>
             </dl>
+            <div className={styles.controls}>
+              <label>Plan<select defaultValue={subscription?.plan_code??"starter"} id={`plan-${club.id}`}>
+                <option value="starter">Starter</option><option value="league">League</option><option value="pro">Pro</option>
+              </select></label>
+              <label>Status<select defaultValue={subscription?.status??"trialing"} id={`status-${club.id}`}>
+                <option value="trialing">Trial</option><option value="active">Active</option><option value="past_due">Past due</option><option value="paused">Paused</option><option value="cancelled">Cancelled</option>
+              </select></label>
+              <button disabled={busy===`plan-${club.id}`} onClick={()=>{const plan=(document.getElementById(`plan-${club.id}`)as HTMLSelectElement).value;const status=(document.getElementById(`status-${club.id}`)as HTMLSelectElement).value;void setPlan(club.id,plan,status)}}>Save plan</button>
+              <button disabled={busy===`club-${club.id}`} onClick={()=>void setClubStatus(club.id,!club.is_active)}>{club.is_active?"Suspend club":"Activate club"}</button>
+            </div>
+            <div className={styles.features}>{["core_league","player_registration","captain_results","social_studio","sponsors","reminders"].map(feature=><label key={feature}><input type="checkbox" checked={features.some(item=>item.feature_key===feature&&item.is_enabled)} onChange={event=>void setFeature(club.id,feature,event.target.checked)}/>{feature.replaceAll("_"," ")}</label>)}</div>
             <strong>Seasons</strong>
             {seasons.map(s => <div className={styles.season} key={s.id}>
               <span>{s.name}</span><em>{s.status}</em>
@@ -172,14 +203,11 @@ export default function PlatformControlCentre() {
           <span className={styles.status}>{application.status}</span>
           <h3>{application.club_name}</h3><p className={styles.slug}>/{application.requested_slug}</p>
           <p>{application.contact_email}</p><p>Requested plan: <strong>{application.plan_code}</strong></p>
-          {application.status === "pending" && <button onClick={() => void approveApplication(application.id)}>Approve & activate club</button>}
+          {application.status === "pending" && <div className={styles.actionRow}><button disabled={busy===`application-${application.id}`} onClick={() => void approveApplication(application.id)}>Approve & activate</button><button className={styles.secondary} disabled={busy===`application-${application.id}`} onClick={() => void declineApplication(application.id)}>Decline</button></div>}
         </article>)}
         {!view.applications.length && <article className={styles.card}><h3>No club applications</h3><p>New applications appear here for approval.</p></article>}
       </section>
-      <p className={styles.footnote}>
-        Club editing and self-service onboarding remain disabled until club-scoped
-        permissions and an isolated development database are tested.
-      </p>
+      <p className={styles.footnote}>Plan state is ready for a payment provider to be connected later; no automatic charges are taken.</p>
     </>}
   </div></main>;
 }
