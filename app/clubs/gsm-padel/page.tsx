@@ -1,3 +1,5 @@
-// GSM is a club within the unified platform, with its complete existing league UI.
-// New per-club read-only overview remains at /clubs/gsm-padel/overview.
-export { default } from "./legacy/page";
+import ClubLeagueHub from "@/app/clubs/[slug]/club-hub";
+
+export default function GsmPadelClubPage() {
+  return <ClubLeagueHub slugOverride="gsm-padel" />;
+}
