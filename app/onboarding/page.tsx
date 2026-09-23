@@ -199,20 +199,16 @@ export default function RalloraOnboardingPage() {
         return;
       }
 
-      const { data: adminRows, error } = await supabase
-        .from("admin_users")
-        .select("email")
-        .ilike("email", userEmail)
-        .limit(1);
+      const { data: isPlatformAdmin, error } = await supabase.rpc("rallora_is_platform_admin");
 
       setUserState({
         email: userEmail,
-        isAdmin: !error && Boolean(adminRows?.length),
+        isAdmin: !error && isPlatformAdmin === true,
         loading: false,
       });
 
       if (error) {
-        setAuthError("Signed in, but admin access could not be verified.");
+        setAuthError("Signed in, but platform admin access could not be verified.");
       }
     } catch (error) {
       console.error("Onboarding session check failed", error);
@@ -520,7 +516,7 @@ export default function RalloraOnboardingPage() {
 
               {!userState.isAdmin && userState.email ? (
                 <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-800">
-                  You are logged in as {userState.email}, but this user is not listed in admin_users.
+                  You are logged in as {userState.email}, but this account does not have Rallora platform admin access.
                   <button onClick={signOut} className="mt-3 block rounded-xl bg-amber-600 px-4 py-2 text-white">Sign out</button>
                 </div>
               ) : (
