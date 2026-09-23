@@ -61,6 +61,10 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [recoveryAway, setRecoveryAway] = useState("");
   const [recoveryWinner, setRecoveryWinner] = useState("");
   const [recoveryNotes, setRecoveryNotes] = useState("");
+  const [manageFixture, setManageFixture] = useState("");
+  const [manageWeek, setManageWeek] = useState("1");
+  const [manageDeadline, setManageDeadline] = useState("");
+  const [managePublish, setManagePublish] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -225,6 +229,11 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
     }, "Fixture created. Confirm its publication timing before announcing.");
   }
 
+  async function setSeasonStatus(seasonId:string,status:"draft"|"active"|"completed") { await submit(async()=>{const {error}=await supabase.rpc("rallora_set_season_status",{p_season_id:seasonId,p_status:status});if(error)throw error;},`Season marked ${status}.`); }
+
+  async function updateFixtureSchedule() { await submit(async()=>{if(!manageFixture)throw new Error("Choose a fixture.");const week=Number(manageWeek);const {error}=await supabase.rpc("rallora_update_fixture_schedule",{p_fixture_id:manageFixture,p_week_number:week,p_play_by:manageDeadline,p_available_from:managePublish});if(error)throw error;},"Fixture schedule updated."); }
+  async function cancelFixture() { await submit(async()=>{if(!manageFixture)throw new Error("Choose a fixture.");const {error}=await supabase.rpc("rallora_cancel_fixture",{p_fixture_id:manageFixture});if(error)throw error;},"Fixture cancelled."); }
+
   async function resolveResult(event: React.FormEvent) {
     event.preventDefault();
     await submit(async () => {
@@ -297,6 +306,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         <label>Division name<input required maxLength={100} value={newDivision}
           onChange={(event) => setNewDivision(event.target.value)} /></label>
         <button disabled={busy || !seasons.length} type="submit">Add division</button>
+        <div className={styles.wide}><h3>Season status</h3>{seasons.map((season)=><div key={season.id}><strong>{season.name}</strong> · {season.status} <button type="button" disabled={busy||season.status==="active"} onClick={()=>void setSeasonStatus(season.id,"active")}>Activate</button> <button type="button" disabled={busy||season.status==="completed"} onClick={()=>void setSeasonStatus(season.id,"completed")}>Complete</button></div>)}</div>
       </form>
     </div>}
     {activeTab === "teams" && <form className={styles.form} onSubmit={createTeam}>
