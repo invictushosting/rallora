@@ -148,7 +148,7 @@ export default function PlatformControlCentre() {
     {view.status === "loading" && <p className={styles.notice} role="status">Checking administrator access and loading clubs…</p>}
     {view.status === "signed_out" && <section className={styles.notice}>
       <h2>Rallora administrator sign in</h2><p>Use your Rallora platform account. Club organisers sign in through their own club dashboard.</p>
-      <form className={styles.loginForm} onSubmit={signIn}><label>Email<input type="email" autoComplete="username" required value={email} onChange={event=>setEmail(event.target.value)} /></label><label>Password<input type="password" autoComplete="current-password" required value={password} onChange={event=>setPassword(event.target.value)} /></label><button disabled={busy==="sign-in"}>{busy==="sign-in"?"Signing in…":"Sign in to Rallora"}</button>{notice&&<p role="alert">{notice}</p>}</form>
+      <form className={styles.loginForm} onSubmit={signIn}><label>Email<input type="email" autoComplete="username" required value={email} onChange={event=>setEmail(event.target.value)} /></label><label>Password<input type="password" autoComplete="current-password" required value={password} onChange={event=>setPassword(event.target.value)} /></label><button disabled={busy==="sign-in"}>{busy==="sign-in"?"Signing in…":"Sign in to Rallora"}</button><Link href="/account">Forgot your password?</Link>{notice&&<p role="alert">{notice}</p>}</form>
     </section>}
     {view.status === "forbidden" && <section className={styles.notice} role="alert">
       <h2>Access denied</h2><p>This area is available only to Rallora platform administrators.</p><button className={styles.switchAccount} onClick={()=>void signOut()}>Sign out and use another account</button>
