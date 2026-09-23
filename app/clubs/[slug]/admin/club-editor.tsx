@@ -15,6 +15,7 @@ export type EditableDivision = {
   id: string; name: string; sort_order: number;
   teams: { id: string; name: string }[];
 };
+type EditableFixture = { id:string; season_id:string; division_id:string; home_team_id:string; away_team_id:string; week_number:number; play_by:string; status:string; home_score?:string|null; away_score?:string|null; winner_team_id?:string|null };
 export type EditableSeason = {
   id: string; club_id: string; name: string; status: string;
   divisions: EditableDivision[];
@@ -24,9 +25,10 @@ type Props = {
   club: EditableClub;
   seasons: EditableSeason[];
   onSaved: () => void;
+  fixtures?: EditableFixture[];
 };
 
-export default function ClubEditor({ club, seasons, onSaved }: Props) {
+export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Props) {
   const supabase = useMemo(() => createClient(), []);
   const [activeTab, setActiveTab] = useState<"branding" | "seasons" | "teams" | "fixtures">("branding");
   const [name, setName] = useState(club.name);
@@ -67,6 +69,7 @@ export default function ClubEditor({ club, seasons, onSaved }: Props) {
     season.divisions.map((division) => ({ ...division, season_id: season.id,
       season_name: season.name })));
   const selectedDivision = divisions.find((division) => division.id === fixtureDivisionId);
+  const recoveryOptions = fixtures.filter((fixture)=>!fixtureDivisionId || fixture.division_id===fixtureDivisionId);
   const eligibleTeams = selectedDivision?.teams ?? [];
 
   useEffect(() => {
