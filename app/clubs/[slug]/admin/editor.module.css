@@ -24,3 +24,12 @@
 .success{color:#146342;border:1px solid #b5e5c9;background:#e8f9f0}
 .error{color:#a32829;border:1px solid #ffcaca;background:#fff0f0}
 @media(max-width:700px){.editor{padding:19px}.editorHead{flex-direction:column}.columns,.form{grid-template-columns:1fr}.form button{width:100%}.columns .form button{align-self:stretch}}
+
+
+@media(max-width:700px){
+ .editor{margin:16px 0 24px;padding:16px;border-radius:16px}.editorHead{gap:10px}
+ .tabs{margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px;scrollbar-width:none;scroll-snap-type:x proximity}.tabs::-webkit-scrollbar{display:none}
+ .tabs button{min-height:44px;scroll-snap-align:start}.form{gap:13px}
+ .form input,.form select,.form textarea{min-height:48px;font-size:16px}.form textarea{min-height:110px}
+ .form button{min-height:48px}.columns{gap:18px}
+}
