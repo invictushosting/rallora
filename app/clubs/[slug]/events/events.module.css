@@ -3,3 +3,15 @@
 .eventNav{display:flex;gap:9px;overflow:auto;margin:20px 0}.eventNav button{min-width:200px;text-align:left;border:1px solid #ccdae6;background:white;border-radius:14px;padding:14px;color:#061a39;font-weight:850}.eventNav button.active{border:3px solid #00b0fe}.eventNav small{display:block;color:#668099;margin-top:5px;text-transform:capitalize}.eventHead{display:flex;justify-content:space-between;align-items:center}.eventHead h2{font-size:30px;margin:8px 0}.eventHead>div:last-child{display:flex;gap:8px}.formatHelp{color:#526c82;margin-bottom:0}
 .adminGrid,.content{display:grid;grid-template-columns:1fr 2fr;gap:16px;margin-top:16px}.adminGrid form{display:grid;gap:9px}.generator{background:linear-gradient(135deg,#061a39,#123d6b);color:white}.generator span{color:#72d2ff;font-size:10px;font-weight:900;letter-spacing:1.4px}.generator h3{font-size:24px;margin:9px 0}.generator p{color:#d7e8f5}.generator button{background:#72d2ff;color:#061a39}.content{grid-template-columns:1fr 1.5fr}.table{list-style:none;padding:0}.table li{display:grid;grid-template-columns:32px 1fr auto;align-items:center;gap:10px;border-top:1px solid #e5edf3;padding:12px}.table span small{display:block;color:#73869a}.matches{display:grid;gap:10px}.match{border:1px solid #dce6ee;border-radius:13px;padding:14px;text-align:center}.match>p{margin:7px}.match>div{display:flex;justify-content:center;gap:7px;margin-top:10px}.match input{width:65px}.notice{margin:15px 0}
 @media(max-width:800px){.create,.adminGrid,.content{grid-template-columns:1fr}.eventHead{display:block}.eventHead>div:last-child{margin-top:12px}.hero{padding:32px 23px}}
+
+
+@media(max-width:800px){
+ .shell{padding:14px 12px 48px}.shell header{align-items:center;min-height:44px}.shell header a{display:flex;align-items:center;min-height:44px}
+ .hero{margin:12px 0 18px;border-radius:18px}.hero h1{font-size:clamp(36px,11vw,48px);line-height:1.05;overflow-wrap:anywhere}
+ .create{padding:16px}.create input,.create select,.adminGrid input,.adminGrid select,.match input{min-height:48px;font-size:16px;width:100%}
+ .create button,.eventHead button,.adminGrid button,.match button,.generator button{min-height:48px}
+ .eventNav{margin-left:-12px;margin-right:-12px;padding:0 12px 8px;scrollbar-width:none;scroll-snap-type:x proximity}.eventNav::-webkit-scrollbar{display:none}.eventNav button{min-width:180px;min-height:58px;scroll-snap-align:start}
+ .eventHead{padding:18px}.eventHead>div:last-child{display:grid;grid-template-columns:1fr 1fr}.eventHead>div:last-child button{width:100%}
+ .adminGrid form,.generator,.content article{padding:16px}.table li{grid-template-columns:28px minmax(0,1fr) auto;padding:11px 4px}
+ .match>div{display:grid;grid-template-columns:1fr 1fr}.match input{width:100%}
+}
