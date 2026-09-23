@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import styles from "./club.module.css";
+import revision from "./club-revision.module.css";
 import {
   makeFixtureDeadlineIcs, makeResultsCsv, type ExportFixture,
 } from "@/lib/leagues/exports";
@@ -655,19 +656,16 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
         <h2>Club partners</h2><div className={styles.sponsorGrid}>
           {content.sponsors.map((sponsor) => {
             const url = safeLink(sponsor.website_url);
+            const logo = safeLink(sponsor.logo_url);
             return <article className={styles.sponsorCard} key={sponsor.id}>
+              {logo && <span className={revision.sponsorLogo}>
+                <img src={logo} alt={`${sponsor.name} logo`} /></span>}
               <strong>{sponsor.name}</strong><span>{sponsor.sponsor_type || "Club partner"}</span>
               {url && <a href={url} target="_blank"
                 rel="noopener noreferrer">Visit partner ↗</a>}
             </article>;
           })}
         </div>
-      </section>}
-      {club.slug === "gsm-padel" && <section className={styles.notice}>
-        <h2>GSM Padel’s full league hub</h2>
-        <p>The original GSM experience includes captain submissions and
-          established league-management tools.</p>
-        <Link href="/clubs/gsm-padel">Open full GSM league →</Link>
       </section>}
       <footer className={styles.footer}>
         <p>{club.footer_text || "Your club. Your league."}</p>
