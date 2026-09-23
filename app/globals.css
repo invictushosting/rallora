@@ -1925,3 +1925,18 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 }
+
+
+@media(max-width:640px){
+ html,body{max-width:100%;overflow-x:hidden}
+ .menu-button{min-width:44px;min-height:44px}.hero-actions .primary-button,.hero-actions .secondary-button{width:100%;min-height:48px}
+ .tabs{margin-left:-14px;margin-right:-14px;padding:0 14px 8px;scrollbar-width:none;scroll-snap-type:x proximity}.tabs::-webkit-scrollbar{display:none}.tabs button{min-height:44px;scroll-snap-align:start}
+ .table-scroll{margin-left:-2px;margin-right:-2px;-webkit-overflow-scrolling:touch}
+ .public-filter-panel select,.public-filter-panel input,.admin-form input,.admin-form select,.admin-form textarea,.email-box input{font-size:16px;min-height:48px}
+ .action-list button{min-height:48px}.team-card-actions button{min-height:44px}
+ .team-profile-modal-backdrop{padding:8px;align-items:end}.team-profile-modal{max-height:calc(100dvh - 16px);border-radius:20px 20px 10px 10px;padding:16px}
+ .team-profile-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.team-profile-actions{display:grid;grid-template-columns:1fr}.team-profile-actions button{width:100%}
+ .mobile-nav{overflow-x:auto;grid-template-columns:repeat(6,minmax(58px,1fr));padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+ .mobile-nav button{min-height:52px}.footer-grid{padding-left:14px;padding-right:14px}
+ .email-box{min-height:48px}.email-box button{min-width:48px}
+}
