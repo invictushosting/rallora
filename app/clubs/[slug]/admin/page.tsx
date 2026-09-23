@@ -245,7 +245,7 @@ export default function ClubAdministration() {
       <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/events`}>Manage Americano &amp; Mexicano events →</Link>
       <a href={`/clubs/${encodeURIComponent(view.club.slug)}/social`}>Open Rallora Social Studio →</a>
       {view.club.slug === "gsm-padel" &&
-        <Link href="/clubs/gsm-padel#admin">Open existing GSM management tools →</Link>}
+        <Link href="/clubs/gsm-padel/legacy#admin">Open existing GSM management tools →</Link>}
     </section>
     <section className={styles.socialInvite}>
       <span>RALLORA SOCIAL</span><h2>Turn league updates into share-ready club stories.</h2>
