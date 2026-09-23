@@ -41,3 +41,6 @@
 
 .field .season{font:inherit;font-size:12px;border:1px solid #cedeea;border-radius:10px;background:#fff;color:#061A39;padding:12px;width:100%;min-width:0}
 .field .season:focus-visible{outline:2px solid #00B0FE;outline-offset:2px}
+
+
+@media(max-width:540px){.root{border-radius:16px}.choices{display:grid;grid-template-columns:1fr 1fr}.choices button{min-height:44px}.field textarea,.field .season{font-size:16px;min-height:48px}.copy{width:100%;min-height:48px}.confirm{min-height:44px}.example>div{align-items:flex-start;flex-direction:column}}

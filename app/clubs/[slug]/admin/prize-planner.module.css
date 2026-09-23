@@ -37,3 +37,6 @@
 .error{color:#872c30;background:#fff1f2;border:1px solid #f0bac1;border-radius:10px;padding:12px;font-size:12px}
 @media(max-width:900px){.content{grid-template-columns:1fr}.output{position:static}}
 @media(max-width:540px){.intro{padding:25px 20px}.content{padding:13px}.row{grid-template-columns:1fr}.output{padding:18px}.choice{flex-wrap:wrap}}
+
+
+@media(max-width:540px){.wrap{border-radius:16px}.field input,.field select{min-height:48px;font-size:16px}.choice{display:grid;grid-template-columns:1fr 1fr}.choice button{min-height:48px}.heroNumber{padding:18px}.breakdown div{align-items:flex-start}.breakdown dd{white-space:normal;overflow-wrap:anywhere}.payouts p{align-items:flex-start}}
