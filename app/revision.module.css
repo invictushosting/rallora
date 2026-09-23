@@ -1,0 +1,18 @@
+.courtOuter{width:280px;height:500px;transform:rotate(-18deg) perspective(600px) rotateY(-7deg);border-width:18px;border-radius:18px}
+.courtNet{top:50%}
+.courtOuter>div::before{display:none}
+.courtServiceLines::before,.courtServiceLines::after{content:"";position:absolute;left:0;width:100%;height:3px;background:#ffffffb0}
+.courtServiceLines::before{top:35%}.courtServiceLines::after{top:65%}
+.courtCentreTop,.courtCentreBottom{position:absolute;left:50%;width:3px;height:15%;background:#ffffffb0}
+.courtCentreTop{top:35%}.courtCentreBottom{top:50%}
+.clubSearch{display:block;background:#fff;border:1px solid #d6e5f2;border-radius:17px;padding:13px 18px;margin:0 0 22px}
+.clubSearch span{display:block;color:#48647f;font-size:10px;font-weight:900;letter-spacing:1.1px;text-transform:uppercase;margin-bottom:6px}
+.clubSearch input{width:100%;border:0;outline:0;color:#061a39;font:700 16px/1.4 Inter,system-ui,sans-serif;background:transparent}
+.clubSearch input::placeholder{color:#91a2b5}
+.clubLogo{background:#fff;border:1px solid #dbe5ee;overflow:hidden}
+.clubLogo img{width:100%;height:100%;object-fit:contain;padding:5px}
+.loginLinks{display:flex;gap:15px;margin-top:15px}
+.loginLinks a{font-size:12px;color:#416cb8;font-weight:800;text-decoration:none}
+.loginLinks a:hover{text-decoration:underline}
+@media(max-width:850px){.courtOuter{width:230px;height:410px}}
+@media(max-width:540px){.courtOuter{width:180px;height:320px}}
