@@ -30,3 +30,11 @@ button.bg-blue-600:hover{background:#1d4ed8}button.bg-blue-600:disabled{opacity:
 @media (max-width:760px){
   .text-5xl{font-size:2.35rem}.text-4xl{font-size:2rem}.p-8{padding:1.25rem}.rounded-\[2rem\]{border-radius:1.35rem}.rounded-\[1\.75rem\]{border-radius:1.25rem}
 }
+
+
+@media (max-width:639px){
+ .min-h-screen{min-height:100svh}.px-6{padding-left:1rem;padding-right:1rem}.p-6{padding:1rem}.p-5{padding:1rem}
+ input,textarea,select{font-size:16px!important;min-height:48px}button{min-height:44px}
+ .text-5xl{font-size:2.15rem;line-height:1.05}.text-4xl{font-size:1.85rem;line-height:1.08}
+ .rounded-3xl,.rounded-\[1\.5rem\],.rounded-\[1\.75rem\],.rounded-\[2rem\]{border-radius:1rem}
+}

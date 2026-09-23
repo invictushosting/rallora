@@ -52,3 +52,14 @@
 .socialInvite p{color:#d3e4f5;font-size:13px;line-height:1.75;max-width:690px}
 .socialInvite a{display:inline-block;margin-top:10px;border-radius:10px;background:#00B0FE;color:#061A39;text-decoration:none;font-weight:850;font-size:13px;padding:13px 17px}
 .actionRow{display:flex;gap:9px;margin-top:16px}.actionRow button{border:0;border-radius:9px;background:#0b5d42;color:#fff;padding:10px 12px;font:inherit;font-weight:800;cursor:pointer}.actionRow button+button{background:#8b2635}
+
+
+@media(max-width:490px){
+ .nav{align-items:flex-start;flex-direction:column;margin-bottom:16px}.navActions{width:100%;justify-content:space-between;gap:6px}.navActions button{min-height:44px}
+ .wordmark{min-height:44px}.hero{border-radius:18px}.hero h1{overflow-wrap:anywhere}
+ .hero a{display:flex;align-items:center;justify-content:center;min-height:44px}
+ .metrics{grid-template-columns:1fr 1fr}.sectionHeading h2{font-size:22px}
+ .numbers{grid-template-columns:1fr}.actionRow{display:grid;grid-template-columns:1fr 1fr;width:100%}.actionRow button{min-height:48px;padding:10px 8px}
+ .loginForm input{min-height:48px;font-size:16px}.loginForm button{min-height:48px}
+ .socialInvite{padding:22px 18px;border-radius:16px}.socialInvite a{display:flex;align-items:center;justify-content:center;min-height:48px}
+}
