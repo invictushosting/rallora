@@ -12,7 +12,7 @@
 .status{display:inline-block;padding:9px 14px;background:#ffffff18;color:#d7edff;border:1px solid #ffffff30;border-radius:30px;font-size:11px;font-weight:750;margin-top:6px}
 .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:29px}
 .actions a{text-decoration:none;padding:14px 18px;border-radius:11px;font-size:13px;font-weight:850}
-.cta{background:#00B0FE;color:#061A39}.outline{background:#ffffff16;border:1px solid #ffffff36;color:#fff}
+.cta{background:#00B0FE;color:#061A39}.demo{background:#fff;color:#061A39}.outline{background:#ffffff16;border:1px solid #ffffff36;color:#fff}
 .features{padding:65px 0}.heading h2{font-size:clamp(28px,3.8vw,44px);letter-spacing:-1px;margin:11px 0 24px}
 .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
 .card{background:white;border:1px solid #dae7f1;border-radius:20px;padding:25px;min-height:210px}
