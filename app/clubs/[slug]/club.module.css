@@ -113,3 +113,27 @@
 .viewShare button{border:1px solid #cbdded;background:#fff;color:#0b5782;padding:10px 13px;border-radius:10px;font-size:12px;font-weight:850;cursor:pointer}
 .viewShare button:focus-visible{outline:2px solid #00B0FE;outline-offset:2px}
 @media(max-width:540px){.viewShare{align-items:stretch;flex-direction:column}.viewShare button{width:100%}}
+
+@media(max-width:540px){
+ .header{align-items:flex-start;flex-direction:column;margin-bottom:16px}
+ .headerLinks{width:100%;display:grid;grid-template-columns:1fr 1fr}
+ .adminLink,.registerLink{display:flex;align-items:center;justify-content:center;min-height:44px;text-align:center}
+ .hero{border-radius:18px}
+ .hero h1{font-size:clamp(32px,11vw,44px);overflow-wrap:anywhere}
+ .tabs{margin-left:-12px;margin-right:-12px;padding:0 12px 10px;scrollbar-width:none;scroll-snap-type:x proximity}
+ .tabs::-webkit-scrollbar{display:none}
+ .tabs button{min-height:44px;scroll-snap-align:start}
+ .metrics{grid-template-columns:1fr 1fr}
+ .metrics article strong{font-size:27px}
+ .sectionHeading{align-items:flex-start;flex-direction:column}
+ .sectionCount{font-size:12px;padding:7px 11px}
+ .filterBar{display:grid;grid-template-columns:1fr;width:100%}
+ .filterBar label{min-width:0;width:100%}
+ .filterBar select,.filterBar input{min-height:48px;font-size:16px}
+ .tableWrap{margin-left:-15px;margin-right:-15px;width:calc(100% + 30px);padding:0 15px;-webkit-overflow-scrolling:touch}
+ .tableWrap table{min-width:480px}
+ .fixtureBottom{align-items:flex-start;flex-direction:column}
+ .match{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:6px}
+ .match strong{overflow-wrap:anywhere}
+ .announcements,.teamCard,.sponsorCard{border-radius:14px}
+}
