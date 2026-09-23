@@ -63,3 +63,23 @@
 .familyCard strong{font-size:13px;margin-top:auto;color:#007cba}
 @media(max-width:850px){.familyGrid{grid-template-columns:1fr}.familyCard{min-height:210px}}
 @media(max-width:540px){.productFamily{padding:46px 12px 5px}.header nav>a[href="/products"]{font-size:11px}}
+
+@media(max-width:540px){
+ .header{gap:10px}
+ .nav{gap:6px}
+ .nav>a[href="/products"]{display:none}
+ .nav .navButton{display:flex;align-items:center;justify-content:center;min-height:44px;padding:0 12px;font-size:10px}
+ .hero{min-height:0}
+ .heroContent{padding-top:32px}
+ .hero h1{font-size:clamp(39px,12vw,48px);line-height:1;overflow-wrap:anywhere}
+ .heroContent>p{font-size:14px;line-height:1.65}
+ .actions{display:grid;grid-template-columns:1fr;width:100%}
+ .actions a{display:flex;align-items:center;justify-content:center;min-height:48px;text-align:center}
+ .heroFoot{gap:14px;justify-content:space-between}
+ .sectionTop{align-items:flex-start;flex-direction:column}
+ .count{align-self:flex-start}
+ .clubSearch{padding:12px 15px}
+ .clubSearch input{font-size:16px}
+ .clubLink{min-height:48px;align-items:center}
+ .familyCard{min-height:190px;padding:23px}
+}
