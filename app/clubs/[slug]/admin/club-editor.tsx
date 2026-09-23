@@ -54,6 +54,11 @@ export default function ClubEditor({ club, seasons, onSaved }: Props) {
   const [fixtureWeek, setFixtureWeek] = useState("1");
   const [fixtureDeadline, setFixtureDeadline] = useState("");
   const [fixturePublish, setFixturePublish] = useState(new Date().toISOString().slice(0, 10));
+  const [recoveryFixture, setRecoveryFixture] = useState("");
+  const [recoveryHome, setRecoveryHome] = useState("");
+  const [recoveryAway, setRecoveryAway] = useState("");
+  const [recoveryWinner, setRecoveryWinner] = useState("");
+  const [recoveryNotes, setRecoveryNotes] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -215,6 +220,24 @@ export default function ClubEditor({ club, seasons, onSaved }: Props) {
       if (mutationError) throw mutationError;
       setFixtureHome(""); setFixtureAway("");
     }, "Fixture created. Confirm its publication timing before announcing.");
+  }
+
+  async function resolveResult(event: React.FormEvent) {
+    event.preventDefault();
+    await submit(async () => {
+      if (!recoveryFixture) throw new Error("Enter the fixture ID to resolve.");
+      const { error: mutationError } = await supabase.rpc("rallora_admin_resolve_result", { p_fixture_id: recoveryFixture.trim(), p_home_score: recoveryHome.trim(), p_away_score: recoveryAway.trim(), p_winner_team_id: recoveryWinner.trim() || null, p_notes: recoveryNotes.trim() || null });
+      if (mutationError) throw mutationError;
+      setRecoveryHome(""); setRecoveryAway(""); setRecoveryWinner(""); setRecoveryNotes("");
+    }, "Official result saved and standings recalculated.");
+  }
+
+  async function reopenFixture() {
+    await submit(async () => {
+      if (!recoveryFixture) throw new Error("Enter the fixture ID to reopen.");
+      const { error: mutationError } = await supabase.rpc("rallora_admin_reopen_fixture", { p_fixture_id: recoveryFixture.trim() });
+      if (mutationError) throw mutationError;
+    }, "Fixture reopened and standings recalculated.");
   }
 
   return <section className={styles.editor}>
