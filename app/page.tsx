@@ -98,15 +98,18 @@ export default function RalloraHome() {
 
     <section className={styles.hero}>
       <div className={styles.heroContent}>
-        <span className={styles.eyebrow}>PRE-LAUNCH · NOW ONBOARDING PILOT CLUBS</span>
-        <h1>The smarter way to<br /><span>run your padel leagues.</span></h1>
-        <p>Rallora brings league management, results, player communication and social content together in one platform — built specifically for padel clubs.</p>
+        <span className={styles.eyebrow}>THE PADEL LEAGUE PLATFORM</span>
+        <h1>Every club.<br /><span>One home for padel.</span></h1>
+        <p>Fixtures, divisions, league tables and results, organised around your club.
+          One Rallora platform, built to give each club its own identity.</p>
         <div className={styles.actions}>
-          <Link href="/register-club" className={styles.primaryButton}>Join the pilot programme ↗</Link>
-          <a href="#workflow" className={styles.secondaryButton}>See how Rallora works →</a>
+          <a href="#clubs" className={styles.primaryButton}>Explore clubs ↗</a>
+          <Link href="/register-club" className={styles.secondaryButton}>
+            Register your club →
+          </Link>
         </div>
         <div className={styles.heroFoot}>
-          <span>LEAGUES · RESULTS · COMMS</span><span>SOCIAL CONTENT · ONE WORKFLOW</span>
+          <span>CLUB-BY-CLUB</span><span>PADEL, SIMPLIFIED</span>
         </div>
       </div>
       <div className={styles.courtArt} aria-hidden="true">
@@ -116,41 +119,41 @@ export default function RalloraHome() {
           <div className={revision.courtCentreTop} /><div className={revision.courtCentreBottom} />
         </div></div>
         <div className={styles.ball} />
-        <span className={styles.artLabel}>YOUR LEAGUE. LESS ADMIN.</span>
+        <span className={styles.artLabel}>YOUR COURT. YOUR LEAGUE.</span>
       </div>
 
     </section>
 
-    <section className={styles.productFamily} id="workflow" aria-labelledby="rallora-family">
+    <section className={styles.productFamily} aria-labelledby="rallora-family">
       <div className={styles.familyHeading}>
-        <span className={styles.eyebrow}>FROM FIXTURE TO SOCIAL POST</span>
-        <h2 id="rallora-family">Run the league. Rallora handles the flow.</h2>
-        <p>Create competitions, let captains submit results, keep tables moving and turn league activity into club content.</p>
+        <span className={styles.eyebrow}>ONE RALLORA PLATFORM</span>
+        <h2 id="rallora-family">Three products. One connected game.</h2>
+        <p>Run your league, share your story and connect with other clubs.</p>
       </div>
       <div className={styles.familyGrid}>
         <Link href="/leagues" className={styles.familyCard}>
-          <span>01 / RUN</span><h3>League management</h3>
-          <p>Divisions, teams, fixtures, results and standings in one club dashboard.</p>
+          <span>01 / COMPETE</span><h3>Rallora Leagues</h3>
+          <p>Fixtures, results, tables and club competitions.</p>
           <strong>Explore Leagues ↗</strong>
         </Link>
         <Link href="/social" className={styles.familyCard}>
-          <span>02 / AUTOMATE</span><h3>Captain-led results</h3>
-          <p>Give captains secure access to submit match results and keep the competition moving.</p>
-          <strong>See the workflow ↗</strong>
+          <span>02 / SHARE</span><h3>Rallora Social</h3>
+          <p>Create club news and branded posts for the channels players use.</p>
+          <strong>Explore Social ↗</strong>
         </Link>
         <Link href="/interclub" className={styles.familyCard}>
-          <span>03 / SHARE</span><h3>Rallora Social Studio</h3>
-          <p>Turn fixtures, results and league moments into professional branded club content.</p>
-          <strong>Explore Social ↗</strong>
+          <span>03 / CONNECT · COMING SOON</span><h3>Rallora Interclub</h3>
+          <p>A future home for challenges and champions versus champions.</p>
+          <strong>Discover Interclub ↗</strong>
         </Link>
       </div>
     </section>
 
     <section className={styles.clubs} id="clubs" aria-labelledby="club-title">
       <div className={styles.sectionTop}>
-        <div><span className={styles.eyebrow}>RALLORA IN ACTION</span>
-          <h2 id="club-title">Explore a Rallora club</h2>
-          <p>See the live club experience, or join the pilot programme to bring your leagues onto Rallora.</p>
+        <div><span className={styles.eyebrow}>DISCOVER RALLORA</span>
+          <h2 id="club-title">Find your club</h2>
+          <p>Choose your club to see its latest league season.</p>
         </div>
         {state.kind === "ready" && <span className={styles.count}>
           {state.clubs.length} {state.clubs.length === 1 ? "CLUB" : "CLUBS"}
@@ -211,10 +214,10 @@ export default function RalloraHome() {
     </section>
 
     <section className={styles.bottom}>
-      <span className={styles.eyebrow}>PILOT CLUBS</span>
-      <h2>Help shape the future of<br />padel league management.</h2>
-      <p>We’re onboarding a small number of clubs for early access, hands-on support and direct input into Rallora’s development.</p>
-      <Link href="/register-club">Apply to become a pilot club ↗</Link>
+      <span className={styles.eyebrow}>BUILT FOR CLUBS</span>
+      <h2>The league stays yours.<br />The admin gets easier.</h2>
+      <p>League tables, fixtures, results, teams and captain access under one roof.</p>
+      <Link href="/register-club">Register your club ↗</Link>
     </section>
     <footer className={styles.footer}>
       <span><strong>rallora.</strong> A padel league platform.</span>
