@@ -190,7 +190,7 @@ export default function PlatformControlCentre() {
               <button disabled={busy===`plan-${club.id}`} onClick={()=>{const plan=(document.getElementById(`plan-${club.id}`)as HTMLSelectElement).value;const status=(document.getElementById(`status-${club.id}`)as HTMLSelectElement).value;void setPlan(club.id,plan,status)}}>Save plan</button>
               <button disabled={busy===`club-${club.id}`} onClick={()=>void setClubStatus(club.id,!club.is_active)}>{club.is_active?"Suspend club":"Activate club"}</button>
             </div>
-            <div className={styles.features}>{["core_league","player_registration","captain_results","social_studio","sponsors","reminders"].map(feature=><label key={feature}><input type="checkbox" checked={features.some(item=>item.feature_key===feature&&item.is_enabled)} onChange={event=>void setFeature(club.id,feature,event.target.checked)}/>{feature.replaceAll("_"," ")}</label>)}</div>
+            <div className={styles.features}>{["core_league","player_registration","captain_results","social_studio","sponsors","reminders","club_events"].map(feature=><label key={feature}><input type="checkbox" checked={features.some(item=>item.feature_key===feature&&item.is_enabled)} onChange={event=>void setFeature(club.id,feature,event.target.checked)}/>{feature.replaceAll("_"," ")}</label>)}</div>
             <strong>Seasons</strong>
             {seasons.map(s => <div className={styles.season} key={s.id}>
               <span>{s.name}</span><em>{s.status}</em>
