@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import styles from "./page.module.css";
+import revision from "./revision.module.css";
 
 type Club = {
   id: string;
@@ -14,6 +15,7 @@ type Club = {
   short_name: string | null;
   primary_color: string | null;
   welcome_text: string | null;
+  logo_url: string | null;
 };
 type Season = { id: string; club_id: string; status: string; name: string };
 type State =
@@ -24,17 +26,24 @@ type State =
 function safeColor(color: string | null) {
   return color && /^#[\da-fA-F]{6}$/.test(color) ? color : "#4169f3";
 }
+function safeImage(url: string | null) {
+  if (!url) return null;
+  if (url.startsWith("/") && !url.startsWith("//")) return url;
+  try { const parsed = new URL(url); return parsed.protocol === "https:" ? parsed.href : null; }
+  catch { return null; }
+}
 
 export default function RalloraHome() {
   const supabase = useMemo(() => createClient(), []);
   const [state, setState] = useState<State>({ kind: "loading" });
+  const [clubSearch, setClubSearch] = useState("");
 
   useEffect(() => {
     // Preserve old GSM bookmarks (#admin, #captain, #fixtures, etc.)
     // without creating a second live app or an endless redirect loop.
     const legacyHash = /^(#admin|#captain|#fixtures|#tables|#teams|#cup|#team=)/i;
     if (legacyHash.test(window.location.hash)) {
-      window.location.replace(`/clubs/gsm-padel${window.location.hash}`);
+      window.location.replace(`/clubs/gsm-padel/legacy${window.location.hash}`);
       return;
     }
 
@@ -43,7 +52,7 @@ export default function RalloraHome() {
       try {
         const { data: clubs, error } = await supabase
           .from("clubs")
-          .select("id,slug,name,short_name,primary_color,welcome_text")
+          .select("id,slug,name,short_name,primary_color,welcome_text,logo_url")
           .eq("is_active", true)
           .order("created_at", { ascending: true });
         if (error) throw error;
@@ -83,7 +92,7 @@ export default function RalloraHome() {
       <nav className={styles.nav} aria-label="Main navigation">
         <a href="#clubs">Find your club</a>
         <Link href="/products">Products</Link>
-        <Link href="/platform" className={styles.navButton}>Platform sign in →</Link>
+        <a href="#clubs" className={styles.navButton}>Club &amp; captain login →</a>
       </nav>
     </header>
 
@@ -95,21 +104,24 @@ export default function RalloraHome() {
           One Rallora platform, built to give each club its own identity.</p>
         <div className={styles.actions}>
           <a href="#clubs" className={styles.primaryButton}>Explore clubs ↗</a>
-          <Link href="/clubs/gsm-padel" className={styles.secondaryButton}>
-            Open GSM Padel league →
+          <Link href="/register-club" className={styles.secondaryButton}>
+            Register your club →
           </Link>
         </div>
         <div className={styles.heroFoot}>
-          <span>CLUB-BY-CLUB</span><span>PADel, SIMPLIFIED</span>
+          <span>CLUB-BY-CLUB</span><span>PADEL, SIMPLIFIED</span>
         </div>
       </div>
       <div className={styles.courtArt} aria-hidden="true">
-        <div className={styles.courtOuter}><div className={styles.courtInner}>
-          <div className={styles.courtNet} /><div className={styles.courtCircle} />
+        <div className={`${styles.courtOuter} ${revision.courtOuter}`}><div className={styles.courtInner}>
+          <div className={`${styles.courtNet} ${revision.courtNet}`} />
+          <div className={revision.courtServiceLines} />
+          <div className={revision.courtCentreTop} /><div className={revision.courtCentreBottom} />
         </div></div>
         <div className={styles.ball} />
         <span className={styles.artLabel}>YOUR COURT. YOUR LEAGUE.</span>
       </div>
+
     </section>
 
     <section className={styles.productFamily} aria-labelledby="rallora-family">
@@ -148,6 +160,12 @@ export default function RalloraHome() {
         </span>}
       </div>
 
+      <label className={revision.clubSearch}>
+        <span>Search clubs</span>
+        <input type="search" value={clubSearch} placeholder="Search by club name…"
+          onChange={(event) => setClubSearch(event.target.value)} />
+      </label>
+
       {state.kind === "loading" && <p className={styles.notice} role="status">Loading clubs…</p>}
       {state.kind === "error" && <p className={styles.notice} role="alert">
         Clubs could not be loaded. {state.message}
@@ -156,15 +174,21 @@ export default function RalloraHome() {
         <p className={styles.notice}>No clubs are published yet.</p>}
 
       {state.kind === "ready" && <div className={styles.grid}>
-        {state.clubs.map((club) => {
+        {state.clubs.filter((club) => [club.name, club.short_name, club.slug]
+          .some((value) => value?.toLowerCase().includes(clubSearch.trim().toLowerCase())))
+          .map((club) => {
           const clubSeasons = state.seasons.filter((season) => season.club_id === club.id);
           const activeSeason = clubSeasons.find((season) => season.status === "active");
           const color = safeColor(club.primary_color);
+          const logo = safeImage(club.logo_url);
           const isDemo = club.slug === "new-padel-club";
           return <article className={styles.club} key={club.id}
             style={{ "--club-accent": color } as React.CSSProperties}>
             <div className={styles.clubHead}>
-              <span className={styles.clubMark}>{(club.short_name || club.name).slice(0, 2).toUpperCase()}</span>
+              <span className={`${styles.clubMark} ${logo ? revision.clubLogo : ""}`}>
+                {logo ? <img src={logo} alt={`${club.name} logo`} />
+                  : (club.short_name || club.name).slice(0, 2).toUpperCase()}
+              </span>
               <span className={styles.activeBadge}>
                 {isDemo ? "DEMO CLUB" : "CLUB HUB"}</span>
             </div>
@@ -180,8 +204,10 @@ export default function RalloraHome() {
             <Link className={styles.clubLink} href={`/clubs/${encodeURIComponent(club.slug)}`}>
               Explore club <span>↗</span>
             </Link>
-            {club.slug === "gsm-padel" && <Link className={styles.legacyLink}
-              href="/clubs/gsm-padel/overview">View GSM league overview →</Link>}
+            <div className={revision.loginLinks}>
+              <Link href={`/clubs/${encodeURIComponent(club.slug)}/admin`}>Club login</Link>
+              <Link href={`/clubs/${encodeURIComponent(club.slug)}/captain`}>Captain login</Link>
+            </div>
           </article>;
         })}
       </div>}
@@ -191,7 +217,7 @@ export default function RalloraHome() {
       <span className={styles.eyebrow}>BUILT FOR CLUBS</span>
       <h2>The league stays yours.<br />The admin gets easier.</h2>
       <p>League tables, fixtures, results, teams and captain access under one roof.</p>
-      <a href="#clubs">Explore your club ↗</a>
+      <Link href="/register-club">Register your club ↗</Link>
     </section>
     <footer className={styles.footer}>
       <span><strong>rallora.</strong> A padel league platform.</span>
