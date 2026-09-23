@@ -20,7 +20,7 @@ const PRODUCTS: Record<ProductKey, {
       { title: "Club identity", text: "Every club retains its own colours, sponsors and league community." },
       { title: "Entry fees & prizes", text: "Plan free or paid league entry, sponsor contributions and cash or physical prizes. Checkout is not yet enabled." },
     ],
-    primaryLabel: "Find your club", primaryHref: "/#clubs",
+    primaryLabel: "Explore clubs", primaryHref: "/#clubs",
   },
   social: {
     name: "Rallora Social", label: "02 / SOCIAL & COMMUNICATIONS",
@@ -70,7 +70,9 @@ export default function ProductLanding({ product }: { product: ProductKey }) {
         <span className={styles.status}>{item.status}</span>
         <div className={styles.actions}>
           <Link className={styles.cta} href={item.primaryHref}>{item.primaryLabel} ↗</Link>
-          <Link className={styles.outline} href="/products">Explore the Rallora platform →</Link>
+          {product === "leagues" && <Link className={styles.demo} href="/clubs/new-padel-club">
+            Try the live demo →</Link>}
+          <Link className={styles.outline} href="/register-club">Register your club →</Link>
         </div>
       </section>
       <section className={styles.features} aria-labelledby="product-features">
