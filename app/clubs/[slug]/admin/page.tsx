@@ -16,6 +16,7 @@ type Season = { id: string; club_id: string; name: string; status: string };
 type Membership = { club_id: string; user_id: string; role: string; status: string };
 type DivisionSummary = { id: string; name: string; sort_order: number;
   teams: { id: string; name: string }[] };
+type AdminFixture = { id:string; season_id:string; division_id:string; home_team_id:string; away_team_id:string; week_number:number; play_by:string; status:string; home_score?:string|null; away_score?:string|null; winner_team_id?:string|null };
 type Summary = {
   season: Season;
   divisions: number;
@@ -27,7 +28,7 @@ type Summary = {
 type View =
   | { status: "loading" | "signed_out" | "forbidden" | "missing" }
   | { status: "error"; message: string }
-  | { status: "ready"; club: Club; role: string; summaries: Summary[]; sponsors: number };
+  | { status: "ready"; club: Club; role: string; summaries: Summary[]; sponsors: number; fixtures: AdminFixture[] };
 
 export default function ClubAdministration() {
   const params = useParams();
@@ -124,18 +125,21 @@ export default function ClubAdministration() {
 
         const seasons = ((seasonReply.data ?? []) as Season[])
           .filter((season) => season.club_id === club.id);
+        const allFixtures: AdminFixture[] = [];
         const summaries = await Promise.all(seasons.map(async (season) => {
           const [divisionReply, fixtureReply] = await Promise.all([
             supabase.from("divisions").select("id,name,sort_order")
               .eq("season_id", season.id).order("sort_order", { ascending: true }),
-            supabase.from("fixtures").select("id,status")
+            supabase.from("fixtures").select("id,season_id,division_id,home_team_id,away_team_id,week_number,play_by,status")
               .eq("season_id", season.id),
           ]);
           if (divisionReply.error) throw divisionReply.error;
           if (fixtureReply.error) throw fixtureReply.error;
 
           const divisionIds = (divisionReply.data ?? []).map((item) => item.id as string);
-          const fixtureIds = (fixtureReply.data ?? []).map((item) => item.id as string);
+          const seasonFixtures = (fixtureReply.data ?? []) as AdminFixture[];
+          allFixtures.push(...seasonFixtures);
+          const fixtureIds = seasonFixtures.map((item) => item.id);
           const [teamsReply, resultsReply] = await Promise.all([
             divisionIds.length
               ? supabase.from("teams").select("id,division_id,name")
@@ -174,6 +178,7 @@ export default function ClubAdministration() {
           role: isClubMember ? member!.role : "platform administrator",
           summaries,
           sponsors: sponsorReply.count ?? 0,
+          fixtures: allFixtures,
         });
       } catch (error) {
         if (alive) setView({
@@ -277,6 +282,7 @@ export default function ClubAdministration() {
         divisions: summary.divisionSummaries,
       }))}
       onSaved={() => setRevision((value) => value + 1)}
+      fixtures={view.fixtures}
     />
     <div className={styles.sectionHeading}><h2>Club seasons</h2>
       <p>Each season below belongs to {view.club.name}.</p></div>
