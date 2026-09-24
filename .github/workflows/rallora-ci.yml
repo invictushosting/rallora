@@ -92,6 +92,7 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260924011500_registration_duplicate_guard.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260924013000_team_registration_flow.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260924014500_partner_invite_claim.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260924180000_internal_standings_recalculation.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_pilot_lifecycle_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/003_social_schema.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_social_assertions.sql
