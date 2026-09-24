@@ -62,19 +62,20 @@ export async function GET(request:NextRequest){
   const ctx=await context(slug);
   if(ctx.status!==200)return reply({error:"Integration access unavailable."},ctx.status);
   const {data,error}=await ctx.db.from("rallora_club_integrations")
-    .select("provider,status,client_id,last_verified_at,last_sync_at,last_error,updated_at")
+    .select("provider,status,client_id,external_venue_id,last_verified_at,last_sync_at,last_error,updated_at")
     .eq("club_id",ctx.club.id).eq("provider","playtomic").maybeSingle();
   if(error)return reply({error:"Could not load integration status."},503);
   return reply({integration:data??null});
 }
 
 export async function POST(request:NextRequest){
-  const input=await request.json().catch(()=>null) as null|{club?:unknown;client_id?:unknown;client_secret?:unknown};
+  const input=await request.json().catch(()=>null) as null|{club?:unknown;client_id?:unknown;client_secret?:unknown;venue_id?:unknown};
   const slug=typeof input?.club==="string"?input.club:"";
   const clientId=typeof input?.client_id==="string"?input.client_id.trim():"";
   const secret=typeof input?.client_secret==="string"?input.client_secret.trim():"";
-  if(!clientId||clientId.length>300||!secret||secret.length>1000){
-    return reply({error:"Enter a valid Playtomic Client ID and Client Secret."},400);
+  const venueId=typeof input?.venue_id==="string"?input.venue_id.trim():"";
+  if(!clientId||clientId.length>300||!secret||secret.length>1000||!venueId||venueId.length>300){
+    return reply({error:"Enter a valid Playtomic Venue ID, Client ID and Client Secret."},400);
   }
   const key=encryptionKey();
   if(!key)return reply({error:"Secure integration storage is not configured yet."},503);
@@ -91,8 +92,13 @@ export async function POST(request:NextRequest){
       signal:AbortSignal.timeout(10000),
     });
     if(tokenResponse.ok){
-      const body=await tokenResponse.json().catch(()=>null) as null|{access_token?:unknown};
-      tokenOk=typeof body?.access_token==="string"&&body.access_token.length>0;
+      const body=await tokenResponse.json().catch(()=>null) as null|{token?:unknown;access_token?:unknown};
+      const token=typeof body?.token==="string"?body.token:typeof body?.access_token==="string"?body.access_token:"";
+      tokenOk=token.length>0;
+      if(tokenOk){
+        const venueCheck=await fetch(`https://thirdparty.playtomic.io/api/v1/venues/${encodeURIComponent(venueId)}/players?limit=1&include=SPORTS`,{headers:{Accept:"application/json",Authorization:`Bearer ${token}`},cache:"no-store",signal:AbortSignal.timeout(10000)});
+        if(!venueCheck.ok)return reply({error:"Credentials worked, but this Playtomic Venue ID could not be accessed."},400);
+      }
     }
   }catch{
     return reply({error:"Playtomic could not be reached. Try again shortly."},502);
@@ -101,7 +107,7 @@ export async function POST(request:NextRequest){
 
   const encrypted=encrypt(secret,key);
   const saved=await ctx.db.rpc("rallora_save_playtomic_integration",{
-    p_club_id:ctx.club.id,p_client_id:clientId,p_ciphertext:encrypted.ciphertext,
+    p_club_id:ctx.club.id,p_client_id:clientId,p_external_venue_id:venueId,p_ciphertext:encrypted.ciphertext,
     p_iv:encrypted.iv,p_auth_tag:encrypted.authTag,
   });
   if(saved.error)return reply({error:"Could not save the verified Playtomic connection."},503);
