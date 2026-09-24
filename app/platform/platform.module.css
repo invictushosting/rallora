@@ -26,3 +26,15 @@
 
 
 @media(max-width:520px){.nav{flex-wrap:wrap;gap:7px}.nav a,.signOut{min-height:44px;display:inline-flex;align-items:center}.badge{margin-left:0}.hero{border-radius:18px}.loginForm input,.controls select{min-height:48px;font-size:16px}.loginForm button,.switchAccount,.controls button,.actionRow button,.card>button{min-height:48px}.clubMetrics{grid-template-columns:repeat(2,1fr)}.controls{grid-template-columns:1fr}.actionRow{display:grid;grid-template-columns:1fr 1fr}.status{top:22px;right:18px}}
+/* Final device QA */
+@media(max-width:520px){
+ .shell{overflow-x:hidden}
+ .nav{align-items:flex-start}
+ .nav b{width:100%}
+ .metrics{grid-template-columns:1fr 1fr}
+ .clubMetrics dd{font-size:19px;overflow-wrap:anywhere}
+ .season{align-items:flex-start;flex-direction:column}
+ .features label{min-height:38px}
+ .actionRow{grid-template-columns:1fr}
+ .card h3,.slug{overflow-wrap:anywhere}
+}

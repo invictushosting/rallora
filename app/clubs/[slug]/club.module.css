@@ -177,3 +177,14 @@
  .headerLinks .adminLink{display:none}
  .headerLinks .registerLink{display:flex}
 }
+
+/* Final device QA */
+@media(max-width:540px){
+ .clubIdentity{gap:12px}
+ .clubIdentity h1{margin-top:8px}
+ .hero>p{font-size:14px}
+ .heroActions{grid-template-columns:1fr}
+ .heroActions a:last-child{grid-column:auto}
+ .qualifiers li{align-items:flex-start;flex-direction:column}
+ .sponsorGrid{grid-template-columns:1fr}
+}

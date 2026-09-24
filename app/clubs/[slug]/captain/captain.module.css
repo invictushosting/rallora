@@ -14,3 +14,10 @@
  .result div{display:grid;grid-template-columns:1fr 1fr;width:100%}
  .result div button{min-height:48px}
 }
+
+/* Final device QA */
+@media(max-width:600px){
+ .shell header{flex-wrap:wrap}
+ .card{min-width:0;overflow:hidden}
+ .result>strong{font-size:21px;overflow-wrap:anywhere}
+}
