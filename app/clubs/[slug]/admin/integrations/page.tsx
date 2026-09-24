@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import {useEffect,useState} from "react";
+import {useCallback,useEffect,useState} from "react";
 import {useParams} from "next/navigation";
 import styles from "../admin.module.css";
 
@@ -15,7 +15,7 @@ export default function IntegrationsPage(){
   const [clientId,setClientId]=useState(""),[secret,setSecret]=useState("");
   const [state,setState]=useState("Loading integration status…"),[error,setError]=useState(""),[busy,setBusy]=useState(false);
 
-  async function load(){
+  const load=useCallback(async()=>{
     setError("");
     const r=await fetch(`/api/integrations/playtomic?club=${encodeURIComponent(slug)}`,{cache:"no-store"});
     const body=await r.json().catch(()=>({})) as {integration?:Integration|null;error?:string};
@@ -23,8 +23,8 @@ export default function IntegrationsPage(){
     setIntegration(body.integration??null);
     setClientId(body.integration?.client_id??"");
     setState("");
-  }
-  useEffect(()=>{if(slug)void load()},[slug]);
+  },[slug]);
+  useEffect(()=>{if(slug)void load()},[slug,load]);
 
   async function connect(e:React.FormEvent){
     e.preventDefault();setBusy(true);setError("");setState("");
