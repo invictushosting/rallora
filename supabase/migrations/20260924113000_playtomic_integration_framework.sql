@@ -85,11 +85,26 @@ begin
   if not found then raise exception 'Integration not found'; end if;
 end $$;
 
+create or replace function public.rallora_disconnect_playtomic_integration(p_club_id uuid)
+returns void language plpgsql security definer set search_path='' as $
+declare v_id uuid;
+begin
+  if not public.rallora_can_manage_club(p_club_id) then raise exception 'Not authorised'; end if;
+  select id into v_id from public.rallora_club_integrations where club_id=p_club_id and provider='playtomic' for update;
+  if v_id is null then return; end if;
+  delete from public.rallora_integration_secrets where integration_id=v_id;
+  update public.rallora_club_integrations
+    set status='disabled',client_id=null,last_error=null,updated_by=auth.uid(),updated_at=now()
+    where id=v_id;
+end $;
+
 revoke all on function public.rallora_save_playtomic_integration(uuid,text,text,text,text),
-  public.rallora_set_playtomic_integration_state(uuid,text,text,boolean)
+  public.rallora_set_playtomic_integration_state(uuid,text,text,boolean),
+  public.rallora_disconnect_playtomic_integration(uuid)
 from public,anon;
 grant execute on function public.rallora_save_playtomic_integration(uuid,text,text,text,text),
-  public.rallora_set_playtomic_integration_state(uuid,text,text,boolean)
+  public.rallora_set_playtomic_integration_state(uuid,text,text,boolean),
+  public.rallora_disconnect_playtomic_integration(uuid)
 to authenticated;
 
 commit;
