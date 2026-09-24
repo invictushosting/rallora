@@ -22,7 +22,7 @@ export default function MaintenancePage() {
           <span className={styles.eyebrow}>RALLORA IS GETTING READY</span>
           <h1>The smarter way to run your <span>padel leagues.</span></h1>
           <p>
-            We&apos;re putting the finishing touches on Rallora — one connected platform
+            We&apos;re putting the finishing touches on Rallora, one connected platform
             for fixtures, results, league tables, captains and club communities.
           </p>
           <div className={styles.actions}>
