@@ -651,10 +651,14 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
             </>}
           </section>}
         </>}
-      {content.sponsors.length > 0 && <section className={styles.sponsorSection}>
-        <span className={styles.kicker}>PROUDLY SUPPORTED BY</span>
-        <h2>Club partners</h2><div className={styles.sponsorGrid}>
-          {content.sponsors.map((sponsor) => {
+      <section className={styles.sponsorSection}>
+        <span className={styles.kicker}>{content.sponsors.length ? "PROUDLY SUPPORTED BY" : "PARTNER WITH THIS LEAGUE"}</span>
+        <h2>{content.sponsors.length ? "Club partners" : "Sponsor placements available"}</h2>
+        <p className={styles.sponsorIntro}>{content.sponsors.length
+          ? "The organisations supporting this club and its players."
+          : "Rallora gives clubs dedicated space to showcase league, division and event partners without cluttering the player experience."}</p>
+        <div className={styles.sponsorGrid}>
+          {content.sponsors.length ? content.sponsors.map((sponsor) => {
             const url = safeLink(sponsor.website_url);
             const logo = safeLink(sponsor.logo_url);
             return <article className={styles.sponsorCard} key={sponsor.id}>
@@ -664,9 +668,14 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
               {url && <a href={url} target="_blank"
                 rel="noopener noreferrer">Visit partner ↗</a>}
             </article>;
-          })}
+          }) : ["Headline partner","Division partner","Event partner"].map((label)=>
+            <article className={styles.sponsorPlaceholder} key={label}>
+              <span className={styles.sponsorMark}>R</span>
+              <strong>Your brand here</strong>
+              <span>{label}</span>
+            </article>)}
         </div>
-      </section>}
+      </section>
       <footer className={styles.footer}>
         <p>{club.footer_text || "Your club. Your league."}</p>
         <Link href="/">Powered by Rallora ↗</Link>
