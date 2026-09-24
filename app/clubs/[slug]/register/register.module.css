@@ -2,3 +2,4 @@
 
 
 @media(max-width:560px){.page{place-items:start center}.card{margin-top:10px}.back{display:inline-flex;align-items:center;min-height:44px;margin-bottom:18px}.card h1{font-size:clamp(30px,10vw,36px);overflow-wrap:anywhere}.card input,.card select{min-height:48px;font-size:16px}.card button{min-height:48px}}
+.player{display:grid;gap:12px;padding:16px;border:1px solid #dce7f3;border-radius:14px;background:#f8fbfe}.player>strong{font-size:14px;color:#061a39}
