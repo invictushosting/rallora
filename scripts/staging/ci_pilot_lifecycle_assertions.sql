@@ -35,7 +35,7 @@ begin
     'Partner B','captain-b@example.test',3.2,'pending');
 
   -- Platform admin approves and assigns division.
-  perform set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',true);
+  perform set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000999',true);
   select public.rallora_review_team_application(
     (select id from public.rallora_team_applications where team_name='Lifecycle Team A'),
     'approved',v_division
@@ -63,7 +63,7 @@ begin
     v_club,v_season,'22222222-2222-2222-2222-222222222222','Lifecycle Team B','Captain B',
     'Partner A','captain-a@example.test','pending');
 
-  perform set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',true);
+  perform set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000999',true);
   select public.rallora_review_team_application(
     (select id from public.rallora_team_applications where team_name='Lifecycle Team B'),
     'approved',v_division
@@ -100,7 +100,7 @@ begin
   end if;
 
   -- Organiser recovery should reopen cleanly and remove official result.
-  perform set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',true);
+  perform set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000999',true);
   perform public.rallora_admin_reopen_fixture(v_fixture);
 
   if exists(select 1 from public.results where fixture_id=v_fixture) then
