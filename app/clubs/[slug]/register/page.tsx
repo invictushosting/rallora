@@ -30,6 +30,7 @@ export default function PlayerRegistrationPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [existingStatus, setExistingStatus] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -63,6 +64,10 @@ export default function PlayerRegistrationPage() {
       if (teamReply.error) { setError(teamReply.error.message); return; }
       setTeams((teamReply.data ?? []) as Team[]);
       if (auth.user) {
+        const existing = await supabase.from("rallora_team_registration_requests").select("status,team_id")
+          .eq("club_id", nextClub.id).eq("season_id", nextSeason.id).eq("player_user_id", auth.user.id)
+          .in("status", ["pending","approved"]).order("created_at",{ascending:false}).limit(1).maybeSingle();
+        if(existing.data){setExistingStatus(existing.data.status);setTeamId(existing.data.team_id);}
         const profile = await supabase.from("rallora_player_profiles").select("display_name,phone")
           .eq("user_id", auth.user.id).maybeSingle();
         if (profile.data) { setName(profile.data.display_name ?? ""); setPhone(profile.data.phone ?? ""); }
@@ -84,6 +89,7 @@ export default function PlayerRegistrationPage() {
         }
         activeUserId = reply.data.user.id; setUserId(activeUserId);
       }
+      if (existingStatus) throw new Error(existingStatus==="approved" ? "You are already registered for this season." : "Your registration request is already awaiting review.");
       if (!club || !season || !teamId || !activeUserId) throw new Error("Choose a team before submitting your request.");
       const team = teams.find((item) => item.id === teamId);
       if (!team) throw new Error("Choose a valid team.");
@@ -108,7 +114,7 @@ export default function PlayerRegistrationPage() {
     {club&&(club.venue_name||club.town)&&<p><strong>{[club.venue_name,club.town,club.postcode].filter(Boolean).join(" · ")}</strong></p>}
     <p>Submit your request and a club organiser will approve or decline it. You are not added automatically.</p>
     <aside className={styles.terms}><strong>Before you join</strong><p>{club?.player_registration_terms||rules?.fixture_rules || "Matches must be arranged and played in line with this club’s league rules."}</p>{rules?.custom_rules && <p>{rules.custom_rules}</p>}</aside>
-    <form onSubmit={submit}>
+    {existingStatus&&<p className={styles.success} role="status">{existingStatus==="approved"?"You are registered for this season.":"Your registration request is awaiting organiser review."}</p>}<form onSubmit={submit}>
       <label>Full name<input required minLength={2} maxLength={120} value={name} onChange={(e) => setName(e.target.value)} /></label>
       <label>Phone <small>(optional)</small><input maxLength={40} value={phone} onChange={(e) => setPhone(e.target.value)} /></label>
       {!userId && <><label>Email<input required type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} /></label>
@@ -118,7 +124,7 @@ export default function PlayerRegistrationPage() {
           {teams.filter((team) => team.division_id === division.id).map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
         </optgroup>)}</select></label>
       {error && <p className={styles.error} role="alert">{error}</p>}{message && <p className={styles.success} role="status">{message}</p>}
-      <button disabled={busy || !season}>{busy ? "Submitting…" : userId ? "Submit request" : "Create account & submit"}</button>
+      <button disabled={busy || !season || Boolean(existingStatus)}>{busy ? "Submitting…" : userId ? "Submit request" : "Create account & submit"}</button>
     </form>
   </section></main>;
 }
