@@ -130,9 +130,9 @@ export default function RalloraOnboardingPage() {
   const [authLoading, setAuthLoading] = useState(false);
 
   const [step, setStep] = useState(1);
-  const [clubName, setClubName] = useState("New Padel Club");
-  const [shortName, setShortName] = useState("NPC");
-  const [slug, setSlug] = useState("new-padel-club");
+  const [clubName, setClubName] = useState("");
+  const [shortName, setShortName] = useState("");
+  const [slug, setSlug] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [instagramUrl, setInstagramUrl] = useState("");
@@ -170,7 +170,7 @@ export default function RalloraOnboardingPage() {
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [createdSummary, setCreatedSummary] = useState<CreatedSummary | null>(null);
-  const [createDemoSetup, setCreateDemoSetup] = useState(true);
+  const [createDemoSetup, setCreateDemoSetup] = useState(false);
 
   useEffect(() => {
     checkSession();
