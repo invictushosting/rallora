@@ -1,7 +1,7 @@
 -- Minimal synthetic schema for the production adjacent-table migration.
 create table public.announcements (id uuid primary key, club_id uuid, title text, body text, is_published boolean not null);
 create table public.sponsors (id uuid primary key, club_id uuid, name text, is_active boolean not null);
-create table public.club_rules (id uuid primary key, club_id uuid not null, season_id uuid, win_points integer, draw_points integer, loss_points integer, forfeit_win_points integer, forfeit_loss_points integer, double_forfeit_points integer, updated_at timestamptz not null default now());
+create table public.club_rules (id uuid primary key, club_id uuid not null, season_id uuid, win_points integer, draw_points integer, loss_points integer, forfeit_win_points integer, forfeit_loss_points integer, double_forfeit_points integer, created_at timestamptz not null default now(), updated_at timestamptz not null default now());
 create table public.club_setup_profiles (id uuid primary key, club_id uuid not null, season_id uuid);
 create table public.standings (id uuid primary key default gen_random_uuid(), season_id uuid not null, division_id uuid not null, team_id uuid not null, played integer not null default 0, won integer not null default 0, drawn integer not null default 0, lost integer not null default 0, score_diff integer not null default 0, points integer not null default 0, updated_at timestamptz not null default now(), unique(season_id,team_id));
 create table public.cup_qualifier_rules (id uuid primary key, season_id uuid not null, division_id uuid not null, is_active boolean not null);
