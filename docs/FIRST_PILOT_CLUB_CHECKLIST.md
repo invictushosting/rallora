@@ -44,5 +44,5 @@ Use this checklist for every real pilot. Do not use the demo club as the startin
 ## Go-live check
 - Run Rallora pilot readiness checks.
 - Confirm there are no disputed fixtures, orphaned confirmed fixtures or tenant-access anomalies.
-- Decide whether the pilot club needs access while global maintenance mode remains enabled; narrow/disable maintenance deliberately rather than as a side effect.
+- Keep global maintenance mode enabled during pilots. Add only approved live pilot slugs to the server-side `RALLORA_PILOT_CLUB_SLUGS` allowlist, then redeploy and verify the club hub/admin/register/captain routes. Remove a slug when pilot access should end.
 - Keep the first live league small enough to observe registrations, the first fixture and the first result closely.
