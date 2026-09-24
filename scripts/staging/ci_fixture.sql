@@ -4,27 +4,33 @@
 create role authenticated nologin;
 create role anon nologin;
 create schema auth;
-create table auth.users (id uuid primary key);
-create function auth.uid() returns uuid language sql stable as $$
+create table auth.users (id uuid primary key, email text);
+create function auth.uid() returns uuid language sql stable as $
   select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
-$$;
+$;
+create function auth.jwt() returns jsonb language sql stable as $
+  select coalesce(nullif(current_setting('request.jwt.claims', true), '')::jsonb, '{}'::jsonb)
+$;
 
 create table public.clubs (id uuid primary key, slug text unique not null, name text not null);
 create table public.seasons (
   id uuid primary key, club_id uuid not null references public.clubs(id), name text not null
 );
 create table public.divisions (
-  id uuid primary key, season_id uuid not null references public.seasons(id), name text not null
+  id uuid primary key, season_id uuid not null references public.seasons(id), name text not null, sort_order integer not null default 1
 );
 create table public.teams (
-  id uuid primary key, division_id uuid not null references public.divisions(id), name text not null
+  id uuid primary key, division_id uuid not null references public.divisions(id), name text not null,
+  player_one_name text, player_two_name text, is_active boolean not null default true
 );
 create table public.fixtures (
   id uuid primary key,
   season_id uuid not null references public.seasons(id),
   division_id uuid not null references public.divisions(id),
   home_team_id uuid not null references public.teams(id),
-  away_team_id uuid not null references public.teams(id)
+  away_team_id uuid not null references public.teams(id),
+  week_number integer not null default 1,
+  play_by date not null default current_date + 7
 );
 create table public.rallora_platform_admins (
   user_id uuid primary key
@@ -76,5 +82,9 @@ insert into public.rallora_club_memberships values
  '00000000-0000-0000-0000-000000000a03','admin','active'),
 ('00000000-0000-0000-0000-0000000005b2','00000000-0000-0000-0000-0000000000b2',
  '00000000-0000-0000-0000-000000000b02','captain','active');
+insert into auth.users(id,email) values
+('00000000-0000-0000-0000-000000000999','platform@example.test'),
+('11111111-1111-1111-1111-111111111111','captain-a@example.test'),
+('22222222-2222-2222-2222-222222222222','captain-b@example.test');
 insert into public.rallora_platform_admins values
 ('00000000-0000-0000-0000-000000000999');
