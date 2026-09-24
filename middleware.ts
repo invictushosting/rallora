@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 const PUBLIC_PATHS = ["/maintenance", "/pilot", "/register-club"];
 
+function pilotClubPaths() {
+  return (process.env.RALLORA_PILOT_CLUB_SLUGS ?? "")
+    .split(",")
+    .map((slug) => slug.trim().toLowerCase())
+    .filter((slug) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug))
+    .flatMap((slug) => [`/clubs/${slug}`]);
+}
+
 export function middleware(request: NextRequest) {
   // Preview deployments remain fully usable for development/testing.
   if (process.env.VERCEL_ENV !== "production") {
@@ -13,8 +21,9 @@ export function middleware(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
+  const allowedPaths = [...PUBLIC_PATHS, ...pilotClubPaths()];
   const isPublic =
-    PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`)) ||
+    allowedPaths.some((path) => pathname === path || pathname.startsWith(`${path}/`)) ||
     pathname.startsWith("/_next/") ||
     pathname === "/favicon.ico" ||
     pathname === "/icon.svg" ||
