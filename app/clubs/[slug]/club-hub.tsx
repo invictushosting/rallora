@@ -468,12 +468,10 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
         <Link href="/" className={styles.brand} aria-label="Rallora home">
           <RalloraLogo variant="light" width={210} /></Link>
         <div className={styles.headerLinks}>
-          <Link href="/notifications" className={styles.adminLink}>Updates</Link>
-          <Link href={`/clubs/${encodeURIComponent(slug)}/events`} className={styles.adminLink}>Club events</Link>
+          <Link href="/#clubs" className={styles.adminLink}>All clubs</Link>
           <Link href={`/clubs/${encodeURIComponent(slug)}/register`} className={styles.registerLink}>Join a team</Link>
-          <Link href={`/clubs/${encodeURIComponent(slug)}/captain`} className={styles.adminLink}>Captain centre</Link>
-          <a href={`/clubs/${encodeURIComponent(slug)}/admin`}
-            className={styles.adminLink}>Club administration ↗</a>
+          <Link href={`/clubs/${encodeURIComponent(slug)}/captain`} className={styles.adminLink}>Captain login</Link>
+          <Link href={`/clubs/${encodeURIComponent(slug)}/admin`} className={styles.adminLink}>Club admin</Link>
         </div>
       </header>
       <section className={`${styles.hero} ${clubCover ? styles.heroWithCover : ""}`}
@@ -484,6 +482,11 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
             <h1>{club.name}</h1></div>
         </div>
         <p>{club.welcome_text || "Fixtures, results and league tables. All in one place."}</p>
+        <div className={styles.heroActions}>
+          <Link href={`/clubs/${encodeURIComponent(slug)}/register`}>Join this league</Link>
+          <Link href={`/clubs/${encodeURIComponent(slug)}/events`}>Club events</Link>
+          <Link href="/notifications">League updates</Link>
+        </div>
         <div className={styles.heroFooter}>
           <span>{currentSeason?.name ?? club.welcome_title ?? "Club league"}</span>
           <span>Powered by Rallora</span>
