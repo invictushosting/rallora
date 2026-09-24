@@ -32,6 +32,8 @@ create table public.fixtures (
   week_number integer not null default 1,
   play_by date not null default current_date + 7
 );
+create table public.players (id uuid primary key);
+create table public.team_players (id uuid primary key);
 create table public.rallora_platform_admins (
   user_id uuid primary key
 );
