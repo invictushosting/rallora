@@ -5,10 +5,14 @@ alter table public.seasons add column status text not null default 'active';
 alter table public.fixtures add column available_from date;
 alter table public.fixtures add column status text not null default 'open';
 create table public.results (
-  id uuid primary key,
-  fixture_id uuid not null references public.fixtures(id),
+  id uuid primary key default gen_random_uuid(),
+  fixture_id uuid not null unique references public.fixtures(id),
+  home_score text,
+  away_score text,
   winner_team_id uuid references public.teams(id),
-  status text not null
+  notes text,
+  status text not null,
+  confirmed_at timestamptz
 );
 alter table public.results enable row level security;
 
@@ -20,7 +24,7 @@ insert into public.seasons(id,club_id,name,status) values
 -- Published A fixture/result, unreleased B fixture/result.
 update public.fixtures set available_from = current_date + 4
 where id='00000000-0000-0000-0000-0000000004b2';
-insert into public.results values
+insert into public.results(id,fixture_id,winner_team_id,status) values
 ('00000000-0000-0000-0000-0000000006a1',
  '00000000-0000-0000-0000-0000000004a1',
  '00000000-0000-0000-0000-0000000003a1','confirmed'),

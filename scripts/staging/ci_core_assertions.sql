@@ -66,7 +66,7 @@ begin
  -- Cannot forge A fixture with a B team.
  rejected := false;
  begin
-  insert into public.fixtures values (
+  insert into public.fixtures(id,season_id,division_id,home_team_id,away_team_id,available_from,status) values (
    '00000000-0000-0000-0000-0000000004a3',
    '00000000-0000-0000-0000-0000000001a1',
    '00000000-0000-0000-0000-0000000002a1',
@@ -79,7 +79,7 @@ begin
  -- Cannot forge results for fixture in club B, even if published.
  rejected := false;
  begin
-  insert into public.results values (
+  insert into public.results(id,fixture_id,winner_team_id,status) values (
    '00000000-0000-0000-0000-0000000006a2',
    '00000000-0000-0000-0000-0000000004b2',
    '00000000-0000-0000-0000-0000000003b1','confirmed'
@@ -90,7 +90,7 @@ begin
  -- Cannot claim another team's victory on a fixture in own club.
  rejected := false;
  begin
-  insert into public.results values (
+  insert into public.results(id,fixture_id,winner_team_id,status) values (
    '00000000-0000-0000-0000-0000000006a3',
    '00000000-0000-0000-0000-0000000004a1',
    '00000000-0000-0000-0000-0000000003b1','confirmed'
