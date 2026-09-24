@@ -7,7 +7,7 @@ import styles from "./editor.module.css";
 export type EditableClub = {
   id: string; slug: string; name: string;
   short_name: string | null; primary_color: string | null;
-  welcome_text: string | null; logo_url:string|null; website_url:string|null;
+  welcome_text: string | null; logo_url:string|null; cover_image_url:string|null; website_url:string|null;
   contact_email:string|null; venue_name:string|null; address_line_1:string|null;
   town:string|null; postcode:string|null; player_registration_terms:string|null;
 };
@@ -36,6 +36,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [colour, setColour] = useState(club.primary_color || "#2458ff");
   const [welcomeText, setWelcomeText] = useState(club.welcome_text ?? "");
   const [logoUrl,setLogoUrl]=useState(club.logo_url??"");
+  const [coverImageUrl,setCoverImageUrl]=useState(club.cover_image_url??"");
   const [websiteUrl,setWebsiteUrl]=useState(club.website_url??"");
   const [contactEmail,setContactEmail]=useState(club.contact_email??"");
   const [venueName,setVenueName]=useState(club.venue_name??"");
@@ -100,7 +101,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
     setShortName(club.short_name ?? "");
     setColour(club.primary_color || "#2458ff");
     setWelcomeText(club.welcome_text ?? "");
-    setLogoUrl(club.logo_url??"");setWebsiteUrl(club.website_url??"");setContactEmail(club.contact_email??"");
+    setLogoUrl(club.logo_url??"");setCoverImageUrl(club.cover_image_url??"");setWebsiteUrl(club.website_url??"");setContactEmail(club.contact_email??"");
     setVenueName(club.venue_name??"");setAddress(club.address_line_1??"");setTown(club.town??"");
     setPostcode(club.postcode??"");setRegistrationTerms(club.player_registration_terms??"");
   }, [club]);
@@ -147,7 +148,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         .update({
           name: name.trim(), short_name: shortName.trim() || null,
           primary_color: colour, welcome_text: welcomeText.trim() || null,
-          logo_url:logoUrl.trim()||null,website_url:websiteUrl.trim()||null,
+          logo_url:logoUrl.trim()||null,cover_image_url:coverImageUrl.trim()||null,website_url:websiteUrl.trim()||null,
           contact_email:contactEmail.trim()||null,venue_name:venueName.trim()||null,
           address_line_1:address.trim()||null,town:town.trim()||null,postcode:postcode.trim()||null,
           player_registration_terms:registrationTerms.trim()||null,
@@ -293,7 +294,16 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         onChange={(event) => setShortName(event.target.value)} /></label>
       <label>Brand colour<input type="color" value={colour}
         onChange={(event) => setColour(event.target.value)} /></label>
-      <label>Logo URL<input type="url" value={logoUrl} onChange={event=>setLogoUrl(event.target.value)} /></label>
+      <div className={styles.imageField}>
+        <label>Club logo URL<input type="url" value={logoUrl} onChange={event=>setLogoUrl(event.target.value)} /></label>
+        <p><strong>Logo:</strong> use a square 1:1 image, ideally 800 × 800 px PNG/WebP with padding around the mark. Rallora always fits the full logo inside its frame, so it will not be stretched.</p>
+        {logoUrl && <div className={styles.logoPreview}><img src={logoUrl} alt="Club logo preview" /></div>}
+      </div>
+      <div className={styles.imageField}>
+        <label>Club cover image URL<input type="url" value={coverImageUrl} onChange={event=>setCoverImageUrl(event.target.value)} /></label>
+        <p><strong>Cover:</strong> use a landscape 16:9 image, ideally 1600 × 900 px JPG/WebP. Keep people, signage and key details near the centre because the image is cropped responsively, never stretched.</p>
+        {coverImageUrl && <div className={styles.coverPreview}><img src={coverImageUrl} alt="Club cover preview" /></div>}
+      </div>
       <label>Website<input type="url" value={websiteUrl} onChange={event=>setWebsiteUrl(event.target.value)} /></label>
       <label>Contact email<input type="email" value={contactEmail} onChange={event=>setContactEmail(event.target.value)} /></label>
       <label>Venue name<input value={venueName} maxLength={160} onChange={event=>setVenueName(event.target.value)} /></label>

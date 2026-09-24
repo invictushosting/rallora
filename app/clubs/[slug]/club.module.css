@@ -5,6 +5,10 @@
 .brand span{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:#061A39;color:#00B0FE;font-size:25px}
 .readOnly{color:#54708d;background:#e9f0fb;border:1px solid #d9e5f4;border-radius:40px;padding:9px 13px;font-size:10px;letter-spacing:.8px;font-weight:800}
 .hero{background:#061A39;border-radius:26px;padding:43px 45px 24px;box-shadow:0 20px 40px #11294a18;color:white;position:relative;overflow:hidden}
+.heroWithCover{background-image:linear-gradient(90deg,#061A39f2 0%,#061A39d9 52%,#061A3999 100%),var(--club-cover);background-size:cover;background-position:center}
+.clubIdentity{display:flex;align-items:center;gap:18px;position:relative;z-index:1}.clubIdentity h1{margin-bottom:0}
+.heroLogo{width:82px;height:82px;flex:0 0 82px;border-radius:18px;background:#fff;padding:9px;display:grid;place-items:center;overflow:hidden;box-shadow:0 8px 24px #0003}.heroLogo img{width:100%;height:100%;display:block;object-fit:contain}
+.hero>p,.heroFooter{position:relative;z-index:1}
 .hero::after{content:"";position:absolute;right:-30px;bottom:-130px;border:45px solid var(--club-color);opacity:.3;border-radius:50%;width:280px;height:280px;pointer-events:none}
 .eyebrow,.kicker{font-size:11px;font-weight:850;letter-spacing:1.6px}
 .eyebrow{color:#add0fb}.hero h1{font-size:clamp(32px,5vw,54px);line-height:1.05;letter-spacing:-1.7px;margin:17px 0}
@@ -81,12 +85,16 @@
 .announcements article span{font-size:11px;color:#8193aa;white-space:nowrap}
 .announcements p{white-space:pre-wrap;font-size:13px;color:#607690;line-height:1.7;margin:9px 0 0}
 .sponsorSection{padding:29px 0 9px;margin:41px 0 0;border-top:1px solid #dce6f2}
-.sponsorSection h2{font-size:25px;margin:8px 0 21px}
+.sponsorSection h2{font-size:25px;margin:8px 0 8px}
+.sponsorIntro{max-width:720px;margin:0 0 21px;color:#617892;font-size:13px;line-height:1.65}
 .sponsorGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
 .sponsorCard{display:flex;flex-direction:column;gap:9px;background:#fff;border:1px solid #e0e9f3;border-radius:16px;padding:19px}
 .sponsorCard strong{font-size:15px;color:#17375c}
 .sponsorCard span{font-size:11px;color:#778ba6}
 .sponsorCard a{margin-top:5px;font-size:12px;color:var(--club-color);font-weight:850}
+.sponsorPlaceholder{min-height:150px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;padding:19px;border:1px dashed #b8cde2;border-radius:16px;background:linear-gradient(145deg,#fff,#f7fbff)}
+.sponsorPlaceholder strong{font-size:15px;color:#17375c}.sponsorPlaceholder>span:last-child{font-size:11px;color:#778ba6;text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+.sponsorMark{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:#061A39;color:#fff;font-weight:900;font-size:18px}
 .footer a{color:#476b9a;text-decoration:none;font-weight:800}
 @media(max-width:540px){
  .adminLink,.registerLink{font-size:10px;padding:9px}.headerLinks{gap:5px}
@@ -137,3 +145,5 @@
  .match strong{overflow-wrap:anywhere}
  .announcements,.teamCard,.sponsorCard{border-radius:14px}
 }
+
+@media(max-width:540px){.clubIdentity{align-items:flex-start}.heroLogo{width:62px;height:62px;flex-basis:62px;border-radius:14px}.heroWithCover{background-position:center}}
