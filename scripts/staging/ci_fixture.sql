@@ -17,7 +17,7 @@ language sql immutable set search_path to 'pg_catalog','public' as $fn$
   from regexp_matches(coalesce(input_text,''),'([0-9]+)','g') as match
 $fn$;
 
-create table public.clubs (id uuid primary key, slug text unique not null, name text not null);
+create table public.clubs (id uuid primary key default gen_random_uuid(), slug text unique not null, name text not null);
 create table public.seasons (
   id uuid primary key, club_id uuid not null references public.clubs(id), name text not null
 );
@@ -43,7 +43,7 @@ create table public.rallora_platform_admins (
   user_id uuid primary key
 );
 create table public.rallora_club_memberships (
-  id uuid primary key,
+  id uuid primary key default gen_random_uuid(),
   club_id uuid not null references public.clubs(id),
   user_id uuid not null,
   role text not null,
