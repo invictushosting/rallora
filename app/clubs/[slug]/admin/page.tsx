@@ -246,6 +246,7 @@ export default function ClubAdministration() {
       <a href={`/clubs/${encodeURIComponent(view.club.slug)}`}>View public club hub →</a>
       <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/registrations`}>Review player registration requests →</Link>
       <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/staff`}>Manage club staff →</Link>
+      <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/integrations`}>Manage integrations →</Link>
       <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/captain`}>Open captain result centre →</Link>
       <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/events`}>Manage Americano &amp; Mexicano events →</Link>
       <a href={`/clubs/${encodeURIComponent(view.club.slug)}/social`}>Open Rallora Social Studio →</a>
