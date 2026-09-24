@@ -11,8 +11,8 @@ declare
   v_fixture uuid;
   v_submission uuid;
 begin
-  select id into v_club from public.clubs order by created_at limit 1;
-  select id into v_season from public.seasons where club_id=v_club order by created_at limit 1;
+  select id into v_club from public.clubs order by id limit 1;
+  select id into v_season from public.seasons where club_id=v_club order by id limit 1;
   select id into v_division from public.divisions where season_id=v_season order by sort_order limit 1;
 
   if v_club is null or v_season is null or v_division is null then
