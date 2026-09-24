@@ -76,3 +76,6 @@
  .divisionRow summary{align-items:flex-start;flex-direction:column}
  .divisionRow summary span{white-space:normal}
 }
+
+.launchActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.launchActions a,.launchActions button{display:inline-flex;align-items:center;min-height:44px;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:#fff;color:#061a39;font:inherit;font-weight:800;text-decoration:none;cursor:pointer}.launchActions button{background:transparent;color:#fff}.launchGate{margin:16px 0 0;color:#b8cce0;font-size:13px}
+@media(max-width:540px){.launchActions{display:grid;grid-template-columns:1fr}.launchActions a,.launchActions button{justify-content:center;width:100%}}

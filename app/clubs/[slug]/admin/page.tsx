@@ -237,10 +237,13 @@ export default function ClubAdministration() {
     {label:"Brand your club",done:Boolean(view.club.logo_url && view.club.cover_image_url && view.club.welcome_text),hint:"Add a logo, cover image and welcome message in Branding."},
     {label:"Create your first season",done:view.summaries.length>0,hint:"Create a draft season before publishing anything."},
     {label:"Add divisions",done:totals.divisions>0,hint:"Add the competition divisions your teams will enter."},
-    {label:"Add or approve teams",done:totals.teams>0,hint:"Teams can be added here or arrive through player registration."},
+    {label:"Open team registration",done:view.summaries.some(({season,divisions})=>season.status==="active"&&divisions>0),hint:"Activate a season with divisions, then share your team registration link."},
+    {label:"Add or approve teams",done:totals.teams>0,hint:"Teams can be added here or arrive through team registration."},
     {label:"Publish fixtures",done:totals.fixtures>0,hint:"Create fixtures only after the team list is ready."},
   ];
   const launchComplete = launchSteps.every((step)=>step.done);
+  const activeSeason = view.summaries.find(({season})=>season.status==="active");
+  const registrationReady = Boolean(activeSeason && activeSeason.divisions>0);
 
   return <main className={styles.page}><div className={styles.shell}>
     <header className={styles.nav}>
@@ -266,6 +269,11 @@ export default function ClubAdministration() {
       <ol className={styles.launchList}>{launchSteps.map((step,index)=><li key={step.label} className={step.done?styles.launchDone:""}>
         <span>{step.done?"✓":index+1}</span><div><strong>{step.label}</strong><p>{step.hint}</p></div>
       </li>)}</ol>
+      {registrationReady && <div className={styles.launchActions}>
+        <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/register`}>Open team registration →</Link>
+        <button type="button" onClick={()=>void navigator.clipboard.writeText(`${window.location.origin}/clubs/${view.club.slug}/register`)}>Copy registration link</button>
+      </div>}
+      {!registrationReady && <p className={styles.launchGate}>Team registration becomes available once you have an active season with at least one division.</p>}
     </section>
     <section className={styles.socialInvite}>
       <span>RALLORA SOCIAL</span><h2>Turn league updates into share-ready club stories.</h2>
