@@ -38,3 +38,8 @@
  .actionRow{grid-template-columns:1fr}
  .card h3,.slug{overflow-wrap:anywhere}
 }
+
+.sectionHeading{display:flex;align-items:end;justify-content:space-between;gap:24px;margin:36px 0 14px}.sectionHeading h2{margin:4px 0 0}.sectionHeading small{font-size:9px;font-weight:900;letter-spacing:1.4px;color:#3975bd}.sectionHeading p{margin:0;color:#6a7d94;font-size:12px}
+.applicationDetails{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0;padding:16px;background:#f7fafc;border-radius:12px}.applicationDetails div{min-width:0}.applicationDetails dt{color:#708198;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}.applicationDetails dd{margin:4px 0 0;font-size:12px;font-weight:750;overflow-wrap:anywhere}
+.clubActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px}.clubActions a{display:flex;align-items:center;justify-content:center;min-height:42px;border-radius:9px;text-decoration:none;text-align:center;background:#061a39;color:#fff!important;font-size:11px}.clubActions a:last-child{background:#eef4fa;color:#2459c8!important}
+@media(max-width:520px){.sectionHeading{align-items:flex-start;flex-direction:column;gap:5px;margin-top:30px}.applicationDetails{grid-template-columns:1fr}.clubActions{grid-template-columns:1fr}}

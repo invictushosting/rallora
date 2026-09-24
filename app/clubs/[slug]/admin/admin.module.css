@@ -79,3 +79,12 @@
 
 .launchActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.launchActions a,.launchActions button{display:inline-flex;align-items:center;min-height:44px;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:#fff;color:#061a39;font:inherit;font-weight:800;text-decoration:none;cursor:pointer}.launchActions button{background:transparent;color:#fff}.launchGate{margin:16px 0 0;color:#b8cce0;font-size:13px}
 @media(max-width:540px){.launchActions{display:grid;grid-template-columns:1fr}.launchActions a,.launchActions button{justify-content:center;width:100%}}
+
+/* Operational dashboard hierarchy */
+.hero{box-shadow:0 20px 42px rgba(6,26,57,.14);background:linear-gradient(135deg,#061A39,#0b2d5d)}
+.heroTop{display:flex;align-items:center;justify-content:space-between;gap:15px}
+.rolePill{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);border-radius:999px;padding:8px 11px;color:#dbe9ff;font-size:10px;font-weight:850;text-transform:capitalize}
+.heroActions{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}.heroActions a{margin-top:0}.heroActions .primaryAction{background:#00B0FE;border-color:#00B0FE;color:#061A39}
+.adminShortcuts{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px;padding-top:14px;border-top:1px solid rgba(255,255,255,.14)}
+.adminShortcuts a{margin-top:0;padding:8px 11px;font-size:11px;background:transparent;border-color:rgba(255,255,255,.2);color:#dceaff}
+@media(max-width:490px){.heroTop{align-items:flex-start}.rolePill{font-size:9px}.heroActions{display:grid;grid-template-columns:1fr;width:100%}.heroActions a{width:100%}.adminShortcuts{display:grid;grid-template-columns:1fr 1fr}.adminShortcuts a{min-height:40px;text-align:center}}
