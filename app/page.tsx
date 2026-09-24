@@ -145,8 +145,8 @@ export default function RalloraHome() {
     <section className={styles.clubs} id="clubs" aria-labelledby="club-title">
       <div className={styles.sectionTop}>
         <div><span className={styles.eyebrow}>DISCOVER RALLORA</span>
-          <h2 id="club-title">Find your club</h2>
-          <p>Choose your club to see its latest league season.</p>
+          <h2 id="club-title">Explore clubs</h2>
+          <p>Step inside a club hub to see its competitions, fixtures, results and standings.</p>
         </div>
         {state.kind === "ready" && <span className={styles.count}>
           {state.clubs.length} {state.clubs.length === 1 ? "CLUB" : "CLUBS"}
@@ -155,7 +155,7 @@ export default function RalloraHome() {
 
       <label className={revision.clubSearch}>
         <span>Search clubs</span>
-        <input type="search" value={clubSearch} placeholder="Search by club name…"
+        <input type="search" value={clubSearch} placeholder="Search clubs…"
           onChange={(event) => setClubSearch(event.target.value)} />
       </label>
 
@@ -180,7 +180,7 @@ export default function RalloraHome() {
             style={{ "--club-accent": color } as React.CSSProperties}>
             <Link href={`/clubs/${encodeURIComponent(club.slug)}`} className={styles.clubCover}
               aria-label={`Explore ${club.name}`}>
-              {cover ? <img src={cover} alt="" /> : <span>YOUR CLUB · YOUR LEAGUE</span>}
+              {cover ? <img src={cover} alt="" /> : <span className={styles.coverFallback}><small>RALLORA CLUB HUB</small><strong>{club.short_name || club.name}</strong></span>}
             </Link>
             <div className={styles.clubBody}>
             <div className={styles.clubHead}>
@@ -192,7 +192,7 @@ export default function RalloraHome() {
                 {isDemo ? "DEMO CLUB" : "CLUB HUB"}</span>
             </div>
             <h3>{club.name}</h3>
-            <p className={styles.slug}>rallora / {club.slug}</p>
+            <p className={styles.slug}>rallora.app/clubs/{club.slug}</p>
             <p className={styles.description}>{isDemo
               ? "Explore a demonstration club with sample competition data."
               : club.welcome_text || "Your club's league, all in one place."}</p>
@@ -201,7 +201,7 @@ export default function RalloraHome() {
               <span>NOW PLAYING <strong>{activeSeason?.name || "Coming soon"}</strong></span>
             </div>
             <Link className={styles.clubLink} href={`/clubs/${encodeURIComponent(club.slug)}`}>
-              Explore club <span>↗</span>
+              Enter club hub <span>↗</span>
             </Link>
             <div className={revision.loginLinks}>
               <Link href={`/clubs/${encodeURIComponent(club.slug)}/admin`}>Club login</Link>
