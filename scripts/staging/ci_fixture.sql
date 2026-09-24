@@ -5,12 +5,12 @@ create role authenticated nologin;
 create role anon nologin;
 create schema auth;
 create table auth.users (id uuid primary key, email text);
-create function auth.uid() returns uuid language sql stable as $
+create function auth.uid() returns uuid language sql stable as $fn$
   select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
-$;
-create function auth.jwt() returns jsonb language sql stable as $
+$fn$;
+create function auth.jwt() returns jsonb language sql stable as $fn$
   select coalesce(nullif(current_setting('request.jwt.claims', true), '')::jsonb, '{}'::jsonb)
-$;
+$fn$;
 
 create table public.clubs (id uuid primary key, slug text unique not null, name text not null);
 create table public.seasons (
