@@ -11,6 +11,11 @@ $fn$;
 create function auth.jwt() returns jsonb language sql stable as $fn$
   select coalesce(nullif(current_setting('request.jwt.claims', true), '')::jsonb, '{}'::jsonb)
 $fn$;
+create function public.score_text_total(input_text text) returns integer
+language sql immutable set search_path to 'pg_catalog','public' as $fn$
+  select coalesce(sum((match)[1]::int),0)::int
+  from regexp_matches(coalesce(input_text,''),'([0-9]+)','g') as match
+$fn$;
 
 create table public.clubs (id uuid primary key, slug text unique not null, name text not null);
 create table public.seasons (
