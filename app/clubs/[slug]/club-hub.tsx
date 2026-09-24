@@ -16,6 +16,7 @@ type Club = {
   id: string; slug: string; name: string; short_name: string | null;
   primary_color: string | null; welcome_title: string | null;
   welcome_text: string | null; footer_text: string | null;
+  logo_url: string | null; cover_image_url: string | null;
 };
 type Season = {
   id: string; club_id: string; name: string; status: string;
@@ -76,6 +77,12 @@ const EMPTY: LeagueData = {
 function safeColor(color: string | null) {
   return color && /^#[\da-fA-F]{6}$/.test(color) ? color : "#2458ff";
 }
+function safeImage(url: string | null) {
+  if (!url) return null;
+  if (url.startsWith("/") && !url.startsWith("//")) return url;
+  try { const parsed = new URL(url); return parsed.protocol === "https:" ? parsed.href : null; }
+  catch { return null; }
+}
 function safeLink(url: string | null) {
   if (!url) return null;
   try {
@@ -127,7 +134,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
         }
         const { data: club, error: clubError } = await supabase
           .from("clubs")
-          .select("id,slug,name,short_name,primary_color,welcome_title,welcome_text,footer_text")
+          .select("id,slug,name,short_name,primary_color,welcome_title,welcome_text,footer_text,logo_url,cover_image_url")
           .eq("slug", slug).eq("is_active", true).maybeSingle();
         if (clubError) throw clubError;
         if (!club) {
@@ -313,6 +320,8 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
 
   const { club, seasons, content } = clubState;
   const currentSeason = seasons.find((season) => season.id === seasonId);
+  const clubLogo = safeImage(club.logo_url);
+  const clubCover = safeImage(club.cover_image_url);
   const teamNames = new Map(data.teams.map((team) => [team.id, team.name]));
   const results = new Map(data.results.map((result) => [result.fixture_id, result]));
   const standings = (id: string) => data.standings
@@ -467,9 +476,13 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
             className={styles.adminLink}>Club administration ↗</a>
         </div>
       </header>
-      <section className={styles.hero}>
-        <span className={styles.eyebrow}>{club.short_name || "PADEL"} · LEAGUE HUB</span>
-        <h1>{club.name}</h1>
+      <section className={`${styles.hero} ${clubCover ? styles.heroWithCover : ""}`}
+        style={clubCover ? { "--club-cover": `url("${clubCover.replace(/["\\]/g, "")}")` } as React.CSSProperties : undefined}>
+        <div className={styles.clubIdentity}>
+          {clubLogo && <span className={styles.heroLogo}><img src={clubLogo} alt={`${club.name} logo`} /></span>}
+          <div><span className={styles.eyebrow}>{club.short_name || "PADEL"} · LEAGUE HUB</span>
+            <h1>{club.name}</h1></div>
+        </div>
         <p>{club.welcome_text || "Fixtures, results and league tables. All in one place."}</p>
         <div className={styles.heroFooter}>
           <span>{currentSeason?.name ?? club.welcome_title ?? "Club league"}</span>
