@@ -5,14 +5,14 @@ import {useParams} from "next/navigation";
 import styles from "../admin.module.css";
 
 type Integration={
-  provider:string;status:string;client_id:string|null;last_verified_at:string|null;
+  provider:string;status:string;client_id:string|null;external_venue_id:string|null;last_verified_at:string|null;
   last_sync_at:string|null;last_error:string|null;updated_at:string;
 };
 
 export default function IntegrationsPage(){
   const params=useParams(); const slug=typeof params.slug==="string"?params.slug:"";
   const [integration,setIntegration]=useState<Integration|null>(null);
-  const [clientId,setClientId]=useState(""),[secret,setSecret]=useState("");
+  const [venueId,setVenueId]=useState(""),[clientId,setClientId]=useState(""),[secret,setSecret]=useState("");
   const [state,setState]=useState("Loading integration status…"),[error,setError]=useState(""),[busy,setBusy]=useState(false);
 
   const load=useCallback(async()=>{
@@ -21,6 +21,7 @@ export default function IntegrationsPage(){
     const body=await r.json().catch(()=>({})) as {integration?:Integration|null;error?:string};
     if(!r.ok){setState("");setError(body.error??"Could not load integrations.");return}
     setIntegration(body.integration??null);
+    setVenueId(body.integration?.external_venue_id??"");
     setClientId(body.integration?.client_id??"");
     setState("");
   },[slug]);
@@ -28,7 +29,7 @@ export default function IntegrationsPage(){
 
   async function connect(e:React.FormEvent){
     e.preventDefault();setBusy(true);setError("");setState("");
-    const r=await fetch("/api/integrations/playtomic",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({club:slug,client_id:clientId,client_secret:secret})});
+    const r=await fetch("/api/integrations/playtomic",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({club:slug,venue_id:venueId,client_id:clientId,client_secret:secret})});
     const body=await r.json().catch(()=>({})) as {error?:string};
     setBusy(false);
     if(!r.ok){setError(body.error??"Could not connect Playtomic.");return}
@@ -57,7 +58,7 @@ export default function IntegrationsPage(){
     <section className={styles.card}>
       <span className={styles.status}>{connected?"connected":integration?.status??"not connected"}</span>
       <h3>Playtomic Club API</h3>
-      <p>Generate External API credentials in Playtomic Manager → Settings → Developer Tools, then connect them here.</p>
+      <p>Generate External API credentials in Playtomic Manager → Settings → Developer Tools, then add the Playtomic Venue ID for this club. Rallora uses the Venue ID to read supported player data such as current padel level.</p>
       {integration&&<div className={styles.numbers}>
         <span><strong>{integration.client_id?"Saved":"—"}</strong> Client ID</span>
         <span><strong>{integration.last_verified_at?new Date(integration.last_verified_at).toLocaleDateString("en-GB"):"—"}</strong> Last verified</span>
@@ -65,6 +66,7 @@ export default function IntegrationsPage(){
       </div>}
       {integration?.last_error&&<p>{integration.last_error}</p>}
       <form className={styles.loginForm} onSubmit={connect}>
+        <label>Venue ID<input required autoComplete="off" value={venueId} onChange={e=>setVenueId(e.target.value)} /></label>
         <label>Client ID<input required autoComplete="off" value={clientId} onChange={e=>setClientId(e.target.value)} /></label>
         <label>Client Secret<input required type="password" autoComplete="new-password" value={secret} onChange={e=>setSecret(e.target.value)} /></label>
         <button disabled={busy}>{busy?"Verifying…":connected?"Replace & re-verify credentials":"Connect & verify"}</button>
