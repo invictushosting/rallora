@@ -10,3 +10,11 @@
 .applicationState{background:linear-gradient(135deg,#f1fbf5,#fff);border:1px solid #cbe9d7;border-radius:14px;padding:16px;margin:0 0 18px}.applicationState strong{font-size:15px;color:#155f43}.applicationState p{margin:5px 0 0;color:#557066;font-size:12px;line-height:1.55}
 .player input[readonly]{background:#eef8f2;border-color:#bfe1cb;color:#185b40;font-weight:800}
 @media(max-width:560px){.playerHead{align-items:flex-start;flex-direction:column;gap:4px}}
+
+/* Final device QA */
+@media(max-width:560px){
+ .card{width:100%}
+ .card>p{font-size:14px}
+ .player{padding:14px}
+ .step{gap:10px}
+}
