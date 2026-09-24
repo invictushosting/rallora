@@ -16,7 +16,7 @@ type Subscription = { plan_code:string; status:string };
 type Entitlement = { feature_key:string; is_enabled:boolean };
 type ClubSummary = { club: Club; seasons: Season[]; teams: number; fixtures: number;
   members:number; players:number; subscription:Subscription|null; features:Entitlement[] };
-type Application = { id:string; club_name:string; requested_slug:string; contact_email:string; plan_code:string; status:string; created_at:string };
+type Application = { id:string; applicant_name:string|null; club_name:string; requested_slug:string; contact_email:string; plan_code:string; status:string; created_at:string };
 type Readiness = Record<string,number>;
 type View =
   | { status: "loading" | "signed_out" | "forbidden" }
@@ -91,7 +91,7 @@ export default function PlatformControlCentre() {
           }),
         );
         const applicationsReply = await supabase.from("rallora_club_applications")
-          .select("id,club_name,requested_slug,contact_email,plan_code,status,created_at").order("created_at",{ascending:false});
+          .select("id,applicant_name,club_name,requested_slug,contact_email,plan_code,status,created_at").order("created_at",{ascending:false});
         if (applicationsReply.error) throw applicationsReply.error;
         const readinessReply=await supabase.rpc("rallora_pilot_readiness_report");
         if(readinessReply.error) throw readinessReply.error;
@@ -211,7 +211,7 @@ export default function PlatformControlCentre() {
         {view.applications.map(application => <article className={styles.card} key={application.id}>
           <span className={styles.status}>{application.status}</span>
           <h3>{application.club_name}</h3><p className={styles.slug}>/{application.requested_slug}</p>
-          <p>{application.contact_email}</p><p>Requested plan: <strong>{application.plan_code}</strong></p>
+          <p>{application.applicant_name&&<><strong>{application.applicant_name}</strong><br/></>}{application.contact_email}</p><p>Requested plan: <strong>{application.plan_code}</strong></p>
           {application.status === "pending" && <div className={styles.actionRow}><button disabled={busy===`application-${application.id}`} onClick={() => void approveApplication(application.id)}>Approve & activate</button><button className={styles.secondary} disabled={busy===`application-${application.id}`} onClick={() => void declineApplication(application.id)}>Decline</button></div>}
         </article>)}
         {!view.applications.length && <article className={styles.card}><h3>No club applications</h3><p>New applications appear here for approval.</p></article>}
