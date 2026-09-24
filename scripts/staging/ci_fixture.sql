@@ -43,7 +43,7 @@ create table public.rallora_platform_admins (
   user_id uuid primary key
 );
 create table public.rallora_club_memberships (
-  id uuid primary key,
+  id uuid primary key default gen_random_uuid(),
   club_id uuid not null references public.clubs(id),
   user_id uuid not null,
   role text not null,
