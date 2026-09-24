@@ -16,6 +16,7 @@ type Club = {
   primary_color: string | null;
   welcome_text: string | null;
   logo_url: string | null;
+  cover_image_url: string | null;
 };
 type Season = { id: string; club_id: string; status: string; name: string };
 type State =
@@ -39,20 +40,12 @@ export default function RalloraHome() {
   const [clubSearch, setClubSearch] = useState("");
 
   useEffect(() => {
-    // Preserve old GSM bookmarks (#admin, #captain, #fixtures, etc.)
-    // without creating a second live app or an endless redirect loop.
-    const legacyHash = /^(#admin|#captain|#fixtures|#tables|#teams|#cup|#team=)/i;
-    if (legacyHash.test(window.location.hash)) {
-      window.location.replace(`/clubs/gsm-padel/legacy${window.location.hash}`);
-      return;
-    }
-
     let active = true;
     async function load() {
       try {
         const { data: clubs, error } = await supabase
           .from("clubs")
-          .select("id,slug,name,short_name,primary_color,welcome_text,logo_url")
+          .select("id,slug,name,short_name,primary_color,welcome_text,logo_url,cover_image_url")
           .eq("is_active", true)
           .order("created_at", { ascending: true });
         if (error) throw error;
@@ -181,9 +174,15 @@ export default function RalloraHome() {
           const activeSeason = clubSeasons.find((season) => season.status === "active");
           const color = safeColor(club.primary_color);
           const logo = safeImage(club.logo_url);
-          const isDemo = club.slug === "new-padel-club";
+          const cover = safeImage(club.cover_image_url);
+          const isDemo = club.slug === "rallora-demo";
           return <article className={styles.club} key={club.id}
             style={{ "--club-accent": color } as React.CSSProperties}>
+            <Link href={`/clubs/${encodeURIComponent(club.slug)}`} className={styles.clubCover}
+              aria-label={`Explore ${club.name}`}>
+              {cover ? <img src={cover} alt="" /> : <span>YOUR CLUB · YOUR LEAGUE</span>}
+            </Link>
+            <div className={styles.clubBody}>
             <div className={styles.clubHead}>
               <span className={`${styles.clubMark} ${logo ? revision.clubLogo : ""}`}>
                 {logo ? <img src={logo} alt={`${club.name} logo`} />
@@ -207,7 +206,7 @@ export default function RalloraHome() {
             <div className={revision.loginLinks}>
               <Link href={`/clubs/${encodeURIComponent(club.slug)}/admin`}>Club login</Link>
               <Link href={`/clubs/${encodeURIComponent(club.slug)}/captain`}>Captain login</Link>
-            </div>
+            </div></div>
           </article>;
         })}
       </div>}
