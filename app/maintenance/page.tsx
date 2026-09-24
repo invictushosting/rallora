@@ -11,7 +11,11 @@ export default function MaintenancePage() {
   return (
     <main className={styles.page}>
       <header className={styles.header}>
-        <RalloraLogo variant="light" width={218} />
+        <Link href="/" className={styles.brand} aria-label="Rallora home"><RalloraLogo variant="dark" width={188} /></Link>
+        <nav className={styles.nav} aria-label="Main navigation">
+          <Link href="/pilot">Pilot programme</Link>
+          <Link href="/register-club" className={styles.navCta}>Register your club</Link>
+        </nav>
       </header>
       <section className={styles.hero}>
         <div className={styles.copy}>
