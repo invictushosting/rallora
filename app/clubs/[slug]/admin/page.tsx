@@ -251,16 +251,20 @@ export default function ClubAdministration() {
       <div className={styles.navActions}><button onClick={()=>void signOut()}>Sign out</button><span className={styles.badge}>CLUB ADMIN</span></div>
     </header>
     <section className={styles.hero}>
-      <span className={styles.eyebrow}>YOUR CLUB CONTROL CENTRE</span>
+      <div className={styles.heroTop}><span className={styles.eyebrow}>YOUR CLUB CONTROL CENTRE</span><span className={styles.rolePill}>{view.role}</span></div>
       <h1>{view.club.name}</h1>
-      <p>League administration is scoped to this club. You are viewing as {view.role}.</p>
-      <a href={`/clubs/${encodeURIComponent(view.club.slug)}`}>View public club hub →</a>
-      <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/registrations`}>Review player registration requests →</Link>
-      <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/staff`}>Manage club staff →</Link>
-      <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/integrations`}>Manage integrations →</Link>
-      <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/captain`}>Open captain result centre →</Link>
-      <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/events`}>Manage Americano &amp; Mexicano events →</Link>
-      <a href={`/clubs/${encodeURIComponent(view.club.slug)}/social`}>Open Rallora Social Studio →</a>
+      <p>Everything you need to prepare, run and review your club competitions.</p>
+      <div className={styles.heroActions}>
+        <Link className={styles.primaryAction} href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/registrations`}>Review registrations</Link>
+        <a href={`/clubs/${encodeURIComponent(view.club.slug)}`}>View public hub</a>
+      </div>
+      <div className={styles.adminShortcuts}>
+        <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/staff`}>Club staff</Link>
+        <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/integrations`}>Integrations</Link>
+        <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/captain`}>Captain centre</Link>
+        <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/events`}>Events</Link>
+        <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/social`}>Social Studio</Link>
+      </div>
     </section>
     <section className={styles.launchPanel}>
       <div className={styles.launchHead}><div><span>PILOT SETUP</span><h2>{launchComplete?"Club setup ready":"Get your club ready to launch"}</h2>
