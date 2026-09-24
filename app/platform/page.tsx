@@ -17,6 +17,7 @@ type Entitlement = { feature_key:string; is_enabled:boolean };
 type ClubSummary = { club: Club; seasons: Season[]; teams: number; fixtures: number;
   members:number; players:number; subscription:Subscription|null; features:Entitlement[] };
 type Application = { id:string; club_name:string; requested_slug:string; contact_email:string; plan_code:string; status:string; created_at:string };
+type Readiness = Record<string,number>;
 type View =
   | { status: "loading" | "signed_out" | "forbidden" }
   | { status: "error"; message: string }
@@ -29,6 +30,7 @@ export default function PlatformControlCentre() {
   const [notice,setNotice]=useState("");
   const [email,setEmail]=useState("");
   const [password,setPassword]=useState("");
+  const [readiness,setReadiness]=useState<Readiness|null>(null);
   const load=useCallback(async()=>{
       try {
         const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -91,6 +93,9 @@ export default function PlatformControlCentre() {
         const applicationsReply = await supabase.from("rallora_club_applications")
           .select("id,club_name,requested_slug,contact_email,plan_code,status,created_at").order("created_at",{ascending:false});
         if (applicationsReply.error) throw applicationsReply.error;
+        const readinessReply=await supabase.rpc("rallora_pilot_readiness_report");
+        if(readinessReply.error) throw readinessReply.error;
+        setReadiness((readinessReply.data??{}) as Readiness);
         setView({ status: "ready", clubs: summaries, applications: (applicationsReply.data ?? []) as Application[] });
       } catch (e) {
         setView({
@@ -166,7 +171,7 @@ export default function PlatformControlCentre() {
             <span>{label}</span><strong>{count.toLocaleString("en-GB")}</strong>
           </div>)}
       </section>
-      <h2>Registered clubs</h2>
+      <h2>Pilot readiness</h2>{readiness&&<section className={styles.metrics} aria-label="Pilot readiness">{Object.entries(readiness).map(([key,value])=><div className={styles.metric} key={key}><span>{key.replaceAll("_"," ")}</span><strong>{Number(value).toLocaleString("en-GB")}</strong></div>)}</section>}<h2>Registered clubs</h2>
       <section className={styles.grid} aria-label="Registered clubs">
         {summaries.map(({ club, seasons, teams, fixtures, members, players, subscription, features }) =>
           <article className={styles.card} key={club.id}>
