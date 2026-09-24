@@ -171,7 +171,7 @@ export default function PlatformControlCentre() {
             <span>{label}</span><strong>{count.toLocaleString("en-GB")}</strong>
           </div>)}
       </section>
-      <h2>Pilot readiness</h2>{readiness&&<section className={styles.metrics} aria-label="Pilot readiness">{Object.entries(readiness).map(([key,value])=><div className={styles.metric} key={key}><span>{key.replaceAll("_"," ")}</span><strong>{Number(value).toLocaleString("en-GB")}</strong></div>)}</section>}<h2>Registered clubs</h2>
+      <h2>Pilot readiness</h2>{readiness&&<section className={styles.metrics} aria-label="Pilot readiness">{Object.entries(readiness).map(([key,value])=><div className={styles.metric} key={key}><span>{key.replaceAll("_"," ")}</span><strong>{Number(value).toLocaleString("en-GB")}</strong></div>)}</section>}<div className={styles.sectionHeading}><div><small>CLUB OPERATIONS</small><h2>Registered clubs</h2></div><p>Manage access, plans and features for every Rallora club.</p></div>
       <section className={styles.grid} aria-label="Registered clubs">
         {summaries.map(({ club, seasons, teams, fixtures, members, players, subscription, features }) =>
           <article className={styles.card} key={club.id}>
@@ -187,13 +187,13 @@ export default function PlatformControlCentre() {
             </dl>
             <div className={styles.controls}>
               <label>Plan<select defaultValue={subscription?.plan_code??"starter"} id={`plan-${club.id}`}>
-                <option value="starter">Starter</option><option value="league">League</option><option value="pro">Pro</option>
+                <option value="starter">Starter</option><option value="league">Growth</option><option value="pro">Pro</option>
               </select></label>
               <label>Status<select defaultValue={subscription?.status??"trialing"} id={`status-${club.id}`}>
                 <option value="trialing">Trial</option><option value="active">Active</option><option value="past_due">Past due</option><option value="paused">Paused</option><option value="cancelled">Cancelled</option>
               </select></label>
               <button disabled={busy===`plan-${club.id}`} onClick={()=>{const plan=(document.getElementById(`plan-${club.id}`)as HTMLSelectElement).value;const status=(document.getElementById(`status-${club.id}`)as HTMLSelectElement).value;void setPlan(club.id,plan,status)}}>Save plan</button>
-              <button disabled={busy===`club-${club.id}`} onClick={()=>void setClubStatus(club.id,!club.is_active)}>{club.is_active?"Suspend club":"Activate club"}</button>
+              <button disabled={busy===`club-${club.id}`} onClick={()=>{const next=!club.is_active;if(window.confirm(`${next?"Activate":"Suspend"} ${club.name}?`))void setClubStatus(club.id,next)}}>{club.is_active?"Suspend club":"Activate club"}</button>
             </div>
             <div className={styles.features}>{["core_league","player_registration","captain_results","social_studio","sponsors","reminders","club_events"].map(feature=><label key={feature}><input type="checkbox" checked={features.some(item=>item.feature_key===feature&&item.is_enabled)} onChange={event=>void setFeature(club.id,feature,event.target.checked)}/>{feature.replaceAll("_"," ")}</label>)}</div>
             <strong>Seasons</strong>
@@ -201,18 +201,15 @@ export default function PlatformControlCentre() {
               <span>{s.name}</span><em>{s.status}</em>
             </div>)}
             {!seasons.length && <p>No seasons created yet.</p>}
-            <p><a href={`/clubs/${encodeURIComponent(club.slug)}`}>View this club’s league hub →</a></p>
-            <p><a href={`/clubs/${encodeURIComponent(club.slug)}/admin`}>Open club administration →</a></p>
-            {club.slug === "gsm-padel" && <p><Link href="/clubs/gsm-padel/legacy">Open legacy GSM management →</Link></p>}
+            <div className={styles.clubActions}><a href={`/clubs/${encodeURIComponent(club.slug)}/admin`}>Open club admin</a><a href={`/clubs/${encodeURIComponent(club.slug)}`}>View public hub</a></div>
           </article>)}
       </section>
-      <h2>Club applications</h2>
+      <div className={styles.sectionHeading}><div><small>ONBOARDING</small><h2>Club applications</h2></div><p>Review new clubs before they receive access to Rallora.</p></div>
       <section className={styles.grid} aria-label="Club applications">
         {view.applications.map(application => <article className={styles.card} key={application.id}>
           <span className={styles.status}>{application.status}</span>
-          <h3>{application.club_name}</h3><p className={styles.slug}>/{application.requested_slug}</p>
-          <p>{application.applicant_name&&<><strong>{application.applicant_name}</strong><br/></>}{application.contact_email}</p><p>Requested plan: <strong>{application.plan_code}</strong></p>
-          {application.status === "pending" && <div className={styles.actionRow}><button disabled={busy===`application-${application.id}`} onClick={() => void approveApplication(application.id)}>Approve & activate</button><button className={styles.secondary} disabled={busy===`application-${application.id}`} onClick={() => void declineApplication(application.id)}>Decline</button></div>}
+          <h3>{application.club_name}</h3><p className={styles.slug}>rallora.app/clubs/{application.requested_slug}</p><dl className={styles.applicationDetails}><div><dt>Main contact</dt><dd>{application.applicant_name||"Not supplied"}</dd></div><div><dt>Email</dt><dd>{application.contact_email}</dd></div><div><dt>Requested plan</dt><dd>{application.plan_code==="league"?"Growth":application.plan_code.charAt(0).toUpperCase()+application.plan_code.slice(1)}</dd></div><div><dt>Applied</dt><dd>{new Date(application.created_at).toLocaleDateString("en-GB")}</dd></div></dl>
+          {application.status === "pending" && <div className={styles.actionRow}><button disabled={busy===`application-${application.id}`} onClick={() => {if(window.confirm(`Approve ${application.club_name} and activate its Rallora club?`))void approveApplication(application.id)}}>Approve & activate</button><button className={styles.secondary} disabled={busy===`application-${application.id}`} onClick={() => {if(window.confirm(`Decline the application from ${application.club_name}?`))void declineApplication(application.id)}}>Decline</button></div>}
         </article>)}
         {!view.applications.length && <article className={styles.card}><h3>No club applications</h3><p>New applications appear here for approval.</p></article>}
       </section>
