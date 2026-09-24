@@ -233,6 +233,14 @@ export default function ClubAdministration() {
     fixtures: acc.fixtures + item.fixtures,
     confirmed: acc.confirmed + item.confirmed,
   }), { divisions: 0, teams: 0, fixtures: 0, confirmed: 0 });
+  const launchSteps = [
+    {label:"Brand your club",done:Boolean(view.club.logo_url && view.club.cover_image_url && view.club.welcome_text),hint:"Add a logo, cover image and welcome message in Branding."},
+    {label:"Create your first season",done:view.summaries.length>0,hint:"Create a draft season before publishing anything."},
+    {label:"Add divisions",done:totals.divisions>0,hint:"Add the competition divisions your teams will enter."},
+    {label:"Add or approve teams",done:totals.teams>0,hint:"Teams can be added here or arrive through player registration."},
+    {label:"Publish fixtures",done:totals.fixtures>0,hint:"Create fixtures only after the team list is ready."},
+  ];
+  const launchComplete = launchSteps.every((step)=>step.done);
 
   return <main className={styles.page}><div className={styles.shell}>
     <header className={styles.nav}>
@@ -250,8 +258,14 @@ export default function ClubAdministration() {
       <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/captain`}>Open captain result centre →</Link>
       <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/events`}>Manage Americano &amp; Mexicano events →</Link>
       <a href={`/clubs/${encodeURIComponent(view.club.slug)}/social`}>Open Rallora Social Studio →</a>
-      {view.club.slug === "gsm-padel" &&
-        <Link href="/clubs/gsm-padel/legacy#admin">Open existing GSM management tools →</Link>}
+    </section>
+    <section className={styles.launchPanel}>
+      <div className={styles.launchHead}><div><span>PILOT SETUP</span><h2>{launchComplete?"Club setup ready":"Get your club ready to launch"}</h2>
+        <p>{launchComplete?"Your core league setup is in place. Review it before inviting players.":"Work through these steps in order. Rallora keeps draft setup private until you activate the season."}</p></div>
+        <strong>{launchSteps.filter(step=>step.done).length}/{launchSteps.length}</strong></div>
+      <ol className={styles.launchList}>{launchSteps.map((step,index)=><li key={step.label} className={step.done?styles.launchDone:""}>
+        <span>{step.done?"✓":index+1}</span><div><strong>{step.label}</strong><p>{step.hint}</p></div>
+      </li>)}</ol>
     </section>
     <section className={styles.socialInvite}>
       <span>RALLORA SOCIAL</span><h2>Turn league updates into share-ready club stories.</h2>
