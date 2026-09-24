@@ -20,11 +20,11 @@ create table public.divisions (
   id uuid primary key, season_id uuid not null references public.seasons(id), name text not null, sort_order integer not null default 1
 );
 create table public.teams (
-  id uuid primary key, division_id uuid not null references public.divisions(id), name text not null,
+  id uuid primary key default gen_random_uuid(), division_id uuid not null references public.divisions(id), name text not null,
   player_one_name text, player_two_name text, is_active boolean not null default true
 );
 create table public.fixtures (
-  id uuid primary key,
+  id uuid primary key default gen_random_uuid(),
   season_id uuid not null references public.seasons(id),
   division_id uuid not null references public.divisions(id),
   home_team_id uuid not null references public.teams(id),
