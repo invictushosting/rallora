@@ -33,3 +33,6 @@
  .form input,.form select,.form textarea{min-height:48px;font-size:16px}.form textarea{min-height:110px}
  .form button{min-height:48px}.columns{gap:18px}
 }
+.fixtureSummary{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding:14px;border:1px solid #d6e2f1;border-radius:12px;background:#fff}
+.fixtureSummary strong{font-size:14px;color:#173354}.fixtureSummary span{font-size:12px;color:#667f9d}
+.form .danger{background:#8b2635}
