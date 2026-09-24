@@ -82,7 +82,7 @@ export default function ClubAdministration() {
 
         const { data: club, error: clubError } = await supabase
           .from("clubs")
-          .select("id,slug,name,short_name,primary_color,welcome_text,logo_url,website_url,contact_email,venue_name,address_line_1,town,postcode,player_registration_terms")
+          .select("id,slug,name,short_name,primary_color,welcome_text,logo_url,cover_image_url,website_url,contact_email,venue_name,address_line_1,town,postcode,player_registration_terms")
           .eq("slug", slug).maybeSingle();
         if (clubError) throw clubError;
         if (!club) {
