@@ -1,9 +1,9 @@
 -- Minimal synthetic schema for the production adjacent-table migration.
 create table public.announcements (id uuid primary key, club_id uuid, title text, body text, is_published boolean not null);
 create table public.sponsors (id uuid primary key, club_id uuid, name text, is_active boolean not null);
-create table public.club_rules (id uuid primary key, club_id uuid not null, season_id uuid);
+create table public.club_rules (id uuid primary key, club_id uuid not null, season_id uuid, win_points integer, draw_points integer, loss_points integer, forfeit_win_points integer, forfeit_loss_points integer, double_forfeit_points integer, updated_at timestamptz not null default now());
 create table public.club_setup_profiles (id uuid primary key, club_id uuid not null, season_id uuid);
-create table public.standings (id uuid primary key, season_id uuid not null, division_id uuid not null, team_id uuid not null, points integer not null);
+create table public.standings (id uuid primary key default gen_random_uuid(), season_id uuid not null, division_id uuid not null, team_id uuid not null, played integer not null default 0, won integer not null default 0, drawn integer not null default 0, lost integer not null default 0, score_diff integer not null default 0, points integer not null default 0, updated_at timestamptz not null default now(), unique(season_id,team_id));
 create table public.cup_qualifier_rules (id uuid primary key, season_id uuid not null, division_id uuid not null, is_active boolean not null);
 create table public.cup_manual_qualifiers (id uuid primary key, season_id uuid not null, team_id uuid not null, is_active boolean not null);
 
@@ -19,7 +19,7 @@ insert into public.club_rules values
 insert into public.club_setup_profiles values
  ('40000000-0000-0000-0000-0000000000a1','00000000-0000-0000-0000-0000000000a1','00000000-0000-0000-0000-0000000001a1'),
  ('40000000-0000-0000-0000-0000000000b1','00000000-0000-0000-0000-0000000000b2','00000000-0000-0000-0000-0000000001b2');
-insert into public.standings values
+insert into public.standings(id,season_id,division_id,team_id,points) values
  ('50000000-0000-0000-0000-0000000000a1','00000000-0000-0000-0000-0000000001a1','00000000-0000-0000-0000-0000000002a1','00000000-0000-0000-0000-0000000003a1',3),
  ('50000000-0000-0000-0000-0000000000b1','00000000-0000-0000-0000-0000000001b2','00000000-0000-0000-0000-0000000002b2','00000000-0000-0000-0000-0000000003b1',3);
 insert into public.cup_qualifier_rules values
