@@ -3,3 +3,10 @@
 
 @media(max-width:560px){.page{place-items:start center}.card{margin-top:10px}.back{display:inline-flex;align-items:center;min-height:44px;margin-bottom:18px}.card h1{font-size:clamp(30px,10vw,36px);overflow-wrap:anywhere}.card input,.card select{min-height:48px;font-size:16px}.card button{min-height:48px}}
 .player{display:grid;gap:12px;padding:16px;border:1px solid #dce7f3;border-radius:14px;background:#f8fbfe}.player>strong{font-size:14px;color:#061a39}
+
+.step{display:flex;align-items:flex-start;gap:12px;padding:4px 0}.step>span{display:grid;place-items:center;flex:0 0 30px;height:30px;border-radius:9px;background:#061a39;color:#fff;font-size:12px;font-weight:900}.step>div{display:grid;gap:3px}.step strong{font-size:13px}.step p{margin:0;color:#6b8097;font-size:11px;line-height:1.45}
+.playerHead{display:flex;align-items:center;justify-content:space-between;gap:12px}.playerHead>span{color:#6d8298;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.7px}
+.syncNote,.syncSuccess{margin:0;font-size:11px;line-height:1.5}.syncNote{color:#657c94}.syncSuccess{color:#18704d;font-weight:750}
+.applicationState{background:linear-gradient(135deg,#f1fbf5,#fff);border:1px solid #cbe9d7;border-radius:14px;padding:16px;margin:0 0 18px}.applicationState strong{font-size:15px;color:#155f43}.applicationState p{margin:5px 0 0;color:#557066;font-size:12px;line-height:1.55}
+.player input[readonly]{background:#eef8f2;border-color:#bfe1cb;color:#185b40;font-weight:800}
+@media(max-width:560px){.playerHead{align-items:flex-start;flex-direction:column;gap:4px}}
