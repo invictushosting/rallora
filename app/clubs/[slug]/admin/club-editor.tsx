@@ -75,6 +75,11 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const selectedDivision = divisions.find((division) => division.id === fixtureDivisionId);
   const recoveryOptions = fixtures.filter((fixture)=>!fixtureDivisionId || fixture.division_id===fixtureDivisionId);
   const eligibleTeams = selectedDivision?.teams ?? [];
+  const selectedManagedFixture = fixtures.find((fixture)=>fixture.id===manageFixture);
+  const managedDivision = selectedManagedFixture ? divisions.find((division)=>division.id===selectedManagedFixture.division_id) : undefined;
+  const managedHome = managedDivision?.teams.find((team)=>team.id===selectedManagedFixture?.home_team_id)?.name ?? "Home";
+  const managedAway = managedDivision?.teams.find((team)=>team.id===selectedManagedFixture?.away_team_id)?.name ?? "Away";
+  const managedLocked = selectedManagedFixture?.status==="confirmed" || selectedManagedFixture?.status==="cancelled";
 
   useEffect(() => {
     if (!seasons.some((season) => season.id === divisionSeasonId)) {
@@ -231,8 +236,22 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
 
   async function setSeasonStatus(seasonId:string,status:"draft"|"active"|"completed") { await submit(async()=>{const {error}=await supabase.rpc("rallora_set_season_status",{p_season_id:seasonId,p_status:status});if(error)throw error;},`Season marked ${status}.`); }
 
-  async function updateFixtureSchedule() { await submit(async()=>{if(!manageFixture)throw new Error("Choose a fixture.");const week=Number(manageWeek);const {error}=await supabase.rpc("rallora_update_fixture_schedule",{p_fixture_id:manageFixture,p_week_number:week,p_play_by:manageDeadline,p_available_from:managePublish});if(error)throw error;},"Fixture schedule updated."); }
-  async function cancelFixture() { await submit(async()=>{if(!manageFixture)throw new Error("Choose a fixture.");const {error}=await supabase.rpc("rallora_cancel_fixture",{p_fixture_id:manageFixture});if(error)throw error;},"Fixture cancelled."); }
+  async function updateFixtureSchedule() {
+    if (!manageFixture) { setError("Choose a fixture."); return; }
+    if (managedLocked) { setError("Confirmed or cancelled fixtures cannot be rescheduled."); return; }
+    const week=Number(manageWeek);
+    if(!Number.isInteger(week)||week<1||week>1000){setError("Week number must be between 1 and 1000.");return;}
+    if(!manageDeadline||!managePublish||managePublish>manageDeadline){setError("Publish date must be on or before the play-by date.");return;}
+    if(!window.confirm(`Update ${managedHome} vs ${managedAway} to week ${week}, published ${new Date(managePublish+"T00:00:00").toLocaleDateString("en-GB")} and due ${new Date(manageDeadline+"T00:00:00").toLocaleDateString("en-GB")}?`)) return;
+    await submit(async()=>{const {error}=await supabase.rpc("rallora_update_fixture_schedule",{p_fixture_id:manageFixture,p_week_number:week,p_play_by:manageDeadline,p_available_from:managePublish});if(error)throw error;},"Fixture schedule updated.");
+  }
+  async function cancelFixture() {
+    if(!manageFixture){setError("Choose a fixture.");return;}
+    if(selectedManagedFixture?.status==="cancelled"){setError("This fixture is already cancelled.");return;}
+    if(selectedManagedFixture?.status==="confirmed"){setError("Confirmed fixtures must be reopened before they can be cancelled.");return;}
+    if(!window.confirm(`Cancel ${managedHome} vs ${managedAway}? Captains will no longer see this fixture as active.`)) return;
+    await submit(async()=>{const {error}=await supabase.rpc("rallora_cancel_fixture",{p_fixture_id:manageFixture});if(error)throw error;},"Fixture cancelled.");
+  }
 
   async function resolveResult(event: React.FormEvent) {
     event.preventDefault();
@@ -351,6 +370,32 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         onChange={(event) => setFixturePublish(event.target.value)} /></label>
       <button disabled={busy || eligibleTeams.length < 2}
         type="submit">Create fixture</button>
+
+      <div className={styles.wide}><hr /><h3>Manage an existing fixture</h3><p>Reschedule open or disputed fixtures, or cancel a fixture that has no official result.</p></div>
+      <label className={styles.wide}>Fixture<select value={manageFixture} onChange={(event)=>{
+        const id=event.target.value; setManageFixture(id);
+        const fixture=fixtures.find((item)=>item.id===id);
+        if(fixture){setManageWeek(String(fixture.week_number));setManageDeadline(fixture.play_by);setManagePublish(fixture.play_by);}
+      }}>
+        <option value="">Choose fixture</option>
+        {fixtures.map((fixture)=>{
+          const division=divisions.find((item)=>item.id===fixture.division_id);
+          const home=division?.teams.find((team)=>team.id===fixture.home_team_id)?.name??"Home";
+          const away=division?.teams.find((team)=>team.id===fixture.away_team_id)?.name??"Away";
+          return <option key={fixture.id} value={fixture.id}>Week {fixture.week_number} · {home} vs {away} · {fixture.status}</option>
+        })}
+      </select></label>
+      {selectedManagedFixture&&<div className={styles.fixtureSummary}>
+        <strong>{managedHome} vs {managedAway}</strong>
+        <span>Status: {selectedManagedFixture.status}</span>
+        <span>Play by: {new Date(selectedManagedFixture.play_by+"T00:00:00").toLocaleDateString("en-GB")}</span>
+      </div>}
+      <label>Week<input type="number" min={1} max={1000} value={manageWeek} onChange={(event)=>setManageWeek(event.target.value)} /></label>
+      <label>Publish on<input type="date" value={managePublish} onChange={(event)=>setManagePublish(event.target.value)} /></label>
+      <label>Play by<input type="date" value={manageDeadline} onChange={(event)=>setManageDeadline(event.target.value)} /></label>
+      <button type="button" disabled={busy||!manageFixture||managedLocked} onClick={()=>void updateFixtureSchedule()}>Update fixture schedule</button>
+      <button type="button" className={styles.danger} disabled={busy||!manageFixture||selectedManagedFixture?.status==="cancelled"||selectedManagedFixture?.status==="confirmed"} onClick={()=>void cancelFixture()}>Cancel fixture</button>
+      {selectedManagedFixture?.status==="confirmed"&&<p className={styles.wide}>This fixture has an official result. Use Result recovery to reopen it before making schedule or cancellation changes.</p>}
     </form>}
   </section>;
 }
