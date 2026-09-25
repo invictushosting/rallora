@@ -29,7 +29,7 @@ export default function RegisterClub(){
   async function submit(event:React.FormEvent<HTMLFormElement>){
     event.preventDefault();setBusy(true);setError("");setMessage("");
     try{const form=new FormData(event.currentTarget);let user=(await supabase.auth.getUser()).data.user;if(!user)user=await authenticate();if(!user)return;
-      const {error:insertError}=await supabase.from("rallora_club_applications").insert({applicant_user_id:user.id,applicant_name:String(form.get("managerName")).trim(),club_name:String(form.get("name")).trim(),requested_slug:String(form.get("slug")).trim().toLowerCase(),contact_email:user.email,plan_code:plan});if(insertError)throw insertError;
+      const {error:insertError}=await supabase.from("rallora_club_applications").insert({applicant_user_id:user.id,applicant_name:String(form.get("managerName")).trim(),club_name:String(form.get("name")).trim(),requested_slug:String(form.get("slug")).trim().toLowerCase(),contact_email:user.email,contact_phone:String(form.get("mobile")).trim(),plan_code:plan});if(insertError)throw insertError;
       setMessage("Application submitted ✓ We’ll review your club application next. Once approved, you’ll be able to sign in as the club administrator, finish your club profile, create your first league and invite teams. We’ll let you know when your club is ready.");
     }catch(reason){setError(reason instanceof Error?reason.message:"Could not submit your application.")}finally{setBusy(false)}
   }
