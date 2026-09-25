@@ -114,3 +114,6 @@
 .playtomicSetupActions label{display:flex;align-items:center;gap:8px;color:#60758d;font-size:11px;font-weight:750;max-width:310px;cursor:pointer}
 .playtomicSetupActions input{width:16px;height:16px;accent-color:#00B0FE}
 @media(max-width:760px){.playtomicSetup{align-items:flex-start;flex-direction:column}.playtomicSetupActions{width:100%;align-items:stretch}.playtomicSetupActions a{justify-content:center}}
+
+
+.statusDanger{background:#fde8e8;color:#b42318;text-transform:capitalize;font-size:11px;font-weight:850;padding:7px 11px;border-radius:20px}
