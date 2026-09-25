@@ -138,3 +138,10 @@
 .formatRequestRow aside{margin-top:12px;padding:12px;border-radius:10px;background:#eef5fb}
 .formatRequestRow aside strong{font-size:11px;color:#173354}
 .formatRequestRow aside p{margin:4px 0 0;color:#60758d;font-size:12px;line-height:1.5}
+
+
+.seasonCardTop{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.seasonEdit{border:1px solid #cfe0ef;border-radius:10px;background:#f8fbfe;color:#0b3b72;padding:8px 11px;font-size:12px;font-weight:850;cursor:pointer;transition:background .16s ease,border-color .16s ease,transform .16s ease,box-shadow .16s ease}
+.seasonEdit:hover{background:#fff;border-color:#9fc8e3;box-shadow:0 6px 14px rgba(6,26,57,.08);transform:translateY(-1px)}
+.seasonEdit:focus-visible{outline:3px solid rgba(0,176,254,.22);outline-offset:2px}
+@media(max-width:490px){.seasonCardTop{align-items:flex-start}.seasonEdit{min-height:40px;padding:8px 10px}}
