@@ -13,7 +13,7 @@ import PrizePlanner from "./prize-planner";
 import PaymentSetup from "./payment-setup";
 
 type Club = EditableClub;
-type Season = { id: string; club_id: string; name: string; status: string };
+type Season = { id: string; club_id: string; name: string; status: string; fixture_schedule_mode: "weekly" | "date_window" };
 type Membership = { club_id: string; user_id: string; role: string; status: string };
 type DivisionSummary = { id: string; name: string; sort_order: number;
   teams: { id: string; name: string }[] };
@@ -116,7 +116,7 @@ export default function ClubAdministration() {
         }
 
         const [seasonReply, sponsorReply] = await Promise.all([
-          supabase.from("seasons").select("id,club_id,name,status")
+          supabase.from("seasons").select("id,club_id,name,status,fixture_schedule_mode")
             .eq("club_id", club.id).order("created_at", { ascending: false }),
           supabase.from("sponsors").select("id", { count: "exact", head: true })
             .eq("club_id", club.id).eq("is_active", true),
@@ -305,6 +305,7 @@ export default function ClubAdministration() {
       seasons={view.summaries.map((summary): EditableSeason => ({
         id: summary.season.id, name: summary.season.name,
         club_id: summary.season.club_id, status: summary.season.status,
+        fixture_schedule_mode: summary.season.fixture_schedule_mode,
         divisions: summary.divisionSummaries,
       }))}
       onSaved={() => setRevision((value) => value + 1)}
