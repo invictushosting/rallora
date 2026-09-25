@@ -1940,3 +1940,51 @@ button:disabled {
  .mobile-nav button{min-height:52px}.footer-grid{padding-left:14px;padding-right:14px}
  .email-box{min-height:48px}.email-box button{min-width:48px}
 }
+
+/* Rallora PWA install prompt */
+.pwa-install {
+  position: fixed;
+  z-index: 10000;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  width: min(420px, calc(100vw - 32px));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 44px 14px 14px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 18px;
+  background: #061A39;
+  color: #fff;
+  box-shadow: 0 18px 50px rgba(0,0,0,.28);
+}
+.pwa-install__icon { flex: 0 0 auto; border-radius: 12px; }
+.pwa-install__copy { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 3px; }
+.pwa-install__copy strong { font-size: 14px; line-height: 1.25; }
+.pwa-install__copy span { color: rgba(255,255,255,.75); font-size: 12px; line-height: 1.4; }
+.pwa-install__button {
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 999px;
+  padding: 9px 14px;
+  background: #fff;
+  color: #061A39;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.pwa-install__close {
+  position: absolute;
+  top: 7px;
+  right: 9px;
+  border: 0;
+  background: transparent;
+  color: rgba(255,255,255,.7);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+@media (max-width: 520px) {
+  .pwa-install { right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); width: calc(100vw - 24px); }
+}
