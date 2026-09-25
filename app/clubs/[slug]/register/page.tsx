@@ -11,7 +11,7 @@ export default function RegisterTeamPage(){
  const [club,setClub]=useState<Club|null>(null),[seasons,setSeasons]=useState<Season[]>([]),[seasonId,setSeasonId]=useState("");
  const season=seasons.find(item=>item.id===seasonId)??null;
  const [userId,setUserId]=useState<string|null>(null),[email,setEmail]=useState(""),[password,setPassword]=useState("");
- const [teamName,setTeamName]=useState(""),[captainName,setCaptainName]=useState(""),[phone,setPhone]=useState("");
+ const [captainName,setCaptainName]=useState(""),[phone,setPhone]=useState("");
  const [captainRating,setCaptainRating]=useState(""),[partnerName,setPartnerName]=useState(""),[partnerEmail,setPartnerEmail]=useState(""),[partnerRating,setPartnerRating]=useState("");
  const [existing,setExisting]=useState<string|null>(null),[message,setMessage]=useState(""),[error,setError]=useState(""),[busy,setBusy]=useState(false);
  const [ratingState,setRatingState]=useState<"idle"|"checking"|"synced"|"unmatched"|"unavailable">("idle"),[ratingChecked,setRatingChecked]=useState(false);
