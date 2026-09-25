@@ -70,3 +70,8 @@
 .healthAttention{border-color:#f0c9c2;background:#fff9f7}.healthAttention strong{color:#9b321f}.healthOk{opacity:.72}.healthOk strong{color:#2e6b54}
 @media(max-width:900px){.addClubForm{grid-template-columns:1fr 1fr}.addClubForm>button{grid-column:1/-1}}
 @media(max-width:560px){.sectionActions{align-items:stretch;flex-direction:column;width:100%}.sectionActions button{width:100%}.addClubForm{grid-template-columns:1fr;padding:17px}.addClubForm>button{grid-column:auto}.slugInput{display:block;padding-top:8px}.slugInput>span{display:block;padding:0 11px 7px}.slugInput input{width:100%}.healthOk{opacity:.82}}
+
+/* Expanded manual onboarding details */
+.addClubForm{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1050px){.addClubForm{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.addClubForm{grid-template-columns:1fr}}
