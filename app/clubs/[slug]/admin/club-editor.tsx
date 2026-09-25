@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import styles from "./editor.module.css";
 
@@ -30,7 +31,16 @@ type Props = {
 
 export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Props) {
   const supabase = useMemo(() => createClient(), []);
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<"branding" | "seasons" | "teams" | "fixtures">("branding");
+
+  useEffect(() => {
+    const requested = searchParams.get("setup");
+    if (requested === "branding" || requested === "seasons" || requested === "teams" || requested === "fixtures") {
+      setActiveTab(requested);
+      requestAnimationFrame(() => document.getElementById("club-management")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    }
+  }, [searchParams]);
   const [name, setName] = useState(club.name);
   const [shortName, setShortName] = useState(club.short_name ?? "");
   const [colour, setColour] = useState(club.primary_color || "#2458ff");
@@ -272,7 +282,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
     }, "Fixture reopened and standings recalculated.");
   }
 
-  return <section className={styles.editor}>
+  return <section className={styles.editor} id="club-management">
     <div className={styles.editorHead}><div>
       <span className={styles.eyebrow}>CLUB MANAGEMENT</span>
       <h2>Manage {club.name}</h2>
