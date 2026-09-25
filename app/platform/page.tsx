@@ -18,10 +18,17 @@ type ClubSummary = { club: Club; seasons: Season[]; teams: number; fixtures: num
   members:number; players:number; subscription:Subscription|null; features:Entitlement[] };
 type Application = { id:string; applicant_name:string|null; club_name:string; requested_slug:string; contact_email:string; contact_phone:string|null; plan_code:string; status:string; created_at:string };
 type Readiness = Record<string,number>;
+type FormatRequest = {
+  id:string; club_id:string; format_name:string; description:string; team_structure:string|null;
+  group_structure:string|null; match_structure:string|null; scheduling_rules:string|null;
+  scoring_rules:string|null; promotion_relegation_rules:string|null; special_rules:string|null;
+  reference_link:string|null; status:string; implemented_format_key:string|null;
+  platform_notes:string|null; created_at:string;
+};
 type View =
   | { status: "loading" | "signed_out" | "forbidden" }
   | { status: "error"; message: string }
-  | { status: "ready"; clubs: ClubSummary[]; applications: Application[] };
+  | { status: "ready"; clubs: ClubSummary[]; applications: Application[]; formatRequests: FormatRequest[] };
 
 export default function PlatformControlCentre() {
   const supabase = useMemo(() => createClient(), []);
@@ -91,13 +98,25 @@ export default function PlatformControlCentre() {
             };
           }),
         );
-        const applicationsReply = await supabase.from("rallora_club_applications")
-          .select("id,applicant_name,club_name,requested_slug,contact_email,contact_phone,plan_code,status,created_at").order("created_at",{ascending:false});
+        const [applicationsReply,formatRequestsReply] = await Promise.all([
+          supabase.from("rallora_club_applications")
+            .select("id,applicant_name,club_name,requested_slug,contact_email,contact_phone,plan_code,status,created_at")
+            .order("created_at",{ascending:false}),
+          supabase.from("rallora_format_requests")
+            .select("id,club_id,format_name,description,team_structure,group_structure,match_structure,scheduling_rules,scoring_rules,promotion_relegation_rules,special_rules,reference_link,status,implemented_format_key,platform_notes,created_at")
+            .order("created_at",{ascending:false}),
+        ]);
         if (applicationsReply.error) throw applicationsReply.error;
+        if (formatRequestsReply.error) throw formatRequestsReply.error;
         const readinessReply=await supabase.rpc("rallora_pilot_readiness_report");
         if(readinessReply.error) throw readinessReply.error;
         setReadiness((readinessReply.data??{}) as Readiness);
-        setView({ status: "ready", clubs: summaries, applications: (applicationsReply.data ?? []) as Application[] });
+        setView({
+          status: "ready",
+          clubs: summaries,
+          applications: (applicationsReply.data ?? []) as Application[],
+          formatRequests: (formatRequestsReply.data ?? []) as FormatRequest[],
+        });
       } catch (e) {
         setView({
           status: "error",
@@ -128,6 +147,14 @@ export default function PlatformControlCentre() {
   function setClubStatus(id:string,value:boolean){return action(`club-${id}`,supabase.rpc("rallora_platform_set_club_status",{p_club_id:id,p_is_active:value}),value?"Club activated.":"Club suspended.");}
   function setPlan(id:string,plan:string,status:string){return action(`plan-${id}`,supabase.rpc("rallora_platform_set_plan",{p_club_id:id,p_plan_code:plan,p_status:status}),"Subscription updated.");}
   function setFeature(id:string,feature:string,enabled:boolean){return action(`feature-${id}-${feature}`,supabase.rpc("rallora_platform_set_feature",{p_club_id:id,p_feature_key:feature,p_enabled:enabled}),"Feature access updated.");}
+  function updateFormatRequest(id:string){
+    const status=(document.getElementById(`format-status-${id}`) as HTMLSelectElement)?.value||"reviewing";
+    const notes=(document.getElementById(`format-notes-${id}`) as HTMLTextAreaElement)?.value.trim()||null;
+    const key=(document.getElementById(`format-key-${id}`) as HTMLInputElement)?.value.trim()||null;
+    return action(`format-${id}`,supabase.from("rallora_format_requests").update({
+      status,platform_notes:notes,implemented_format_key:key,updated_at:new Date().toISOString(),
+    }).eq("id",id),"Format request updated.");
+  }
   async function createClub(event:React.FormEvent<HTMLFormElement>){
     event.preventDefault();setBusy("create-club");setNotice("");
     const form=new FormData(event.currentTarget);
@@ -243,6 +270,40 @@ export default function PlatformControlCentre() {
           {application.status === "pending" && <div className={styles.actionRow}><button disabled={busy===`application-${application.id}`} onClick={() => {if(window.confirm(`Approve ${application.club_name} and activate its Rallora club?`))void approveApplication(application.id)}}>Approve & activate</button><button className={styles.secondary} disabled={busy===`application-${application.id}`} onClick={() => {if(window.confirm(`Decline the application from ${application.club_name}?`))void declineApplication(application.id)}}>Decline</button></div>}
         </article>)}
         {!view.applications.length && <article className={styles.card}><h3>No club applications</h3><p>New applications appear here for approval.</p></article>}
+      </section>
+      <div className={styles.sectionHeading}><div><small>PRODUCT REQUESTS</small><h2>League format requests</h2></div><p>Review formats requested by clubs and track them through delivery.</p></div>
+      <section className={styles.grid} aria-label="League format requests">
+        {view.formatRequests.map(request=>{
+          const club=summaries.find(item=>item.club.id===request.club_id)?.club;
+          return <article className={styles.card} key={request.id}>
+            <span className={styles.status}>{request.status}</span>
+            <h3>{request.format_name}</h3>
+            <p className={styles.slug}>{club?.name??"Unknown club"} · {new Date(request.created_at).toLocaleDateString("en-GB")}</p>
+            <p>{request.description}</p>
+            <dl className={styles.applicationDetails}>
+              {request.team_structure&&<div><dt>Teams / players</dt><dd>{request.team_structure}</dd></div>}
+              {request.group_structure&&<div><dt>Groups / divisions</dt><dd>{request.group_structure}</dd></div>}
+              {request.match_structure&&<div><dt>Matches</dt><dd>{request.match_structure}</dd></div>}
+              {request.scheduling_rules&&<div><dt>Scheduling</dt><dd>{request.scheduling_rules}</dd></div>}
+              {request.scoring_rules&&<div><dt>Scoring</dt><dd>{request.scoring_rules}</dd></div>}
+              {request.promotion_relegation_rules&&<div><dt>Promotion / relegation</dt><dd>{request.promotion_relegation_rules}</dd></div>}
+              {request.special_rules&&<div><dt>Special rules</dt><dd>{request.special_rules}</dd></div>}
+            </dl>
+            {request.reference_link&&<a href={request.reference_link} target="_blank" rel="noreferrer">Open reference ↗</a>}
+            <div className={styles.controls}>
+              <label>Status<select id={`format-status-${request.id}`} defaultValue={request.status}>
+                <option value="new">New</option><option value="reviewing">Reviewing</option>
+                <option value="building">Building</option><option value="testing">Testing</option>
+                <option value="available">Available</option><option value="declined">Declined</option>
+              </select></label>
+              <label>Implemented format key<input id={`format-key-${request.id}`} defaultValue={request.implemented_format_key??""} placeholder="e.g. rolling-4-team" /></label>
+              <label>Club-visible note<textarea id={`format-notes-${request.id}`} defaultValue={request.platform_notes??""} rows={4} placeholder="Update the club on progress or next steps." /></label>
+              <button disabled={busy===`format-${request.id}`} onClick={()=>void updateFormatRequest(request.id)}>{busy===`format-${request.id}`?"Saving…":"Save request"}</button>
+            </div>
+            {club&&<div className={styles.clubActions}><a href={`/clubs/${encodeURIComponent(club.slug)}/admin`}>Open club admin</a></div>}
+          </article>
+        })}
+        {!view.formatRequests.length&&<article className={styles.card}><h3>No format requests</h3><p>Requests submitted by club organisers will appear here.</p></article>}
       </section>
       <div className={styles.sectionHeading}><div><small>PLATFORM HEALTH</small><h2>Operational checks</h2></div><p>Exceptions and data-quality checks across Rallora.</p></div>
       {readiness&&<section className={`${styles.metrics} ${styles.readinessMetrics}`} aria-label="Platform health">{Object.entries(readiness).map(([key,value])=><div className={`${styles.metric} ${Number(value)>0?styles.healthAttention:styles.healthOk}`} key={key}><span>{key.replaceAll("_"," ")}</span><strong>{Number(value).toLocaleString("en-GB")}</strong></div>)}</section>}
