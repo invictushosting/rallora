@@ -110,8 +110,13 @@ function isConfirmed(result: Result | undefined) {
 function teamLabel(id: string, names: Map<string, string>) {
   return names.get(id) ?? "Players unavailable";
 }
+function playerNames(team: Team | undefined) {
+  return team
+    ? [team.player_one_name, team.player_two_name].filter((name): name is string => Boolean(name?.trim())).map(name => name.trim())
+    : [];
+}
 function playerPair(team: Team) {
-  return [team.player_one_name, team.player_two_name].filter(Boolean).join(" / ") || "Players to be confirmed";
+  return playerNames(team).join(" / ") || "Players to be confirmed";
 }
 
 export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string } = {}) {
@@ -399,6 +404,8 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
   function fixtureRow(fixture: Fixture) {
     const result = results.get(fixture.id);
     const resolved = isConfirmed(result);
+    const homePlayers = playerNames(data.teams.find(team => team.id === fixture.home_team_id));
+    const awayPlayers = playerNames(data.teams.find(team => team.id === fixture.away_team_id));
     return <li key={fixture.id} className={styles.fixture}>
       <div className={styles.fixtureTop}>
         <span>{data.divisions.find((division) =>
@@ -416,9 +423,9 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
         </div>
         <div className={`${styles.resultPair} ${styles.resultPairAway}`}><span className={styles.pairSide}>AWAY</span><strong>{teamLabel(fixture.away_team_id, teamNames)}</strong></div>
       </div> : <div className={styles.match}>
-        <div className={styles.matchTeam}>{teamLabel(fixture.home_team_id, teamNames).split(" / ").map((name, index)=><strong key={index}>{name}</strong>)}</div>
+        <div className={styles.matchTeam}>{homePlayers.length ? homePlayers.map((name, index)=><strong key={index}>{name}</strong>) : <strong>Players to be confirmed</strong>}</div>
         <span className={styles.score}>vs</span>
-        <div className={styles.matchTeam}>{teamLabel(fixture.away_team_id, teamNames).split(" / ").map((name, index)=><strong key={index}>{name}</strong>)}</div>
+        <div className={styles.matchTeam}>{awayPlayers.length ? awayPlayers.map((name, index)=><strong key={index}>{name}</strong>) : <strong>Players to be confirmed</strong>}</div>
       </div>}
       {!resolved && arrangementPanel(fixture)}
       {(resolved || fixture.status === "disputed") && <div className={styles.fixtureBottom}>
