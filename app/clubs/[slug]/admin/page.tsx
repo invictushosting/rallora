@@ -280,6 +280,44 @@ export default function ClubAdministration() {
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/social`}>Social Studio</Link>
       </div>
     </section>
+    <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>CLUB OVERVIEW</span><h2>Your club at a glance</h2></div>
+      <p>Live totals and season structure for {view.club.name}.</p></div>
+    <section className={styles.metrics} aria-label="Club totals">
+      {([["Seasons", view.summaries.length], ["Divisions", totals.divisions],
+        ["Teams", totals.teams], ["Fixtures", totals.fixtures],
+        ["Confirmed results", totals.confirmed], ["Sponsors", view.sponsors]] as [string, number][])
+        .map(([label, value]) => <article key={label}><span>{label}</span>
+          <strong>{value.toLocaleString("en-GB")}</strong></article>)}
+    </section>
+    <div className={styles.sectionHeading}><h2>Club seasons</h2>
+      <p>Each season below belongs to {view.club.name}.</p></div>
+    <section className={styles.grid}>
+      {view.summaries.map(({ season, divisions, teams, fixtures, confirmed, divisionSummaries }) =>
+        <article className={styles.card} key={season.id}>
+          <span className={styles.status}>{season.status}</span>
+          <h3>{season.name}</h3>
+          <div className={styles.numbers}>
+            <span><strong>{divisions}</strong> divisions</span>
+            <span><strong>{teams}</strong> teams</span>
+            <span><strong>{fixtures}</strong> fixtures</span>
+            <span><strong>{confirmed}</strong> confirmed</span>
+          </div>
+          <div className={styles.divisionList}>
+            <h4>Divisions &amp; teams</h4>
+            {divisionSummaries.map((division) => <details key={division.id} className={styles.divisionRow}>
+              <summary>{division.name}<span>{division.teams.length} teams</span></summary>
+              {division.teams.length
+                ? <ul>{division.teams.map((name, index) => <li key={`${division.id}-${index}`}>{name.name}</li>)}</ul>
+                : <p>No teams yet.</p>}
+            </details>)}
+            {!divisionSummaries.length && <p>No divisions yet.</p>}
+          </div>
+          <a href={`/clubs/${encodeURIComponent(view.club.slug)}`}>View season in club hub →</a>
+        </article>)}
+      {!view.summaries.length && <article className={styles.card}>
+        <h3>No seasons yet</h3><p>Club seasons will appear here when configured.</p>
+      </article>}
+    </section>
     <section className={`${styles.launchPanel} ${launchComplete ? styles.launchCompletePanel : ""}`}>
       {launchComplete ? <>
         <div className={styles.completeState}>
@@ -367,44 +405,6 @@ export default function ClubAdministration() {
       seasons={view.summaries.map(({season})=>({
         id:season.id,name:season.name,status:season.status,
       }))} />
-    <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>CLUB OVERVIEW</span><h2>Your club at a glance</h2></div>
-      <p>Live totals and season structure for {view.club.name}.</p></div>
-    <section className={styles.metrics} aria-label="Club totals">
-      {([["Seasons", view.summaries.length], ["Divisions", totals.divisions],
-        ["Teams", totals.teams], ["Fixtures", totals.fixtures],
-        ["Confirmed results", totals.confirmed], ["Sponsors", view.sponsors]] as [string, number][])
-        .map(([label, value]) => <article key={label}><span>{label}</span>
-          <strong>{value.toLocaleString("en-GB")}</strong></article>)}
-    </section>
-    <div className={styles.sectionHeading}><h2>Club seasons</h2>
-      <p>Each season below belongs to {view.club.name}.</p></div>
-    <section className={styles.grid}>
-      {view.summaries.map(({ season, divisions, teams, fixtures, confirmed, divisionSummaries }) =>
-        <article className={styles.card} key={season.id}>
-          <span className={styles.status}>{season.status}</span>
-          <h3>{season.name}</h3>
-          <div className={styles.numbers}>
-            <span><strong>{divisions}</strong> divisions</span>
-            <span><strong>{teams}</strong> teams</span>
-            <span><strong>{fixtures}</strong> fixtures</span>
-            <span><strong>{confirmed}</strong> confirmed</span>
-          </div>
-          <div className={styles.divisionList}>
-            <h4>Divisions &amp; teams</h4>
-            {divisionSummaries.map((division) => <details key={division.id} className={styles.divisionRow}>
-              <summary>{division.name}<span>{division.teams.length} teams</span></summary>
-              {division.teams.length
-                ? <ul>{division.teams.map((name, index) => <li key={`${division.id}-${index}`}>{name.name}</li>)}</ul>
-                : <p>No teams yet.</p>}
-            </details>)}
-            {!divisionSummaries.length && <p>No divisions yet.</p>}
-          </div>
-          <a href={`/clubs/${encodeURIComponent(view.club.slug)}`}>View season in club hub →</a>
-        </article>)}
-      {!view.summaries.length && <article className={styles.card}>
-        <h3>No seasons yet</h3><p>Club seasons will appear here when configured.</p>
-      </article>}
-    </section>
     <p className={styles.note}>All changes are restricted to this club by verified membership and database permissions.</p>
   </div></main>;
 }
