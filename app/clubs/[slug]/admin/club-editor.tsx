@@ -437,8 +437,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
     <div className={styles.editorHead}><div>
       <span className={styles.eyebrow}>CLUB MANAGEMENT</span>
       <h2>Manage {club.name}</h2>
-      <p>Changes affect this club only, subject to database membership checks.</p>
-    </div><span className={styles.badge}>EDITING ENABLED</span></div>
+      <p>Set up and manage your seasons, registrations, teams and fixtures.</p>
+    </div><span className={styles.badge}>CLUB ADMIN</span></div>
     <div className={styles.tabs}>
       {([["branding","Branding"],["seasons","Seasons & divisions"],
         ["registration","Registration"],["teams","Teams"],["fixtures","Fixtures"]] as const).map(([id,label]) =>
