@@ -267,7 +267,15 @@ export default function ClubAdministration() {
   return <main className={styles.page}><div className={styles.shell}>
     <header className={styles.nav}>
       <Link href="/" className={styles.wordmark}><RalloraLogo variant="light" width={218} /></Link>
-      <div className={styles.navActions}><Link href={`/account?club=${encodeURIComponent(view.club.slug)}`}>Profile</Link><button onClick={()=>void signOut()}>Sign out</button><span className={styles.badge}>CLUB ADMIN</span></div>
+      <div className={styles.navActions}>
+        <Link className={styles.profileAction} href={`/account?club=${encodeURIComponent(view.club.slug)}`} aria-label="Open profile">
+          <span className={styles.profileIcon} aria-hidden="true">●</span><span>Profile</span>
+        </Link>
+        <button className={styles.signOutAction} onClick={()=>void signOut()}>
+          <span aria-hidden="true">↗</span><span>Sign out</span>
+        </button>
+        <span className={styles.badge}><span aria-hidden="true">◆</span> CLUB ADMIN</span>
+      </div>
     </header>
     <section className={styles.hero}>
       <div className={styles.heroTop}><span className={styles.eyebrow}>YOUR CLUB CONTROL CENTRE</span><span className={styles.rolePill}>{view.role}</span></div>
