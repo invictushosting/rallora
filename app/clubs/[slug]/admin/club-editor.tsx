@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import styles from "./editor.module.css";
@@ -28,6 +28,45 @@ type Props = {
   onSaved: () => void;
   fixtures?: EditableFixture[];
 };
+
+type ImageKind = "logo" | "cover";
+
+async function optimiseClubImage(file: File, kind: ImageKind): Promise<Blob> {
+  if (!["image/jpeg","image/png","image/webp"].includes(file.type)) {
+    throw new Error("Choose a JPG, PNG or WebP image.");
+  }
+  if (file.size > 15 * 1024 * 1024) throw new Error("Choose an image smaller than 15 MB.");
+
+  const bitmap = await createImageBitmap(file);
+  const targetWidth = kind === "logo" ? 800 : 1600;
+  const targetHeight = kind === "logo" ? 800 : 900;
+  const canvas = document.createElement("canvas");
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    bitmap.close();
+    throw new Error("Your browser could not prepare this image.");
+  }
+
+  if (kind === "logo") {
+    const scale = Math.min(targetWidth / bitmap.width, targetHeight / bitmap.height);
+    const width = Math.max(1, Math.round(bitmap.width * scale));
+    const height = Math.max(1, Math.round(bitmap.height * scale));
+    ctx.drawImage(bitmap, Math.round((targetWidth - width) / 2), Math.round((targetHeight - height) / 2), width, height);
+  } else {
+    const scale = Math.max(targetWidth / bitmap.width, targetHeight / bitmap.height);
+    const width = bitmap.width * scale;
+    const height = bitmap.height * scale;
+    ctx.drawImage(bitmap, (targetWidth - width) / 2, (targetHeight - height) / 2, width, height);
+  }
+  bitmap.close();
+
+  const quality = kind === "logo" ? 0.9 : 0.86;
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", quality));
+  if (!blob) throw new Error("Rallora could not resize this image.");
+  return blob;
+}
 
 export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Props) {
   const supabase = useMemo(() => createClient(), []);
@@ -77,6 +116,9 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [manageDeadline, setManageDeadline] = useState("");
   const [managePublish, setManagePublish] = useState("");
   const [busy, setBusy] = useState(false);
+  const [uploadBusy, setUploadBusy] = useState<ImageKind | "">("");
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -143,6 +185,40 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       setError(caught instanceof Error ? caught.message : "Change could not be saved.");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function uploadClubImage(file: File | undefined, kind: ImageKind) {
+    if (!file) return;
+    setError("");
+    setMessage("");
+    setUploadBusy(kind);
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) throw new Error("Sign in again before uploading images.");
+
+      const optimised = await optimiseClubImage(file, kind);
+      const path = `${club.id}/${kind}.webp`;
+      const { error: uploadError } = await supabase.storage.from("club-media").upload(path, optimised, {
+        contentType: "image/webp",
+        cacheControl: "3600",
+        upsert: true,
+      });
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from("club-media").getPublicUrl(path);
+      const publicUrl = `${data.publicUrl}?v=${Date.now()}`;
+      if (kind === "logo") setLogoUrl(publicUrl);
+      else setCoverImageUrl(publicUrl);
+      setMessage(kind === "logo"
+        ? "Logo uploaded and resized to 800 × 800. Save branding to apply it."
+        : "Cover uploaded and resized to 1600 × 900. Save branding to apply it.");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Image upload failed.");
+    } finally {
+      setUploadBusy("");
+      if (kind === "logo" && logoInputRef.current) logoInputRef.current.value = "";
+      if (kind === "cover" && coverInputRef.current) coverInputRef.current.value = "";
     }
   }
 
@@ -305,14 +381,18 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       <label>Brand colour<input type="color" value={colour}
         onChange={(event) => setColour(event.target.value)} /></label>
       <div className={styles.imageField}>
-        <label>Club logo URL<input type="url" value={logoUrl} onChange={event=>setLogoUrl(event.target.value)} /></label>
-        <p><strong>Logo:</strong> use a square 1:1 image, ideally 800 × 800 px PNG/WebP with padding around the mark. Rallora always fits the full logo inside its frame, so it will not be stretched.</p>
+        <div className={styles.imageFieldHead}><div><strong>Club logo</strong><p>Upload any JPG, PNG or WebP. Rallora automatically resizes it to a square 800 × 800 WebP without stretching the logo.</p></div>
+          <button className={styles.uploadButton} type="button" disabled={Boolean(uploadBusy)} onClick={()=>logoInputRef.current?.click()}>{uploadBusy==="logo"?"Preparing…":logoUrl?"Replace logo":"Upload logo"}</button></div>
+        <input ref={logoInputRef} className={styles.hiddenFile} type="file" accept="image/jpeg,image/png,image/webp" onChange={event=>void uploadClubImage(event.target.files?.[0],"logo")} />
         {logoUrl && <div className={styles.logoPreview}><img src={logoUrl} alt="Club logo preview" /></div>}
+        <details className={styles.advancedImage}><summary>Advanced: use an image URL instead</summary><label>Logo URL<input type="url" value={logoUrl} onChange={event=>setLogoUrl(event.target.value)} /></label></details>
       </div>
       <div className={styles.imageField}>
-        <label>Club cover image URL<input type="url" value={coverImageUrl} onChange={event=>setCoverImageUrl(event.target.value)} /></label>
-        <p><strong>Cover:</strong> use a landscape 16:9 image, ideally 1600 × 900 px JPG/WebP. Keep people, signage and key details near the centre because the image is cropped responsively, never stretched.</p>
+        <div className={styles.imageFieldHead}><div><strong>Cover image</strong><p>Upload a landscape photo. Rallora automatically crops and resizes it to 1600 × 900 (16:9), keeping the centre of the image in view.</p></div>
+          <button className={styles.uploadButton} type="button" disabled={Boolean(uploadBusy)} onClick={()=>coverInputRef.current?.click()}>{uploadBusy==="cover"?"Preparing…":coverImageUrl?"Replace cover":"Upload cover"}</button></div>
+        <input ref={coverInputRef} className={styles.hiddenFile} type="file" accept="image/jpeg,image/png,image/webp" onChange={event=>void uploadClubImage(event.target.files?.[0],"cover")} />
         {coverImageUrl && <div className={styles.coverPreview}><img src={coverImageUrl} alt="Club cover preview" /></div>}
+        <details className={styles.advancedImage}><summary>Advanced: use an image URL instead</summary><label>Cover image URL<input type="url" value={coverImageUrl} onChange={event=>setCoverImageUrl(event.target.value)} /></label></details>
       </div>
       <label>Website<input type="url" value={websiteUrl} onChange={event=>setWebsiteUrl(event.target.value)} /></label>
       <label>Contact email<input type="email" value={contactEmail} onChange={event=>setContactEmail(event.target.value)} /></label>
