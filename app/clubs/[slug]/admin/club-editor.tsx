@@ -131,6 +131,10 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [teamName, setTeamName] = useState("");
   const [playerOne, setPlayerOne] = useState("");
   const [playerTwo, setPlayerTwo] = useState("");
+  const [playerOneEmail, setPlayerOneEmail] = useState("");
+  const [playerTwoEmail, setPlayerTwoEmail] = useState("");
+  const [playerOneRating, setPlayerOneRating] = useState("");
+  const [playerTwoRating, setPlayerTwoRating] = useState("");
   const [fixtureDivisionId, setFixtureDivisionId] = useState(seasons[0]?.divisions[0]?.id ?? "");
   const [fixtureHome, setFixtureHome] = useState("");
   const [fixtureAway, setFixtureAway] = useState("");
@@ -317,13 +321,28 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       if (!division) throw new Error("Select a division belonging to your club.");
       if (!teamName.trim() || teamName.trim().length > 100)
         throw new Error("Team name must be 1–100 characters.");
+      const ratingOne = playerOneRating.trim() === "" ? null : Number(playerOneRating);
+      const ratingTwo = playerTwoRating.trim() === "" ? null : Number(playerTwoRating);
+      if (ratingOne !== null && (!Number.isFinite(ratingOne) || ratingOne < 0 || ratingOne > 7))
+        throw new Error("Player one's Playtomic rating must be between 0 and 7.");
+      if (ratingTwo !== null && (!Number.isFinite(ratingTwo) || ratingTwo < 0 || ratingTwo > 7))
+        throw new Error("Player two's Playtomic rating must be between 0 and 7.");
       const { error: mutationError } = await supabase.from("teams").insert({
         division_id: division.id, name: teamName.trim(),
         player_one_name: playerOne.trim() || null,
-        player_two_name: playerTwo.trim() || null, is_active: true,
+        player_two_name: playerTwo.trim() || null,
+        player_one_email: playerOneEmail.trim().toLowerCase() || null,
+        player_two_email: playerTwoEmail.trim().toLowerCase() || null,
+        player_one_rating: ratingOne,
+        player_two_rating: ratingTwo,
+        player_one_rating_source: "manual",
+        player_two_rating_source: "manual",
+        captain_email: playerOneEmail.trim().toLowerCase() || null,
+        is_active: true,
       });
       if (mutationError) throw mutationError;
       setTeamName(""); setPlayerOne(""); setPlayerTwo("");
+      setPlayerOneEmail(""); setPlayerTwoEmail(""); setPlayerOneRating(""); setPlayerTwoRating("");
     }, "Team added to the selected division.");
   }
 
@@ -497,10 +516,30 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
           {item.season_name} · {item.name}</option>)}</select></label>
       <label>Team name<input required maxLength={100} value={teamName}
         onChange={(event) => setTeamName(event.target.value)} /></label>
-      <label>Player one<input maxLength={100} value={playerOne}
-        onChange={(event) => setPlayerOne(event.target.value)} /></label>
-      <label>Player two<input maxLength={100} value={playerTwo}
-        onChange={(event) => setPlayerTwo(event.target.value)} /></label>
+      <div className={styles.playerCard}>
+        <strong>Player one · Captain</strong>
+        <label>Name<input maxLength={100} value={playerOne}
+          onChange={(event) => setPlayerOne(event.target.value)} /></label>
+        <label>Playtomic email<input type="email" maxLength={254} value={playerOneEmail}
+          placeholder="Email linked to Playtomic"
+          onChange={(event) => setPlayerOneEmail(event.target.value)} /></label>
+        <label>Playtomic rating<input type="number" min="0" max="7" step="0.01" value={playerOneRating}
+          placeholder="e.g. 3.42"
+          onChange={(event) => setPlayerOneRating(event.target.value)} /></label>
+        <small>Enter the current rating manually. When Playtomic is connected, Rallora will be able to sync this instead.</small>
+      </div>
+      <div className={styles.playerCard}>
+        <strong>Player two</strong>
+        <label>Name<input maxLength={100} value={playerTwo}
+          onChange={(event) => setPlayerTwo(event.target.value)} /></label>
+        <label>Playtomic email<input type="email" maxLength={254} value={playerTwoEmail}
+          placeholder="Email linked to Playtomic"
+          onChange={(event) => setPlayerTwoEmail(event.target.value)} /></label>
+        <label>Playtomic rating<input type="number" min="0" max="7" step="0.01" value={playerTwoRating}
+          placeholder="e.g. 3.18"
+          onChange={(event) => setPlayerTwoRating(event.target.value)} /></label>
+        <small>Use the email attached to the player's Playtomic account so it can be matched later.</small>
+      </div>
       <button disabled={busy || !divisions.length} type="submit">Add team</button>
     </form>}
     {activeTab === "fixtures" && <form className={styles.form} onSubmit={createFixture}>
