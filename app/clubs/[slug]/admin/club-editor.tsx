@@ -19,6 +19,7 @@ export type EditableDivision = {
 type EditableFixture = { id:string; season_id:string; division_id:string; home_team_id:string; away_team_id:string; week_number:number; play_by:string; status:string; home_score?:string|null; away_score?:string|null; winner_team_id?:string|null };
 export type EditableSeason = {
   id: string; club_id: string; name: string; status: string;
+  fixture_schedule_mode: "weekly" | "date_window";
   divisions: EditableDivision[];
 };
 
@@ -122,6 +123,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [postcode,setPostcode]=useState(club.postcode??"");
   const [registrationTerms,setRegistrationTerms]=useState(club.player_registration_terms??"");
   const [newSeason, setNewSeason] = useState("");
+  const [newFixtureScheduleMode, setNewFixtureScheduleMode] = useState<"weekly" | "date_window">("weekly");
   const [newDivision, setNewDivision] = useState("");
   const [divisionSeasonId, setDivisionSeasonId] = useState(seasons[0]?.id ?? "");
   const [teamDivisionId, setTeamDivisionId] = useState(seasons[0]?.divisions[0]?.id ?? "");
@@ -156,6 +158,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const activeSeason = seasons.find((season) => season.status === "active");
   const registrationReady = Boolean(activeSeason && activeSeason.divisions.length > 0);
   const selectedDivision = divisions.find((division) => division.id === fixtureDivisionId);
+  const selectedFixtureSeason = selectedDivision ? seasons.find((season)=>season.id===selectedDivision.season_id) : undefined;
+  const fixtureScheduleMode = selectedFixtureSeason?.fixture_schedule_mode ?? "weekly";
   const recoveryOptions = fixtures.filter((fixture)=>!fixtureDivisionId || fixture.division_id===fixtureDivisionId);
   const eligibleTeams = selectedDivision?.teams ?? [];
   const selectedManagedFixture = fixtures.find((fixture)=>fixture.id===manageFixture);
@@ -282,6 +286,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       if (!title || title.length > 100) throw new Error("Season name must be 1–100 characters.");
       const { error: mutationError } = await supabase.from("seasons").insert({
         club_id: club.id, name: title, status: "draft",
+        fixture_schedule_mode: newFixtureScheduleMode,
       });
       if (mutationError) throw mutationError;
       setNewSeason("");
@@ -332,20 +337,23 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       if (![fixtureHome, fixtureAway].every((id) =>
         division.teams.some((team) => team.id === id)))
         throw new Error("Both teams must belong to the selected division.");
-      const week = Number(fixtureWeek);
-      if (!Number.isInteger(week) || week < 1 || week > 1000)
+      const week = fixtureScheduleMode === "weekly" ? Number(fixtureWeek) : 1;
+      if (fixtureScheduleMode === "weekly" && (!Number.isInteger(week) || week < 1 || week > 1000))
         throw new Error("Week number must be between 1 and 1000.");
       if (!/^\d{4}-\d{2}-\d{2}$/.test(fixtureDeadline))
-        throw new Error("Choose a play-by date.");
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(fixturePublish) ||
-        fixturePublish > fixtureDeadline) {
-        throw new Error("Publish date must be on or before the fixture deadline.");
+        throw new Error(fixtureScheduleMode === "weekly" ? "Choose a completion deadline." : "Choose a complete-by date.");
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(fixturePublish) || fixturePublish > fixtureDeadline) {
+        throw new Error(fixtureScheduleMode === "weekly"
+          ? "Available date must be on or before the fixture deadline."
+          : "Start date must be on or before the end date.");
       }
       const { error: mutationError } = await supabase.from("fixtures").insert({
         season_id: division.season_id, division_id: division.id,
         home_team_id: fixtureHome, away_team_id: fixtureAway,
         week_number: week, play_by: fixtureDeadline, status: "open",
         available_from: fixturePublish,
+        fixture_group_type: fixtureScheduleMode === "weekly" ? "weekly" : "custom",
+        fixture_group_name: fixtureScheduleMode === "weekly" ? `Week ${week}` : "Date window",
       });
       if (mutationError) throw mutationError;
       setFixtureHome(""); setFixtureAway("");
@@ -445,6 +453,14 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         <label>Season name<input required maxLength={100}
           value={newSeason} placeholder="Autumn 2026"
           onChange={(event) => setNewSeason(event.target.value)} /></label>
+        <label>Fixture scheduling<select value={newFixtureScheduleMode}
+          onChange={(event)=>setNewFixtureScheduleMode(event.target.value as "weekly" | "date_window")}>
+          <option value="weekly">Weekly rounds</option>
+          <option value="date_window">Start &amp; end date window</option>
+        </select></label>
+        <p className={styles.wide}>{newFixtureScheduleMode==="weekly"
+          ? "Fixtures are organised by week number, with a completion deadline."
+          : "Each fixture has an available-from date and a complete-by date."}</p>
         <button disabled={busy} type="submit">Create draft season</button>
       </form>
       <form className={styles.form} onSubmit={createDivision}>
@@ -506,13 +522,14 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         <option value="">Choose a team</option>
         {eligibleTeams.map((team) => <option value={team.id}
           key={team.id}>{team.name}</option>)}</select></label>
-      <label>Week number<input type="number" min={1} max={1000}
+      <div className={styles.wide}><strong>Scheduling:</strong> {fixtureScheduleMode==="weekly" ? "Weekly rounds" : "Start & end date window"}</div>
+      {fixtureScheduleMode==="weekly" && <label>Week number<input type="number" min={1} max={1000}
         value={fixtureWeek}
-        onChange={(event) => setFixtureWeek(event.target.value)} /></label>
-      <label>Play by<input type="date" required value={fixtureDeadline}
-        onChange={(event) => setFixtureDeadline(event.target.value)} /></label>
-      <label>Publish on<input type="date" required value={fixturePublish}
+        onChange={(event) => setFixtureWeek(event.target.value)} /></label>}
+      <label>{fixtureScheduleMode==="weekly" ? "Available from" : "Start date"}<input type="date" required value={fixturePublish}
         onChange={(event) => setFixturePublish(event.target.value)} /></label>
+      <label>{fixtureScheduleMode==="weekly" ? "Complete by" : "End date"}<input type="date" required value={fixtureDeadline}
+        onChange={(event) => setFixtureDeadline(event.target.value)} /></label>
       <button disabled={busy || eligibleTeams.length < 2}
         type="submit">Create fixture</button>
 
