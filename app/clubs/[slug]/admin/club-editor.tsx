@@ -74,6 +74,22 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [activeTab, setActiveTab] = useState<"branding" | "seasons" | "registration" | "teams" | "fixtures">("branding");
 
   useEffect(() => {
+    function openSetup(event: Event) {
+      const detail = (event as CustomEvent<{tab?: "branding" | "seasons" | "registration" | "teams" | "fixtures"}>).detail;
+      const requested = detail?.tab;
+      if (!requested) return;
+      setActiveTab(requested);
+      setMessage("");
+      setError("");
+      requestAnimationFrame(() => {
+        document.getElementById("club-management")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+    window.addEventListener("rallora:open-club-setup", openSetup as EventListener);
+    return () => window.removeEventListener("rallora:open-club-setup", openSetup as EventListener);
+  }, []);
+
+  useEffect(() => {
     const requested = searchParams.get("setup");
     if (requested === "branding" || requested === "seasons" || requested === "registration" || requested === "teams" || requested === "fixtures") {
       setActiveTab(requested);
