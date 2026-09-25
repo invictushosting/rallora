@@ -48,3 +48,14 @@
 .hiddenFile{display:none!important}
 .advancedImage{margin-top:4px}.advancedImage summary{cursor:pointer;color:#60758d;font-size:11px;font-weight:800}.advancedImage label{margin-top:10px}
 @media(max-width:700px){.imageFieldHead{flex-direction:column}.form .uploadButton{width:100%}}
+
+
+.registrationPanel{display:grid;gap:18px;padding:22px;border:1px solid #d9e5f0;border-radius:16px;background:#fff}
+.registrationPanel h3{margin:7px 0 6px;font-size:20px;color:#173354}
+.registrationPanel p{margin:0;color:#60758d;font-size:12px;line-height:1.6}
+.registrationActions{display:flex;gap:10px;flex-wrap:wrap}
+.registrationActions a{display:inline-flex;align-items:center;min-height:44px;padding:11px 14px;border-radius:10px;border:1px solid #cddbed;text-decoration:none;color:#173354;font-size:12px;font-weight:850;background:#f7faff}
+.registrationActions .primaryLink{background:#00B0FE;border-color:#00B0FE;color:#fff}
+.registrationPanel>button{justify-self:start;border:0;background:#00B0FE;color:#fff;border-radius:10px;padding:12px 15px;font-weight:850;cursor:pointer}
+.registrationNote{padding-top:4px}
+@media(max-width:700px){.registrationActions{display:grid;grid-template-columns:1fr}.registrationActions a,.registrationPanel>button{width:100%;justify-content:center}}
