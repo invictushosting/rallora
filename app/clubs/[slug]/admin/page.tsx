@@ -314,7 +314,7 @@ export default function ClubAdministration() {
     </section>
     <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>CLUB OVERVIEW</span><h2>Your club at a glance</h2></div>
       <p>Live totals and season structure for {view.club.name}.</p></div>
-    <section className={styles.operations} aria-label="League operations overview">
+    <section className={styles.operationsCompact} aria-label="League operations overview">
       <article><span>Active leagues</span><strong>{view.summaries.filter(({season})=>season.status==="active").length}</strong><small>Currently being played</small></article>
       <article><span>Total fixtures</span><strong>{totals.fixtures}</strong><small>Across all leagues</small></article>
       <article className={totals.outstanding ? styles.operationWarn : ""}><span>Outstanding</span><strong>{Math.max(0, totals.outstanding - bookedFixtureIds.size)}</strong><small>No confirmed booking yet</small></article>
