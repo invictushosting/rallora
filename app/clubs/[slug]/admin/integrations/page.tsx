@@ -58,7 +58,12 @@ export default function IntegrationsPage(){
     <section className={styles.card}>
       <span className={connected?styles.status:styles.statusDanger}>{connected?"Connected":integration?.status??"Not connected"}</span>
       <h3>Playtomic Club API</h3>
-      <p>Generate External API credentials in Playtomic Manager → Settings → Developer Tools, then add the Playtomic Venue ID for this club. Rallora uses the Venue ID to read supported player data such as current padel level.</p>
+      <p>Generate External API credentials in Playtomic Manager → Settings → Developer Tools. Use the fields below to connect this club securely.</p>
+      <div className={styles.integrationHelp}>
+        <article><strong>Venue ID</strong><p>The unique identifier for this Playtomic club/venue. You can find it in Playtomic Manager within the club’s Developer Tools or API settings.</p></article>
+        <article><strong>Client ID</strong><p>The public identifier for your External API credentials. Find it in Playtomic Manager → Settings → Developer Tools after creating API credentials.</p></article>
+        <article><strong>Client Secret</strong><p>The private secret paired with your Client ID. It is shown when the API credentials are created. Treat it like a password and do not share it.</p></article>
+      </div>
       {integration&&<div className={styles.numbers}>
         <span><strong>{integration.client_id?"Saved":"—"}</strong> Client ID</span>
         <span><strong>{integration.last_verified_at?new Date(integration.last_verified_at).toLocaleDateString("en-GB"):"—"}</strong> Last verified</span>
