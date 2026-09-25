@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "./onboarding.css";
 import RalloraGuide from "./components/rallora-guide";
+import ScrollToTop from "./components/scroll-to-top";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://rallora-rho.vercel.app";
 
@@ -47,7 +48,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}<RalloraGuide /></body>
+      <body><ScrollToTop />{children}<RalloraGuide /></body>
     </html>
   );
 }
