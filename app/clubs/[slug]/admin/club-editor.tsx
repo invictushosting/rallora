@@ -568,7 +568,13 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
     </form>}
     {activeTab === "seasons" && <div className={styles.columns}>
       <form className={styles.form} onSubmit={createSeason}>
-        <h3>Add a season</h3><p>New seasons start as drafts.</p>
+        <div className={styles.seasonEditorIntro}>
+          <span className={styles.eyebrow}>{editingSeasonId ? "EDIT LEAGUE" : "NEW LEAGUE"}</span>
+          <h3>{editingSeasonId ? `Edit ${editingSeason?.name ?? "league"}` : "Create a league"}</h3>
+          <p>{editingSeasonId ? "Update this league without rebuilding it. Structural settings may be protected once registrations exist." : "New leagues start as drafts and stay private until you activate them."}</p>
+        </div>
+        <section className={styles.seasonSection}>
+          <div className={styles.seasonSectionHead}><span>1</span><div><strong>League details</strong><p>Name the league and choose how fixtures are scheduled.</p></div></div>
         <label>Season name<input required maxLength={100}
           value={newSeason} placeholder="Autumn 2026"
           onChange={(event) => setNewSeason(event.target.value)} /></label>
@@ -580,8 +586,14 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         <p className={styles.wide}>{newFixtureScheduleMode==="weekly"
           ? "Fixtures are organised by week number, with a completion deadline."
           : "Each fixture has an available-from date and a complete-by date."}</p>
+        </section>
+        <section className={styles.seasonSection}>
+          <div className={styles.seasonSectionHead}><span>2</span><div><strong>Registration</strong><p>Control when players can enter this league.</p></div></div>
         <label>Registration opens<input type="datetime-local" value={registrationOpens} onChange={e=>setRegistrationOpens(e.target.value)} /></label>
         <label>Registration closes<input type="datetime-local" value={registrationCloses} onChange={e=>setRegistrationCloses(e.target.value)} /></label>
+        </section>
+        <section className={styles.seasonSection}>
+          <div className={styles.seasonSectionHead}><span>3</span><div><strong>Format &amp; divisions</strong><p>Choose the competition structure and how teams are grouped.</p></div></div>
         <label>League format<select value={leagueFormat} disabled={formatLocked} onChange={e=>setLeagueFormat(e.target.value as "standard"|"promotion_relegation_cycles")}>
           <option value="standard">Standard divisions</option>
           <option value="promotion_relegation_cycles">Short cycles with promotion &amp; relegation</option>
@@ -606,7 +618,9 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
             Allow Rallora to place extra teams into a group only when registrations do not divide evenly.</span>
           <small>Example: target 4 teams per group. If the final total cannot be split evenly, Rallora may create a 5-team group rather than reject registrations or create an undersized extra group.</small>
         </label>
-        {leagueFormat==="promotion_relegation_cycles" && <>
+        </section>
+        {leagueFormat==="promotion_relegation_cycles" && <section className={styles.seasonSection}>
+          <div className={styles.seasonSectionHead}><span>4</span><div><strong>Promotion &amp; relegation</strong><p>Configure the rolling-cycle movement rules.</p></div></div>
           <label>Teams per group<input type="number" min="2" max="100" value={teamsPerDivision} onChange={e=>setTeamsPerDivision(e.target.value)} /></label>
           <label>Promotion places<input type="number" min="0" max="20" value={promotionPlaces} onChange={e=>setPromotionPlaces(e.target.value)} /></label>
           <label>Relegation places<input type="number" min="0" max="20" value={relegationPlaces} onChange={e=>setRelegationPlaces(e.target.value)} /></label>
@@ -620,8 +634,10 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
             <small>Once the cycle is complete, the club chooses the next fixture window. Rallora then applies the configured movement rules and generates the next cycle.</small>
           </label>
           <p className={styles.wide}>Fixtures are calculated from the actual group size. For example, a 4-team group playing everyone once gives 3 matches per team; a 5-team overflow group gives 4.</p>
-        </>}
-        <section className={styles.ruleBuilder}>
+        </section>}
+        <section className={styles.seasonSection}>
+          <div className={styles.seasonSectionHead}><span>{leagueFormat==="promotion_relegation_cycles" ? "5" : "4"}</span><div><strong>League rules</strong><p>Choose the rules players will see for this competition.</p></div></div>
+        <div className={styles.ruleBuilder}>
           <div className={styles.ruleBuilderHead}>
             <div><strong>League rules</strong><p>Start with common padel league rules, switch off anything you do not use, and add your own.</p></div>
           </div>
@@ -641,6 +657,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
               setCustomRule("");
             }}>Add rule</button>
           </div>
+        </div>
         </section>
         <div className={styles.seasonFormActions}>
           <button disabled={busy} type="submit">{editingSeasonId ? "Save league changes" : "Create draft season"}</button>
