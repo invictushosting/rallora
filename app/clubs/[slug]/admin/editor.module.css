@@ -59,3 +59,8 @@
 .registrationPanel>button{justify-self:start;border:0;background:#00B0FE;color:#fff;border-radius:10px;padding:12px 15px;font-weight:850;cursor:pointer}
 .registrationNote{padding-top:4px}
 @media(max-width:700px){.registrationActions{display:grid;grid-template-columns:1fr}.registrationActions a,.registrationPanel>button{width:100%;justify-content:center}}
+
+
+.playerCard{display:grid;gap:10px;padding:16px;border:1px solid #d9e5f0;border-radius:14px;background:#fff}
+.playerCard>strong{color:#173354;font-size:13px}
+.playerCard small{color:#6c8098;font-size:11px;line-height:1.5}
