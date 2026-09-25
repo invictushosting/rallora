@@ -1,6 +1,7 @@
 "use client";
 
 import RalloraLogo from "@/app/components/rallora-logo";
+import Loading from "@/app/loading";
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
@@ -68,7 +69,7 @@ type Tab = "overview" | "tables" | "fixtures" | "results" | "teams" | "cup";
 const TABS: { id: Tab; label: string }[] = [
   { id: "overview", label: "Overview" }, { id: "tables", label: "Tables" },
   { id: "fixtures", label: "Fixtures" }, { id: "results", label: "Results" },
-  { id: "teams", label: "Teams" }, { id: "cup", label: "League cup" },
+  { id: "teams", label: "Players" }, { id: "cup", label: "League cup" },
 ];
 const EMPTY: LeagueData = {
   divisions: [], teams: [], fixtures: [], results: [], standings: [],
@@ -102,7 +103,10 @@ function isConfirmed(result: Result | undefined) {
   return Boolean(result && ["confirmed", "admin_override"].includes(result.status));
 }
 function teamLabel(id: string, names: Map<string, string>) {
-  return names.get(id) ?? "Team unavailable";
+  return names.get(id) ?? "Players unavailable";
+}
+function playerPair(team: Team) {
+  return [team.player_one_name, team.player_two_name].filter(Boolean).join(" / ") || "Players to be confirmed";
 }
 
 export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string } = {}) {
@@ -305,15 +309,16 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
     return () => { alive = false; };
   }, [clubState, seasonId, supabase]);
 
+  if (clubState.kind === "loading") return <Loading />;
+
   if (clubState.kind !== "ready") {
-    const message = clubState.kind === "loading" ? "Loading your club…" :
+    const message =
       clubState.kind === "missing" ? "This club is not publicly available." :
       clubState.message;
     return <main className={styles.page}><div className={styles.center}
       role={clubState.kind === "error" ? "alert" : "status"}>
       <span className={styles.brand}><RalloraLogo variant="light" width={210} /></span>
-      <h1>{clubState.kind === "missing" ? "Club not found" :
-        clubState.kind === "error" ? "Could not load club" : "Finding your club"}</h1>
+      <h1>{clubState.kind === "missing" ? "Club not found" : "Could not load club"}</h1>
       <p>{message}</p><Link href="/">Back to Rallora →</Link>
     </div></main>;
   }
@@ -322,7 +327,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
   const currentSeason = seasons.find((season) => season.id === seasonId);
   const clubLogo = safeImage(club.logo_url);
   const clubCover = safeImage(club.cover_image_url);
-  const teamNames = new Map(data.teams.map((team) => [team.id, team.name]));
+  const teamNames = new Map(data.teams.map((team) => [team.id, playerPair(team)]));
   const results = new Map(data.results.map((result) => [result.fixture_id, result]));
   const standings = (id: string) => data.standings
     .filter((row) => row.division_id === id)
@@ -445,7 +450,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
   function tableFor(division: Division) {
     const rows = standings(division.id);
     return <div className={styles.tableWrap}><table>
-      <thead><tr><th scope="col">#</th><th scope="col">Team</th>
+      <thead><tr><th scope="col">#</th><th scope="col">Players</th>
         <th scope="col">P</th><th scope="col">W</th>
         <th scope="col">D</th><th scope="col">L</th>
         <th scope="col">Diff</th><th scope="col">Pts</th></tr></thead>
@@ -469,7 +474,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
           <RalloraLogo variant="light" width={210} /></Link>
         <div className={styles.headerLinks}>
           <Link href="/#clubs" className={styles.adminLink}>All clubs</Link>
-          <Link href={`/clubs/${encodeURIComponent(slug)}/register`} className={styles.registerLink}>Join a team</Link>
+          <Link href={`/clubs/${encodeURIComponent(slug)}/register`} className={styles.registerLink}>Join league</Link>
           <Link href={`/clubs/${encodeURIComponent(slug)}/captain`} className={styles.adminLink}>Captain login</Link>
           <Link href={`/clubs/${encodeURIComponent(slug)}/admin`} className={styles.adminLink}>Club admin</Link>
         </div>
@@ -521,7 +526,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
           {tab === "overview" && <>
             <div className={styles.metrics}>
               <article><span>Divisions</span><strong>{data.divisions.length}</strong></article>
-              <article><span>Teams</span><strong>{data.teams.length}</strong></article>
+              <article><span>Player pairs</span><strong>{data.teams.length}</strong></article>
               <article><span>Fixtures</span><strong>{data.fixtures.length}</strong></article>
               <article><span>Final results</span><strong>{confirmed}</strong></article>
             </div>
@@ -544,7 +549,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
                   <h3>{division.name}</h3>
                 </div>
                 <div className={styles.panels}>
-                  <div className={styles.card}><h4>League table</h4>{tableFor(division)}</div>
+                  <div><div className={styles.card}><h4>League table</h4>{tableFor(division)}</div>{content.sponsors[0] && (() => { const sponsor = content.sponsors[0]; const url = safeLink(sponsor.website_url); const logo = safeLink(sponsor.logo_url); return <div className={styles.card}><span className={styles.kicker}>LEAGUE SPONSOR</span>{logo && <span className={revision.sponsorLogo}><img src={logo} alt={`${sponsor.name} logo`} /></span>}<h4>{sponsor.name}</h4><p>Proudly supporting {division.name}.</p>{url && <a href={url} target="_blank" rel="noopener noreferrer">Visit sponsor ↗</a>}</div>; })()}</div>
                   <div className={styles.card}><h4>Latest &amp; upcoming matches</h4>
                     {divisionFixtures.length
                       ? <ul className={styles.fixtures}>{divisionFixtures.map(fixtureRow)}</ul>
@@ -576,7 +581,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
               </label>
               {(tab === "fixtures" || tab === "results" || tab === "teams") &&
                 <label>Search
-                  <input type="search" value={search} placeholder="Find a team or match…"
+                  <input type="search" value={search} placeholder="Find players or a match…"
                     onChange={(event) => { setSearch(event.target.value); setShowAll(false); }} />
                 </label>}
             </div>
@@ -621,12 +626,9 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
                   .some((value) => value?.toLowerCase().includes(search.toLowerCase()))))
                 .map((team) => <article key={team.id} className={styles.teamCard}>
                   <span className={styles.teamIcon}>◉</span>
-                  <div><h3>{team.name}</h3>
+                  <div><h3>{playerPair(team)}</h3>
                     <span>{data.divisions.find((division) =>
                       division.id === team.division_id)?.name}</span>
-                    {(team.player_one_name || team.player_two_name) && <p>
-                      {[team.player_one_name, team.player_two_name]
-                        .filter(Boolean).join(" · ")}</p>}
                   </div>
                 </article>)}
             </div>}
