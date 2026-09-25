@@ -239,7 +239,7 @@ export default function ClubAdministration() {
     {label:"Brand your club",done:Boolean(view.club.logo_url && view.club.cover_image_url && view.club.welcome_text),hint:"Add your logo, cover image and welcome message.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=branding#club-management`,action:"Start branding"},
     {label:"Create your first season",done:view.summaries.length>0,hint:"Create a draft season before anything goes live.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=seasons#club-management`,action:"Create season"},
     {label:"Add divisions",done:totals.divisions>0,hint:"Set up the divisions your teams will compete in.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=seasons#club-management`,action:"Add divisions"},
-    {label:"Open team registration",done:registrationReady,hint:"Activate a season with divisions, then open registration.",href:registrationReady?`/clubs/${encodeURIComponent(view.club.slug)}/register`:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=seasons#club-management`,action:registrationReady?"Open registration":"Prepare registration"},
+    {label:"Open team registration",done:registrationReady,hint:"Activate a season with divisions, then open registration.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=registration#club-management`,action:registrationReady?"Open registration":"Prepare registration"},
     {label:"Add or approve teams",done:totals.teams>0,hint:"Add teams manually or review teams that register.",href:registrationReady?`/clubs/${encodeURIComponent(view.club.slug)}/admin/registrations`:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=teams#club-management`,action:registrationReady?"Review teams":"Add teams"},
     {label:"Publish fixtures",done:totals.fixtures>0,hint:"Create and publish fixtures once your team list is ready.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=fixtures#club-management`,action:"Create fixtures"},
   ];
@@ -283,6 +283,16 @@ export default function ClubAdministration() {
       </div>}
       {!registrationReady && <p className={styles.launchGate}>Team registration becomes available once you have an active season with at least one division.</p>}
     </section>
+    <ClubEditor
+      club={view.club}
+      seasons={view.summaries.map((summary): EditableSeason => ({
+        id: summary.season.id, name: summary.season.name,
+        club_id: summary.season.club_id, status: summary.season.status,
+        divisions: summary.divisionSummaries,
+      }))}
+      onSaved={() => setRevision((value) => value + 1)}
+      fixtures={view.fixtures}
+    />
     <section className={styles.socialInvite}>
       <span>RALLORA SOCIAL</span><h2>Turn league updates into share-ready club stories.</h2>
       <p>Create news, prepare a confirmed result or weekly roundup, preview each channel
@@ -305,16 +315,6 @@ export default function ClubAdministration() {
         .map(([label, value]) => <article key={label}><span>{label}</span>
           <strong>{value.toLocaleString("en-GB")}</strong></article>)}
     </section>
-    <ClubEditor
-      club={view.club}
-      seasons={view.summaries.map((summary): EditableSeason => ({
-        id: summary.season.id, name: summary.season.name,
-        club_id: summary.season.club_id, status: summary.season.status,
-        divisions: summary.divisionSummaries,
-      }))}
-      onSaved={() => setRevision((value) => value + 1)}
-      fixtures={view.fixtures}
-    />
     <div className={styles.sectionHeading}><h2>Club seasons</h2>
       <p>Each season below belongs to {view.club.name}.</p></div>
     <section className={styles.grid}>
