@@ -416,7 +416,9 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
         </div>
         <div className={`${styles.resultPair} ${styles.resultPairAway}`}><span className={styles.pairSide}>AWAY</span><strong>{teamLabel(fixture.away_team_id, teamNames)}</strong></div>
       </div> : <div className={styles.match}>
-        <strong>{teamLabel(fixture.home_team_id, teamNames)}</strong><span className={styles.score}>vs</span><strong>{teamLabel(fixture.away_team_id, teamNames)}</strong>
+        <div className={styles.matchTeam}>{teamLabel(fixture.home_team_id, teamNames).split(" / ").map((name, index)=><strong key={index}>{name}</strong>)}</div>
+        <span className={styles.score}>vs</span>
+        <div className={styles.matchTeam}>{teamLabel(fixture.away_team_id, teamNames).split(" / ").map((name, index)=><strong key={index}>{name}</strong>)}</div>
       </div>}
       {!resolved && arrangementPanel(fixture)}
       {(resolved || fixture.status === "disputed") && <div className={styles.fixtureBottom}>
