@@ -46,7 +46,7 @@ export default function IntegrationsPage(){
     setState("Playtomic disconnected.");await load();
   }
 
-  const connected=integration?.status==="connected";
+  const connected=integration?.status==="connected"; const demoMode=slug==="rallora-demo";
   return <main className={styles.page}><div className={styles.shell}>
     <header className={styles.nav}><Link href={`/clubs/${slug}/admin`} className={styles.wordmark}>← Club administration</Link></header>
     <section className={styles.hero}>
@@ -70,13 +70,13 @@ export default function IntegrationsPage(){
         <span><strong>{integration.last_sync_at?new Date(integration.last_sync_at).toLocaleDateString("en-GB"):"—"}</strong> Last sync</span>
       </div>}
       {integration?.last_error&&<p>{integration.last_error}</p>}
-      <form className={styles.loginForm} onSubmit={connect}>
+      {!demoMode&&<form className={styles.loginForm} onSubmit={connect}>
         <label>Venue ID<input required autoComplete="off" value={venueId} onChange={e=>setVenueId(e.target.value)} /></label>
         <label>Client ID<input required autoComplete="off" value={clientId} onChange={e=>setClientId(e.target.value)} /></label>
         <label>Client Secret<input required type="password" autoComplete="new-password" value={secret} onChange={e=>setSecret(e.target.value)} /></label>
         <button disabled={busy}>{busy?"Verifying…":connected?"Replace & re-verify credentials":"Connect & verify"}</button>
-      </form>
-      {connected&&<button disabled={busy} onClick={()=>void disconnect()}>Disconnect Playtomic</button>}
+      </form>}
+      {demoMode&&connected&&<div className={styles.integrationHelp}><article><strong>Demo automation active</strong><p>Rallora is demonstrating booking detection across regular bookings and Open Matches. 4/4 player matches are linked automatically, 3/4 matches are flagged for review, and completed bookings can move fixtures into Awaiting Result.</p></article><article><strong>What the club saves</strong><p>Booked fixtures stop arrangement chasing. Admins can focus on overdue, unmatched and result-required fixtures from the operations dashboard.</p></article></div>}{connected&&!demoMode&&<button disabled={busy} onClick={()=>void disconnect()}>Disconnect Playtomic</button>}
     </section>
   </div></main>;
 }
