@@ -27,6 +27,8 @@ export type EditableSeason = {
   teams_per_division: number | null;
   matches_per_cycle: number | null;
   division_assignment_mode: "manual" | "combined_rating";
+  max_divisions: number | null;
+  allow_overflow_when_uneven: boolean;
   divisions: EditableDivision[];
 };
 
@@ -139,6 +141,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [teamsPerDivision, setTeamsPerDivision] = useState("4");
   const [matchesPerCycle, setMatchesPerCycle] = useState("3");
   const [assignmentMode, setAssignmentMode] = useState<"manual"|"combined_rating">("combined_rating");
+  const [maxDivisions, setMaxDivisions] = useState("6");
+  const [allowOverflowWhenUneven, setAllowOverflowWhenUneven] = useState(true);
   const [newDivision, setNewDivision] = useState("");
   const [divisionSeasonId, setDivisionSeasonId] = useState(seasons[0]?.id ?? "");
   const [teamDivisionId, setTeamDivisionId] = useState(seasons[0]?.divisions[0]?.id ?? "");
@@ -308,6 +312,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         teams_per_division: leagueFormat==="promotion_relegation_cycles" ? Number(teamsPerDivision) : null,
         matches_per_cycle: leagueFormat==="promotion_relegation_cycles" ? Number(matchesPerCycle) : null,
         division_assignment_mode: assignmentMode,
+        max_divisions: maxDivisions ? Number(maxDivisions) : null,
+        allow_overflow_when_uneven: allowOverflowWhenUneven,
       });
       if (mutationError) throw mutationError;
       setNewSeason("");
@@ -512,6 +518,16 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
           <option value="combined_rating">Auto seed by combined Playtomic rating</option>
           <option value="manual">Club assigns teams manually</option>
         </select></label>
+        <label>Maximum divisions / groups<input type="number" min="1" max="100" value={maxDivisions}
+          onChange={e=>setMaxDivisions(e.target.value)} /></label>
+        <label>Target teams per division / group<input type="number" min="2" max="100" value={teamsPerDivision}
+          onChange={e=>setTeamsPerDivision(e.target.value)} /></label>
+        <label className={styles.wide}><span>Uneven registrations</span>
+          <span className={styles.inlineCheck}><input type="checkbox" checked={allowOverflowWhenUneven}
+            onChange={e=>setAllowOverflowWhenUneven(e.target.checked)} />
+            Allow Rallora to place extra teams into a group only when registrations do not divide evenly.</span>
+          <small>Example: target 4 teams per group. If the final total cannot be split evenly, Rallora may create a 5-team group rather than reject registrations or create an undersized extra group.</small>
+        </label>
         {leagueFormat==="promotion_relegation_cycles" && <>
           <label>Teams per group<input type="number" min="2" max="100" value={teamsPerDivision} onChange={e=>setTeamsPerDivision(e.target.value)} /></label>
           <label>Matches per cycle<input type="number" min="1" max="100" value={matchesPerCycle} onChange={e=>setMatchesPerCycle(e.target.value)} /></label>
