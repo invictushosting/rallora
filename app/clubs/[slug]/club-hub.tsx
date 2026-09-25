@@ -368,14 +368,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
           (fixture.week_number ? `Week ${fixture.week_number}` : "League fixture")}</span>
         <span>{dateLabel(fixture.play_by)}</span>
       </div>
-      <div className={styles.match}>
-        <strong>{teamLabel(fixture.home_team_id, teamNames)}</strong>
-        <span className={`${styles.score} ${resolved ? styles.finalScore : ""}`}>{resolved
-          ? <><small>FINAL</small><b>{result?.home_score ?? "–"}</b><em>:</em><b>{result?.away_score ?? "–"}</b></>
-          : "vs"}</span>
-        <strong>{teamLabel(fixture.away_team_id, teamNames)}</strong>
-      </div>
-      <div className={styles.fixtureBottom}>
+      <div className={resolved ? styles.resultMatch : styles.match}>\n        {resolved ? <>\n          <div className={styles.resultPair}><span>HOME</span><strong>{teamLabel(fixture.home_team_id, teamNames)}</strong></div>\n          <div className={styles.resultScore}><span>FINAL</span><strong>{result?.home_score ?? "–"}</strong><em>—</em><strong>{result?.away_score ?? "–"}</strong></div>\n          <div className={`${styles.resultPair} ${styles.resultPairAway}`}><span>AWAY</span><strong>{teamLabel(fixture.away_team_id, teamNames)}</strong></div>\n        </> : <>\n          <strong>{teamLabel(fixture.home_team_id, teamNames)}</strong>\n          <span className={styles.score}>vs</span>\n          <strong>{teamLabel(fixture.away_team_id, teamNames)}</strong>\n        </>}\n      </div>\n      <div className={styles.fixtureBottom}>
         <span>{fixture.court || "Court to arrange"}</span>
         <span className={resolved ? styles.confirmed : styles.fixtureStatus}>
           {resolved ? "Final" : fixture.status === "disputed" ?
