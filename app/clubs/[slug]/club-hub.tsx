@@ -1,6 +1,7 @@
 "use client";
 
 import RalloraLogo from "@/app/components/rallora-logo";
+import Loading from "@/app/loading";
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
@@ -308,15 +309,16 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
     return () => { alive = false; };
   }, [clubState, seasonId, supabase]);
 
+  if (clubState.kind === "loading") return <Loading />;
+
   if (clubState.kind !== "ready") {
-    const message = clubState.kind === "loading" ? "Loading your club…" :
+    const message =
       clubState.kind === "missing" ? "This club is not publicly available." :
       clubState.message;
     return <main className={styles.page}><div className={styles.center}
       role={clubState.kind === "error" ? "alert" : "status"}>
       <span className={styles.brand}><RalloraLogo variant="light" width={210} /></span>
-      <h1>{clubState.kind === "missing" ? "Club not found" :
-        clubState.kind === "error" ? "Could not load club" : "Finding your club"}</h1>
+      <h1>{clubState.kind === "missing" ? "Club not found" : "Could not load club"}</h1>
       <p>{message}</p><Link href="/">Back to Rallora →</Link>
     </div></main>;
   }
@@ -472,7 +474,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
           <RalloraLogo variant="light" width={210} /></Link>
         <div className={styles.headerLinks}>
           <Link href="/#clubs" className={styles.adminLink}>All clubs</Link>
-          <Link href={`/clubs/${encodeURIComponent(slug)}/register`} className={styles.registerLink}>Join a team</Link>
+          <Link href={`/clubs/${encodeURIComponent(slug)}/register`} className={styles.registerLink}>Join league</Link>
           <Link href={`/clubs/${encodeURIComponent(slug)}/captain`} className={styles.adminLink}>Captain login</Link>
           <Link href={`/clubs/${encodeURIComponent(slug)}/admin`} className={styles.adminLink}>Club admin</Link>
         </div>
@@ -524,7 +526,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
           {tab === "overview" && <>
             <div className={styles.metrics}>
               <article><span>Divisions</span><strong>{data.divisions.length}</strong></article>
-              <article><span>Teams</span><strong>{data.teams.length}</strong></article>
+              <article><span>Player pairs</span><strong>{data.teams.length}</strong></article>
               <article><span>Fixtures</span><strong>{data.fixtures.length}</strong></article>
               <article><span>Final results</span><strong>{confirmed}</strong></article>
             </div>
