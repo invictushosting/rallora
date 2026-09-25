@@ -238,12 +238,12 @@ export default function ClubAdministration() {
   const activeSeason = view.summaries.find(({season})=>season.status==="active");
   const registrationReady = Boolean(activeSeason && activeSeason.divisions>0);
   const launchSteps = [
-    {label:"Brand your club",done:Boolean(view.club.logo_url && view.club.cover_image_url && view.club.welcome_text),hint:"Add your logo, cover image and welcome message.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=branding#club-management`,action:"Start branding"},
-    {label:"Create your first season",done:view.summaries.length>0,hint:"Create a draft season before anything goes live.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=seasons#club-management`,action:"Create season"},
-    {label:"Add divisions",done:totals.divisions>0,hint:"Set up the divisions your teams will compete in.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=seasons#club-management`,action:"Add divisions"},
-    {label:"Open team registration",done:registrationReady,hint:"Activate a season with divisions, then open registration.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=registration#club-management`,action:registrationReady?"Open registration":"Prepare registration"},
-    {label:"Add or approve teams",done:totals.teams>0,hint:"Add teams manually or review teams that register.",href:registrationReady?`/clubs/${encodeURIComponent(view.club.slug)}/admin/registrations`:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=teams#club-management`,action:registrationReady?"Review teams":"Add teams"},
-    {label:"Publish fixtures",done:totals.fixtures>0,hint:"Create and publish fixtures once your team list is ready.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=fixtures#club-management`,action:"Create fixtures"},
+    {label:"Brand your club",done:Boolean(view.club.logo_url && view.club.cover_image_url && view.club.welcome_text),hint:"Add your logo, cover image and welcome message.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=branding`,action:"Start branding"},
+    {label:"Create your first season",done:view.summaries.length>0,hint:"Create a draft season before anything goes live.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=seasons`,action:"Create season"},
+    {label:"Add divisions",done:totals.divisions>0,hint:"Set up the divisions your teams will compete in.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=seasons`,action:"Add divisions"},
+    {label:"Open team registration",done:registrationReady,hint:"Activate a season with divisions, then open registration.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=registration`,action:registrationReady?"Open registration":"Prepare registration"},
+    {label:"Add or approve teams",done:totals.teams>0,hint:"Add teams manually or review teams that register.",href:registrationReady?`/clubs/${encodeURIComponent(view.club.slug)}/admin/registrations`:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=teams`,action:registrationReady?"Review teams":"Add teams"},
+    {label:"Publish fixtures",done:totals.fixtures>0,hint:"Create and publish fixtures once your team list is ready.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=fixtures`,action:"Create fixtures"},
   ];
   const launchComplete = launchSteps.every((step)=>step.done);
 
@@ -268,22 +268,35 @@ export default function ClubAdministration() {
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/social`}>Social Studio</Link>
       </div>
     </section>
-    <section className={styles.launchPanel}>
-      <div className={styles.launchHead}><div><span>GET STARTED</span><h2>{launchComplete?"Your club is ready to go":"Set up your club"}</h2>
-        <p>{launchComplete?"Your core setup is complete. You can keep refining it at any time.":"Follow these steps to get your club ready. Each one takes you straight to the right setup area."}</p></div>
-        <strong>{launchSteps.filter(step=>step.done).length}/{launchSteps.length}</strong></div>
-      <ol className={styles.launchList}>{launchSteps.map((step,index)=><li key={step.label} className={step.done?styles.launchDone:""}>
-        <Link className={styles.launchLink} href={step.href}>
-          <span className={styles.launchNumber}>{step.done?"✓":index+1}</span>
-          <div className={styles.launchCopy}><strong>{step.label}</strong><p>{step.hint}</p></div>
-          <span className={styles.launchCta}>{step.done?"Review":step.action} →</span>
-        </Link>
-      </li>)}</ol>
-      {registrationReady && <div className={styles.launchActions}>
-        <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/register`}>Open team registration →</Link>
-        <button type="button" onClick={()=>void navigator.clipboard.writeText(`${window.location.origin}/clubs/${view.club.slug}/register`)}>Copy registration link</button>
-      </div>}
-      {!registrationReady && <p className={styles.launchGate}>Team registration becomes available once you have an active season with at least one division.</p>}
+    <section className={`${styles.launchPanel} ${launchComplete ? styles.launchCompletePanel : ""}`}>
+      {launchComplete ? <>
+        <div className={styles.completeState}>
+          <span className={styles.completeCheck}>✓</span>
+          <div><span>SETUP COMPLETE</span><h2>Your club setup is complete</h2>
+            <p>Branding, season structure, registration, teams and fixtures are all in place. You can review or change any area below.</p></div>
+          <strong>6/6</strong>
+        </div>
+        <div className={styles.completeActions}>
+          <button type="button" onClick={() => document.getElementById("club-management")?.scrollIntoView({behavior:"smooth",block:"start"})}>Review club setup ↓</button>
+          <Link href={`/clubs/${encodeURIComponent(view.club.slug)}`}>View public hub →</Link>
+        </div>
+      </> : <>
+        <div className={styles.launchHead}><div><span>GET STARTED</span><h2>Set up your club</h2>
+          <p>Follow these steps to get your club ready. Each one takes you straight to the right setup area.</p></div>
+          <strong>{launchSteps.filter(step=>step.done).length}/{launchSteps.length}</strong></div>
+        <ol className={styles.launchList}>{launchSteps.map((step,index)=><li key={step.label} className={step.done?styles.launchDone:""}>
+          <Link className={styles.launchLink} href={step.href} onClick={() => sessionStorage.setItem("rallora:setup-nav","1")}>
+            <span className={styles.launchNumber}>{step.done?"✓":index+1}</span>
+            <div className={styles.launchCopy}><strong>{step.label}</strong><p>{step.hint}</p></div>
+            <span className={styles.launchCta}>{step.done?"Review":step.action} →</span>
+          </Link>
+        </li>)}</ol>
+        {registrationReady && <div className={styles.launchActions}>
+          <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/register`}>Open team registration →</Link>
+          <button type="button" onClick={()=>void navigator.clipboard.writeText(`${window.location.origin}/clubs/${view.club.slug}/register`)}>Copy registration link</button>
+        </div>}
+        {!registrationReady && <p className={styles.launchGate}>Team registration becomes available once you have an active season with at least one division.</p>}
+      </>}
     </section>
     <ClubEditor
       club={view.club}
