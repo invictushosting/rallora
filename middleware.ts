@@ -1,45 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/maintenance", "/pilot", "/register-club", "/platform", "/notifications", "/account"];
-const PRODUCT_PATHS = ["/clubs", "/events", "/onboarding"];
-
-function pilotClubPaths() {
-  return (process.env.RALLORA_PILOT_CLUB_SLUGS ?? "")
-    .split(",")
-    .map((slug) => slug.trim().toLowerCase())
-    .filter((slug) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug))
-    .flatMap((slug) => [`/clubs/${slug}`]);
-}
-
-export function middleware(request: NextRequest) {
-  // Preview deployments remain fully usable for development/testing.
-  if (process.env.VERCEL_ENV !== "production") {
-    return NextResponse.next();
-  }
-
-  if (process.env.RALLORA_MAINTENANCE_MODE !== "true") {
-    return NextResponse.next();
-  }
-
-  const { pathname } = request.nextUrl;
-  const allowedPaths = [...PUBLIC_PATHS, ...PRODUCT_PATHS, ...pilotClubPaths()];
-  const isPublic =
-    allowedPaths.some((path) => pathname === path || pathname.startsWith(`${path}/`)) ||
-    pathname.startsWith("/_next/") ||
-    pathname === "/favicon.ico" ||
-    pathname === "/icon.svg" ||
-    pathname === "/apple-touch-icon.png" ||
-    pathname === "/manifest.webmanifest" ||
-    pathname.startsWith("/brand/");
-
-  if (isPublic) {
-    return NextResponse.next();
-  }
-
-  const url = request.nextUrl.clone();
-  url.pathname = "/maintenance";
-  url.search = "";
-  return NextResponse.rewrite(url);
+export function middleware(_request: NextRequest) {
+  // Rallora is open for live end-to-end pilot testing.
+  // Authentication, platform-admin checks and tenant RLS continue to protect
+  // private/admin areas. Reintroduce a maintenance gate only for a deliberate
+  // production incident or planned maintenance window.
+  return NextResponse.next();
 }
 
 export const config = {
