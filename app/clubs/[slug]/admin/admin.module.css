@@ -88,3 +88,17 @@
 .adminShortcuts{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px;padding-top:14px;border-top:1px solid rgba(255,255,255,.14)}
 .adminShortcuts a{margin-top:0;padding:8px 11px;font-size:11px;background:transparent;border-color:rgba(255,255,255,.2);color:#dceaff}
 @media(max-width:490px){.heroTop{align-items:flex-start}.rolePill{font-size:9px}.heroActions{display:grid;grid-template-columns:1fr;width:100%}.heroActions a{width:100%}.adminShortcuts{display:grid;grid-template-columns:1fr 1fr}.adminShortcuts a{min-height:40px;text-align:center}}
+
+
+.launchCompletePanel{background:#f4fbf7;border-color:#cfe9d8}
+.completeState{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:center}
+.completeState>div>span{display:block;color:#1c7a50;font-size:10px;letter-spacing:1.7px;font-weight:900;margin-bottom:6px}
+.completeState h2{margin:0 0 6px;font-size:26px;letter-spacing:-.6px}
+.completeState p{margin:0;color:#5f7c6c;font-size:13px;line-height:1.6}
+.completeState>strong{display:grid;place-items:center;min-width:58px;height:58px;border-radius:18px;background:#dff3e5;color:#187447;font-size:18px}
+.completeCheck{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:#dff3e5;color:#187447;font-size:22px;font-weight:900}
+.completeActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.completeActions button,.completeActions a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border-radius:10px;padding:11px 14px;font-size:12px;font-weight:850;text-decoration:none;cursor:pointer}
+.completeActions button{border:0;background:#061A39;color:#fff}
+.completeActions a{border:1px solid #bcd9c5;background:#fff;color:#176b47}
+@media(max-width:650px){.completeState{grid-template-columns:auto 1fr}.completeState>strong{grid-column:1/-1;width:100%;height:44px}.completeActions{display:grid;grid-template-columns:1fr}.completeActions button,.completeActions a{width:100%}}
