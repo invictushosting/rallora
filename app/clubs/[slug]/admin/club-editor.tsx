@@ -21,6 +21,12 @@ type EditableFixture = { id:string; season_id:string; division_id:string; home_t
 export type EditableSeason = {
   id: string; club_id: string; name: string; status: string;
   fixture_schedule_mode: "weekly" | "date_window";
+  registration_opens_at: string | null;
+  registration_closes_at: string | null;
+  league_format: "standard" | "promotion_relegation_cycles";
+  teams_per_division: number | null;
+  matches_per_cycle: number | null;
+  division_assignment_mode: "manual" | "combined_rating";
   divisions: EditableDivision[];
 };
 
@@ -127,6 +133,12 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [registrationTerms,setRegistrationTerms]=useState(club.player_registration_terms??"");
   const [newSeason, setNewSeason] = useState("");
   const [newFixtureScheduleMode, setNewFixtureScheduleMode] = useState<"weekly" | "date_window">("weekly");
+  const [registrationOpens, setRegistrationOpens] = useState("");
+  const [registrationCloses, setRegistrationCloses] = useState("");
+  const [leagueFormat, setLeagueFormat] = useState<"standard"|"promotion_relegation_cycles">("standard");
+  const [teamsPerDivision, setTeamsPerDivision] = useState("4");
+  const [matchesPerCycle, setMatchesPerCycle] = useState("3");
+  const [assignmentMode, setAssignmentMode] = useState<"manual"|"combined_rating">("combined_rating");
   const [newDivision, setNewDivision] = useState("");
   const [divisionSeasonId, setDivisionSeasonId] = useState(seasons[0]?.id ?? "");
   const [teamDivisionId, setTeamDivisionId] = useState(seasons[0]?.divisions[0]?.id ?? "");
@@ -290,6 +302,12 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       const { error: mutationError } = await supabase.from("seasons").insert({
         club_id: club.id, name: title, status: "draft",
         fixture_schedule_mode: newFixtureScheduleMode,
+        registration_opens_at: registrationOpens || null,
+        registration_closes_at: registrationCloses || null,
+        league_format: leagueFormat,
+        teams_per_division: leagueFormat==="promotion_relegation_cycles" ? Number(teamsPerDivision) : null,
+        matches_per_cycle: leagueFormat==="promotion_relegation_cycles" ? Number(matchesPerCycle) : null,
+        division_assignment_mode: assignmentMode,
       });
       if (mutationError) throw mutationError;
       setNewSeason("");
@@ -479,6 +497,21 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         <p className={styles.wide}>{newFixtureScheduleMode==="weekly"
           ? "Fixtures are organised by week number, with a completion deadline."
           : "Each fixture has an available-from date and a complete-by date."}</p>
+        <label>Registration opens<input type="datetime-local" value={registrationOpens} onChange={e=>setRegistrationOpens(e.target.value)} /></label>
+        <label>Registration closes<input type="datetime-local" value={registrationCloses} onChange={e=>setRegistrationCloses(e.target.value)} /></label>
+        <label>League format<select value={leagueFormat} onChange={e=>setLeagueFormat(e.target.value as "standard"|"promotion_relegation_cycles")}>
+          <option value="standard">Standard divisions</option>
+          <option value="promotion_relegation_cycles">Short cycles with promotion &amp; relegation</option>
+        </select></label>
+        <label>Division assignment<select value={assignmentMode} onChange={e=>setAssignmentMode(e.target.value as "manual"|"combined_rating")}>
+          <option value="combined_rating">Auto seed by combined Playtomic rating</option>
+          <option value="manual">Club assigns teams manually</option>
+        </select></label>
+        {leagueFormat==="promotion_relegation_cycles" && <>
+          <label>Teams per group<input type="number" min="2" max="100" value={teamsPerDivision} onChange={e=>setTeamsPerDivision(e.target.value)} /></label>
+          <label>Matches per cycle<input type="number" min="1" max="100" value={matchesPerCycle} onChange={e=>setMatchesPerCycle(e.target.value)} /></label>
+          <p className={styles.wide}>After each cycle, the top team is promoted and the bottom team is relegated. Teams arrange their own matches within the scheduled period.</p>
+        </>}
         <button disabled={busy} type="submit">Create draft season</button>
       </form>
       <form className={styles.form} onSubmit={createDivision}>
