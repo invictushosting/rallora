@@ -18,6 +18,16 @@ export type EditableDivision = {
   teams: { id: string; name: string }[];
 };
 type EditableFixture = { id:string; season_id:string; division_id:string; home_team_id:string; away_team_id:string; week_number:number; play_by:string; status:string; home_score?:string|null; away_score?:string|null; winner_team_id?:string|null };
+type LeagueRule = { key:string; label:string; text:string; enabled:boolean; custom?:boolean };
+const COMMON_RULES: LeagueRule[] = [
+  {key:"venue",label:"Venue requirement",text:"League matches must be played at the club unless the organiser approves otherwise.",enabled:true},
+  {key:"arrange",label:"Arrange your own match",text:"Teams arrange their own match time within the published fixture window.",enabled:true},
+  {key:"deadline",label:"Fixture deadline",text:"All fixtures must be completed by the published deadline unless the organiser grants an extension.",enabled:true},
+  {key:"results",label:"Result reporting",text:"The winning team or nominated captain must submit the result promptly after the match.",enabled:true},
+  {key:"availability",label:"Player availability",text:"Teams are responsible for being available to complete all fixtures in the scheduled period.",enabled:true},
+  {key:"walkover",label:"Walkovers",text:"If a team cannot complete a fixture, the organiser may award a walkover in line with the club’s competition policy.",enabled:false},
+  {key:"conduct",label:"Player conduct",text:"Players must follow the club’s on-court conduct and venue rules at all times.",enabled:true},
+];
 export type EditableSeason = {
   id: string; club_id: string; name: string; status: string;
   fixture_schedule_mode: "weekly" | "date_window";
@@ -33,6 +43,7 @@ export type EditableSeason = {
   relegation_places: number;
   cycle_match_mode: "single_round_robin" | "double_round_robin";
   require_cycle_completion: boolean;
+  league_rules: LeagueRule[];
   registrations: number;
   divisions: EditableDivision[];
 };
@@ -110,6 +121,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       setRelegationPlaces(String(season.relegation_places ?? 2));
       setCycleMatchMode(season.cycle_match_mode ?? "single_round_robin");
       setRequireCycleCompletion(season.require_cycle_completion ?? true);
+      setLeagueRules(season.league_rules?.length ? season.league_rules : COMMON_RULES);
       setActiveTab("seasons");
       setMessage("");
       setError("");
@@ -184,6 +196,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [relegationPlaces, setRelegationPlaces] = useState("2");
   const [cycleMatchMode, setCycleMatchMode] = useState<"single_round_robin"|"double_round_robin">("single_round_robin");
   const [requireCycleCompletion, setRequireCycleCompletion] = useState(true);
+  const [leagueRules, setLeagueRules] = useState<LeagueRule[]>(COMMON_RULES);
+  const [customRule, setCustomRule] = useState("");
   const [newDivision, setNewDivision] = useState("");
   const [divisionSeasonId, setDivisionSeasonId] = useState(seasons[0]?.id ?? "");
   const [teamDivisionId, setTeamDivisionId] = useState(seasons[0]?.divisions[0]?.id ?? "");
@@ -361,6 +375,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         relegation_places: leagueFormat==="promotion_relegation_cycles" ? Number(relegationPlaces) : 0,
         cycle_match_mode: cycleMatchMode,
         require_cycle_completion: requireCycleCompletion,
+        league_rules: leagueRules,
       };
       if (editingSeasonId) {
         const existing = seasons.find((item)=>item.id===editingSeasonId);
@@ -605,6 +620,27 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
           </label>
           <p className={styles.wide}>Fixtures are calculated from the actual group size. For example, a 4-team group playing everyone once gives 3 matches per team; a 5-team overflow group gives 4.</p>
         </>}
+        <section className={styles.ruleBuilder}>
+          <div className={styles.ruleBuilderHead}>
+            <div><strong>League rules</strong><p>Start with common padel league rules, switch off anything you do not use, and add your own.</p></div>
+          </div>
+          <div className={styles.ruleList}>
+            {leagueRules.map((rule,index)=><label className={styles.ruleRow} key={rule.key}>
+              <input type="checkbox" checked={rule.enabled} onChange={e=>setLeagueRules(current=>current.map((item,i)=>i===index?{...item,enabled:e.target.checked}:item))} />
+              <span><strong>{rule.label}</strong><small>{rule.text}</small></span>
+              {rule.custom&&<button type="button" onClick={()=>setLeagueRules(current=>current.filter((_,i)=>i!==index))}>Remove</button>}
+            </label>)}
+          </div>
+          <div className={styles.customRuleAdd}>
+            <input maxLength={300} value={customRule} onChange={e=>setCustomRule(e.target.value)} placeholder="Add a club-specific rule…" />
+            <button type="button" disabled={!customRule.trim()} onClick={()=>{
+              const text=customRule.trim();
+              if(!text)return;
+              setLeagueRules(current=>[...current,{key:`custom-${Date.now()}`,label:"Club rule",text,enabled:true,custom:true}]);
+              setCustomRule("");
+            }}>Add rule</button>
+          </div>
+        </section>
         <div className={styles.seasonFormActions}>
           <button disabled={busy} type="submit">{editingSeasonId ? "Save league changes" : "Create draft season"}</button>
           {editingSeasonId && <button type="button" className={styles.secondaryButton} onClick={()=>{
