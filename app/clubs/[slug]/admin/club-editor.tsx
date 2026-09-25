@@ -142,7 +142,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [welcomeText, setWelcomeText] = useState(club.welcome_text ?? "");
   const [logoUrl,setLogoUrl]=useState(club.logo_url??"");
   const [coverImageUrl,setCoverImageUrl]=useState(club.cover_image_url??"");
-  const [websiteUrl,setWebsiteUrl]=useState(club.website_url??"");\n  const [bookingUrl,setBookingUrl]=useState(club.booking_url??"");
+  const [websiteUrl,setWebsiteUrl]=useState(club.website_url??"");
+  const [bookingUrl,setBookingUrl]=useState(club.booking_url??"");
   const [contactEmail,setContactEmail]=useState(club.contact_email??"");
   const [venueName,setVenueName]=useState(club.venue_name??"");
   const [address,setAddress]=useState(club.address_line_1??"");
@@ -552,7 +553,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         {coverImageUrl && <div className={styles.coverPreview}><img src={coverImageUrl} alt="Club cover preview" /></div>}
         <details className={styles.advancedImage}><summary>Advanced: use an image URL instead</summary><label>Cover image URL<input type="url" value={coverImageUrl} onChange={event=>setCoverImageUrl(event.target.value)} /></label></details>
       </div>
-      <label>Website<input type="url" value={websiteUrl} onChange={event=>setWebsiteUrl(event.target.value)} /></label>\n      <label>Player court booking link<input type="url" value={bookingUrl} onChange={event=>setBookingUrl(event.target.value)} placeholder="https://app.playtomic.io/..." /><small>Shown as Book court on fixtures that still need arranging.</small></label>
+      <label>Website<input type="url" value={websiteUrl} onChange={event=>setWebsiteUrl(event.target.value)} /></label>
+      <label>Player court booking link<input type="url" value={bookingUrl} onChange={event=>setBookingUrl(event.target.value)} placeholder="https://app.playtomic.io/..." /><small>Shown as Book court on fixtures that still need arranging.</small></label>
       <label>Contact email<input type="email" value={contactEmail} onChange={event=>setContactEmail(event.target.value)} /></label>
       <label>Venue name<input value={venueName} maxLength={160} onChange={event=>setVenueName(event.target.value)} /></label>
       <label>Address<input value={address} maxLength={200} onChange={event=>setAddress(event.target.value)} /></label>
