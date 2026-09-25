@@ -400,7 +400,19 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
           (fixture.week_number ? `Week ${fixture.week_number}` : "League fixture")}</span>
         <span>{dateLabel(fixture.play_by)}</span>
       </div>
-      {resolved ? <div className={styles.resultCard}>\n        <div className={styles.resultPair}><span className={styles.pairSide}>HOME</span><strong>{teamLabel(fixture.home_team_id, teamNames)}</strong></div>\n        <div className={styles.setScore}>\n          <div className={styles.setHeaders}>{scoreSets(result?.home_score).map((_, index)=><span key={index}>SET {index + 1}</span>)}</div>\n          <div className={styles.setRow}>{scoreSets(result?.home_score).map((score,index)=>{const away=Number(scoreSets(result?.away_score)[index]);const home=Number(score);return <strong key={index} className={home>away?styles.setWon:""}>{score}</strong>;})}</div>\n          <div className={styles.setRow}>{scoreSets(result?.away_score).map((score,index)=>{const home=Number(scoreSets(result?.home_score)[index]);const away=Number(score);return <strong key={index} className={away>home?styles.setWon:""}>{score}</strong>;})}</div>\n        </div>\n        <div className={`${styles.resultPair} ${styles.resultPairAway}`}><span className={styles.pairSide}>AWAY</span><strong>{teamLabel(fixture.away_team_id, teamNames)}</strong></div>\n      </div> : <div className={styles.match}>\n        <strong>{teamLabel(fixture.home_team_id, teamNames)}</strong><span className={styles.score}>vs</span><strong>{teamLabel(fixture.away_team_id, teamNames)}</strong>\n      </div>}\n      {!resolved && arrangementPanel(fixture)}\n      <div className={styles.fixtureBottom}>
+      {resolved ? <div className={styles.resultCard}>
+        <div className={styles.resultPair}><span className={styles.pairSide}>HOME</span><strong>{teamLabel(fixture.home_team_id, teamNames)}</strong></div>
+        <div className={styles.setScore}>
+          <div className={styles.setHeaders}>{scoreSets(result?.home_score).map((_, index)=><span key={index}>SET {index + 1}</span>)}</div>
+          <div className={styles.setRow}>{scoreSets(result?.home_score).map((score,index)=>{const away=Number(scoreSets(result?.away_score)[index]);const home=Number(score);return <strong key={index} className={home>away?styles.setWon:""}>{score}</strong>;})}</div>
+          <div className={styles.setRow}>{scoreSets(result?.away_score).map((score,index)=>{const home=Number(scoreSets(result?.home_score)[index]);const away=Number(score);return <strong key={index} className={away>home?styles.setWon:""}>{score}</strong>;})}</div>
+        </div>
+        <div className={`${styles.resultPair} ${styles.resultPairAway}`}><span className={styles.pairSide}>AWAY</span><strong>{teamLabel(fixture.away_team_id, teamNames)}</strong></div>
+      </div> : <div className={styles.match}>
+        <strong>{teamLabel(fixture.home_team_id, teamNames)}</strong><span className={styles.score}>vs</span><strong>{teamLabel(fixture.away_team_id, teamNames)}</strong>
+      </div>}
+      {!resolved && arrangementPanel(fixture)}
+      <div className={styles.fixtureBottom}>
         <span>{fixture.court || "Court to arrange"}</span>
         <span className={resolved ? styles.confirmed : styles.fixtureStatus}>
           {resolved ? "Final" : fixture.status === "disputed" ?
