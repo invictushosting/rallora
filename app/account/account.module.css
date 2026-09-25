@@ -4,3 +4,16 @@
 @media(max-width:540px){.page{padding:12px;place-items:start center}.card{margin-top:12px;padding:24px 18px;border-radius:18px}.card>a{display:inline-flex;align-items:center;min-height:44px}.card h1{font-size:clamp(32px,10vw,38px)}.card input{width:100%;min-height:48px;font-size:16px}.card button{min-height:48px;font-size:14px}}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:inline-flex;align-items:center}.returnLink{display:inline-flex;align-items:center;min-height:40px;padding:0 11px;border:1px solid #d5e2ed;border-radius:999px;text-decoration:none!important;font-size:11px}.card>small{margin-top:28px}
 @media(max-width:540px){.topbar{align-items:flex-start;flex-direction:column;gap:8px}.returnLink{min-height:40px}.card>small{margin-top:22px}}
+
+
+.profileCard{display:grid;gap:12px;margin:20px 0;padding:16px;border:1px solid #dbe6f1;border-radius:14px;background:#f8fbfe}
+.profileCard>div{display:flex;justify-content:space-between;gap:16px;align-items:center}
+.profileCard span{font-size:11px;font-weight:850;color:#70849c;text-transform:uppercase;letter-spacing:.8px}
+.profileCard strong{font-size:13px;color:#173354}
+.clubAccess{display:block!important;border-top:1px solid #e4ebf3;padding-top:12px}
+.clubAccess>span{display:block;margin-bottom:8px}
+.clubAccess p{display:flex;justify-content:space-between;gap:10px;margin:6px 0;color:#173354}
+.clubAccess em{font-style:normal;text-transform:capitalize;color:#6d8198;font-size:12px}
+.passwordSection{margin-top:22px;padding-top:20px;border-top:1px solid #e1e9f1}
+.passwordSection h2{margin:0 0 5px;font-size:18px;color:#173354}
+.passwordSection>p{margin:0 0 14px;color:#6d8198;font-size:12px}
