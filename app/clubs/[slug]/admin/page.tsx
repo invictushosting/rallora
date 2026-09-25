@@ -295,6 +295,8 @@ export default function ClubAdministration() {
       onSaved={() => setRevision((value) => value + 1)}
       fixtures={view.fixtures}
     />
+    <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>ADDITIONAL TOOLS</span><h2>More ways to run your club</h2></div>
+      <p>These tools support your league once the core setup is in place.</p></div>
     <section className={styles.socialInvite}>
       <span>RALLORA SOCIAL</span><h2>Turn league updates into share-ready club stories.</h2>
       <p>Create news, prepare a confirmed result or weekly roundup, preview each channel
@@ -310,6 +312,8 @@ export default function ClubAdministration() {
       seasons={view.summaries.map(({season})=>({
         id:season.id,name:season.name,status:season.status,
       }))} />
+    <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>CLUB OVERVIEW</span><h2>Your club at a glance</h2></div>
+      <p>Live totals and season structure for {view.club.name}.</p></div>
     <section className={styles.metrics} aria-label="Club totals">
       {([["Seasons", view.summaries.length], ["Divisions", totals.divisions],
         ["Teams", totals.teams], ["Fixtures", totals.fixtures],
