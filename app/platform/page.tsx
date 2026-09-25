@@ -131,11 +131,17 @@ export default function PlatformControlCentre() {
   async function createClub(event:React.FormEvent<HTMLFormElement>){
     event.preventDefault();setBusy("create-club");setNotice("");
     const form=new FormData(event.currentTarget);
-    const {error}=await supabase.rpc("rallora_platform_create_club",{
+    const {error}=await supabase.rpc("rallora_platform_create_club_with_details",{
       p_name:String(form.get("name")).trim(),
       p_slug:String(form.get("slug")).trim().toLowerCase(),
       p_owner_email:String(form.get("ownerEmail")).trim().toLowerCase(),
       p_plan_code:String(form.get("plan")),
+      p_contact_name:String(form.get("contactName")).trim(),
+      p_contact_phone:String(form.get("contactPhone")).trim(),
+      p_address_line_1:String(form.get("address1")).trim(),
+      p_town:String(form.get("town")).trim(),
+      p_postcode:String(form.get("postcode")).trim(),
+      p_country:String(form.get("country")).trim(),
     });
     if(error){setNotice(error.message);setBusy("");return}
     setNotice("Club created and owner access activated.");
@@ -195,6 +201,12 @@ export default function PlatformControlCentre() {
         <label>Club name<input name="name" required minLength={2} maxLength={120} placeholder="Example Padel Club"/></label>
         <label>Club web address<div className={styles.slugInput}><span>rallora.app/clubs/</span><input name="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="example-padel"/></div></label>
         <label>Owner email<input name="ownerEmail" type="email" required placeholder="owner@example.com"/></label>
+        <label>Primary contact name<input name="contactName" required minLength={2} placeholder="Club owner / manager"/></label>
+        <label>Mobile number<input name="contactPhone" type="tel" autoComplete="tel" required minLength={7} placeholder="+44 7..."/></label>
+        <label>Address line 1<input name="address1" required minLength={3} placeholder="Venue address"/></label>
+        <label>Town / city<input name="town" required minLength={2} placeholder="Manchester"/></label>
+        <label>Postcode<input name="postcode" required minLength={2} placeholder="M1 1AA"/></label>
+        <label>Country<input name="country" required defaultValue="United Kingdom"/></label>
         <label>Plan<select name="plan" defaultValue="league"><option value="starter">Starter</option><option value="league">Growth</option><option value="pro">Pro</option></select></label>
         <button disabled={busy==="create-club"}>{busy==="create-club"?"Creating club…":"Create club & activate owner"}</button>
       </form>}
