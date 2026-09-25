@@ -262,7 +262,7 @@ export default function ClubAdministration() {
   return <main className={styles.page}><div className={styles.shell}>
     <header className={styles.nav}>
       <Link href="/" className={styles.wordmark}><RalloraLogo variant="light" width={218} /></Link>
-      <div className={styles.navActions}><button onClick={()=>void signOut()}>Sign out</button><span className={styles.badge}>CLUB ADMIN</span></div>
+      <div className={styles.navActions}><Link href={`/account?club=${encodeURIComponent(view.club.slug)}`}>Profile</Link><button onClick={()=>void signOut()}>Sign out</button><span className={styles.badge}>CLUB ADMIN</span></div>
     </header>
     <section className={styles.hero}>
       <div className={styles.heroTop}><span className={styles.eyebrow}>YOUR CLUB CONTROL CENTRE</span><span className={styles.rolePill}>{view.role}</span></div>
