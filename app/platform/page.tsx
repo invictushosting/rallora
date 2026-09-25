@@ -144,7 +144,7 @@ export default function PlatformControlCentre() {
       <div className={styles.navTitle}><strong>Platform Control Centre</strong><span>Rallora operations</span></div>
       <div className={styles.navActions}>
         <Link href="/notifications">Notifications</Link>
-        <Link href="/account">Account</Link>
+        <Link href="/account">Security</Link>
         {view.status==="ready"&&<button className={styles.signOut} disabled={busy==="sign-out"} onClick={()=>void signOut()}>Sign out</button>}
       </div>
       <span className={styles.badge}>PLATFORM ADMIN</span>
