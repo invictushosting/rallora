@@ -147,3 +147,6 @@
 @media(max-width:490px){.seasonCardTop{align-items:flex-start}.seasonEdit{min-height:40px;padding:8px 10px}}
 
 
+
+/* Sales-ready demo context */
+.demoShowcase{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px;padding:12px 14px;border:1px solid rgba(154,190,255,.24);border-radius:12px;background:rgba(20,62,117,.42)}.demoShowcase strong{font-size:9px;letter-spacing:.12em;padding:5px 8px;border-radius:20px;background:#e9f2ff;color:#184d98}.demoShowcase span{font-size:12px;line-height:1.5;color:#c8d8ec}
