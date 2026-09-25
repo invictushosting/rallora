@@ -17,7 +17,7 @@ type Club = {
   id: string; slug: string; name: string; short_name: string | null;
   primary_color: string | null; welcome_title: string | null;
   welcome_text: string | null; footer_text: string | null;
-  logo_url: string | null; cover_image_url: string | null;
+  logo_url: string | null; cover_image_url: string | null; booking_url: string | null;
 };
 type Season = {
   id: string; club_id: string; name: string; status: string;
@@ -143,7 +143,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
         }
         const { data: club, error: clubError } = await supabase
           .from("clubs")
-          .select("id,slug,name,short_name,primary_color,welcome_title,welcome_text,footer_text,logo_url,cover_image_url")
+          .select("id,slug,name,short_name,primary_color,welcome_title,welcome_text,footer_text,logo_url,cover_image_url,booking_url")
           .eq("slug", slug).eq("is_active", true).maybeSingle();
         if (clubError) throw clubError;
         if (!club) {

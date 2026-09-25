@@ -8,7 +8,7 @@ import styles from "./editor.module.css";
 export type EditableClub = {
   id: string; slug: string; name: string;
   short_name: string | null; primary_color: string | null;
-  welcome_text: string | null; logo_url:string|null; cover_image_url:string|null; website_url:string|null;
+  welcome_text: string | null; logo_url:string|null; cover_image_url:string|null; website_url:string|null; booking_url:string|null;
   contact_email:string|null; venue_name:string|null; address_line_1:string|null;
   town:string|null; postcode:string|null; player_registration_terms:string|null;
   playtomic_setup_choice:"later"|null;
@@ -143,6 +143,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [logoUrl,setLogoUrl]=useState(club.logo_url??"");
   const [coverImageUrl,setCoverImageUrl]=useState(club.cover_image_url??"");
   const [websiteUrl,setWebsiteUrl]=useState(club.website_url??"");
+  const [bookingUrl,setBookingUrl]=useState(club.booking_url??"");
   const [contactEmail,setContactEmail]=useState(club.contact_email??"");
   const [venueName,setVenueName]=useState(club.venue_name??"");
   const [address,setAddress]=useState(club.address_line_1??"");
@@ -346,7 +347,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         .update({
           name: name.trim(), short_name: shortName.trim() || null,
           primary_color: colour, welcome_text: welcomeText.trim() || null,
-          logo_url:logoUrl.trim()||null,cover_image_url:coverImageUrl.trim()||null,website_url:websiteUrl.trim()||null,
+          logo_url:logoUrl.trim()||null,cover_image_url:coverImageUrl.trim()||null,website_url:websiteUrl.trim()||null,booking_url:bookingUrl.trim()||null,
           contact_email:contactEmail.trim()||null,venue_name:venueName.trim()||null,
           address_line_1:address.trim()||null,town:town.trim()||null,postcode:postcode.trim()||null,
           player_registration_terms:registrationTerms.trim()||null,
@@ -553,6 +554,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         <details className={styles.advancedImage}><summary>Advanced: use an image URL instead</summary><label>Cover image URL<input type="url" value={coverImageUrl} onChange={event=>setCoverImageUrl(event.target.value)} /></label></details>
       </div>
       <label>Website<input type="url" value={websiteUrl} onChange={event=>setWebsiteUrl(event.target.value)} /></label>
+      <label>Player court booking link<input type="url" value={bookingUrl} onChange={event=>setBookingUrl(event.target.value)} placeholder="https://app.playtomic.io/..." /><small>Shown as Book court on fixtures that still need arranging.</small></label>
       <label>Contact email<input type="email" value={contactEmail} onChange={event=>setContactEmail(event.target.value)} /></label>
       <label>Venue name<input value={venueName} maxLength={160} onChange={event=>setVenueName(event.target.value)} /></label>
       <label>Address<input value={address} maxLength={200} onChange={event=>setAddress(event.target.value)} /></label>
