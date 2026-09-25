@@ -25,6 +25,9 @@ type Summary = {
   teams: number;
   fixtures: number;
   confirmed: number;
+  outstanding: number;
+  awaitingResult: number;
+  overdue: number;
   registrations: number;
   divisionSummaries: DivisionSummary[];
 };
@@ -186,6 +189,9 @@ export default function ClubAdministration() {
             fixtures: fixtureIds.length,
             confirmed: (resultsReply.data ?? [])
               .filter((result) => knownFixtureIds.has(result.fixture_id)).length,
+            outstanding: seasonFixtures.filter((fixture) => !["confirmed","cancelled"].includes(fixture.status)).length,
+            awaitingResult: seasonFixtures.filter((fixture) => fixture.status === "played" || fixture.status === "awaiting_result").length,
+            overdue: seasonFixtures.filter((fixture) => !["confirmed","cancelled"].includes(fixture.status) && fixture.play_by && fixture.play_by < new Date().toISOString().slice(0,10)).length,
             registrations: registrationReply.count ?? 0,
             divisionSummaries,
           };
@@ -252,7 +258,10 @@ export default function ClubAdministration() {
     teams: acc.teams + item.teams,
     fixtures: acc.fixtures + item.fixtures,
     confirmed: acc.confirmed + item.confirmed,
-  }), { divisions: 0, teams: 0, fixtures: 0, confirmed: 0 });
+    outstanding: acc.outstanding + item.outstanding,
+    awaitingResult: acc.awaitingResult + item.awaitingResult,
+    overdue: acc.overdue + item.overdue,
+  }), { divisions: 0, teams: 0, fixtures: 0, confirmed: 0, outstanding: 0, awaitingResult: 0, overdue: 0 });
   const activeSeason = view.summaries.find(({season})=>season.status==="active");
   const registrationReady = Boolean(activeSeason && activeSeason.divisions>0);
   const playtomicDeferred = view.club.playtomic_setup_choice === "later";
@@ -296,17 +305,18 @@ export default function ClubAdministration() {
     </section>
     <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>CLUB OVERVIEW</span><h2>Your club at a glance</h2></div>
       <p>Live totals and season structure for {view.club.name}.</p></div>
-    <section className={styles.metrics} aria-label="Club totals">
-      {([["Seasons", view.summaries.length], ["Divisions", totals.divisions],
-        ["Teams", totals.teams], ["Fixtures", totals.fixtures],
-        ["Confirmed results", totals.confirmed], ["Sponsors", view.sponsors]] as [string, number][])
-        .map(([label, value]) => <article key={label}><span>{label}</span>
-          <strong>{value.toLocaleString("en-GB")}</strong></article>)}
+    <section className={styles.operations} aria-label="League operations overview">
+      <article><span>Active leagues</span><strong>{view.summaries.filter(({season})=>season.status==="active").length}</strong><small>Currently being played</small></article>
+      <article><span>Total fixtures</span><strong>{totals.fixtures}</strong><small>Across all leagues</small></article>
+      <article className={totals.outstanding ? styles.operationWarn : ""}><span>Outstanding</span><strong>{totals.outstanding}</strong><small>Still to be completed</small></article>
+      <article className={totals.awaitingResult ? styles.operationInfo : ""}><span>Awaiting result</span><strong>{totals.awaitingResult}</strong><small>Played, captain action needed</small></article>
+      <article className={totals.overdue ? styles.operationDanger : ""}><span>Needs attention</span><strong>{totals.overdue}</strong><small>Overdue fixtures</small></article>
+      <article><span>Played</span><strong>{totals.confirmed}</strong><small>Confirmed results</small></article>
     </section>
     <div className={styles.sectionHeading}><h2>Club seasons</h2>
       <p>Each season below belongs to {view.club.name}.</p></div>
     <section className={styles.grid}>
-      {view.summaries.map(({ season, divisions, teams, fixtures, confirmed, divisionSummaries }) =>
+      {view.summaries.map(({ season, divisions, teams, fixtures, confirmed, outstanding, awaitingResult, overdue, divisionSummaries }) =>
         <article className={styles.card} key={season.id}>
           <div className={styles.seasonCardTop}><span className={styles.status}>{season.status}</span>
             <button type="button" className={styles.seasonEdit} onClick={() => window.dispatchEvent(new CustomEvent("rallora:edit-season",{detail:{seasonId:season.id}}))}>Edit league</button>
@@ -316,7 +326,15 @@ export default function ClubAdministration() {
             <span><strong>{divisions}</strong> divisions</span>
             <span><strong>{teams}</strong> teams</span>
             <span><strong>{fixtures}</strong> fixtures</span>
-            <span><strong>{confirmed}</strong> confirmed</span>
+            <span><strong>{outstanding}</strong> outstanding</span>
+            <span><strong>{awaitingResult}</strong> awaiting result</span>
+            <span><strong>{confirmed}</strong> played</span>
+          </div>
+          {overdue > 0 && <div className={styles.attentionStrip}><strong>{overdue} need attention</strong><span>Overdue fixtures should be chased first.</span></div>
+          <div className={styles.fixtureFilters} aria-label={`${season.name} fixture status`}>
+            <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("rallora:open-club-setup",{detail:{tab:"fixtures"}}))}>Outstanding <b>{outstanding}</b></button>
+            <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("rallora:open-club-setup",{detail:{tab:"fixtures"}}))}>Awaiting result <b>{awaitingResult}</b></button>
+            <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("rallora:open-club-setup",{detail:{tab:"fixtures"}}))}>Played <b>{confirmed}</b></button>
           </div>
           <div className={styles.divisionList}>
             <h4>Divisions &amp; teams</h4>
