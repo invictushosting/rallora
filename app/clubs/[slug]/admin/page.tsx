@@ -314,13 +314,13 @@ export default function ClubAdministration() {
     </section>
     <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>CLUB OVERVIEW</span><h2>Your club at a glance</h2></div>
       <p>Live totals and season structure for {view.club.name}.</p></div>
-    <section className={styles.operationsCompact} aria-label="League operations overview">
+    <section className={styles.metrics} aria-label="League operations overview">
       <article><span>Active leagues</span><strong>{view.summaries.filter(({season})=>season.status==="active").length}</strong><small>Currently being played</small></article>
       <article><span>Total fixtures</span><strong>{totals.fixtures}</strong><small>Across all leagues</small></article>
-      <article className={totals.outstanding ? styles.operationWarn : ""}><span>Outstanding</span><strong>{Math.max(0, totals.outstanding - bookedFixtureIds.size)}</strong><small>No confirmed booking yet</small></article>
+      <article><span>Outstanding</span><strong>{Math.max(0, totals.outstanding - bookedFixtureIds.size)}</strong><small>No confirmed booking yet</small></article>
       <article><span>Booked</span><strong>{bookedFixtureIds.size}</strong><small>Playtomic matched 4/4</small></article>
-      <article className={(totals.awaitingResult + finishedWithoutResult) ? styles.operationInfo : ""}><span>Awaiting result</span><strong>{Math.max(totals.awaitingResult, finishedWithoutResult)}</strong><small>Played, captain action needed</small></article>
-      <article className={(totals.overdue + possibleBookings) ? styles.operationDanger : ""}><span>Needs attention</span><strong>{totals.overdue + possibleBookings}</strong><small>{possibleBookings ? `${possibleBookings} possible 3/4 booking${possibleBookings===1?"":"s"} to review` : "Overdue fixtures"}</small></article>
+      <article><span>Awaiting result</span><strong>{Math.max(totals.awaitingResult, finishedWithoutResult)}</strong><small>Played, captain action needed</small></article>
+      <article><span>Needs attention</span><strong>{totals.overdue + possibleBookings}</strong><small>{possibleBookings ? `${possibleBookings} possible 3/4 booking${possibleBookings===1?"":"s"} to review` : "Overdue fixtures"}</small></article>
       <article><span>Played</span><strong>{totals.confirmed}</strong><small>Confirmed results</small></article>
     </section>
     <div className={styles.sectionHeading}><h2>Club seasons</h2>
@@ -340,16 +340,10 @@ export default function ClubAdministration() {
             <span><strong>{awaitingResult}</strong> awaiting result</span>
             <span><strong>{confirmed}</strong> played</span>
           </div>
-          {overdue > 0 && <div className={styles.attentionStrip}><strong>{overdue} need attention</strong><span>Overdue fixtures should be chased first.</span></div>
-          <div className={styles.fixtureFilters} aria-label={`${season.name} fixture status`}>
-            <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("rallora:open-club-setup",{detail:{tab:"fixtures"}}))}>Outstanding <b>{outstanding}</b></button>
-            <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("rallora:open-club-setup",{detail:{tab:"fixtures"}}))}>Awaiting result <b>{awaitingResult}</b></button>
-            <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("rallora:open-club-setup",{detail:{tab:"fixtures"}}))}>Played <b>{confirmed}</b></button>
-          </div>
           <div className={styles.divisionList}>
             <h4>Divisions</h4>
             {divisionSummaries.map((division) => <div key={division.id} className={styles.divisionRow}>
-              <div className={styles.divisionSummary}>{division.name}<span>{division.teams.length} teams</span></div>
+              <div><strong>{division.name}</strong><span>{division.teams.length} teams</span></div>
             </div>)}
             {!divisionSummaries.length && <p>No divisions yet.</p>}
           </div>
