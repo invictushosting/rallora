@@ -36,6 +36,9 @@ type Fixture = {
   play_by: string; week_number: number;
   fixture_group_name: string | null; status: string; court: string | null;
   available_from: string | null;
+  arrangement_status: "not_arranged" | "possible" | "arranged" | "in_progress" | "result_required" | "cancelled";
+  booking_starts_at: string | null; booking_ends_at: string | null;
+  booking_type: string | null; booking_court: string | null; booking_matched_players: number | null;
 };
 type Result = {
   fixture_id: string; home_score: string | null;
@@ -229,7 +232,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
               .select("id,season_id,name,sort_order")
               .eq("season_id", verifiedSeasonId).order("sort_order", { ascending: true }),
             supabase.from("fixtures")
-              .select("id,season_id,division_id,home_team_id,away_team_id,play_by,week_number,fixture_group_name,status,court,available_from")
+              .select("id,season_id,division_id,home_team_id,away_team_id,play_by,week_number,fixture_group_name,status,court,available_from,arrangement_status,booking_starts_at,booking_ends_at,booking_type,booking_court,booking_matched_players")
               .eq("season_id", verifiedSeasonId)
               .or(`available_from.is.null,available_from.lte.${today}`)
               .order("play_by", { ascending: true }),
@@ -357,6 +360,35 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
   const filteredDivisions = data.divisions.filter((division) =>
     divisionFilter === "all" || division.id === divisionFilter);
 
+  function scoreSets(value: string | null | undefined) { return (value ?? "").split(",").map((set) => set.trim()).filter(Boolean); }
+  function bookingLabel(value: string | null) {
+    if (!value) return "";
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? "" : new Intl.DateTimeFormat("en-GB", {
+      weekday:"short", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit",
+    }).format(date);
+  }
+  function bookingDuration(start: string | null, end: string | null) {
+    if (!start || !end) return "";
+    const minutes = Math.round((new Date(end).getTime()-new Date(start).getTime())/60000);
+    return minutes > 0 ? `${minutes} mins` : "";
+  }
+  function arrangementPanel(fixture: Fixture) {
+    const status = fixture.arrangement_status || "not_arranged";
+    const arranged = ["arranged","in_progress","result_required"].includes(status);
+    const title = status==="possible" ? "Possible booking found" : status==="cancelled" ? "Booking cancelled" :
+      status==="result_required" ? "Match played · result required" : status==="in_progress" ? "Match in progress" :
+      arranged ? "Match arranged" : "Match not arranged";
+    const detail = arranged || status==="possible"
+      ? [bookingLabel(fixture.booking_starts_at), fixture.booking_court, bookingDuration(fixture.booking_starts_at,fixture.booking_ends_at)].filter(Boolean).join(" · ")
+      : status==="cancelled" ? "This fixture needs rearranging" : `No matching Playtomic booking detected · Play by ${dateLabel(fixture.play_by)}`;
+    const meta = status==="possible" ? `${fixture.booking_matched_players ?? 0}/4 players matched · Club review required` :
+      arranged ? `${fixture.booking_type==="OPEN_MATCH" ? "Open Match" : "Playtomic booking"} · ${fixture.booking_matched_players ?? 4}/4 players matched` :
+      status==="cancelled" ? "Arrange another match in Playtomic" : "Arrange your match in Playtomic";
+    return <div className={`${styles.arrangementBox} ${styles["arrangement_"+status]}`}>
+      <span className={styles.arrangementDot} aria-hidden="true" /><div><strong>{title}</strong><span>{detail}</span><small>{meta}</small></div>
+    </div>;
+  }
   function fixtureRow(fixture: Fixture) {
     const result = results.get(fixture.id);
     const resolved = isConfirmed(result);
@@ -368,14 +400,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
           (fixture.week_number ? `Week ${fixture.week_number}` : "League fixture")}</span>
         <span>{dateLabel(fixture.play_by)}</span>
       </div>
-      <div className={styles.match}>
-        <strong>{teamLabel(fixture.home_team_id, teamNames)}</strong>
-        <span className={`${styles.score} ${resolved ? styles.finalScore : ""}`}>{resolved
-          ? <><small>FINAL</small><b>{result?.home_score ?? "–"}</b><em>:</em><b>{result?.away_score ?? "–"}</b></>
-          : "vs"}</span>
-        <strong>{teamLabel(fixture.away_team_id, teamNames)}</strong>
-      </div>
-      <div className={styles.fixtureBottom}>
+      {resolved ? <div className={styles.resultCard}>\n        <div className={styles.resultPair}><span className={styles.pairSide}>HOME</span><strong>{teamLabel(fixture.home_team_id, teamNames)}</strong></div>\n        <div className={styles.setScore}>\n          <div className={styles.setHeaders}>{scoreSets(result?.home_score).map((_, index)=><span key={index}>SET {index + 1}</span>)}</div>\n          <div className={styles.setRow}>{scoreSets(result?.home_score).map((score,index)=>{const away=Number(scoreSets(result?.away_score)[index]);const home=Number(score);return <strong key={index} className={home>away?styles.setWon:""}>{score}</strong>;})}</div>\n          <div className={styles.setRow}>{scoreSets(result?.away_score).map((score,index)=>{const home=Number(scoreSets(result?.home_score)[index]);const away=Number(score);return <strong key={index} className={away>home?styles.setWon:""}>{score}</strong>;})}</div>\n        </div>\n        <div className={`${styles.resultPair} ${styles.resultPairAway}`}><span className={styles.pairSide}>AWAY</span><strong>{teamLabel(fixture.away_team_id, teamNames)}</strong></div>\n      </div> : <div className={styles.match}>\n        <strong>{teamLabel(fixture.home_team_id, teamNames)}</strong><span className={styles.score}>vs</span><strong>{teamLabel(fixture.away_team_id, teamNames)}</strong>\n      </div>}\n      {!resolved && arrangementPanel(fixture)}\n      <div className={styles.fixtureBottom}>
         <span>{fixture.court || "Court to arrange"}</span>
         <span className={resolved ? styles.confirmed : styles.fixtureStatus}>
           {resolved ? "Final" : fixture.status === "disputed" ?
