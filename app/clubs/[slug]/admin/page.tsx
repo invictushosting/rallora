@@ -25,13 +25,17 @@ type Summary = {
   teams: number;
   fixtures: number;
   confirmed: number;
+  outstanding: number;
+  awaitingResult: number;
+  overdue: number;
   registrations: number;
   divisionSummaries: DivisionSummary[];
 };
+type PlaytomicBooking = { matched_fixture_id:string|null; matched_player_count:number; match_state:"unmatched"|"possible"|"confirmed"|"ignored"; booking_status:string; starts_at:string; ends_at:string; court:string|null };
 type View =
   | { status: "loading" | "signed_out" | "forbidden" | "missing" }
   | { status: "error"; message: string }
-  | { status: "ready"; club: Club; role: string; summaries: Summary[]; sponsors: number; fixtures: AdminFixture[]; playtomicConnected: boolean };
+  | { status: "ready"; club: Club; role: string; summaries: Summary[]; sponsors: number; fixtures: AdminFixture[]; playtomicConnected: boolean; playtomicBookings: PlaytomicBooking[] };
 
 export default function ClubAdministration() {
   const params = useParams();
@@ -125,17 +129,20 @@ export default function ClubAdministration() {
           return;
         }
 
-        const [seasonReply, sponsorReply, playtomicReply] = await Promise.all([
+        const [seasonReply, sponsorReply, playtomicReply, bookingReply] = await Promise.all([
           supabase.from("seasons").select("id,club_id,name,status,fixture_schedule_mode,registration_opens_at,registration_closes_at,league_format,teams_per_division,matches_per_cycle,division_assignment_mode,max_divisions,allow_overflow_when_uneven,promotion_places,relegation_places,cycle_match_mode,require_cycle_completion,league_rules")
             .eq("club_id", club.id).order("created_at", { ascending: false }),
           supabase.from("sponsors").select("id", { count: "exact", head: true })
             .eq("club_id", club.id).eq("is_active", true),
           supabase.from("rallora_club_integrations").select("status")
             .eq("club_id", club.id).eq("provider","playtomic").maybeSingle(),
+          supabase.from("rallora_playtomic_bookings").select("matched_fixture_id,matched_player_count,match_state,booking_status,starts_at,ends_at,court")
+            .eq("club_id", club.id),
         ]);
         if (seasonReply.error) throw seasonReply.error;
         if (sponsorReply.error) throw sponsorReply.error;
         if (playtomicReply.error) throw playtomicReply.error;
+        if (bookingReply.error) throw bookingReply.error;
 
         const seasons = ((seasonReply.data ?? []) as Season[])
           .filter((season) => season.club_id === club.id);
@@ -186,6 +193,9 @@ export default function ClubAdministration() {
             fixtures: fixtureIds.length,
             confirmed: (resultsReply.data ?? [])
               .filter((result) => knownFixtureIds.has(result.fixture_id)).length,
+            outstanding: seasonFixtures.filter((fixture) => !["confirmed","cancelled"].includes(fixture.status)).length,
+            awaitingResult: seasonFixtures.filter((fixture) => fixture.status === "played" || fixture.status === "awaiting_result").length,
+            overdue: seasonFixtures.filter((fixture) => !["confirmed","cancelled"].includes(fixture.status) && fixture.play_by && fixture.play_by < new Date().toISOString().slice(0,10)).length,
             registrations: registrationReply.count ?? 0,
             divisionSummaries,
           };
@@ -198,6 +208,7 @@ export default function ClubAdministration() {
           sponsors: sponsorReply.count ?? 0,
           fixtures: allFixtures,
           playtomicConnected: playtomicReply.data?.status === "connected",
+          playtomicBookings: (bookingReply.data ?? []) as PlaytomicBooking[],
         });
       } catch (error) {
         if (alive) setView({
@@ -252,7 +263,14 @@ export default function ClubAdministration() {
     teams: acc.teams + item.teams,
     fixtures: acc.fixtures + item.fixtures,
     confirmed: acc.confirmed + item.confirmed,
-  }), { divisions: 0, teams: 0, fixtures: 0, confirmed: 0 });
+    outstanding: acc.outstanding + item.outstanding,
+    awaitingResult: acc.awaitingResult + item.awaitingResult,
+    overdue: acc.overdue + item.overdue,
+  }), { divisions: 0, teams: 0, fixtures: 0, confirmed: 0, outstanding: 0, awaitingResult: 0, overdue: 0 });
+  const confirmedBookings = view.playtomicBookings.filter((booking)=>booking.match_state==="confirmed" && booking.matched_player_count===4);
+  const bookedFixtureIds = new Set(confirmedBookings.filter((booking)=>booking.booking_status!=="CANCELED").map((booking)=>booking.matched_fixture_id).filter(Boolean));
+  const possibleBookings = view.playtomicBookings.filter((booking)=>booking.match_state==="possible" && booking.matched_player_count===3).length;
+  const finishedWithoutResult = confirmedBookings.filter((booking)=>booking.booking_status==="FINISHED" && booking.matched_fixture_id && !view.fixtures.some((fixture)=>fixture.id===booking.matched_fixture_id && fixture.status==="confirmed")).length;
   const activeSeason = view.summaries.find(({season})=>season.status==="active");
   const registrationReady = Boolean(activeSeason && activeSeason.divisions>0);
   const playtomicDeferred = view.club.playtomic_setup_choice === "later";
@@ -296,17 +314,19 @@ export default function ClubAdministration() {
     </section>
     <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>CLUB OVERVIEW</span><h2>Your club at a glance</h2></div>
       <p>Live totals and season structure for {view.club.name}.</p></div>
-    <section className={styles.metrics} aria-label="Club totals">
-      {([["Seasons", view.summaries.length], ["Divisions", totals.divisions],
-        ["Teams", totals.teams], ["Fixtures", totals.fixtures],
-        ["Confirmed results", totals.confirmed], ["Sponsors", view.sponsors]] as [string, number][])
-        .map(([label, value]) => <article key={label}><span>{label}</span>
-          <strong>{value.toLocaleString("en-GB")}</strong></article>)}
+    <section className={styles.metrics} aria-label="League operations overview">
+      <article><span>Active leagues</span><strong>{view.summaries.filter(({season})=>season.status==="active").length}</strong><small>Currently being played</small></article>
+      <article><span>Total fixtures</span><strong>{totals.fixtures}</strong><small>Across all leagues</small></article>
+      <article><span>Outstanding</span><strong>{Math.max(0, totals.outstanding - bookedFixtureIds.size)}</strong><small>No confirmed booking yet</small></article>
+      <article><span>Booked</span><strong>{bookedFixtureIds.size}</strong><small>Playtomic matched 4/4</small></article>
+      <article><span>Awaiting result</span><strong>{Math.max(totals.awaitingResult, finishedWithoutResult)}</strong><small>Played, captain action needed</small></article>
+      <article><span>Needs attention</span><strong>{totals.overdue + possibleBookings}</strong><small>{possibleBookings ? `${possibleBookings} possible 3/4 booking${possibleBookings===1?"":"s"} to review` : "Overdue fixtures"}</small></article>
+      <article><span>Played</span><strong>{totals.confirmed}</strong><small>Confirmed results</small></article>
     </section>
     <div className={styles.sectionHeading}><h2>Club seasons</h2>
       <p>Each season below belongs to {view.club.name}.</p></div>
     <section className={styles.grid}>
-      {view.summaries.map(({ season, divisions, teams, fixtures, confirmed, divisionSummaries }) =>
+      {view.summaries.map(({ season, divisions, teams, fixtures, confirmed, outstanding, awaitingResult, overdue, divisionSummaries }) =>
         <article className={styles.card} key={season.id}>
           <div className={styles.seasonCardTop}><span className={styles.status}>{season.status}</span>
             <button type="button" className={styles.seasonEdit} onClick={() => window.dispatchEvent(new CustomEvent("rallora:edit-season",{detail:{seasonId:season.id}}))}>Edit league</button>
@@ -316,16 +336,15 @@ export default function ClubAdministration() {
             <span><strong>{divisions}</strong> divisions</span>
             <span><strong>{teams}</strong> teams</span>
             <span><strong>{fixtures}</strong> fixtures</span>
-            <span><strong>{confirmed}</strong> confirmed</span>
+            <span><strong>{outstanding}</strong> outstanding</span>
+            <span><strong>{awaitingResult}</strong> awaiting result</span>
+            <span><strong>{confirmed}</strong> played</span>
           </div>
           <div className={styles.divisionList}>
-            <h4>Divisions &amp; teams</h4>
-            {divisionSummaries.map((division) => <details key={division.id} className={styles.divisionRow}>
-              <summary>{division.name}<span>{division.teams.length} teams</span></summary>
-              {division.teams.length
-                ? <ul>{division.teams.map((name, index) => <li key={`${division.id}-${index}`}>{name.name}</li>)}</ul>
-                : <p>No teams yet.</p>}
-            </details>)}
+            <h4>Divisions</h4>
+            {divisionSummaries.map((division) => <div key={division.id} className={styles.divisionRow}>
+              <div><strong>{division.name}</strong><span>{division.teams.length} teams</span></div>
+            </div>)}
             {!divisionSummaries.length && <p>No divisions yet.</p>}
           </div>
           <a href={`/clubs/${encodeURIComponent(view.club.slug)}`}>View season in club hub →</a>

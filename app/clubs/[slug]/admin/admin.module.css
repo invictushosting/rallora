@@ -145,3 +145,5 @@
 .seasonEdit:hover{background:#fff;border-color:#9fc8e3;box-shadow:0 6px 14px rgba(6,26,57,.08);transform:translateY(-1px)}
 .seasonEdit:focus-visible{outline:3px solid rgba(0,176,254,.22);outline-offset:2px}
 @media(max-width:490px){.seasonCardTop{align-items:flex-start}.seasonEdit{min-height:40px;padding:8px 10px}}
+
+
