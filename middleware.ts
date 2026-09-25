@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const PUBLIC_PATHS = ["/maintenance", "/pilot", "/register-club", "/platform", "/notifications", "/account"];
+const PRODUCT_PATHS = ["/clubs", "/events", "/onboarding"];
 
 function pilotClubPaths() {
   return (process.env.RALLORA_PILOT_CLUB_SLUGS ?? "")
@@ -21,7 +22,7 @@ export function middleware(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
-  const allowedPaths = [...PUBLIC_PATHS, ...pilotClubPaths()];
+  const allowedPaths = [...PUBLIC_PATHS, ...PRODUCT_PATHS, ...pilotClubPaths()];
   const isPublic =
     allowedPaths.some((path) => pathname === path || pathname.startsWith(`${path}/`)) ||
     pathname.startsWith("/_next/") ||

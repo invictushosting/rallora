@@ -140,9 +140,13 @@ export default function PlatformControlCentre() {
   };
   return <main className={styles.page}><div className={styles.shell}>
     <nav className={styles.nav}>
-      <RalloraLogo variant="light" width={218} /><span>Platform Control Centre</span>
-      <Link href="/notifications">Notifications</Link>
-      {view.status==="ready"&&<button className={styles.signOut} disabled={busy==="sign-out"} onClick={()=>void signOut()}>Sign out</button>}
+      <Link className={styles.brand} href="/" aria-label="Rallora home"><RalloraLogo variant="light" width={184}/></Link>
+      <div className={styles.navTitle}><strong>Platform Control Centre</strong><span>Rallora operations</span></div>
+      <div className={styles.navActions}>
+        <Link href="/notifications">Notifications</Link>
+        <Link href="/account">Account</Link>
+        {view.status==="ready"&&<button className={styles.signOut} disabled={busy==="sign-out"} onClick={()=>void signOut()}>Sign out</button>}
+      </div>
       <span className={styles.badge}>PLATFORM ADMIN</span>
     </nav>
     <header className={styles.hero}>
@@ -171,7 +175,7 @@ export default function PlatformControlCentre() {
             <span>{label}</span><strong>{count.toLocaleString("en-GB")}</strong>
           </div>)}
       </section>
-      <h2>Pilot readiness</h2>{readiness&&<section className={styles.metrics} aria-label="Pilot readiness">{Object.entries(readiness).map(([key,value])=><div className={styles.metric} key={key}><span>{key.replaceAll("_"," ")}</span><strong>{Number(value).toLocaleString("en-GB")}</strong></div>)}</section>}<div className={styles.sectionHeading}><div><small>CLUB OPERATIONS</small><h2>Registered clubs</h2></div><p>Manage access, plans and features for every Rallora club.</p></div>
+      <div className={styles.sectionHeading}><div><small>HEALTH CHECK</small><h2>Pilot readiness</h2></div><p>Live operational checks before clubs go into pilot.</p></div>{readiness&&<section className={`${styles.metrics} ${styles.readinessMetrics}`} aria-label="Pilot readiness">{Object.entries(readiness).map(([key,value])=><div className={styles.metric} key={key}><span>{key.replaceAll("_"," ")}</span><strong>{Number(value).toLocaleString("en-GB")}</strong></div>)}</section>}<div className={styles.sectionHeading}><div><small>CLUB OPERATIONS</small><h2>Registered clubs</h2></div><p>Manage access, plans and features for every Rallora club.</p></div>
       <section className={styles.grid} aria-label="Registered clubs">
         {summaries.map(({ club, seasons, teams, fixtures, members, players, subscription, features }) =>
           <article className={styles.card} key={club.id}>
