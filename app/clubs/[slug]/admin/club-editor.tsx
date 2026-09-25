@@ -11,6 +11,7 @@ export type EditableClub = {
   welcome_text: string | null; logo_url:string|null; cover_image_url:string|null; website_url:string|null;
   contact_email:string|null; venue_name:string|null; address_line_1:string|null;
   town:string|null; postcode:string|null; player_registration_terms:string|null;
+  playtomic_setup_choice:"later"|null;
 };
 export type EditableDivision = {
   id: string; name: string; sort_order: number;
