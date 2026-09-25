@@ -109,3 +109,15 @@
 .face::before{left:11px;top:12px}.face::after{right:10px;top:12px}.bridge{left:18px;top:26px}.bridge::before{left:-9px;top:10px}.bridge::after{left:10px;top:10px}
 .handle{left:26px;top:61px;width:13px;height:34px;border:2px solid #fff;background:#071a38;transform:rotate(-8deg)}
 .handle span{position:absolute;inset:4px 2px;border-radius:2px;background:repeating-linear-gradient(0deg,#00b0fe 0 3px,#fff 3px 5px)}
+
+
+/* Loader brand polish: stronger Rallora wordmark and recognisable padel racket */
+.racketWrap{width:128px;height:128px;margin-bottom:18px}
+.racket{width:72px;height:116px;transform-origin:36px 52px}
+.face{left:8px;top:0;width:56px;height:70px;border:4px solid #fff;border-radius:46% 46% 52% 52%/38% 38% 62% 62%;box-shadow:0 12px 30px rgba(0,176,254,.3)}
+.face::before,.face::after,.bridge::before,.bridge::after,.bridge{width:5px;height:5px}
+.face::before{left:14px;top:15px}.face::after{right:13px;top:15px}.bridge{left:25px;top:31px}.bridge::before{left:-12px;top:13px}.bridge::after{left:12px;top:13px}
+.handle{left:29px;top:68px;width:16px;height:44px;border:3px solid #fff;border-radius:4px 4px 8px 8px;background:#071a38;transform:rotate(-5deg)}
+.handle span{inset:5px 2px;border-radius:2px;background:repeating-linear-gradient(0deg,#00b0fe 0 4px,#fff 4px 6px)}
+.kicker{margin:0 0 10px;font-size:17px;line-height:1;font-weight:950;letter-spacing:3.2px;color:#58c8ff;text-shadow:0 0 18px rgba(0,176,254,.2)}
+@media(max-width:540px){.racketWrap{width:112px;height:112px}.kicker{font-size:15px;letter-spacing:2.8px}}
