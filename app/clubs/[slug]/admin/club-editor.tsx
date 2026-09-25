@@ -77,7 +77,19 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
     const requested = searchParams.get("setup");
     if (requested === "branding" || requested === "seasons" || requested === "registration" || requested === "teams" || requested === "fixtures") {
       setActiveTab(requested);
-      requestAnimationFrame(() => document.getElementById("club-management")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+      const intentionalSetupNav = sessionStorage.getItem("rallora:setup-nav") === "1";
+      sessionStorage.removeItem("rallora:setup-nav");
+
+      const url = new URL(window.location.href);
+      url.searchParams.delete("setup");
+      url.hash = "";
+      window.history.replaceState(window.history.state, "", url.pathname + (url.search ? url.search : ""));
+
+      if (intentionalSetupNav) {
+        requestAnimationFrame(() => document.getElementById("club-management")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+      } else {
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      }
     }
   }, [searchParams]);
   const [name, setName] = useState(club.name);
