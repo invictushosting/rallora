@@ -351,3 +351,26 @@
  .matchTeam strong{font-size:11px!important}
  .score{padding:6px!important}
 }
+
+/* Fixture pairing polish: treat each pair as a centred unit, not opposing text edges. */
+.matchTeam,.matchTeam:first-child,.matchTeam:last-child{text-align:center}
+.matchTeam:first-child strong,.matchTeam:last-child strong{text-align:center}
+.matchTeam{align-items:center;justify-items:center}
+.matchTeam strong{max-width:100%;text-wrap:balance}
+.arrangement_not_arranged{background:#fff3f3!important;border-color:#efcdcd!important;box-shadow:inset 3px 0 0 #d85b5b}
+.arrangement_not_arranged .arrangementDot{background:#d85b5b!important;box-shadow:0 0 0 4px rgba(216,91,91,.12)!important}
+.arrangement_not_arranged strong{color:#8f3030!important}
+.arrangement_not_arranged span:not(.arrangementDot){color:#754646}
+.arrangement_not_arranged small{color:#9b6666}
+.arrangement_arranged{box-shadow:inset 3px 0 0 #25a66a}
+.arrangement_possible{box-shadow:inset 3px 0 0 #d89b22}
+.arrangement_result_required,.arrangement_in_progress{box-shadow:inset 3px 0 0 #168bd2}
+@media(max-width:700px){
+ .match{padding:16px 2px!important;grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr)!important}
+ .matchTeam{align-items:center!important;text-align:center!important;min-height:52px!important;gap:4px!important}
+ .matchTeam strong,.matchTeam:first-child strong,.matchTeam:last-child strong{text-align:center!important;font-size:12px!important;line-height:1.3!important}
+}
+@media(max-width:390px){
+ .match{grid-template-columns:minmax(0,1fr) 30px minmax(0,1fr)!important;gap:6px!important}
+ .matchTeam strong{font-size:11px!important}
+}
