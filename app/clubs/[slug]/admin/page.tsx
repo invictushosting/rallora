@@ -233,17 +233,17 @@ export default function ClubAdministration() {
     fixtures: acc.fixtures + item.fixtures,
     confirmed: acc.confirmed + item.confirmed,
   }), { divisions: 0, teams: 0, fixtures: 0, confirmed: 0 });
+  const activeSeason = view.summaries.find(({season})=>season.status==="active");
+  const registrationReady = Boolean(activeSeason && activeSeason.divisions>0);
   const launchSteps = [
     {label:"Brand your club",done:Boolean(view.club.logo_url && view.club.cover_image_url && view.club.welcome_text),hint:"Add your logo, cover image and welcome message.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=branding#club-management`,action:"Start branding"},
     {label:"Create your first season",done:view.summaries.length>0,hint:"Create a draft season before anything goes live.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=seasons#club-management`,action:"Create season"},
     {label:"Add divisions",done:totals.divisions>0,hint:"Set up the divisions your teams will compete in.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=seasons#club-management`,action:"Add divisions"},
-    {label:"Open team registration",done:view.summaries.some(({season,divisions})=>season.status==="active"&&divisions>0),hint:"Activate a season with divisions, then open registration.",href:registrationReady?`/clubs/${encodeURIComponent(view.club.slug)}/register`:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=seasons#club-management`,action:registrationReady?"Open registration":"Prepare registration"},
+    {label:"Open team registration",done:registrationReady,hint:"Activate a season with divisions, then open registration.",href:registrationReady?`/clubs/${encodeURIComponent(view.club.slug)}/register`:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=seasons#club-management`,action:registrationReady?"Open registration":"Prepare registration"},
     {label:"Add or approve teams",done:totals.teams>0,hint:"Add teams manually or review teams that register.",href:registrationReady?`/clubs/${encodeURIComponent(view.club.slug)}/admin/registrations`:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=teams#club-management`,action:registrationReady?"Review teams":"Add teams"},
     {label:"Publish fixtures",done:totals.fixtures>0,hint:"Create and publish fixtures once your team list is ready.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=fixtures#club-management`,action:"Create fixtures"},
   ];
   const launchComplete = launchSteps.every((step)=>step.done);
-  const activeSeason = view.summaries.find(({season})=>season.status==="active");
-  const registrationReady = Boolean(activeSeason && activeSeason.divisions>0);
 
   return <main className={styles.page}><div className={styles.shell}>
     <header className={styles.nav}>
