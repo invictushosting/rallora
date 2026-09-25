@@ -349,7 +349,7 @@ export default function ClubAdministration() {
         {fixtureRows.map((fixture)=><div className={styles.divisionRow} key={fixture.id}><div><strong>{fixture.home_label || "Players"} vs {fixture.away_label || "Players"}</strong><span>Week {fixture.week_number} · Play by {fixture.play_by} · {fixture.status}</span></div>{fixture.status!=="confirmed" && <button type="button" onClick={()=>sendFixtureReminder(fixture)}>{fixtureView==="awaiting"?"Remind captain for result":"Send reminder"}</button>}</div>)}
         {!fixtureRows.length && <p>No fixtures in this view.</p>}
       </div>
-    </section>
+    </section>}
     <div className={styles.sectionHeading}><h2>Club seasons</h2>
       <p>Each season below belongs to {view.club.name}.</p></div>
     <section className={styles.grid}>
