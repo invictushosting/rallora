@@ -101,3 +101,11 @@
 @media (prefers-reduced-motion:reduce){
   .racket{animation:none}
 }
+
+.overlay{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:24px;background:linear-gradient(180deg,#071a38 0%,#041227 100%);animation:loaderFadeIn .12s ease-out}
+@keyframes loaderFadeIn{from{opacity:0}to{opacity:1}}
+.face{border-radius:42% 42% 50% 50%/35% 35% 62% 62%;overflow:visible}
+.face::before,.face::after,.bridge::before,.bridge::after,.bridge{content:"";position:absolute;width:4px;height:4px;border-radius:50%;background:#071a38}
+.face::before{left:11px;top:12px}.face::after{right:10px;top:12px}.bridge{left:18px;top:26px}.bridge::before{left:-9px;top:10px}.bridge::after{left:10px;top:10px}
+.handle{left:26px;top:61px;width:13px;height:34px;border:2px solid #fff;background:#071a38;transform:rotate(-8deg)}
+.handle span{position:absolute;inset:4px 2px;border-radius:2px;background:repeating-linear-gradient(0deg,#00b0fe 0 3px,#fff 3px 5px)}
