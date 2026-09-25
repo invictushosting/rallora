@@ -38,3 +38,13 @@
 .form .danger{background:#8b2635}
 
 .imageField{display:flex;flex-direction:column;gap:8px}.imageField p{margin:0;color:#60758d;font-size:12px;line-height:1.55}.logoPreview,.coverPreview{background:#f4f8fc;border:1px solid #d9e5f0;border-radius:14px;overflow:hidden}.logoPreview{width:112px;height:112px;padding:10px}.logoPreview img{width:100%;height:100%;display:block;object-fit:contain}.coverPreview{width:100%;aspect-ratio:16/9;max-height:260px}.coverPreview img{width:100%;height:100%;display:block;object-fit:cover;object-position:center}
+
+
+.imageField{grid-column:1/-1;padding:16px;border:1px solid #d9e5f0;border-radius:16px;background:#fff}
+.imageFieldHead{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
+.imageFieldHead>div{min-width:0}.imageFieldHead strong{display:block;color:#173354;font-size:13px;margin-bottom:5px}
+.imageFieldHead p{margin:0;max-width:640px}
+.form .uploadButton{grid-column:auto;justify-self:auto;flex:0 0 auto;background:#061a39;color:#fff;padding:11px 14px;white-space:nowrap}
+.hiddenFile{display:none!important}
+.advancedImage{margin-top:4px}.advancedImage summary{cursor:pointer;color:#60758d;font-size:11px;font-weight:800}.advancedImage label{margin-top:10px}
+@media(max-width:700px){.imageFieldHead{flex-direction:column}.form .uploadButton{width:100%}}
