@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
 
 function resetScroll(behavior: ScrollBehavior = "auto") {
@@ -23,12 +23,6 @@ export default function ScrollToTop() {
       window.history.scrollRestoration = previous;
     };
   }, [pathname]);
-
-  useEffect(() => {
-    const handler = () => resetScroll("smooth");
-    window.addEventListener("rallora:action-complete", handler);
-    return () => window.removeEventListener("rallora:action-complete", handler);
-  }, []);
 
   return null;
 }
