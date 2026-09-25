@@ -591,7 +591,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         <label>Playtomic rating<input type="number" min="0" max="7" step="0.01" value={playerTwoRating}
           placeholder="e.g. 3.18"
           onChange={(event) => setPlayerTwoRating(event.target.value)} /></label>
-        <small>Use the email attached to the player's Playtomic account so it can be matched later.</small>
+        <small>Use the email attached to the player’s Playtomic account so it can be matched later.</small>
       </div>
       <button disabled={busy || !divisions.length} type="submit">Add team</button>
     </form>}
