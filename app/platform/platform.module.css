@@ -60,3 +60,13 @@
  .navActions{grid-column:1/-1;grid-row:3;width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
  .navActions a,.navActions button{min-width:0;min-height:42px;font-size:10px;white-space:nowrap}
 }
+
+/* Platform operations hierarchy + manual club onboarding */
+.sectionActions{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap}.sectionActions p{margin:0}.sectionActions button{min-height:42px;border:0;border-radius:10px;background:#061a39;color:#fff;padding:0 14px;font-weight:850;cursor:pointer}
+.addClubForm{display:grid;grid-template-columns:1.3fr 1fr 1fr .8fr;gap:14px;align-items:end;margin:0 0 20px;padding:22px;background:#fff;border:1px solid #dce7f1;border-radius:18px;box-shadow:0 10px 24px rgba(24,59,95,.05)}
+.addClubForm>div{grid-column:1/-1}.addClubForm>div>span{color:#1682bd;font-size:9px;font-weight:900;letter-spacing:1.4px}.addClubForm h3{margin:5px 0 4px;font-size:23px}.addClubForm p{margin:0;color:#6a7d94;font-size:12px}
+.addClubForm label{display:grid;gap:7px;color:#65758b;font-size:11px;font-weight:850;text-transform:uppercase}.addClubForm input,.addClubForm select{min-height:46px;border:1px solid #cbd9e7;border-radius:10px;background:#fff;padding:0 12px;color:#061a39;font:inherit;text-transform:none}.addClubForm>button{min-height:46px;border:0;border-radius:10px;background:#00b0fe;color:#061a39;font-weight:900;cursor:pointer}.addClubForm>button:disabled{opacity:.55}
+.slugInput{display:flex;align-items:center;min-height:46px;border:1px solid #cbd9e7;border-radius:10px;overflow:hidden;background:#f5f8fb}.slugInput>span{padding-left:10px;color:#7b8da0;font-size:11px;font-weight:650;text-transform:none;white-space:nowrap}.slugInput input{border:0;border-radius:0;min-width:0;flex:1}
+.healthAttention{border-color:#f0c9c2;background:#fff9f7}.healthAttention strong{color:#9b321f}.healthOk{opacity:.72}.healthOk strong{color:#2e6b54}
+@media(max-width:900px){.addClubForm{grid-template-columns:1fr 1fr}.addClubForm>button{grid-column:1/-1}}
+@media(max-width:560px){.sectionActions{align-items:stretch;flex-direction:column;width:100%}.sectionActions button{width:100%}.addClubForm{grid-template-columns:1fr;padding:17px}.addClubForm>button{grid-column:auto}.slugInput{display:block;padding-top:8px}.slugInput>span{display:block;padding:0 11px 7px}.slugInput input{width:100%}.healthOk{opacity:.82}}
