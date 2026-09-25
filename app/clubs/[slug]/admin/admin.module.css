@@ -165,3 +165,6 @@
 .fixtureFilters b{display:grid;place-items:center;min-width:25px;height:25px;padding:0 6px;border-radius:8px;background:#e7f2fa;color:#0b3b72;font-size:11px}
 @media(max-width:900px){.operations{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:540px){.operations{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.operations article{padding:14px}.operations strong{font-size:24px}.fixtureFilters{grid-template-columns:1fr}.attentionStrip{align-items:flex-start;flex-direction:column}}
+
+.divisionSummary{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px;font-size:13px;font-weight:800}.divisionSummary span{font-size:11px;color:#63809f;white-space:nowrap;font-weight:750}
+@media(max-width:490px){.divisionSummary{align-items:flex-start;flex-direction:column}.divisionSummary span{white-space:normal}}
