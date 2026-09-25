@@ -1,6 +1,7 @@
 "use client";
 
 import RalloraLogo from "@/app/components/rallora-logo";
+import Loading from "@/app/loading";
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
@@ -66,8 +67,8 @@ export default function ClubAdministration() {
   useEffect(() => {
     let alive = true;
 
-    async function load() {
-      if (alive) setView({ status: "loading" });
+    async function load(options?: { showLoading?: boolean }) {
+      if (alive && options?.showLoading) setView({ status: "loading" });
       try {
         if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
           if (alive) setView({ status: "missing" });
@@ -188,12 +189,12 @@ export default function ClubAdministration() {
       }
     }
 
-    void load();
+    void load({ showLoading: revision === 0 });
     // Only reload after the Supabase callback completes, avoiding auth-client deadlocks.
     let timer: ReturnType<typeof setTimeout> | undefined;
     const { data: listener } = supabase.auth.onAuthStateChange(() => {
       if (timer) clearTimeout(timer);
-      timer = setTimeout(() => { void load(); }, 0);
+      timer = setTimeout(() => { void load({ showLoading: view.status !== "ready" }); }, 0);
     });
     return () => {
       alive = false;
@@ -202,9 +203,10 @@ export default function ClubAdministration() {
     };
   }, [slug, supabase, revision]);
 
+  if (view.status === "loading") return <Loading />;
+
   if (view.status !== "ready") {
-    const title = view.status === "loading" ? "Loading club administration…" :
-      view.status === "signed_out" ? "Sign in required" :
+    const title = view.status === "signed_out" ? "Sign in required" :
       view.status === "forbidden" ? "Access denied" :
       view.status === "missing" ? "Club not found" : "Unable to load this club";
     const explanation = view.status === "signed_out"
