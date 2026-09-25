@@ -255,9 +255,7 @@ export default function ClubAdministration() {
     {label:"Brand your club",done:Boolean(view.club.logo_url && view.club.cover_image_url && view.club.welcome_text),hint:"Add your logo, cover image and welcome message.",tab:"branding" as const,action:"Start branding"},
     {label:"Create your first season",done:view.summaries.length>0,hint:"Create a draft season before anything goes live.",tab:"seasons" as const,action:"Create season"},
     {label:"Add divisions",done:totals.divisions>0,hint:"Set up the divisions your teams will compete in.",tab:"seasons" as const,action:"Add divisions"},
-    {label:"Open team registration",done:registrationReady,hint:"Activate a season with divisions, then open registration.",tab:"registration" as const,action:registrationReady?"Open registration":"Prepare registration"},
-    {label:"Add or approve teams",done:totals.teams>0,hint:"Add teams manually or review teams that register.",tab:"teams" as const,action:registrationReady?"Manage teams":"Add teams"},
-    {label:"Publish fixtures",done:totals.fixtures>0,hint:"Create and publish fixtures once your team list is ready.",tab:"fixtures" as const,action:"Create fixtures"},
+    {label:"Open team registration",done:registrationReady,hint:"Activate your season and open registration so players can enter their own teams.",tab:"registration" as const,action:registrationReady?"Review registration":"Prepare registration"},
   ];
   const launchComplete = launchSteps.every((step)=>step.done) && playtomicSetupDone;
 
@@ -287,8 +285,8 @@ export default function ClubAdministration() {
         <div className={styles.completeState}>
           <span className={styles.completeCheck}>✓</span>
           <div><span>SETUP COMPLETE</span><h2>Your club setup is complete</h2>
-            <p>Branding, season structure, registration, teams and fixtures are all in place. Playtomic is either connected or intentionally left for later.</p></div>
-          <strong>7/7</strong>
+            <p>Your club is ready to launch: branding, season structure and team registration are configured. Playtomic is either connected or intentionally left for later.</p></div>
+          <strong>5/5</strong>
         </div>
         <div className={styles.completeActions}>
           <button type="button" onClick={() => document.getElementById("club-management")?.scrollIntoView({behavior:"smooth",block:"start"})}>Review club setup ↓</button>
@@ -297,7 +295,7 @@ export default function ClubAdministration() {
       </> : <>
         <div className={styles.launchHead}><div><span>GET STARTED</span><h2>Set up your club</h2>
           <p>Follow these steps to get your club ready. Each one takes you straight to the right setup area.</p></div>
-          <strong>{launchSteps.filter(step=>step.done).length + (playtomicSetupDone?1:0)}/7</strong></div>
+          <strong>{launchSteps.filter(step=>step.done).length + (playtomicSetupDone?1:0)}/5</strong></div>
         <ol className={styles.launchList}>{launchSteps.map((step,index)=><li key={step.label} className={step.done?styles.launchDone:""}>
           <button className={styles.launchLink} type="button" onClick={() => {
             window.dispatchEvent(new CustomEvent("rallora:open-club-setup",{detail:{tab:step.tab}}));
@@ -309,7 +307,7 @@ export default function ClubAdministration() {
         </li>)}</ol>
         <div className={styles.playtomicSetup}>
           <div className={styles.playtomicSetupCopy}>
-            <span className={playtomicSetupDone?styles.completeCheck:styles.launchNumber}>{playtomicSetupDone?"✓":"7"}</span>
+            <span className={playtomicSetupDone?styles.completeCheck:styles.launchNumber}>{playtomicSetupDone?"✓":"5"}</span>
             <div><strong>Connect Playtomic</strong>
               <p>{view.playtomicConnected
                 ? "Playtomic is connected. You can manage or re-verify it from Integrations."
