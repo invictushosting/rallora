@@ -2,3 +2,5 @@
 
 
 @media(max-width:540px){.page{padding:12px;place-items:start center}.card{margin-top:12px;padding:24px 18px;border-radius:18px}.card>a{display:inline-flex;align-items:center;min-height:44px}.card h1{font-size:clamp(32px,10vw,38px)}.card input{width:100%;min-height:48px;font-size:16px}.card button{min-height:48px;font-size:14px}}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:inline-flex;align-items:center}.returnLink{display:inline-flex;align-items:center;min-height:40px;padding:0 11px;border:1px solid #d5e2ed;border-radius:999px;text-decoration:none!important;font-size:11px}.card>small{margin-top:28px}
+@media(max-width:540px){.topbar{align-items:flex-start;flex-direction:column;gap:8px}.returnLink{min-height:40px}.card>small{margin-top:22px}}
