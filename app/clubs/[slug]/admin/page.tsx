@@ -24,6 +24,7 @@ type Summary = {
   teams: number;
   fixtures: number;
   confirmed: number;
+  registrations: number;
   divisionSummaries: DivisionSummary[];
 };
 type View =
@@ -139,14 +140,17 @@ export default function ClubAdministration() {
           .filter((season) => season.club_id === club.id);
         const allFixtures: AdminFixture[] = [];
         const summaries = await Promise.all(seasons.map(async (season) => {
-          const [divisionReply, fixtureReply] = await Promise.all([
+          const [divisionReply, fixtureReply, registrationReply] = await Promise.all([
             supabase.from("divisions").select("id,name,sort_order")
               .eq("season_id", season.id).order("sort_order", { ascending: true }),
             supabase.from("fixtures").select("id,season_id,division_id,home_team_id,away_team_id,week_number,play_by,status")
               .eq("season_id", season.id),
+            supabase.from("rallora_team_applications").select("id",{count:"exact",head:true})
+              .eq("season_id", season.id).in("status",["pending","approved"]),
           ]);
           if (divisionReply.error) throw divisionReply.error;
           if (fixtureReply.error) throw fixtureReply.error;
+          if (registrationReply.error) throw registrationReply.error;
 
           const divisionIds = (divisionReply.data ?? []).map((item) => item.id as string);
           const seasonFixtures = (fixtureReply.data ?? []) as AdminFixture[];
@@ -181,6 +185,7 @@ export default function ClubAdministration() {
             fixtures: fixtureIds.length,
             confirmed: (resultsReply.data ?? [])
               .filter((result) => knownFixtureIds.has(result.fixture_id)).length,
+            registrations: registrationReply.count ?? 0,
             divisionSummaries,
           };
         }));
@@ -294,7 +299,9 @@ export default function ClubAdministration() {
     <section className={styles.grid}>
       {view.summaries.map(({ season, divisions, teams, fixtures, confirmed, divisionSummaries }) =>
         <article className={styles.card} key={season.id}>
-          <span className={styles.status}>{season.status}</span>
+          <div className={styles.seasonCardTop}><span className={styles.status}>{season.status}</span>
+            <button type="button" className={styles.seasonEdit} onClick={() => window.dispatchEvent(new CustomEvent("rallora:edit-season",{detail:{seasonId:season.id}}))}>Edit league</button>
+          </div>
           <h3>{season.name}</h3>
           <div className={styles.numbers}>
             <span><strong>{divisions}</strong> divisions</span>
@@ -383,6 +390,7 @@ export default function ClubAdministration() {
         division_assignment_mode: summary.season.division_assignment_mode,
         max_divisions: summary.season.max_divisions,
         allow_overflow_when_uneven: summary.season.allow_overflow_when_uneven,
+        registrations: summary.registrations,
         divisions: summary.divisionSummaries,
       }))}
       onSaved={() => setRevision((value) => value + 1)}
