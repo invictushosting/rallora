@@ -194,7 +194,7 @@ export default function ClubAdministration() {
     let timer: ReturnType<typeof setTimeout> | undefined;
     const { data: listener } = supabase.auth.onAuthStateChange(() => {
       if (timer) clearTimeout(timer);
-      timer = setTimeout(() => { void load({ showLoading: view.status !== "ready" }); }, 0);
+      timer = setTimeout(() => { void load({ showLoading: false }); }, 0);
     });
     return () => {
       alive = false;
