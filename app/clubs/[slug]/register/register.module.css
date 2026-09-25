@@ -18,3 +18,7 @@
  .player{padding:14px}
  .step{gap:10px}
 }
+
+.returningPlayer{margin:18px 0;padding:14px 16px;border:1px solid #c8e6d8;border-radius:14px;background:#f1faf6}
+.returningPlayer strong{display:block;color:#075f43;font-size:13px}
+.returningPlayer p{margin:5px 0 0;color:#4f6f65;font-size:12px;line-height:1.5}
