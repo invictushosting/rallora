@@ -87,6 +87,33 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [error, setError] = useState("");
 
   useEffect(() => {
+    function editSeason(event: Event) {
+      const detail = (event as CustomEvent<{seasonId?: string}>).detail;
+      const season = seasons.find((item) => item.id === detail?.seasonId);
+      if (!season) return;
+      setEditingSeasonId(season.id);
+      setNewSeason(season.name);
+      setNewFixtureScheduleMode(season.fixture_schedule_mode);
+      setRegistrationOpens(season.registration_opens_at ? season.registration_opens_at.slice(0,16) : "");
+      setRegistrationCloses(season.registration_closes_at ? season.registration_closes_at.slice(0,16) : "");
+      setLeagueFormat(season.league_format);
+      setTeamsPerDivision(String(season.teams_per_division ?? 4));
+      setMatchesPerCycle(String(season.matches_per_cycle ?? 3));
+      setAssignmentMode(season.division_assignment_mode);
+      setMaxDivisions(String(season.max_divisions ?? 6));
+      setAllowOverflowWhenUneven(season.allow_overflow_when_uneven);
+      setActiveTab("seasons");
+      setMessage("");
+      setError("");
+      requestAnimationFrame(() => {
+        document.getElementById("club-management")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+    window.addEventListener("rallora:edit-season", editSeason as EventListener);
+    return () => window.removeEventListener("rallora:edit-season", editSeason as EventListener);
+  }, [seasons]);
+
+  useEffect(() => {
     function openSetup(event: Event) {
       const detail = (event as CustomEvent<{tab?: "branding" | "seasons" | "registration" | "teams" | "fixtures"}>).detail;
       const requested = detail?.tab;
@@ -135,6 +162,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [postcode,setPostcode]=useState(club.postcode??"");
   const [registrationTerms,setRegistrationTerms]=useState(club.player_registration_terms??"");
   const [newSeason, setNewSeason] = useState("");
+  const [editingSeasonId, setEditingSeasonId] = useState<string | null>(null);
   const [newFixtureScheduleMode, setNewFixtureScheduleMode] = useState<"weekly" | "date_window">("weekly");
   const [registrationOpens, setRegistrationOpens] = useState("");
   const [registrationCloses, setRegistrationCloses] = useState("");
@@ -181,6 +209,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const selectedDivision = divisions.find((division) => division.id === fixtureDivisionId);
   const selectedFixtureSeason = selectedDivision ? seasons.find((season)=>season.id===selectedDivision.season_id) : undefined;
   const fixtureScheduleMode = selectedFixtureSeason?.fixture_schedule_mode ?? "weekly";
+  const editingSeason = editingSeasonId ? seasons.find((item)=>item.id===editingSeasonId) : null;
+  const formatLocked = Boolean(editingSeason && editingSeason.registrations > 0);
   const recoveryOptions = fixtures.filter((fixture)=>!fixtureDivisionId || fixture.division_id===fixtureDivisionId);
   const eligibleTeams = selectedDivision?.teams ?? [];
   const selectedManagedFixture = fixtures.find((fixture)=>fixture.id===manageFixture);
@@ -304,8 +334,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
     await submit(async () => {
       const title = newSeason.trim();
       if (!title || title.length > 100) throw new Error("Season name must be 1–100 characters.");
-      const { error: mutationError } = await supabase.from("seasons").insert({
-        club_id: club.id, name: title, status: "draft",
+      const payload = {
+        name: title,
         fixture_schedule_mode: newFixtureScheduleMode,
         registration_opens_at: registrationOpens || null,
         registration_closes_at: registrationCloses || null,
@@ -315,10 +345,24 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         division_assignment_mode: assignmentMode,
         max_divisions: maxDivisions ? Number(maxDivisions) : null,
         allow_overflow_when_uneven: allowOverflowWhenUneven,
-      });
-      if (mutationError) throw mutationError;
+      };
+      if (editingSeasonId) {
+        const existing = seasons.find((item)=>item.id===editingSeasonId);
+        if (!existing) throw new Error("League could not be found.");
+        if (existing.registrations > 0 && existing.league_format !== leagueFormat)
+          throw new Error("League format cannot be changed after players have registered.");
+        const { error: mutationError } = await supabase.from("seasons")
+          .update(payload).eq("id", editingSeasonId).eq("club_id", club.id);
+        if (mutationError) throw mutationError;
+      } else {
+        const { error: mutationError } = await supabase.from("seasons").insert({
+          club_id: club.id, status: "draft", ...payload,
+        });
+        if (mutationError) throw mutationError;
+      }
       setNewSeason("");
-    }, "Draft season created. It will not be public until activated.");
+      setEditingSeasonId(null);
+    }, editingSeasonId ? "League updated." : "Draft season created. It will not be public until activated.");
   }
 
   async function createDivision(event: React.FormEvent) {
@@ -506,10 +550,11 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
           : "Each fixture has an available-from date and a complete-by date."}</p>
         <label>Registration opens<input type="datetime-local" value={registrationOpens} onChange={e=>setRegistrationOpens(e.target.value)} /></label>
         <label>Registration closes<input type="datetime-local" value={registrationCloses} onChange={e=>setRegistrationCloses(e.target.value)} /></label>
-        <label>League format<select value={leagueFormat} onChange={e=>setLeagueFormat(e.target.value as "standard"|"promotion_relegation_cycles")}>
+        <label>League format<select value={leagueFormat} disabled={formatLocked} onChange={e=>setLeagueFormat(e.target.value as "standard"|"promotion_relegation_cycles")}>
           <option value="standard">Standard divisions</option>
           <option value="promotion_relegation_cycles">Short cycles with promotion &amp; relegation</option>
         </select></label>
+        {formatLocked && <p className={styles.lockWarning}>⚠ League format is locked because {editingSeason?.registrations} player/team registration{editingSeason?.registrations===1?" has":"s have"} already been received. You can still update non-structural details.</p>}
         <div className={styles.formatRequestPrompt}>
           <strong>Can’t see the format you need?</strong>
           <p>Tell Rallora how your club runs it and we’ll review whether it can be added specifically to your account.</p>
@@ -534,7 +579,12 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
           <label>Matches per cycle<input type="number" min="1" max="100" value={matchesPerCycle} onChange={e=>setMatchesPerCycle(e.target.value)} /></label>
           <p className={styles.wide}>After each cycle, the top team is promoted and the bottom team is relegated. Teams arrange their own matches within the scheduled period.</p>
         </>}
-        <button disabled={busy} type="submit">Create draft season</button>
+        <div className={styles.seasonFormActions}>
+          <button disabled={busy} type="submit">{editingSeasonId ? "Save league changes" : "Create draft season"}</button>
+          {editingSeasonId && <button type="button" className={styles.secondaryButton} onClick={()=>{
+            setEditingSeasonId(null); setNewSeason(""); setMessage(""); setError("");
+          }}>Cancel edit</button>}
+        </div>
       </form>
       <form className={styles.form} onSubmit={createDivision}>
         <h3>Add a division</h3>
