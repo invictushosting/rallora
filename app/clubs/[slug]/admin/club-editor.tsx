@@ -102,38 +102,6 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [error, setError] = useState("");
 
   useEffect(() => {
-    function editSeason(event: Event) {
-      const detail = (event as CustomEvent<{seasonId?: string}>).detail;
-      const season = seasons.find((item) => item.id === detail?.seasonId);
-      if (!season) return;
-      setEditingSeasonId(season.id);
-      setNewSeason(season.name);
-      setNewFixtureScheduleMode(season.fixture_schedule_mode);
-      setRegistrationOpens(season.registration_opens_at ? season.registration_opens_at.slice(0,16) : "");
-      setRegistrationCloses(season.registration_closes_at ? season.registration_closes_at.slice(0,16) : "");
-      setLeagueFormat(season.league_format);
-      setTeamsPerDivision(String(season.teams_per_division ?? 4));
-      setMatchesPerCycle(String(season.matches_per_cycle ?? 3));
-      setAssignmentMode(season.division_assignment_mode);
-      setMaxDivisions(String(season.max_divisions ?? 6));
-      setAllowOverflowWhenUneven(season.allow_overflow_when_uneven);
-      setPromotionPlaces(String(season.promotion_places ?? 2));
-      setRelegationPlaces(String(season.relegation_places ?? 2));
-      setCycleMatchMode(season.cycle_match_mode ?? "single_round_robin");
-      setRequireCycleCompletion(season.require_cycle_completion ?? true);
-      setLeagueRules(season.league_rules?.length ? season.league_rules : COMMON_RULES);
-      setActiveTab("seasons");
-      setMessage("");
-      setError("");
-      requestAnimationFrame(() => {
-        document.getElementById("club-management")?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    }
-    window.addEventListener("rallora:edit-season", editSeason as EventListener);
-    return () => window.removeEventListener("rallora:edit-season", editSeason as EventListener);
-  }, [seasons]);
-
-  useEffect(() => {
     function openSetup(event: Event) {
       const detail = (event as CustomEvent<{tab?: "branding" | "seasons" | "registration" | "teams" | "fixtures"}>).detail;
       const requested = detail?.tab;
@@ -198,6 +166,39 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [requireCycleCompletion, setRequireCycleCompletion] = useState(true);
   const [leagueRules, setLeagueRules] = useState<LeagueRule[]>(COMMON_RULES);
   const [customRule, setCustomRule] = useState("");
+
+  useEffect(() => {
+    function editSeason(event: Event) {
+      const detail = (event as CustomEvent<{seasonId?: string}>).detail;
+      const season = seasons.find((item) => item.id === detail?.seasonId);
+      if (!season) return;
+      setEditingSeasonId(season.id);
+      setNewSeason(season.name);
+      setNewFixtureScheduleMode(season.fixture_schedule_mode);
+      setRegistrationOpens(season.registration_opens_at ? season.registration_opens_at.slice(0,16) : "");
+      setRegistrationCloses(season.registration_closes_at ? season.registration_closes_at.slice(0,16) : "");
+      setLeagueFormat(season.league_format);
+      setTeamsPerDivision(String(season.teams_per_division ?? 4));
+      setMatchesPerCycle(String(season.matches_per_cycle ?? 3));
+      setAssignmentMode(season.division_assignment_mode);
+      setMaxDivisions(String(season.max_divisions ?? 6));
+      setAllowOverflowWhenUneven(season.allow_overflow_when_uneven);
+      setPromotionPlaces(String(season.promotion_places ?? 2));
+      setRelegationPlaces(String(season.relegation_places ?? 2));
+      setCycleMatchMode(season.cycle_match_mode ?? "single_round_robin");
+      setRequireCycleCompletion(season.require_cycle_completion ?? true);
+      setLeagueRules(season.league_rules?.length ? season.league_rules : COMMON_RULES);
+      setActiveTab("seasons");
+      setMessage("");
+      setError("");
+      requestAnimationFrame(() => {
+        document.getElementById("club-management")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+    window.addEventListener("rallora:edit-season", editSeason as EventListener);
+    return () => window.removeEventListener("rallora:edit-season", editSeason as EventListener);
+  }, [seasons]);
+
   const [newDivision, setNewDivision] = useState("");
   const [divisionSeasonId, setDivisionSeasonId] = useState(seasons[0]?.id ?? "");
   const [teamDivisionId, setTeamDivisionId] = useState(seasons[0]?.divisions[0]?.id ?? "");
