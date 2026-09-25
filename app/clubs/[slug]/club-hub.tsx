@@ -68,7 +68,7 @@ type Tab = "overview" | "tables" | "fixtures" | "results" | "teams" | "cup";
 const TABS: { id: Tab; label: string }[] = [
   { id: "overview", label: "Overview" }, { id: "tables", label: "Tables" },
   { id: "fixtures", label: "Fixtures" }, { id: "results", label: "Results" },
-  { id: "teams", label: "Teams" }, { id: "cup", label: "League cup" },
+  { id: "teams", label: "Players" }, { id: "cup", label: "League cup" },
 ];
 const EMPTY: LeagueData = {
   divisions: [], teams: [], fixtures: [], results: [], standings: [],
@@ -102,7 +102,10 @@ function isConfirmed(result: Result | undefined) {
   return Boolean(result && ["confirmed", "admin_override"].includes(result.status));
 }
 function teamLabel(id: string, names: Map<string, string>) {
-  return names.get(id) ?? "Team unavailable";
+  return names.get(id) ?? "Players unavailable";
+}
+function playerPair(team: Team) {
+  return [team.player_one_name, team.player_two_name].filter(Boolean).join(" / ") || "Players to be confirmed";
 }
 
 export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string } = {}) {
@@ -322,7 +325,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
   const currentSeason = seasons.find((season) => season.id === seasonId);
   const clubLogo = safeImage(club.logo_url);
   const clubCover = safeImage(club.cover_image_url);
-  const teamNames = new Map(data.teams.map((team) => [team.id, team.name]));
+  const teamNames = new Map(data.teams.map((team) => [team.id, playerPair(team)]));
   const results = new Map(data.results.map((result) => [result.fixture_id, result]));
   const standings = (id: string) => data.standings
     .filter((row) => row.division_id === id)
@@ -445,7 +448,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
   function tableFor(division: Division) {
     const rows = standings(division.id);
     return <div className={styles.tableWrap}><table>
-      <thead><tr><th scope="col">#</th><th scope="col">Team</th>
+      <thead><tr><th scope="col">#</th><th scope="col">Players</th>
         <th scope="col">P</th><th scope="col">W</th>
         <th scope="col">D</th><th scope="col">L</th>
         <th scope="col">Diff</th><th scope="col">Pts</th></tr></thead>
@@ -544,7 +547,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
                   <h3>{division.name}</h3>
                 </div>
                 <div className={styles.panels}>
-                  <div className={styles.card}><h4>League table</h4>{tableFor(division)}</div>
+                  <div><div className={styles.card}><h4>League table</h4>{tableFor(division)}</div>{content.sponsors[0] && (() => { const sponsor = content.sponsors[0]; const url = safeLink(sponsor.website_url); const logo = safeLink(sponsor.logo_url); return <div className={styles.card}><span className={styles.kicker}>LEAGUE SPONSOR</span>{logo && <span className={revision.sponsorLogo}><img src={logo} alt={`${sponsor.name} logo`} /></span>}<h4>{sponsor.name}</h4><p>Proudly supporting {division.name}.</p>{url && <a href={url} target="_blank" rel="noopener noreferrer">Visit sponsor ↗</a>}</div>; })()}</div>
                   <div className={styles.card}><h4>Latest &amp; upcoming matches</h4>
                     {divisionFixtures.length
                       ? <ul className={styles.fixtures}>{divisionFixtures.map(fixtureRow)}</ul>
@@ -576,7 +579,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
               </label>
               {(tab === "fixtures" || tab === "results" || tab === "teams") &&
                 <label>Search
-                  <input type="search" value={search} placeholder="Find a team or match…"
+                  <input type="search" value={search} placeholder="Find players or a match…"
                     onChange={(event) => { setSearch(event.target.value); setShowAll(false); }} />
                 </label>}
             </div>
@@ -621,13 +624,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
                   .some((value) => value?.toLowerCase().includes(search.toLowerCase()))))
                 .map((team) => <article key={team.id} className={styles.teamCard}>
                   <span className={styles.teamIcon}>◉</span>
-                  <div><h3>{team.name}</h3>
-                    <span>{data.divisions.find((division) =>
-                      division.id === team.division_id)?.name}</span>
-                    {(team.player_one_name || team.player_two_name) && <p>
-                      {[team.player_one_name, team.player_two_name]
-                        .filter(Boolean).join(" · ")}</p>}
-                  </div>
+                  <div><h3>{playerPair(team)}</h3>\n                    <span>{data.divisions.find((division) =>\n                      division.id === team.division_id)?.name}</span>\n                  </div>
                 </article>)}
             </div>}
             {tab === "cup" && <>
