@@ -13,7 +13,7 @@ import PrizePlanner from "./prize-planner";
 import PaymentSetup from "./payment-setup";
 
 type Club = EditableClub;
-type Season = { id: string; club_id: string; name: string; status: string; fixture_schedule_mode: "weekly" | "date_window" };
+type Season = { id: string; club_id: string; name: string; status: string; fixture_schedule_mode: "weekly" | "date_window"; registration_opens_at:string|null; registration_closes_at:string|null; league_format:"standard"|"promotion_relegation_cycles"; teams_per_division:number|null; matches_per_cycle:number|null; division_assignment_mode:"manual"|"combined_rating" };
 type Membership = { club_id: string; user_id: string; role: string; status: string };
 type DivisionSummary = { id: string; name: string; sort_order: number;
   teams: { id: string; name: string }[] };
@@ -124,7 +124,7 @@ export default function ClubAdministration() {
         }
 
         const [seasonReply, sponsorReply, playtomicReply] = await Promise.all([
-          supabase.from("seasons").select("id,club_id,name,status,fixture_schedule_mode")
+          supabase.from("seasons").select("id,club_id,name,status,fixture_schedule_mode,registration_opens_at,registration_closes_at,league_format,teams_per_division,matches_per_cycle,division_assignment_mode")
             .eq("club_id", club.id).order("created_at", { ascending: false }),
           supabase.from("sponsors").select("id", { count: "exact", head: true })
             .eq("club_id", club.id).eq("is_active", true),
@@ -337,6 +337,12 @@ export default function ClubAdministration() {
         id: summary.season.id, name: summary.season.name,
         club_id: summary.season.club_id, status: summary.season.status,
         fixture_schedule_mode: summary.season.fixture_schedule_mode,
+        registration_opens_at: summary.season.registration_opens_at,
+        registration_closes_at: summary.season.registration_closes_at,
+        league_format: summary.season.league_format,
+        teams_per_division: summary.season.teams_per_division,
+        matches_per_cycle: summary.season.matches_per_cycle,
+        division_assignment_mode: summary.season.division_assignment_mode,
         divisions: summary.divisionSummaries,
       }))}
       onSaved={() => setRevision((value) => value + 1)}
