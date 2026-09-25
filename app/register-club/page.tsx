@@ -35,24 +35,25 @@ export default function RegisterClub(){
       const mobile=String(form.get("mobile")).trim();
       const clubName=String(form.get("name")).trim();
       const slug=String(form.get("slug")).trim().toLowerCase();
-      const existingUser=(await supabase.auth.getUser()).data.user;
-      if(existingUser){
-        const {error:insertError}=await supabase.from("rallora_club_applications").insert({
-          applicant_user_id:existingUser.id,applicant_name:managerName,club_name:clubName,
-          requested_slug:slug,contact_email:existingUser.email,contact_phone:mobile,plan_code:plan,
+      let user=(await supabase.auth.getUser()).data.user;
+      if(!user){
+        const signup=await supabase.auth.signUp({
+          email:email.trim(),password,
+          options:{data:{name:managerName,phone:mobile,source:"club_application"}},
         });
-        if(insertError)throw insertError;
-      }else{
-        const response=await fetch("/api/club-applications",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
-          email:email.trim(),password,manager_name:managerName,mobile,club_name:clubName,slug,plan,
-        })});
-        const body=await response.json().catch(()=>({})) as {error?:string};
-        if(!response.ok)throw new Error(body.error||"Could not submit your application.");
-        const signedIn=await supabase.auth.signInWithPassword({email:email.trim(),password});
-        if(!signedIn.error&&signedIn.data.user)setUserId(signedIn.data.user.id);
-        setPassword("");
+        if(signup.error)throw signup.error;
+        if(!signup.data.user||!signup.data.session){
+          throw new Error("Rallora account creation is awaiting email verification. Please contact the Rallora team so we can complete your application.");
+        }
+        user=signup.data.user;
+        setUserId(user.id);
       }
-      setSubmitted(true);
+      const {error:insertError}=await supabase.from("rallora_club_applications").insert({
+        applicant_user_id:user.id,applicant_name:managerName,club_name:clubName,
+        requested_slug:slug,contact_email:user.email,contact_phone:mobile,plan_code:plan,
+      });
+      if(insertError)throw insertError;
+      setPassword("");setSubmitted(true);
     }catch(reason){setError(reason instanceof Error?reason.message:"Could not submit your application.")}finally{setBusy(false)}
   }
   return <main className={styles.page}><div className={styles.shell}>
