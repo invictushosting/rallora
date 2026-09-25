@@ -131,20 +131,22 @@ export default function PlatformControlCentre() {
   async function createClub(event:React.FormEvent<HTMLFormElement>){
     event.preventDefault();setBusy("create-club");setNotice("");
     const form=new FormData(event.currentTarget);
-    const {error}=await supabase.rpc("rallora_platform_create_club_with_details",{
-      p_name:String(form.get("name")).trim(),
-      p_slug:String(form.get("slug")).trim().toLowerCase(),
-      p_owner_email:String(form.get("ownerEmail")).trim().toLowerCase(),
-      p_plan_code:String(form.get("plan")),
-      p_contact_name:String(form.get("contactName")).trim(),
-      p_contact_phone:String(form.get("contactPhone")).trim(),
-      p_address_line_1:String(form.get("address1")).trim(),
-      p_town:String(form.get("town")).trim(),
-      p_postcode:String(form.get("postcode")).trim(),
-      p_country:String(form.get("country")).trim(),
-    });
-    if(error){setNotice(error.message);setBusy("");return}
-    setNotice("Club created and owner access activated.");
+    const response=await fetch("/api/platform/clubs",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+      name:String(form.get("name")).trim(),
+      slug:String(form.get("slug")).trim().toLowerCase(),
+      ownerEmail:String(form.get("ownerEmail")).trim().toLowerCase(),
+      ownerPassword:String(form.get("ownerPassword")||""),
+      plan:String(form.get("plan")),
+      contactName:String(form.get("contactName")).trim(),
+      contactPhone:String(form.get("contactPhone")).trim(),
+      address1:String(form.get("address1")).trim(),
+      town:String(form.get("town")).trim(),
+      postcode:String(form.get("postcode")).trim(),
+      country:String(form.get("country")).trim(),
+    })});
+    const body=await response.json().catch(()=>({})) as {error?:string;ownerCreated?:boolean};
+    if(!response.ok){setNotice(body.error||"Could not create the club.");setBusy("");return}
+    setNotice(body.ownerCreated?"Club and owner account created. Share the temporary login details with the owner.":"Club created and linked to the existing owner account.");
     setBusy("");setShowAddClub(false);await load();
   }
   async function signIn(event:React.FormEvent<HTMLFormElement>){event.preventDefault();setBusy("sign-in");setNotice("");const {error}=await supabase.auth.signInWithPassword({email:email.trim(),password});if(error){setNotice(error.message);setBusy("");return}setPassword("");setBusy("");await load()}
@@ -197,10 +199,10 @@ export default function PlatformControlCentre() {
       </section>
       <div className={styles.sectionHeading}><div><small>CLUB OPERATIONS</small><h2>Clubs</h2></div><div className={styles.sectionActions}><p>Manage access, plans and features across Rallora.</p><button type="button" onClick={()=>setShowAddClub(value=>!value)}>{showAddClub?"Cancel":"＋ Add club"}</button></div></div>
       {showAddClub&&<form className={styles.addClubForm} onSubmit={createClub}>
-        <div><span>MANUAL ONBOARDING</span><h3>Add a club</h3><p>Use this when Rallora is onboarding a club directly. The owner must already have a Rallora account.</p></div>
+        <div><span>MANUAL ONBOARDING</span><h3>Add a club</h3><p>Use this when Rallora is onboarding a club directly. If the owner does not have a Rallora account yet, one will be created at the same time.</p></div>
         <label>Club name<input name="name" required minLength={2} maxLength={120} placeholder="Example Padel Club"/></label>
         <label>Club web address<div className={styles.slugInput}><span>rallora.app/clubs/</span><input name="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="example-padel"/></div></label>
-        <label>Owner email<input name="ownerEmail" type="email" required placeholder="owner@example.com"/></label>
+        <label>Owner email<input name="ownerEmail" type="email" required placeholder="owner@example.com"/></label><label>Temporary password<span className={styles.fieldHint}>Only used if this owner does not already have a Rallora account.</span><input name="ownerPassword" type="password" minLength={8} autoComplete="new-password" placeholder="Minimum 8 characters"/></label>
         <label>Primary contact name<input name="contactName" required minLength={2} placeholder="Club owner / manager"/></label>
         <label>Mobile number<input name="contactPhone" type="tel" autoComplete="tel" required minLength={7} placeholder="+44 7..."/></label>
         <label>Address line 1<input name="address1" required minLength={3} placeholder="Venue address"/></label>
