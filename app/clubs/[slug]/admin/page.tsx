@@ -282,8 +282,8 @@ export default function ClubAdministration() {
   const launchSteps = [
     {label:"Brand your club",done:Boolean(view.club.logo_url && view.club.cover_image_url && view.club.welcome_text),hint:"Add your logo, cover image and welcome message.",tab:"branding" as const,action:"Start branding"},
     {label:"Create your first season",done:view.summaries.length>0,hint:"Create a draft season before anything goes live.",tab:"seasons" as const,action:"Create season"},
-    {label:"Add divisions",done:totals.divisions>0,hint:"Set up the divisions your teams will compete in.",tab:"seasons" as const,action:"Add divisions"},
-    {label:"Open team registration",done:registrationReady,hint:"Activate your season and open registration so players can enter their own teams.",tab:"registration" as const,action:registrationReady?"Review registration":"Prepare registration"},
+    {label:"Add divisions",done:totals.divisions>0,hint:"Set up the divisions your player pairings will compete in.",tab:"seasons" as const,action:"Add divisions"},
+    {label:"Open player registration",done:registrationReady,hint:"Activate your season and open registration so players can enter their pairing.",tab:"registration" as const,action:registrationReady?"Review registration":"Prepare registration"},
   ];
   const launchComplete = launchSteps.every((step)=>step.done) && playtomicSetupDone;
   const openFixtureView = (value: typeof fixtureView) => { setFixtureView(value); setReminderNotice(""); window.setTimeout(()=>document.getElementById("fixture-operations")?.scrollIntoView({behavior:"smooth",block:"start"}),0); };
@@ -318,14 +318,14 @@ export default function ClubAdministration() {
     <section className={styles.hero}>
       <div className={styles.heroTop}><span className={styles.eyebrow}>YOUR CLUB CONTROL CENTRE</span><span className={styles.rolePill}>{view.role}</span></div>
       <h1>{view.club.name}</h1>
-      <p>Everything you need to prepare, run and review your club competitions.</p>
+      <p>Everything you need to prepare, run and review your club competitions.</p>{demoMode && <div className={styles.demoShowcase}><strong>LIVE PRODUCT DEMO</strong><span>Explore a fully populated club: Playtomic booking detection, player ratings, league operations, results, sponsors and automated workflows.</span></div>}
       <div className={styles.heroActions}>
         <Link className={styles.primaryAction} href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/registrations`}>Review registrations</Link>
         <a href={`/clubs/${encodeURIComponent(view.club.slug)}`}>View public hub</a>
       </div>
       <div className={styles.adminShortcuts}>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/staff`}>Club staff</Link>
-        <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/integrations`}>Integrations</Link>
+        <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/integrations`}>Integrations {view.playtomicConnected ? "✓" : ""}</Link>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/captain`}>Captain centre</Link>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/events`}>Events</Link>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/social`}>Social Studio</Link>
@@ -361,7 +361,7 @@ export default function ClubAdministration() {
           <h3>{season.name}</h3>
           <div className={styles.numbers}>
             <span><strong>{divisions}</strong> divisions</span>
-            <span><strong>{teams}</strong> teams</span>
+            <span><strong>{teams}</strong> player pairs</span>
             <span><strong>{fixtures}</strong> fixtures</span>
             <span><strong>{outstanding}</strong> outstanding</span>
             <span><strong>{awaitingResult}</strong> awaiting result</span>
@@ -370,7 +370,7 @@ export default function ClubAdministration() {
           <div className={styles.divisionList}>
             <h4>Divisions</h4>
             {divisionSummaries.map((division) => <div key={division.id} className={styles.divisionRow}>
-              <div><strong>{division.name}</strong><span>{division.teams.length} teams</span></div>
+              <div><strong>{division.name}</strong><span>{division.teams.length} player pairs</span></div>
             </div>)}
             {!divisionSummaries.length && <p>No divisions yet.</p>}
           </div>
