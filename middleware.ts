@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/maintenance", "/pilot", "/register-club"];
+const PUBLIC_PATHS = ["/maintenance", "/pilot", "/register-club", "/platform", "/notifications", "/account"];
 
 function pilotClubPaths() {
   return (process.env.RALLORA_PILOT_CLUB_SLUGS ?? "")

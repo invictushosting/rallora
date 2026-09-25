@@ -16,7 +16,7 @@ type Subscription = { plan_code:string; status:string };
 type Entitlement = { feature_key:string; is_enabled:boolean };
 type ClubSummary = { club: Club; seasons: Season[]; teams: number; fixtures: number;
   members:number; players:number; subscription:Subscription|null; features:Entitlement[] };
-type Application = { id:string; applicant_name:string|null; club_name:string; requested_slug:string; contact_email:string; plan_code:string; status:string; created_at:string };
+type Application = { id:string; applicant_name:string|null; club_name:string; requested_slug:string; contact_email:string; contact_phone:string|null; plan_code:string; status:string; created_at:string };
 type Readiness = Record<string,number>;
 type View =
   | { status: "loading" | "signed_out" | "forbidden" }
@@ -91,7 +91,7 @@ export default function PlatformControlCentre() {
           }),
         );
         const applicationsReply = await supabase.from("rallora_club_applications")
-          .select("id,applicant_name,club_name,requested_slug,contact_email,plan_code,status,created_at").order("created_at",{ascending:false});
+          .select("id,applicant_name,club_name,requested_slug,contact_email,contact_phone,plan_code,status,created_at").order("created_at",{ascending:false});
         if (applicationsReply.error) throw applicationsReply.error;
         const readinessReply=await supabase.rpc("rallora_pilot_readiness_report");
         if(readinessReply.error) throw readinessReply.error;
@@ -208,7 +208,7 @@ export default function PlatformControlCentre() {
       <section className={styles.grid} aria-label="Club applications">
         {view.applications.map(application => <article className={styles.card} key={application.id}>
           <span className={styles.status}>{application.status}</span>
-          <h3>{application.club_name}</h3><p className={styles.slug}>rallora.app/clubs/{application.requested_slug}</p><dl className={styles.applicationDetails}><div><dt>Main contact</dt><dd>{application.applicant_name||"Not supplied"}</dd></div><div><dt>Email</dt><dd>{application.contact_email}</dd></div><div><dt>Requested plan</dt><dd>{application.plan_code==="league"?"Growth":application.plan_code.charAt(0).toUpperCase()+application.plan_code.slice(1)}</dd></div><div><dt>Applied</dt><dd>{new Date(application.created_at).toLocaleDateString("en-GB")}</dd></div></dl>
+          <h3>{application.club_name}</h3><p className={styles.slug}>rallora.app/clubs/{application.requested_slug}</p><dl className={styles.applicationDetails}><div><dt>Main contact</dt><dd>{application.applicant_name||"Not supplied"}</dd></div><div><dt>Email</dt><dd>{application.contact_email}</dd></div><div><dt>Mobile</dt><dd>{application.contact_phone||"Not supplied"}</dd></div><div><dt>Requested plan</dt><dd>{application.plan_code==="league"?"Growth":application.plan_code.charAt(0).toUpperCase()+application.plan_code.slice(1)}</dd></div><div><dt>Applied</dt><dd>{new Date(application.created_at).toLocaleDateString("en-GB")}</dd></div></dl>
           {application.status === "pending" && <div className={styles.actionRow}><button disabled={busy===`application-${application.id}`} onClick={() => {if(window.confirm(`Approve ${application.club_name} and activate its Rallora club?`))void approveApplication(application.id)}}>Approve & activate</button><button className={styles.secondary} disabled={busy===`application-${application.id}`} onClick={() => {if(window.confirm(`Decline the application from ${application.club_name}?`))void declineApplication(application.id)}}>Decline</button></div>}
         </article>)}
         {!view.applications.length && <article className={styles.card}><h3>No club applications</h3><p>New applications appear here for approval.</p></article>}
