@@ -29,6 +29,7 @@ export type EditableSeason = {
   division_assignment_mode: "manual" | "combined_rating";
   max_divisions: number | null;
   allow_overflow_when_uneven: boolean;
+  registrations: number;
   divisions: EditableDivision[];
 };
 
