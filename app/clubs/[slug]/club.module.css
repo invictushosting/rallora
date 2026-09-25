@@ -323,3 +323,13 @@
  .tableWrap tbody th{font-size:9px!important}
  .playerRatings{display:grid!important;grid-template-columns:1fr 1fr!important}
 }
+
+.matchTeam{display:grid;gap:5px;min-width:0}
+.matchTeam strong{display:block}
+.matchTeam:first-child{text-align:right}
+.matchTeam:last-child{text-align:left}
+@media(max-width:700px){
+ .matchTeam{gap:7px!important}
+ .matchTeam strong{font-size:12px!important;line-height:1.2!important;overflow-wrap:normal!important;word-break:normal!important}
+}
+@media(max-width:420px){.matchTeam strong{font-size:11px!important}}
