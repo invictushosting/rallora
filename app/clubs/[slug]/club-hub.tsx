@@ -27,6 +27,8 @@ type Division = { id: string; season_id: string; name: string; sort_order: numbe
 type Team = {
   id: string; division_id: string; name: string;
   player_one_name: string | null; player_two_name: string | null;
+  player_one_rating: number | null; player_two_rating: number | null;
+  player_one_rating_source: string | null; player_two_rating_source: string | null;
 };
 type Fixture = {
   id: string; season_id: string; division_id: string;
@@ -256,7 +258,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
         const [teamsReply, resultReply] = await Promise.all([
           divisionIds.size
             ? supabase.from("teams")
-              .select("id,division_id,name,player_one_name,player_two_name")
+              .select("id,division_id,name,player_one_name,player_two_name,player_one_rating,player_two_rating,player_one_rating_source,player_two_rating_source")
               .in("division_id", [...divisionIds]).eq("is_active", true)
               .order("name", { ascending: true })
             : Promise.resolve({ data: [] as Team[], error: null }),
@@ -368,8 +370,8 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
       </div>
       <div className={styles.match}>
         <strong>{teamLabel(fixture.home_team_id, teamNames)}</strong>
-        <span className={styles.score}>{resolved
-          ? `${result?.home_score ?? "–"} : ${result?.away_score ?? "–"}`
+        <span className={`${styles.score} ${resolved ? styles.finalScore : ""}`}>{resolved
+          ? <><small>FINAL</small><b>{result?.home_score ?? "–"}</b><em>:</em><b>{result?.away_score ?? "–"}</b></>
           : "vs"}</span>
         <strong>{teamLabel(fixture.away_team_id, teamNames)}</strong>
       </div>
@@ -626,9 +628,14 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
                   .some((value) => value?.toLowerCase().includes(search.toLowerCase()))))
                 .map((team) => <article key={team.id} className={styles.teamCard}>
                   <span className={styles.teamIcon}>◉</span>
-                  <div><h3>{playerPair(team)}</h3>
+                  <div className={styles.playerCardBody}><h3>{playerPair(team)}</h3>
                     <span>{data.divisions.find((division) =>
                       division.id === team.division_id)?.name}</span>
+                    <div className={styles.playerRatings}>
+                      <span><b>{team.player_one_name || "Player 1"}</b><strong>{team.player_one_rating?.toFixed(2) ?? "–"}</strong></span>
+                      <span><b>{team.player_two_name || "Player 2"}</b><strong>{team.player_two_rating?.toFixed(2) ?? "–"}</strong></span>
+                    </div>
+                    {(team.player_one_rating_source === "playtomic" || team.player_two_rating_source === "playtomic") && <small className={styles.ratingSource}>Playtomic ratings</small>}
                   </div>
                 </article>)}
             </div>}

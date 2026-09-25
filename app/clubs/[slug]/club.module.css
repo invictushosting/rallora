@@ -188,3 +188,7 @@
  .qualifiers li{align-items:flex-start;flex-direction:column}
  .sponsorGrid{grid-template-columns:1fr}
 }
+
+/* Demo showcase: richer player ratings and match results */
+.playerCardBody{min-width:0;flex:1}.playerRatings{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}.playerRatings span{display:flex!important;justify-content:space-between;align-items:center;gap:8px;background:#f4f7fc;border:1px solid #e2e9f3;border-radius:10px;padding:8px 10px}.playerRatings b{font-size:10px;color:#516b89;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.playerRatings strong{font-size:14px;color:#173457}.ratingSource{display:inline-flex;margin-top:8px;padding:4px 7px;border-radius:20px;background:#eaf1ff;color:#2458a8;font-size:9px;font-weight:850;letter-spacing:.04em;text-transform:uppercase}.finalScore{display:grid;grid-template-columns:auto auto auto;align-items:center;gap:5px;background:#071c3b;color:#fff;padding:7px 10px}.finalScore small{grid-column:1/-1;font-size:7px;line-height:1;letter-spacing:.12em;color:#9db5d2;text-align:center}.finalScore b{font-size:14px}.finalScore em{font-style:normal;color:#8da5c1;font-size:10px}
+@media(max-width:540px){.playerRatings{grid-template-columns:1fr}.finalScore{padding:6px 8px}.finalScore b{font-size:13px}}
