@@ -29,6 +29,10 @@ export type EditableSeason = {
   division_assignment_mode: "manual" | "combined_rating";
   max_divisions: number | null;
   allow_overflow_when_uneven: boolean;
+  promotion_places: number;
+  relegation_places: number;
+  cycle_match_mode: "single_round_robin" | "double_round_robin";
+  require_cycle_completion: boolean;
   registrations: number;
   divisions: EditableDivision[];
 };
@@ -102,6 +106,10 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       setAssignmentMode(season.division_assignment_mode);
       setMaxDivisions(String(season.max_divisions ?? 6));
       setAllowOverflowWhenUneven(season.allow_overflow_when_uneven);
+      setPromotionPlaces(String(season.promotion_places ?? 2));
+      setRelegationPlaces(String(season.relegation_places ?? 2));
+      setCycleMatchMode(season.cycle_match_mode ?? "single_round_robin");
+      setRequireCycleCompletion(season.require_cycle_completion ?? true);
       setActiveTab("seasons");
       setMessage("");
       setError("");
@@ -172,6 +180,10 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [assignmentMode, setAssignmentMode] = useState<"manual"|"combined_rating">("combined_rating");
   const [maxDivisions, setMaxDivisions] = useState("6");
   const [allowOverflowWhenUneven, setAllowOverflowWhenUneven] = useState(true);
+  const [promotionPlaces, setPromotionPlaces] = useState("2");
+  const [relegationPlaces, setRelegationPlaces] = useState("2");
+  const [cycleMatchMode, setCycleMatchMode] = useState<"single_round_robin"|"double_round_robin">("single_round_robin");
+  const [requireCycleCompletion, setRequireCycleCompletion] = useState(true);
   const [newDivision, setNewDivision] = useState("");
   const [divisionSeasonId, setDivisionSeasonId] = useState(seasons[0]?.id ?? "");
   const [teamDivisionId, setTeamDivisionId] = useState(seasons[0]?.divisions[0]?.id ?? "");
@@ -345,6 +357,10 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         division_assignment_mode: assignmentMode,
         max_divisions: maxDivisions ? Number(maxDivisions) : null,
         allow_overflow_when_uneven: allowOverflowWhenUneven,
+        promotion_places: leagueFormat==="promotion_relegation_cycles" ? Number(promotionPlaces) : 0,
+        relegation_places: leagueFormat==="promotion_relegation_cycles" ? Number(relegationPlaces) : 0,
+        cycle_match_mode: cycleMatchMode,
+        require_cycle_completion: requireCycleCompletion,
       };
       if (editingSeasonId) {
         const existing = seasons.find((item)=>item.id===editingSeasonId);
@@ -576,8 +592,18 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         </label>
         {leagueFormat==="promotion_relegation_cycles" && <>
           <label>Teams per group<input type="number" min="2" max="100" value={teamsPerDivision} onChange={e=>setTeamsPerDivision(e.target.value)} /></label>
-          <label>Matches per cycle<input type="number" min="1" max="100" value={matchesPerCycle} onChange={e=>setMatchesPerCycle(e.target.value)} /></label>
-          <p className={styles.wide}>After each cycle, the top team is promoted and the bottom team is relegated. Teams arrange their own matches within the scheduled period.</p>
+          <label>Promotion places<input type="number" min="0" max="20" value={promotionPlaces} onChange={e=>setPromotionPlaces(e.target.value)} /></label>
+          <label>Relegation places<input type="number" min="0" max="20" value={relegationPlaces} onChange={e=>setRelegationPlaces(e.target.value)} /></label>
+          <label>Match format<select value={cycleMatchMode} onChange={e=>setCycleMatchMode(e.target.value as "single_round_robin"|"double_round_robin")}>
+            <option value="single_round_robin">Play every team once</option>
+            <option value="double_round_robin">Play every team twice</option>
+          </select></label>
+          <label className={styles.wide}><span>Rolling cycle control</span>
+            <span className={styles.inlineCheck}><input type="checkbox" checked={requireCycleCompletion} onChange={e=>setRequireCycleCompletion(e.target.checked)} />
+              Require every fixture in the current cycle to be completed before promotions/relegations are finalised and the next cycle can be generated.</span>
+            <small>Once the cycle is complete, the club chooses the next fixture window. Rallora then applies the configured movement rules and generates the next cycle.</small>
+          </label>
+          <p className={styles.wide}>Fixtures are calculated from the actual group size. For example, a 4-team group playing everyone once gives 3 matches per team; a 5-team overflow group gives 4.</p>
         </>}
         <div className={styles.seasonFormActions}>
           <button disabled={busy} type="submit">{editingSeasonId ? "Save league changes" : "Create draft season"}</button>
