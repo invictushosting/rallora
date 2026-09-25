@@ -503,6 +503,11 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
           <option value="standard">Standard divisions</option>
           <option value="promotion_relegation_cycles">Short cycles with promotion &amp; relegation</option>
         </select></label>
+        <div className={styles.formatRequestPrompt}>
+          <strong>Can’t see the format you need?</strong>
+          <p>Tell Rallora how your club runs it and we’ll review whether it can be added specifically to your account.</p>
+          <a href={`/clubs/${encodeURIComponent(club.slug)}/admin/format-request`}>Request a format →</a>
+        </div>
         <label>Division assignment<select value={assignmentMode} onChange={e=>setAssignmentMode(e.target.value as "manual"|"combined_rating")}>
           <option value="combined_rating">Auto seed by combined Playtomic rating</option>
           <option value="manual">Club assigns teams manually</option>
