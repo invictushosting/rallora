@@ -181,6 +181,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       await action();
       setMessage(success);
       onSaved();
+      window.dispatchEvent(new Event("rallora:action-complete"));
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Change could not be saved.");
     } finally {
