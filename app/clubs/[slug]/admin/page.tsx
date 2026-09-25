@@ -18,7 +18,7 @@ type Season = { id: string; club_id: string; name: string; status: string; fixtu
 type Membership = { club_id: string; user_id: string; role: string; status: string };
 type DivisionSummary = { id: string; name: string; sort_order: number;
   teams: { id: string; name: string }[] };
-type AdminFixture = { id:string; season_id:string; division_id:string; home_team_id:string; away_team_id:string; week_number:number; play_by:string; status:string; home_score?:string|null; away_score?:string|null; winner_team_id?:string|null };
+type AdminFixture = { id:string; season_id:string; division_id:string; home_team_id:string; away_team_id:string; week_number:number; play_by:string; status:string; home_label?:string; away_label?:string; home_score?:string|null; away_score?:string|null; winner_team_id?:string|null };
 type Summary = {
   season: Season;
   divisions: number;
@@ -47,6 +47,8 @@ export default function ClubAdministration() {
   const [password, setPassword] = useState("");
   const [signInLoading, setSignInLoading] = useState(false);
   const [signInError, setSignInError] = useState("");
+  const [fixtureView, setFixtureView] = useState<"all"|"outstanding"|"booked"|"awaiting"|"attention"|"played"|null>(null);
+  const [reminderNotice, setReminderNotice] = useState("");
   async function signIn(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSignInError("");
@@ -162,13 +164,13 @@ export default function ClubAdministration() {
 
           const divisionIds = (divisionReply.data ?? []).map((item) => item.id as string);
           const seasonFixtures = (fixtureReply.data ?? []) as AdminFixture[];
-          allFixtures.push(...seasonFixtures);
+
           const fixtureIds = seasonFixtures.map((item) => item.id);
           const [teamsReply, resultsReply] = await Promise.all([
             divisionIds.length
-              ? supabase.from("teams").select("id,division_id,name")
+              ? supabase.from("teams").select("id,division_id,name,player_one_name,player_two_name")
                   .in("division_id", divisionIds).order("name", { ascending: true })
-              : Promise.resolve({ data: [] as { id: string; division_id: string; name: string }[], error: null }),
+              : Promise.resolve({ data: [] as { id: string; division_id: string; name: string; player_one_name:string|null; player_two_name:string|null }[], error: null }),
             fixtureIds.length
               ? supabase.from("results").select("fixture_id")
                   .in("fixture_id", fixtureIds).eq("status", "confirmed")
@@ -177,7 +179,9 @@ export default function ClubAdministration() {
           if (teamsReply.error) throw teamsReply.error;
           if (resultsReply.error) throw resultsReply.error;
           const knownFixtureIds = new Set(fixtureIds);
-          const roster = (teamsReply.data ?? []) as { id: string; division_id: string; name: string }[];
+          const roster = (teamsReply.data ?? []) as { id: string; division_id: string; name: string; player_one_name:string|null; player_two_name:string|null }[];
+          const labels = new Map(roster.map((team)=>[team.id,[team.player_one_name,team.player_two_name].filter(Boolean).join(" / ") || "Players to be confirmed"]));
+          allFixtures.push(...seasonFixtures.map((fixture)=>({...fixture,home_label:labels.get(fixture.home_team_id),away_label:labels.get(fixture.away_team_id)})));
           const divisionSummaries: DivisionSummary[] = (divisionReply.data ?? [])
             .map((division) => ({
               id: division.id as string,
@@ -282,6 +286,21 @@ export default function ClubAdministration() {
     {label:"Open team registration",done:registrationReady,hint:"Activate your season and open registration so players can enter their own teams.",tab:"registration" as const,action:registrationReady?"Review registration":"Prepare registration"},
   ];
   const launchComplete = launchSteps.every((step)=>step.done) && playtomicSetupDone;
+  const openFixtureView = (value: typeof fixtureView) => { setFixtureView(value); setReminderNotice(""); window.setTimeout(()=>document.getElementById("fixture-operations")?.scrollIntoView({behavior:"smooth",block:"start"}),0); };
+  const fixtureRows = view.fixtures.filter((fixture)=>{
+    if (!fixtureView || fixtureView==="all") return true;
+    const booking = confirmedBookings.find((item)=>item.matched_fixture_id===fixture.id && item.booking_status!=="CANCELED");
+    if (fixtureView==="booked") return Boolean(booking && booking.booking_status!=="FINISHED");
+    if (fixtureView==="played") return fixture.status==="confirmed";
+    if (fixtureView==="awaiting") return Boolean(booking?.booking_status==="FINISHED" && fixture.status!=="confirmed");
+    if (fixtureView==="attention") return Boolean((fixture.play_by && fixture.play_by < new Date().toISOString().slice(0,10) && fixture.status!=="confirmed") || view.playtomicBookings.some((item)=>item.matched_fixture_id===fixture.id && item.match_state==="possible"));
+    return fixture.status!=="confirmed" && !booking;
+  });
+  const demoMode = view.club.slug==="rallora-demo";
+  function sendFixtureReminder(fixture: AdminFixture) {
+    if (demoMode) setReminderNotice("Demo reminder prepared for "+fixture.home_label+" vs "+fixture.away_label+". No external message was sent.");
+    else setReminderNotice("Reminder delivery is being connected to the club notification service. No message was sent from this screen.");
+  }
 
   return <main className={styles.page}><div className={styles.shell}>
     <header className={styles.nav}>
@@ -314,16 +333,7 @@ export default function ClubAdministration() {
     </section>
     <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>CLUB OVERVIEW</span><h2>Your club at a glance</h2></div>
       <p>Live totals and season structure for {view.club.name}.</p></div>
-    <section className={styles.metrics} aria-label="League operations overview">
-      <article><span>Active leagues</span><strong>{view.summaries.filter(({season})=>season.status==="active").length}</strong><small>Currently being played</small></article>
-      <article><span>Total fixtures</span><strong>{totals.fixtures}</strong><small>Across all leagues</small></article>
-      <article><span>Outstanding</span><strong>{Math.max(0, totals.outstanding - bookedFixtureIds.size)}</strong><small>No confirmed booking yet</small></article>
-      <article><span>Booked</span><strong>{bookedFixtureIds.size}</strong><small>Playtomic matched 4/4</small></article>
-      <article><span>Awaiting result</span><strong>{Math.max(totals.awaitingResult, finishedWithoutResult)}</strong><small>Played, captain action needed</small></article>
-      <article><span>Needs attention</span><strong>{totals.overdue + possibleBookings}</strong><small>{possibleBookings ? `${possibleBookings} possible 3/4 booking${possibleBookings===1?"":"s"} to review` : "Overdue fixtures"}</small></article>
-      <article><span>Played</span><strong>{totals.confirmed}</strong><small>Confirmed results</small></article>
-    </section>
-    <div className={styles.sectionHeading}><h2>Club seasons</h2>
+    <section className={styles.metrics} aria-label="League operations overview">\n      <article onClick={()=>openFixtureView("all")}><span>Active leagues</span><strong>{view.summaries.filter(({season})=>season.status==="active").length}</strong><small>Currently being played · View</small></article>\n      <article onClick={()=>openFixtureView("all")}><span>Total fixtures</span><strong>{totals.fixtures}</strong><small>Across all leagues · View</small></article>\n      <article onClick={()=>openFixtureView("outstanding")}><span>Outstanding</span><strong>{Math.max(0, totals.outstanding - bookedFixtureIds.size)}</strong><small>No confirmed booking yet · View</small></article>\n      <article onClick={()=>openFixtureView("booked")}><span>Booked</span><strong>{bookedFixtureIds.size}</strong><small>Playtomic matched 4/4 · View</small></article>\n      <article onClick={()=>openFixtureView("awaiting")}><span>Awaiting result</span><strong>{Math.max(totals.awaitingResult, finishedWithoutResult)}</strong><small>Played, captain action needed · View</small></article>\n      <article onClick={()=>openFixtureView("attention")}><span>Needs attention</span><strong>{totals.overdue + possibleBookings}</strong><small>{possibleBookings ? possibleBookings+" possible 3/4 booking"+(possibleBookings===1?"":"s")+" to review · View" : "Overdue fixtures · View"}</small></article>\n      <article onClick={()=>openFixtureView("played")}><span>Played</span><strong>{totals.confirmed}</strong><small>Confirmed results · View</small></article>\n    </section>\n    {fixtureView && <section id="fixture-operations" className={styles.launchPanel}>\n      <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>FIXTURE OPERATIONS</span><h2>{fixtureView==="all"?"All fixtures":fixtureView.charAt(0).toUpperCase()+fixtureView.slice(1)}</h2></div><button type="button" onClick={()=>setFixtureView(null)}>Close</button></div>\n      {reminderNotice && <p role="status">{reminderNotice}</p>}\n      <div className={styles.divisionList}>\n        {fixtureRows.map((fixture)=><div className={styles.divisionRow} key={fixture.id}><div><strong>{fixture.home_label || "Players"} vs {fixture.away_label || "Players"}</strong><span>Week {fixture.week_number} · Play by {fixture.play_by} · {fixture.status}</span></div>{fixture.status!=="confirmed" && <button type="button" onClick={()=>sendFixtureReminder(fixture)}>{fixtureView==="awaiting"?"Remind captain for result":"Send reminder"}</button>}</div>)}\n        {!fixtureRows.length && <p>No fixtures in this view.</p>}\n      </div>\n    </section>\n    <div className={styles.sectionHeading}><h2>Club seasons</h2>
       <p>Each season below belongs to {view.club.name}.</p></div>
     <section className={styles.grid}>
       {view.summaries.map(({ season, divisions, teams, fixtures, confirmed, outstanding, awaitingResult, overdue, divisionSummaries }) =>
