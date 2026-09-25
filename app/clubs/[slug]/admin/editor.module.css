@@ -64,3 +64,9 @@
 .playerCard{display:grid;gap:10px;padding:16px;border:1px solid #d9e5f0;border-radius:14px;background:#fff}
 .playerCard>strong{color:#173354;font-size:13px}
 .playerCard small{color:#6c8098;font-size:11px;line-height:1.5}
+
+
+.formatRequestPrompt{grid-column:1/-1;border:1px dashed #b9cce0;border-radius:14px;padding:15px;background:#f8fbfe}
+.formatRequestPrompt strong{display:block;color:#173354;font-size:13px}
+.formatRequestPrompt p{margin:5px 0 10px;color:#60758d;font-size:12px;line-height:1.5}
+.formatRequestPrompt a{display:inline-flex;align-items:center;min-height:38px;border-radius:9px;background:#061a39;color:#fff;text-decoration:none;padding:9px 12px;font-size:12px;font-weight:850}
