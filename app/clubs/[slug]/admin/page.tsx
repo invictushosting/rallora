@@ -234,12 +234,12 @@ export default function ClubAdministration() {
     confirmed: acc.confirmed + item.confirmed,
   }), { divisions: 0, teams: 0, fixtures: 0, confirmed: 0 });
   const launchSteps = [
-    {label:"Brand your club",done:Boolean(view.club.logo_url && view.club.cover_image_url && view.club.welcome_text),hint:"Add a logo, cover image and welcome message in Branding."},
-    {label:"Create your first season",done:view.summaries.length>0,hint:"Create a draft season before publishing anything."},
-    {label:"Add divisions",done:totals.divisions>0,hint:"Add the competition divisions your teams will enter."},
-    {label:"Open team registration",done:view.summaries.some(({season,divisions})=>season.status==="active"&&divisions>0),hint:"Activate a season with divisions, then share your team registration link."},
-    {label:"Add or approve teams",done:totals.teams>0,hint:"Teams can be added here or arrive through team registration."},
-    {label:"Publish fixtures",done:totals.fixtures>0,hint:"Create fixtures only after the team list is ready."},
+    {label:"Brand your club",done:Boolean(view.club.logo_url && view.club.cover_image_url && view.club.welcome_text),hint:"Add your logo, cover image and welcome message.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=branding#club-management`,action:"Start branding"},
+    {label:"Create your first season",done:view.summaries.length>0,hint:"Create a draft season before anything goes live.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=seasons#club-management`,action:"Create season"},
+    {label:"Add divisions",done:totals.divisions>0,hint:"Set up the divisions your teams will compete in.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=seasons#club-management`,action:"Add divisions"},
+    {label:"Open team registration",done:view.summaries.some(({season,divisions})=>season.status==="active"&&divisions>0),hint:"Activate a season with divisions, then open registration.",href:registrationReady?`/clubs/${encodeURIComponent(view.club.slug)}/register`:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=seasons#club-management`,action:registrationReady?"Open registration":"Prepare registration"},
+    {label:"Add or approve teams",done:totals.teams>0,hint:"Add teams manually or review teams that register.",href:registrationReady?`/clubs/${encodeURIComponent(view.club.slug)}/admin/registrations`:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=teams#club-management`,action:registrationReady?"Review teams":"Add teams"},
+    {label:"Publish fixtures",done:totals.fixtures>0,hint:"Create and publish fixtures once your team list is ready.",href:`/clubs/${encodeURIComponent(view.club.slug)}/admin?setup=fixtures#club-management`,action:"Create fixtures"},
   ];
   const launchComplete = launchSteps.every((step)=>step.done);
   const activeSeason = view.summaries.find(({season})=>season.status==="active");
@@ -267,11 +267,15 @@ export default function ClubAdministration() {
       </div>
     </section>
     <section className={styles.launchPanel}>
-      <div className={styles.launchHead}><div><span>PILOT SETUP</span><h2>{launchComplete?"Club setup ready":"Get your club ready to launch"}</h2>
-        <p>{launchComplete?"Your core league setup is in place. Review it before inviting players.":"Work through these steps in order. Rallora keeps draft setup private until you activate the season."}</p></div>
+      <div className={styles.launchHead}><div><span>GET STARTED</span><h2>{launchComplete?"Your club is ready to go":"Set up your club"}</h2>
+        <p>{launchComplete?"Your core setup is complete. You can keep refining it at any time.":"Follow these steps to get your club ready. Each one takes you straight to the right setup area."}</p></div>
         <strong>{launchSteps.filter(step=>step.done).length}/{launchSteps.length}</strong></div>
       <ol className={styles.launchList}>{launchSteps.map((step,index)=><li key={step.label} className={step.done?styles.launchDone:""}>
-        <span>{step.done?"✓":index+1}</span><div><strong>{step.label}</strong><p>{step.hint}</p></div>
+        <Link className={styles.launchLink} href={step.href}>
+          <span className={styles.launchNumber}>{step.done?"✓":index+1}</span>
+          <div className={styles.launchCopy}><strong>{step.label}</strong><p>{step.hint}</p></div>
+          <span className={styles.launchCta}>{step.done?"Review":step.action} →</span>
+        </Link>
       </li>)}</ol>
       {registrationReady && <div className={styles.launchActions}>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/register`}>Open team registration →</Link>
