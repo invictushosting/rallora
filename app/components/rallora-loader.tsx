@@ -4,13 +4,17 @@ export default function RalloraLoader({ overlay=false }: { overlay?: boolean }) 
   return (
     <div className={overlay ? styles.overlay : styles.screen} role="status" aria-live="polite" aria-label="Loading Rallora">
       <div className={styles.loaderCard}>
-        <div className={styles.racketWrap} aria-hidden="true">
-          <div className={styles.racket}>
-            <div className={styles.face}>
-              <div className={styles.bridge} />
-            </div>
-            <div className={styles.handle}>
-              <span />
+        <div className={styles.brandMark} aria-hidden="true">
+          <div className={styles.motionRing} />
+          <div className={styles.rLogo}>
+            <span className={styles.rTop} />
+            <span className={styles.rCurve} />
+            <span className={styles.rLeg} />
+            <div className={styles.logoRacket}>
+              <div className={styles.logoRacketFace}>
+                <i/><i/><i/><i/><i/><i/><i/><i/><i/>
+              </div>
+              <div className={styles.logoRacketHandle} />
             </div>
           </div>
         </div>
