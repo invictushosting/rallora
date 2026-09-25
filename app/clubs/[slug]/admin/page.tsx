@@ -337,13 +337,10 @@ export default function ClubAdministration() {
             <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("rallora:open-club-setup",{detail:{tab:"fixtures"}}))}>Played <b>{confirmed}</b></button>
           </div>
           <div className={styles.divisionList}>
-            <h4>Divisions &amp; teams</h4>
-            {divisionSummaries.map((division) => <details key={division.id} className={styles.divisionRow}>
-              <summary>{division.name}<span>{division.teams.length} teams</span></summary>
-              {division.teams.length
-                ? <ul>{division.teams.map((name, index) => <li key={`${division.id}-${index}`}>{name.name}</li>)}</ul>
-                : <p>No teams yet.</p>}
-            </details>)}
+            <h4>Divisions</h4>
+            {divisionSummaries.map((division) => <div key={division.id} className={styles.divisionRow}>
+              <div className={styles.divisionSummary}>{division.name}<span>{division.teams.length} teams</span></div>
+            </div>)}
             {!divisionSummaries.length && <p>No divisions yet.</p>}
           </div>
           <a href={`/clubs/${encodeURIComponent(view.club.slug)}`}>View season in club hub →</a>
