@@ -71,11 +71,11 @@ async function optimiseClubImage(file: File, kind: ImageKind): Promise<Blob> {
 export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Props) {
   const supabase = useMemo(() => createClient(), []);
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState<"branding" | "seasons" | "teams" | "fixtures">("branding");
+  const [activeTab, setActiveTab] = useState<"branding" | "seasons" | "registration" | "teams" | "fixtures">("branding");
 
   useEffect(() => {
     const requested = searchParams.get("setup");
-    if (requested === "branding" || requested === "seasons" || requested === "teams" || requested === "fixtures") {
+    if (requested === "branding" || requested === "seasons" || requested === "registration" || requested === "teams" || requested === "fixtures") {
       setActiveTab(requested);
       requestAnimationFrame(() => document.getElementById("club-management")?.scrollIntoView({ behavior: "smooth", block: "start" }));
     }
@@ -125,6 +125,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const divisions = seasons.flatMap((season) =>
     season.divisions.map((division) => ({ ...division, season_id: season.id,
       season_name: season.name })));
+  const activeSeason = seasons.find((season) => season.status === "active");
+  const registrationReady = Boolean(activeSeason && activeSeason.divisions.length > 0);
   const selectedDivision = divisions.find((division) => division.id === fixtureDivisionId);
   const recoveryOptions = fixtures.filter((fixture)=>!fixtureDivisionId || fixture.division_id===fixtureDivisionId);
   const eligibleTeams = selectedDivision?.teams ?? [];
@@ -367,7 +369,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
     </div><span className={styles.badge}>EDITING ENABLED</span></div>
     <div className={styles.tabs}>
       {([["branding","Branding"],["seasons","Seasons & divisions"],
-        ["teams","Teams"],["fixtures","Fixtures"]] as const).map(([id,label]) =>
+        ["registration","Registration"],["teams","Teams"],["fixtures","Fixtures"]] as const).map(([id,label]) =>
         <button type="button" key={id} onClick={() => {
           setActiveTab(id); setMessage(""); setError("");
         }} className={activeTab === id ? styles.selected : ""}>{label}</button>)}
@@ -429,6 +431,20 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         <div className={styles.wide}><h3>Season status</h3>{seasons.map((season)=><div key={season.id}><strong>{season.name}</strong> · {season.status} <button type="button" disabled={busy||season.status==="active"} onClick={()=>void setSeasonStatus(season.id,"active")}>Activate</button> <button type="button" disabled={busy||season.status==="completed"} onClick={()=>void setSeasonStatus(season.id,"completed")}>Complete</button></div>)}</div>
       </form>
     </div>}
+    {activeTab === "registration" && <section className={styles.registrationPanel}>
+      <div>
+        <span className={styles.eyebrow}>TEAM REGISTRATION</span>
+        <h3>{registrationReady ? "Registration is ready to open" : "Prepare team registration"}</h3>
+        <p>{registrationReady
+          ? `${activeSeason?.name} has at least one division, so teams can now register.`
+          : "Create a season, add at least one division and activate the season before opening registration."}</p>
+      </div>
+      {registrationReady ? <div className={styles.registrationActions}>
+        <a className={styles.primaryLink} href={`/clubs/${encodeURIComponent(club.slug)}/register`}>Open registration page →</a>
+        <a href={`/clubs/${encodeURIComponent(club.slug)}/admin/registrations`}>Review registrations →</a>
+      </div> : <button type="button" onClick={() => setActiveTab("seasons")}>Go to Seasons &amp; Divisions →</button>}
+      <p className={styles.registrationNote}>Your club registration terms are managed in Branding and shown to entrants during registration.</p>
+    </section>}
     {activeTab === "teams" && <form className={styles.form} onSubmit={createTeam}>
       <h3>Add a team</h3>
       <label>Division<select value={teamDivisionId}
