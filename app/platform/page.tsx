@@ -31,6 +31,7 @@ export default function PlatformControlCentre() {
   const [email,setEmail]=useState("");
   const [password,setPassword]=useState("");
   const [readiness,setReadiness]=useState<Readiness|null>(null);
+  const [showAddClub,setShowAddClub]=useState(false);
   const load=useCallback(async()=>{
       try {
         const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -127,6 +128,19 @@ export default function PlatformControlCentre() {
   function setClubStatus(id:string,value:boolean){return action(`club-${id}`,supabase.rpc("rallora_platform_set_club_status",{p_club_id:id,p_is_active:value}),value?"Club activated.":"Club suspended.");}
   function setPlan(id:string,plan:string,status:string){return action(`plan-${id}`,supabase.rpc("rallora_platform_set_plan",{p_club_id:id,p_plan_code:plan,p_status:status}),"Subscription updated.");}
   function setFeature(id:string,feature:string,enabled:boolean){return action(`feature-${id}-${feature}`,supabase.rpc("rallora_platform_set_feature",{p_club_id:id,p_feature_key:feature,p_enabled:enabled}),"Feature access updated.");}
+  async function createClub(event:React.FormEvent<HTMLFormElement>){
+    event.preventDefault();setBusy("create-club");setNotice("");
+    const form=new FormData(event.currentTarget);
+    const {error}=await supabase.rpc("rallora_platform_create_club",{
+      p_name:String(form.get("name")).trim(),
+      p_slug:String(form.get("slug")).trim().toLowerCase(),
+      p_owner_email:String(form.get("ownerEmail")).trim().toLowerCase(),
+      p_plan_code:String(form.get("plan")),
+    });
+    if(error){setNotice(error.message);setBusy("");return}
+    setNotice("Club created and owner access activated.");
+    setBusy("");setShowAddClub(false);await load();
+  }
   async function signIn(event:React.FormEvent<HTMLFormElement>){event.preventDefault();setBusy("sign-in");setNotice("");const {error}=await supabase.auth.signInWithPassword({email:email.trim(),password});if(error){setNotice(error.message);setBusy("");return}setPassword("");setBusy("");await load()}
   async function signOut(){setBusy("sign-out");await supabase.auth.signOut();setBusy("");setView({status:"signed_out"})}
 
@@ -175,7 +189,15 @@ export default function PlatformControlCentre() {
             <span>{label}</span><strong>{count.toLocaleString("en-GB")}</strong>
           </div>)}
       </section>
-      <div className={styles.sectionHeading}><div><small>HEALTH CHECK</small><h2>Pilot readiness</h2></div><p>Live operational checks before clubs go into pilot.</p></div>{readiness&&<section className={`${styles.metrics} ${styles.readinessMetrics}`} aria-label="Pilot readiness">{Object.entries(readiness).map(([key,value])=><div className={styles.metric} key={key}><span>{key.replaceAll("_"," ")}</span><strong>{Number(value).toLocaleString("en-GB")}</strong></div>)}</section>}<div className={styles.sectionHeading}><div><small>CLUB OPERATIONS</small><h2>Registered clubs</h2></div><p>Manage access, plans and features for every Rallora club.</p></div>
+      <div className={styles.sectionHeading}><div><small>CLUB OPERATIONS</small><h2>Clubs</h2></div><div className={styles.sectionActions}><p>Manage access, plans and features across Rallora.</p><button type="button" onClick={()=>setShowAddClub(value=>!value)}>{showAddClub?"Cancel":"＋ Add club"}</button></div></div>
+      {showAddClub&&<form className={styles.addClubForm} onSubmit={createClub}>
+        <div><span>MANUAL ONBOARDING</span><h3>Add a club</h3><p>Use this when Rallora is onboarding a club directly. The owner must already have a Rallora account.</p></div>
+        <label>Club name<input name="name" required minLength={2} maxLength={120} placeholder="Example Padel Club"/></label>
+        <label>Club web address<div className={styles.slugInput}><span>rallora.app/clubs/</span><input name="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="example-padel"/></div></label>
+        <label>Owner email<input name="ownerEmail" type="email" required placeholder="owner@example.com"/></label>
+        <label>Plan<select name="plan" defaultValue="league"><option value="starter">Starter</option><option value="league">Growth</option><option value="pro">Pro</option></select></label>
+        <button disabled={busy==="create-club"}>{busy==="create-club"?"Creating club…":"Create club & activate owner"}</button>
+      </form>}
       <section className={styles.grid} aria-label="Registered clubs">
         {summaries.map(({ club, seasons, teams, fixtures, members, players, subscription, features }) =>
           <article className={styles.card} key={club.id}>
@@ -183,32 +205,23 @@ export default function PlatformControlCentre() {
             <span className={styles.status}>{club.is_active ? "ACTIVE" : "INACTIVE"}</span>
             <h3>{club.name}</h3><p className={styles.slug}>/{club.slug}</p>
             <dl className={styles.clubMetrics}>
-              <div><dt>Seasons</dt><dd>{seasons.length}</dd></div>
-              <div><dt>Teams</dt><dd>{teams}</dd></div>
-              <div><dt>Fixtures</dt><dd>{fixtures}</dd></div>
-              <div><dt>Organisers</dt><dd>{members}</dd></div>
-              <div><dt>Players</dt><dd>{players}</dd></div>
+              <div><dt>Seasons</dt><dd>{seasons.length}</dd></div><div><dt>Teams</dt><dd>{teams}</dd></div><div><dt>Fixtures</dt><dd>{fixtures}</dd></div><div><dt>Organisers</dt><dd>{members}</dd></div><div><dt>Players</dt><dd>{players}</dd></div>
             </dl>
             <div className={styles.controls}>
-              <label>Plan<select defaultValue={subscription?.plan_code??"starter"} id={`plan-${club.id}`}>
-                <option value="starter">Starter</option><option value="league">Growth</option><option value="pro">Pro</option>
-              </select></label>
-              <label>Status<select defaultValue={subscription?.status??"trialing"} id={`status-${club.id}`}>
-                <option value="trialing">Trial</option><option value="active">Active</option><option value="past_due">Past due</option><option value="paused">Paused</option><option value="cancelled">Cancelled</option>
-              </select></label>
+              <label>Plan<select defaultValue={subscription?.plan_code??"starter"} id={`plan-${club.id}`}><option value="starter">Starter</option><option value="league">Growth</option><option value="pro">Pro</option></select></label>
+              <label>Status<select defaultValue={subscription?.status??"trialing"} id={`status-${club.id}`}><option value="trialing">Trial</option><option value="active">Active</option><option value="past_due">Past due</option><option value="paused">Paused</option><option value="cancelled">Cancelled</option></select></label>
               <button disabled={busy===`plan-${club.id}`} onClick={()=>{const plan=(document.getElementById(`plan-${club.id}`)as HTMLSelectElement).value;const status=(document.getElementById(`status-${club.id}`)as HTMLSelectElement).value;void setPlan(club.id,plan,status)}}>Save plan</button>
               <button disabled={busy===`club-${club.id}`} onClick={()=>{const next=!club.is_active;if(window.confirm(`${next?"Activate":"Suspend"} ${club.name}?`))void setClubStatus(club.id,next)}}>{club.is_active?"Suspend club":"Activate club"}</button>
             </div>
             <div className={styles.features}>{["core_league","player_registration","captain_results","social_studio","sponsors","reminders","club_events"].map(feature=><label key={feature}><input type="checkbox" checked={features.some(item=>item.feature_key===feature&&item.is_enabled)} onChange={event=>void setFeature(club.id,feature,event.target.checked)}/>{feature.replaceAll("_"," ")}</label>)}</div>
             <strong>Seasons</strong>
-            {seasons.map(s => <div className={styles.season} key={s.id}>
-              <span>{s.name}</span><em>{s.status}</em>
-            </div>)}
+            {seasons.map(s => <div className={styles.season} key={s.id}><span>{s.name}</span><em>{s.status}</em></div>)}
             {!seasons.length && <p>No seasons created yet.</p>}
             <div className={styles.clubActions}><a href={`/clubs/${encodeURIComponent(club.slug)}/admin`}>Open club admin</a><a href={`/clubs/${encodeURIComponent(club.slug)}`}>View public hub</a></div>
           </article>)}
+        {!summaries.length&&<article className={styles.card}><h3>No clubs yet</h3><p>Add a club manually or approve an application below.</p></article>}
       </section>
-      <div className={styles.sectionHeading}><div><small>ONBOARDING</small><h2>Club applications</h2></div><p>Review new clubs before they receive access to Rallora.</p></div>
+      <div className={styles.sectionHeading}><div><small>ONBOARDING</small><h2>Club applications</h2></div><p>Review clubs that applied through Rallora.</p></div>
       <section className={styles.grid} aria-label="Club applications">
         {view.applications.map(application => <article className={styles.card} key={application.id}>
           <span className={styles.status}>{application.status}</span>
@@ -217,7 +230,9 @@ export default function PlatformControlCentre() {
         </article>)}
         {!view.applications.length && <article className={styles.card}><h3>No club applications</h3><p>New applications appear here for approval.</p></article>}
       </section>
-      <p className={styles.footnote}>Plan state is ready for a payment provider to be connected later; no automatic charges are taken.</p>
+      <div className={styles.sectionHeading}><div><small>PLATFORM HEALTH</small><h2>Operational checks</h2></div><p>Exceptions and data-quality checks across Rallora.</p></div>
+      {readiness&&<section className={`${styles.metrics} ${styles.readinessMetrics}`} aria-label="Platform health">{Object.entries(readiness).map(([key,value])=><div className={`${styles.metric} ${Number(value)>0?styles.healthAttention:styles.healthOk}`} key={key}><span>{key.replaceAll("_"," ")}</span><strong>{Number(value).toLocaleString("en-GB")}</strong></div>)}</section>}
+      <p className={styles.footnote}>Subscription controls are ready for a payment provider to be connected later; no automatic charges are taken.</p>
     </>}
   </div></main>;
 }
