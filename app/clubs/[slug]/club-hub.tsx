@@ -626,7 +626,10 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
                   .some((value) => value?.toLowerCase().includes(search.toLowerCase()))))
                 .map((team) => <article key={team.id} className={styles.teamCard}>
                   <span className={styles.teamIcon}>◉</span>
-                  <div><h3>{playerPair(team)}</h3>\n                    <span>{data.divisions.find((division) =>\n                      division.id === team.division_id)?.name}</span>\n                  </div>
+                  <div><h3>{playerPair(team)}</h3>
+                    <span>{data.divisions.find((division) =>
+                      division.id === team.division_id)?.name}</span>
+                  </div>
                 </article>)}
             </div>}
             {tab === "cup" && <>
