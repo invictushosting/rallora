@@ -19,7 +19,7 @@ export default function RegisterClub(){
   async function authenticate(){
     if(mode==="signin"){const {data,error}=await supabase.auth.signInWithPassword({email:email.trim(),password});if(error)throw error;setUserId(data.user.id);setPassword("");setMessage("Signed in. Complete your club details below to apply.");return data.user}
     const {data,error}=await supabase.auth.signUp({email:email.trim(),password,options:{emailRedirectTo:window.location.href}});if(error)throw error;
-    if(!data.user||!data.session){setMessage("Check your email to confirm your account, then return here and sign in to submit your club application.");return null}
+    if(!data.user||!data.session){setMessage("Account created — one quick step left. We’ve sent you a confirmation email. Open it and select ‘Confirm email address’, then return to Rallora and sign in. Your club application will be ready to submit once your email is confirmed.");return null}
     setUserId(data.user.id);return data.user;
   }
   async function signIn(event:React.FormEvent<HTMLFormElement>){
@@ -30,7 +30,7 @@ export default function RegisterClub(){
     event.preventDefault();setBusy(true);setError("");setMessage("");
     try{const form=new FormData(event.currentTarget);let user=(await supabase.auth.getUser()).data.user;if(!user)user=await authenticate();if(!user)return;
       const {error:insertError}=await supabase.from("rallora_club_applications").insert({applicant_user_id:user.id,applicant_name:String(form.get("managerName")).trim(),club_name:String(form.get("name")).trim(),requested_slug:String(form.get("slug")).trim().toLowerCase(),contact_email:user.email,plan_code:plan});if(insertError)throw insertError;
-      setMessage("Application received. Rallora will review your club before activation.");
+      setMessage("Application submitted ✓ We’ll review your club application next. Once approved, you’ll be able to sign in as the club administrator, finish your club profile, create your first league and invite teams. We’ll let you know when your club is ready.");
     }catch(reason){setError(reason instanceof Error?reason.message:"Could not submit your application.")}finally{setBusy(false)}
   }
   return <main className={styles.page}><div className={styles.shell}>
