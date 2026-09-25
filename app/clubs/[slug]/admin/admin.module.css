@@ -148,23 +148,23 @@
 
 
 /* Pilot league operations dashboard */
-.operations{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:18px 0 34px}
-.operations article{min-width:0;background:#fff;border:1px solid #dce7f2;border-radius:16px;padding:18px}
-.operations span{display:block;color:#60758d;font-size:11px;font-weight:850}
-.operations strong{display:block;margin:8px 0 4px;font-size:28px;letter-spacing:-1px;color:#173354}
-.operations small{display:block;color:#7a8da3;font-size:10px;line-height:1.4}
-.operations .operationWarn{border-color:#f0d7a5;background:#fffaf0}
-.operations .operationInfo{border-color:#bfe2f5;background:#f5fbff}
-.operations .operationDanger{border-color:#f0c5c5;background:#fff7f7}
-.operations .operationDanger strong{color:#b42318}
+.operationsCompact{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:18px 0 34px}
+.operationsCompact article{min-width:0;background:#fff;border:1px solid #dce7f2;border-radius:16px;padding:18px}
+.operationsCompact span{display:block;color:#60758d;font-size:11px;font-weight:850}
+.operationsCompact strong{display:block;margin:8px 0 4px;font-size:28px;letter-spacing:-1px;color:#173354}
+.operationsCompact small{display:block;color:#7a8da3;font-size:10px;line-height:1.4}
+.operationsCompact .operationWarn{border-color:#f0d7a5;background:#fffaf0}
+.operationsCompact .operationInfo{border-color:#bfe2f5;background:#f5fbff}
+.operationsCompact .operationDanger{border-color:#f0c5c5;background:#fff7f7}
+.operationsCompact .operationDanger strong{color:#b42318}
 .attentionStrip{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 12px;border-radius:10px;background:#fff4f2;border:1px solid #f4d0ca;margin:-4px 0 12px;color:#8f2d22;font-size:11px}
 .attentionStrip span{color:#8b625d}
 .fixtureFilters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 18px}
 .fixtureFilters button{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:42px;border:1px solid #dce7f2;border-radius:10px;background:#f8fbfe;color:#24486e;padding:9px 10px;font:inherit;font-size:11px;font-weight:800;cursor:pointer}
 .fixtureFilters button:hover{background:#fff;border-color:#9fc8e3}
 .fixtureFilters b{display:grid;place-items:center;min-width:25px;height:25px;padding:0 6px;border-radius:8px;background:#e7f2fa;color:#0b3b72;font-size:11px}
-@media(max-width:900px){.operations{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:540px){.operations{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.operations article{padding:14px}.operations strong{font-size:24px}.fixtureFilters{grid-template-columns:1fr}.attentionStrip{align-items:flex-start;flex-direction:column}}
+@media(max-width:900px){.operationsCompact{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:540px){.operationsCompact{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.operationsCompact article{padding:14px}.operationsCompact strong{font-size:24px}.fixtureFilters{grid-template-columns:1fr}.attentionStrip{align-items:flex-start;flex-direction:column}}
 
 .divisionSummary{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px;font-size:13px;font-weight:800}.divisionSummary span{font-size:11px;color:#63809f;white-space:nowrap;font-weight:750}
 @media(max-width:490px){.divisionSummary{align-items:flex-start;flex-direction:column}.divisionSummary span{white-space:normal}}
