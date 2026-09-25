@@ -385,8 +385,15 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
     const meta = status==="possible" ? `${fixture.booking_matched_players ?? 0}/4 players matched · Club review required` :
       arranged ? `${fixture.booking_type==="OPEN_MATCH" ? "Open Match" : "Playtomic booking"} · ${fixture.booking_matched_players ?? 4}/4 players matched` :
       status==="cancelled" ? "Arrange another match in Playtomic" : "Arrange your match in Playtomic";
+    const bookingUrl = safeLink(club.booking_url);
+    const needsBooking = status === "not_arranged" || status === "cancelled";
     return <div className={`${styles.arrangementBox} ${styles["arrangement_"+status]}`}>
-      <span className={styles.arrangementDot} aria-hidden="true" /><div><strong>{title}</strong><span>{detail}</span><small>{meta}</small></div>
+      <span className={styles.arrangementDot} aria-hidden="true" />
+      <div className={styles.arrangementContent}>
+        <strong>{title}</strong><span>{detail}</span><small>{meta}</small>
+        {needsBooking && bookingUrl && <a className={styles.bookingAction} href={bookingUrl}
+          target="_blank" rel="noopener noreferrer">{status === "cancelled" ? "Rebook court ↗" : "Book court ↗"}</a>}
+      </div>
     </div>;
   }
   function fixtureRow(fixture: Fixture) {
@@ -412,13 +419,12 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
         <strong>{teamLabel(fixture.home_team_id, teamNames)}</strong><span className={styles.score}>vs</span><strong>{teamLabel(fixture.away_team_id, teamNames)}</strong>
       </div>}
       {!resolved && arrangementPanel(fixture)}
-      <div className={styles.fixtureBottom}>
-        <span>{fixture.court || "Court to arrange"}</span>
+      {(resolved || fixture.status === "disputed") && <div className={styles.fixtureBottom}>
+        <span>{resolved ? (fixture.booking_court || fixture.court || "Match complete") : "Result under review"}</span>
         <span className={resolved ? styles.confirmed : styles.fixtureStatus}>
-          {resolved ? "Final" : fixture.status === "disputed" ?
-            "Under review" : "Awaiting result"}
+          {resolved ? "Final" : "Under review"}
         </span>
-      </div>
+      </div>}
     </li>;
   }
   async function copyViewLink() {
