@@ -74,6 +74,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const supabase = useMemo(() => createClient(), []);
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<"branding" | "seasons" | "registration" | "teams" | "fixtures">("branding");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     function openSetup(event: Event) {
@@ -154,9 +156,6 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [uploadBusy, setUploadBusy] = useState<ImageKind | "">("");
   const logoInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-
   const divisions = seasons.flatMap((season) =>
     season.divisions.map((division) => ({ ...division, season_id: season.id,
       season_name: season.name })));
@@ -324,7 +323,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       const ratingOne = playerOneRating.trim() === "" ? null : Number(playerOneRating);
       const ratingTwo = playerTwoRating.trim() === "" ? null : Number(playerTwoRating);
       if (ratingOne !== null && (!Number.isFinite(ratingOne) || ratingOne < 0 || ratingOne > 7))
-        throw new Error("Player one's Playtomic rating must be between 0 and 7.");
+        throw new Error("Player one’s Playtomic rating must be between 0 and 7.");
       if (ratingTwo !== null && (!Number.isFinite(ratingTwo) || ratingTwo < 0 || ratingTwo > 7))
         throw new Error("Player two's Playtomic rating must be between 0 and 7.");
       const { error: mutationError } = await supabase.from("teams").insert({
