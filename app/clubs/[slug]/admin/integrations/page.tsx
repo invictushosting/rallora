@@ -56,7 +56,7 @@ export default function IntegrationsPage(){
     {state&&<section className={styles.message}><p>{state}</p></section>}
     {error&&<section className={styles.message}><p>{error}</p></section>}
     <section className={styles.card}>
-      <span className={styles.status}>{connected?"connected":integration?.status??"not connected"}</span>
+      <span className={connected?styles.status:styles.statusDanger}>{connected?"Connected":integration?.status??"Not connected"}</span>
       <h3>Playtomic Club API</h3>
       <p>Generate External API credentials in Playtomic Manager → Settings → Developer Tools, then add the Playtomic Venue ID for this club. Rallora uses the Venue ID to read supported player data such as current padel level.</p>
       {integration&&<div className={styles.numbers}>
