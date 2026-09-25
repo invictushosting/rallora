@@ -29,7 +29,7 @@ type Summary = {
 type View =
   | { status: "loading" | "signed_out" | "forbidden" | "missing" }
   | { status: "error"; message: string }
-  | { status: "ready"; club: Club; role: string; summaries: Summary[]; sponsors: number; fixtures: AdminFixture[] };
+  | { status: "ready"; club: Club; role: string; summaries: Summary[]; sponsors: number; fixtures: AdminFixture[]; playtomicConnected: boolean };
 
 export default function ClubAdministration() {
   const params = useParams();
@@ -64,6 +64,14 @@ export default function ClubAdministration() {
     setView({ status: "signed_out" });
   }
 
+  async function setPlaytomicLater(skip:boolean) {
+    if (view.status !== "ready") return;
+    const { error } = await supabase.from("clubs")
+      .update({ playtomic_setup_choice: skip ? "later" : null })
+      .eq("id", view.club.id);
+    if (!error) setRevision((value)=>value+1);
+  }
+
   useEffect(() => {
     let alive = true;
 
@@ -83,7 +91,7 @@ export default function ClubAdministration() {
 
         const { data: club, error: clubError } = await supabase
           .from("clubs")
-          .select("id,slug,name,short_name,primary_color,welcome_text,logo_url,cover_image_url,website_url,contact_email,venue_name,address_line_1,town,postcode,player_registration_terms")
+          .select("id,slug,name,short_name,primary_color,welcome_text,logo_url,cover_image_url,website_url,contact_email,venue_name,address_line_1,town,postcode,player_registration_terms,playtomic_setup_choice")
           .eq("slug", slug).maybeSingle();
         if (clubError) throw clubError;
         if (!club) {
@@ -115,14 +123,17 @@ export default function ClubAdministration() {
           return;
         }
 
-        const [seasonReply, sponsorReply] = await Promise.all([
+        const [seasonReply, sponsorReply, playtomicReply] = await Promise.all([
           supabase.from("seasons").select("id,club_id,name,status,fixture_schedule_mode")
             .eq("club_id", club.id).order("created_at", { ascending: false }),
           supabase.from("sponsors").select("id", { count: "exact", head: true })
             .eq("club_id", club.id).eq("is_active", true),
+          supabase.from("rallora_club_integrations").select("status")
+            .eq("club_id", club.id).eq("provider","playtomic").maybeSingle(),
         ]);
         if (seasonReply.error) throw seasonReply.error;
         if (sponsorReply.error) throw sponsorReply.error;
+        if (playtomicReply.error) throw playtomicReply.error;
 
         const seasons = ((seasonReply.data ?? []) as Season[])
           .filter((season) => season.club_id === club.id);
@@ -180,6 +191,7 @@ export default function ClubAdministration() {
           summaries,
           sponsors: sponsorReply.count ?? 0,
           fixtures: allFixtures,
+          playtomicConnected: playtomicReply.data?.status === "connected",
         });
       } catch (error) {
         if (alive) setView({
@@ -237,6 +249,8 @@ export default function ClubAdministration() {
   }), { divisions: 0, teams: 0, fixtures: 0, confirmed: 0 });
   const activeSeason = view.summaries.find(({season})=>season.status==="active");
   const registrationReady = Boolean(activeSeason && activeSeason.divisions>0);
+  const playtomicDeferred = view.club.playtomic_setup_choice === "later";
+  const playtomicSetupDone = view.playtomicConnected || playtomicDeferred;
   const launchSteps = [
     {label:"Brand your club",done:Boolean(view.club.logo_url && view.club.cover_image_url && view.club.welcome_text),hint:"Add your logo, cover image and welcome message.",tab:"branding" as const,action:"Start branding"},
     {label:"Create your first season",done:view.summaries.length>0,hint:"Create a draft season before anything goes live.",tab:"seasons" as const,action:"Create season"},
@@ -245,7 +259,7 @@ export default function ClubAdministration() {
     {label:"Add or approve teams",done:totals.teams>0,hint:"Add teams manually or review teams that register.",tab:"teams" as const,action:registrationReady?"Manage teams":"Add teams"},
     {label:"Publish fixtures",done:totals.fixtures>0,hint:"Create and publish fixtures once your team list is ready.",tab:"fixtures" as const,action:"Create fixtures"},
   ];
-  const launchComplete = launchSteps.every((step)=>step.done);
+  const launchComplete = launchSteps.every((step)=>step.done) && playtomicSetupDone;
 
   return <main className={styles.page}><div className={styles.shell}>
     <header className={styles.nav}>
@@ -273,8 +287,8 @@ export default function ClubAdministration() {
         <div className={styles.completeState}>
           <span className={styles.completeCheck}>✓</span>
           <div><span>SETUP COMPLETE</span><h2>Your club setup is complete</h2>
-            <p>Branding, season structure, registration, teams and fixtures are all in place. You can review or change any area below.</p></div>
-          <strong>6/6</strong>
+            <p>Branding, season structure, registration, teams and fixtures are all in place. Playtomic is either connected or intentionally left for later.</p></div>
+          <strong>7/7</strong>
         </div>
         <div className={styles.completeActions}>
           <button type="button" onClick={() => document.getElementById("club-management")?.scrollIntoView({behavior:"smooth",block:"start"})}>Review club setup ↓</button>
@@ -283,7 +297,7 @@ export default function ClubAdministration() {
       </> : <>
         <div className={styles.launchHead}><div><span>GET STARTED</span><h2>Set up your club</h2>
           <p>Follow these steps to get your club ready. Each one takes you straight to the right setup area.</p></div>
-          <strong>{launchSteps.filter(step=>step.done).length}/{launchSteps.length}</strong></div>
+          <strong>{launchSteps.filter(step=>step.done).length + (playtomicSetupDone?1:0)}/7</strong></div>
         <ol className={styles.launchList}>{launchSteps.map((step,index)=><li key={step.label} className={step.done?styles.launchDone:""}>
           <button className={styles.launchLink} type="button" onClick={() => {
             window.dispatchEvent(new CustomEvent("rallora:open-club-setup",{detail:{tab:step.tab}}));
@@ -293,6 +307,25 @@ export default function ClubAdministration() {
             <span className={styles.launchCta}>{step.done?"Review":step.action} →</span>
           </button>
         </li>)}</ol>
+        <div className={styles.playtomicSetup}>
+          <div className={styles.playtomicSetupCopy}>
+            <span className={playtomicSetupDone?styles.completeCheck:styles.launchNumber}>{playtomicSetupDone?"✓":"7"}</span>
+            <div><strong>Connect Playtomic</strong>
+              <p>{view.playtomicConnected
+                ? "Playtomic is connected. You can manage or re-verify it from Integrations."
+                : playtomicDeferred
+                  ? "Skipped for now. You can connect Playtomic later from Integrations."
+                  : "If your club has Playtomic API access, connect it now for player and rating sync."}</p></div>
+          </div>
+          <div className={styles.playtomicSetupActions}>
+            <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/integrations`}>{view.playtomicConnected?"Manage integration":"Connect Playtomic"} →</Link>
+            {!view.playtomicConnected && <label>
+              <input type="checkbox" checked={playtomicDeferred}
+                onChange={(event)=>void setPlaytomicLater(event.target.checked)} />
+              I don’t have Playtomic API access — I’ll add this later
+            </label>}
+          </div>
+        </div>
         {registrationReady && <div className={styles.launchActions}>
           <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/register`}>Open team registration →</Link>
           <button type="button" onClick={()=>void navigator.clipboard.writeText(`${window.location.origin}/clubs/${view.club.slug}/register`)}>Copy registration link</button>
