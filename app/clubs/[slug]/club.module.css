@@ -374,3 +374,31 @@
  .match{grid-template-columns:minmax(0,1fr) 30px minmax(0,1fr)!important;gap:6px!important}
  .matchTeam strong{font-size:11px!important}
 }
+
+/* Visual depth pass: clearer pairing groups and less white-on-white UI. */
+.page{background:
+ radial-gradient(circle at 8% 4%,rgba(0,176,254,.10),transparent 24rem),
+ radial-gradient(circle at 92% 22%,rgba(36,88,255,.07),transparent 28rem),
+ linear-gradient(180deg,#edf7fc 0%,#e4f0f8 55%,#edf6fb 100%)}
+.division{padding:20px;border:1px solid rgba(128,166,203,.18);border-radius:24px;background:rgba(255,255,255,.28);box-shadow:0 16px 38px rgba(19,58,98,.045)}
+.card{border-color:#d5e4f0;background:linear-gradient(180deg,#fff 0%,#fbfdff 100%);box-shadow:0 12px 28px rgba(19,58,98,.07)}
+.card h4{padding-bottom:13px;border-bottom:1px solid #e7eef5}
+.tableWrap thead{background:#f2f7fb}.tableWrap tbody tr:nth-child(even){background:#f8fbfd}.tableWrap tbody tr:hover{background:#edf7fc}
+.fixtures li{padding:18px 0}
+.fixtureTop span:first-child{color:#1557b0}
+.match{grid-template-columns:minmax(0,1fr) 42px minmax(0,1fr);gap:14px;padding:16px 4px 14px}
+.matchTeam{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;text-align:center!important;min-height:52px}
+.matchTeam strong,.matchTeam:first-child strong,.matchTeam:last-child strong{display:block!important;width:100%!important;text-align:center!important;font-size:13px;line-height:1.28;white-space:normal;text-wrap:balance}
+.score{justify-self:center;display:grid;place-items:center;width:34px;height:34px;padding:0;border-radius:11px;background:#eaf2fb;border:1px solid #dce8f4;box-shadow:0 4px 10px rgba(30,74,119,.06)}
+.arrangementBox{border-radius:14px;box-shadow:0 8px 20px rgba(21,61,101,.045)}
+.arrangement_not_arranged{background:linear-gradient(135deg,#fff2f2,#fff8f8)!important;border-color:#efcaca!important}
+.arrangement_arranged{background:linear-gradient(135deg,#ecfaf4,#f5fcf9)}
+.arrangement_possible{background:linear-gradient(135deg,#fff7e7,#fffaf1)}
+.arrangement_result_required,.arrangement_in_progress{background:linear-gradient(135deg,#eaf6ff,#f5fbff)}
+@media(max-width:700px){
+ .division{padding:12px!important;border-radius:18px!important}
+ .match{grid-template-columns:minmax(0,1fr) 36px minmax(0,1fr)!important;gap:8px!important;padding:15px 0!important}
+ .matchTeam{min-height:54px!important}
+ .matchTeam strong,.matchTeam:first-child strong,.matchTeam:last-child strong{font-size:12px!important;line-height:1.28!important;text-align:center!important}
+ .score{width:32px!important;height:32px!important}
+}
