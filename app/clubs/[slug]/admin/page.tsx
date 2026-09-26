@@ -287,7 +287,8 @@ export default function ClubAdministration() {
   ];
   const launchComplete = launchSteps.every((step)=>step.done) && playtomicSetupDone;
   const openFixtureView = (value: typeof fixtureView) => { setFixtureView(value); setReminderNotice(""); window.setTimeout(()=>document.getElementById("fixture-operations")?.scrollIntoView({behavior:"smooth",block:"start"}),0); };
-  const fixtureRows = view.fixtures.filter((fixture)=>{
+  const uniqueFixtures = Array.from(new Map(view.fixtures.map((fixture) => [fixture.id, fixture])).values());
+  const fixtureRows = uniqueFixtures.filter((fixture)=>{
     if (!fixtureView || fixtureView==="all") return true;
     const booking = confirmedBookings.find((item)=>item.matched_fixture_id===fixture.id && item.booking_status!=="CANCELED");
     if (fixtureView==="booked") return Boolean(booking && booking.booking_status!=="FINISHED");
@@ -342,11 +343,11 @@ export default function ClubAdministration() {
       <article onClick={()=>openFixtureView("attention")}><span>Needs attention</span><strong>{totals.overdue + possibleBookings}</strong><small>{possibleBookings ? possibleBookings+" possible 3/4 booking"+(possibleBookings===1?"":"s")+" to review · View" : "Overdue fixtures · View"}</small></article>
       <article onClick={()=>openFixtureView("played")}><span>Played</span><strong>{totals.confirmed}</strong><small>Confirmed results · View</small></article>
     </section>
-    {fixtureView && <section id="fixture-operations" className={styles.launchPanel}>
+    {fixtureView && <section id="fixture-operations" className={`${styles.launchPanel} ${styles.fixtureOperations}`}>
       <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>FIXTURE OPERATIONS</span><h2>{fixtureView==="all"?"All fixtures":fixtureView.charAt(0).toUpperCase()+fixtureView.slice(1)}</h2></div><button type="button" onClick={()=>setFixtureView(null)}>Close</button></div>
       {reminderNotice && <p role="status">{reminderNotice}</p>}
-      <div className={styles.divisionList}>
-        {fixtureRows.map((fixture)=><div className={styles.divisionRow} key={fixture.id}><div><strong>{fixture.home_label || "Players"} vs {fixture.away_label || "Players"}</strong><span>Week {fixture.week_number} · Play by {fixture.play_by} · {fixture.status}</span></div>{fixture.status!=="confirmed" && <button type="button" onClick={()=>sendFixtureReminder(fixture)}>{fixtureView==="awaiting"?"Remind captain for result":"Send reminder"}</button>}</div>)}
+      <div className={styles.fixtureList}>
+        {fixtureRows.map((fixture)=><article className={styles.fixtureOperationRow} key={fixture.id}><div className={styles.fixtureOperationMain}><strong>{fixture.home_label || "Players"} <em>vs</em> {fixture.away_label || "Players"}</strong><span>Week {fixture.week_number} <i>·</i> Play by {new Date(fixture.play_by+"T00:00:00").toLocaleDateString("en-GB")} <i>·</i> <b>{fixture.status}</b></span></div>{fixture.status!=="confirmed" && <button type="button" onClick={()=>sendFixtureReminder(fixture)}>{fixtureView==="awaiting"?"Remind captain for result":"Send reminder"}</button>}</article>)}
         {!fixtureRows.length && <p>No fixtures in this view.</p>}
       </div>
     </section>}
