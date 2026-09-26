@@ -528,7 +528,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       <p>Set up and manage your seasons, registrations, teams and fixtures.</p>
     </div><span className={styles.badge}>CLUB ADMIN</span></div>
     <div className={styles.tabs}>
-      {([["branding","Branding"],["seasons","Seasons & divisions"],
+      {([["branding","Branding"],["seasons","Leagues"],
         ["registration","Registration"],["teams","Teams"],["fixtures","Fixtures"]] as const).map(([id,label]) =>
         <button type="button" key={id} onClick={() => {
           setActiveTab(id); setMessage(""); setError("");
