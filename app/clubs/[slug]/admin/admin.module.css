@@ -195,3 +195,11 @@
 .metrics article:focus-within .metricAction{outline:3px solid rgba(0,176,254,.20);outline-offset:2px}
 .cardAction{display:flex!important;justify-content:center;width:100%;min-height:42px!important;margin-top:14px;padding:10px 14px!important;border:1px solid #c9ddec;border-radius:12px;background:#fff;color:#0b3b72!important;text-align:center;box-shadow:0 3px 9px rgba(6,26,57,.035)}
 @media(max-width:700px){.metricAction,.cardAction{min-height:46px!important;font-size:13px!important}.metrics article{display:flex;flex-direction:column}.metrics article .metricAction{margin-top:auto}.metrics article small{margin-bottom:14px}}
+
+
+/* Premium tactile depth: crisp outlines + restrained dimensional lift */
+.metrics article,.card,.launchPanel{border:1.5px solid rgba(126,157,185,.34);box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 2px 0 rgba(118,148,174,.10),0 14px 32px rgba(21,54,89,.07)}
+.metrics article:hover,.card:hover{border-color:rgba(83,143,184,.46);box-shadow:0 1px 0 rgba(255,255,255,.95) inset,0 3px 0 rgba(93,139,170,.13),0 18px 38px rgba(21,54,89,.10)}
+.metricAction,.cardAction,.divisionAction,.seasonEdit{border-width:1.5px!important;border-color:#b8d0e2!important;box-shadow:0 1px 0 rgba(255,255,255,.95) inset,0 2px 0 #d4e2ec,0 5px 12px rgba(6,26,57,.06)!important}
+.metricAction:hover,.cardAction:hover,.divisionAction:hover,.seasonEdit:hover{border-color:#7eb7d8!important;box-shadow:0 1px 0 rgba(255,255,255,.95) inset,0 2px 0 #bdd5e5,0 8px 16px rgba(6,26,57,.09)!important;transform:translateY(-1px)}
+.metricAction:active,.cardAction:active,.divisionAction:active,.seasonEdit:active{transform:translateY(1px);box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 1px 0 #cbdce8,0 3px 7px rgba(6,26,57,.06)!important}
