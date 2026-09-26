@@ -118,5 +118,10 @@
 /* Layered management surfaces */
 .editor{background:linear-gradient(145deg,#f2f7fb,#eaf3f8);border-color:#cadce8;box-shadow:0 18px 46px rgba(21,54,89,.06)}.tabs{border-color:#cfdee9}.tabs .selected{background:#061a39;color:#fff;box-shadow:0 5px 14px rgba(6,26,57,.14)}.form input,.form select,.form textarea{background:#fbfdfe;border-color:#c9d9e5}.seasonSection{background:#f9fcfd;border-color:#d3e2eb}.pairingRow{background:#f4f9fc;border-color:#d5e4ed}.pairingPlayers>div{background:#fcfefe}.replacePanel{background:linear-gradient(145deg,#e9f7fd,#f5fbfe)}
 
-/* Rallora controls */
-.editor button{font-weight:var(--control-weight)}
+
+/* Responsive club-management navigation */
+@media(max-width:700px){
+ .tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible;margin:20px 0 24px;padding:0 0 18px;gap:8px}
+ .tabs button{width:100%;min-height:48px;white-space:normal;text-align:center;padding:10px 8px;border:1px solid #cfdee9;background:rgba(255,255,255,.62)}
+ .tabs .selected{border-color:#061a39;background:#061a39;color:#fff}
+}
