@@ -5,6 +5,3 @@
 /* Branded notifications navigation */
 .shell header{align-items:center;gap:18px;min-height:52px}.brand{display:inline-flex;align-items:center}.headerActions{display:flex;align-items:center;gap:18px;margin-left:auto}.headerActions a{display:inline-flex;align-items:center;min-height:40px;padding:0 12px;border:1px solid #cadbea;border-radius:999px;background:#fff;color:#174f86!important;font-size:11px;font-weight:850;letter-spacing:0}.headerActions span{font-size:10px;letter-spacing:1.2px;color:#31516f}
 @media(max-width:620px){.shell header{align-items:flex-start}.brand :global(svg){max-width:142px;height:auto}.headerActions{align-items:flex-end;flex-direction:column;gap:6px}.headerActions a{min-height:38px;padding:0 10px}.headerActions span{font-size:8px}}
-
-/* Rallora premium control normalization */
-:where(button){font-weight:var(--control-weight);transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background .16s ease}:where(button):hover{transform:translateY(-1px)}
