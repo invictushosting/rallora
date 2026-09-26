@@ -296,6 +296,15 @@ export default function ClubAdministration() {
     if (fixtureView==="attention") return Boolean((fixture.play_by && fixture.play_by < new Date().toISOString().slice(0,10) && fixture.status!=="confirmed") || view.playtomicBookings.some((item)=>item.matched_fixture_id===fixture.id && item.match_state==="possible"));
     return fixture.status!=="confirmed" && !booking;
   });
+  const bookingForFixture = (fixtureId:string) => view.playtomicBookings.find((item)=>item.matched_fixture_id===fixtureId && item.booking_status!=="CANCELED");
+  const bookingHealth = (fixture:AdminFixture) => {
+    const booking = bookingForFixture(fixture.id);
+    if (booking?.match_state==="confirmed" && booking.matched_player_count===4) return {tone:"green",label:"Court booked"};
+    if (booking?.match_state==="possible" || booking?.matched_player_count===3) return {tone:"amber",label:"Booking to review"};
+    if (fixture.status==="confirmed") return {tone:"green",label:"Result confirmed"};
+    return {tone:"red",label:"Court not booked"};
+  };
+  const playtomicBookingUrl = "https://app.playtomic.io/";
   const demoMode = view.club.slug==="rallora-demo";
   function sendFixtureReminder(fixture: AdminFixture) {
     if (demoMode) setReminderNotice("Demo reminder prepared for "+fixture.home_label+" vs "+fixture.away_label+". No external message was sent.");
@@ -351,7 +360,11 @@ export default function ClubAdministration() {
       <div className={styles.fixtureList}>
         {fixtureRows.map((fixture)=><article className={styles.fixtureOperationRow} key={fixture.id}>
           <div className={styles.fixtureOperationMain}><strong>{fixture.home_label || "Players"} <span>vs</span> {fixture.away_label || "Players"}</strong><div className={styles.fixtureMeta}><span>Week {fixture.week_number}</span><span>Play by {fixture.play_by}</span><b data-status={fixture.status}>{fixture.status==="confirmed"?"Played":fixture.status.replaceAll("_"," ")}</b></div></div>
-          {fixture.status!=="confirmed" && <button className={styles.fixtureReminder} type="button" onClick={()=>sendFixtureReminder(fixture)}>{fixtureView==="awaiting"?"Request result":"Send reminder"}</button>}
+          <div className={styles.fixtureActions}>
+            <span className={styles.bookingHealth} data-tone={bookingHealth(fixture).tone}><i aria-hidden="true" />{bookingHealth(fixture).label}</span>
+            {fixture.status!=="confirmed" && !bookedFixtureIds.has(fixture.id) && <a className={styles.playtomicButton} href={playtomicBookingUrl} target="_blank" rel="noreferrer">Book on Playtomic</a>}
+            {fixture.status!=="confirmed" && <button className={styles.fixtureReminder} type="button" onClick={()=>sendFixtureReminder(fixture)}>{fixtureView==="awaiting"?"Request result":"Send reminder"}</button>}
+          </div>
         </article>)}
         {!fixtureRows.length && <div className={styles.fixtureEmpty}>No fixtures in this view.</div>}
       </div>
