@@ -1990,3 +1990,30 @@ table tbody tr:hover{background:#e8f6fc}
 .rallora-link{display:inline-flex;align-items:center;gap:5px;min-height:40px;color:#0b4f7d;font-size:12px;font-weight:850;text-decoration:none}
 .rallora-card{border:1px solid rgba(116,151,184,.20);border-radius:var(--radius-card);background:linear-gradient(145deg,rgba(253,254,254,.98),rgba(244,249,252,.98));box-shadow:var(--shadow-sm)}
 .rallora-status{display:inline-flex;align-items:center;min-height:28px;padding:0 10px;border-radius:999px;font-size:11px;font-weight:850;line-height:1}
+
+
+/* Rallora tactile UI v2 — global, build-safe and mobile-first */
+:where(.rallora-card,.card,.division-card,.fixture-card,.admin-stat,.admin-action-card){
+  border-width:1.5px;
+  border-color:rgba(112,148,179,.38);
+  box-shadow:0 1px 0 rgba(255,255,255,.94) inset,0 2px 0 rgba(99,136,166,.11),0 14px 32px rgba(21,54,89,.075);
+}
+:where(.rallora-card,.card,.division-card,.fixture-card,.admin-stat,.admin-action-card):hover{
+  border-color:rgba(69,137,181,.50);
+  box-shadow:0 1px 0 rgba(255,255,255,.96) inset,0 3px 0 rgba(83,132,165,.13),0 18px 38px rgba(21,54,89,.10);
+}
+:where(.rallora-btn,.primary-button,.secondary-button,.admin-button,button){
+  border-width:1.5px;
+  box-shadow:0 1px 0 rgba(255,255,255,.92) inset,0 2px 0 rgba(96,132,161,.13),0 5px 12px rgba(6,26,57,.065);
+  transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background-color .16s ease;
+}
+:where(.rallora-btn,.primary-button,.secondary-button,.admin-button,button):not(:disabled):hover{
+  transform:translateY(-1px);
+}
+:where(.rallora-btn,.primary-button,.secondary-button,.admin-button,button):not(:disabled):active{
+  transform:translateY(1px);
+  box-shadow:0 1px 0 rgba(255,255,255,.88) inset,0 1px 0 rgba(96,132,161,.13),0 3px 7px rgba(6,26,57,.06);
+}
+@media(max-width:700px){
+  :where(.rallora-btn,.primary-button,.secondary-button,.admin-button,button){min-height:46px}
+}
