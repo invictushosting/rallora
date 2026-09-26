@@ -729,7 +729,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
           onChange={(event) => setPlayerTwoRating(event.target.value)} /></label>
         <small>Use the email attached to the player’s Playtomic account so it can be matched later.</small>
       </div>
-      <button disabled={busy || !divisions.length} type="submit">Add pairing</button>\n    </form></div>}
+      <button disabled={busy || !divisions.length} type="submit">Add pairing</button>
+    </form></div>}
     {activeTab === "fixtures" && <form className={styles.form} onSubmit={createFixture}>
       <h3>Create a fixture</h3>
       <label>Division<select value={fixtureDivisionId}
