@@ -17,7 +17,7 @@ type LeagueRule = { key:string; label:string; text:string; enabled:boolean; cust
 type Season = { id: string; club_id: string; name: string; status: string; fixture_schedule_mode: "weekly" | "date_window"; registration_opens_at:string|null; registration_closes_at:string|null; league_format:"standard"|"promotion_relegation_cycles"; teams_per_division:number|null; matches_per_cycle:number|null; division_assignment_mode:"manual"|"combined_rating"; max_divisions:number|null; allow_overflow_when_uneven:boolean; promotion_places:number; relegation_places:number; cycle_match_mode:"single_round_robin"|"double_round_robin"; require_cycle_completion:boolean; league_rules:LeagueRule[] };
 type Membership = { club_id: string; user_id: string; role: string; status: string };
 type DivisionSummary = { id: string; name: string; sort_order: number;
-  teams: { id: string; name: string }[] };
+  teams: { id: string; name: string; player_one_name:string|null; player_two_name:string|null; player_one_email:string|null; player_two_email:string|null; player_one_rating:number|null; player_two_rating:number|null }[] };
 type AdminFixture = { id:string; season_id:string; division_id:string; home_team_id:string; away_team_id:string; week_number:number; play_by:string; status:string; home_label?:string; away_label?:string; home_score?:string|null; away_score?:string|null; winner_team_id?:string|null };
 type Summary = {
   season: Season;
@@ -168,9 +168,9 @@ export default function ClubAdministration() {
           const fixtureIds = seasonFixtures.map((item) => item.id);
           const [teamsReply, resultsReply] = await Promise.all([
             divisionIds.length
-              ? supabase.from("teams").select("id,division_id,name,player_one_name,player_two_name")
+              ? supabase.from("teams").select("id,division_id,name,player_one_name,player_two_name,player_one_email,player_two_email,player_one_rating,player_two_rating")
                   .in("division_id", divisionIds).order("name", { ascending: true })
-              : Promise.resolve({ data: [] as { id: string; division_id: string; name: string; player_one_name:string|null; player_two_name:string|null }[], error: null }),
+              : Promise.resolve({ data: [] as { id: string; division_id: string; name: string; player_one_name:string|null; player_two_name:string|null; player_one_email:string|null; player_two_email:string|null; player_one_rating:number|null; player_two_rating:number|null }[], error: null }),
             fixtureIds.length
               ? supabase.from("results").select("fixture_id")
                   .in("fixture_id", fixtureIds).eq("status", "confirmed")
@@ -179,7 +179,7 @@ export default function ClubAdministration() {
           if (teamsReply.error) throw teamsReply.error;
           if (resultsReply.error) throw resultsReply.error;
           const knownFixtureIds = new Set(fixtureIds);
-          const roster = (teamsReply.data ?? []) as { id: string; division_id: string; name: string; player_one_name:string|null; player_two_name:string|null }[];
+          const roster = (teamsReply.data ?? []) as { id: string; division_id: string; name: string; player_one_name:string|null; player_two_name:string|null; player_one_email:string|null; player_two_email:string|null; player_one_rating:number|null; player_two_rating:number|null }[];
           const labels = new Map(roster.map((team)=>[team.id,[team.player_one_name,team.player_two_name].filter(Boolean).join(" / ") || "Players to be confirmed"]));
           allFixtures.push(...seasonFixtures.map((fixture)=>({...fixture,home_label:labels.get(fixture.home_team_id),away_label:labels.get(fixture.away_team_id)})));
           const divisionSummaries: DivisionSummary[] = (divisionReply.data ?? [])
@@ -188,7 +188,7 @@ export default function ClubAdministration() {
               name: division.name as string,
               sort_order: division.sort_order as number,
               teams: roster.filter((team) => team.division_id === division.id)
-                .map((team) => ({ id: team.id, name: team.name })),
+                .map((team) => ({ id: team.id, name: team.name, player_one_name: team.player_one_name, player_two_name: team.player_two_name, player_one_email: team.player_one_email, player_two_email: team.player_two_email, player_one_rating: team.player_one_rating, player_two_rating: team.player_two_rating })),
             }));
           return {
             season,

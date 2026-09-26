@@ -22,3 +22,5 @@
 .returningPlayer{margin:18px 0;padding:14px 16px;border:1px solid #c8e6d8;border-radius:14px;background:#f1faf6}
 .returningPlayer strong{display:block;color:#075f43;font-size:13px}
 .returningPlayer p{margin:5px 0 0;color:#4f6f65;font-size:12px;line-height:1.5}
+
+.modeSwitch{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 22px;padding:5px;background:#edf5fb;border-radius:14px}.modeSwitch button{background:transparent;color:#294566;padding:11px}.modeSwitch .modeActive{background:#061a39;color:#fff;box-shadow:0 5px 14px #061a3920}.card textarea{box-sizing:border-box;width:100%;min-height:90px;resize:vertical;border:1px solid #cedceb;border-radius:10px;padding:12px;font:inherit;color:#061a39;background:#fff}.check{display:flex!important;grid-template-columns:auto 1fr!important;align-items:center;gap:9px!important}.check input{width:18px!important;height:18px;margin:0}@media(max-width:560px){.modeSwitch{grid-template-columns:1fr}}
