@@ -14,4 +14,3 @@
  .eventHead{padding:18px}.eventHead>div:last-child{display:grid;grid-template-columns:1fr 1fr}.eventHead>div:last-child button{width:100%}
  .adminGrid form,.generator,.content article{padding:16px}.table li{grid-template-columns:28px minmax(0,1fr) auto;padding:11px 4px}
  .match>div{display:grid;grid-template-columns:1fr 1fr}.match input{width:100%}
-}
