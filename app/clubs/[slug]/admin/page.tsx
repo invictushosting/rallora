@@ -345,12 +345,15 @@ export default function ClubAdministration() {
       <article onClick={()=>openFixtureView("attention")}><span>Needs attention</span><strong>{totals.overdue + possibleBookings}</strong><small>{possibleBookings ? possibleBookings+" possible 3/4 booking"+(possibleBookings===1?"":"s")+" to review" : "Overdue fixtures"}</small><b className={styles.metricAction}>View overdue</b></article>
       <article onClick={()=>openFixtureView("played")}><span>Played</span><strong>{totals.confirmed}</strong><small>Confirmed results</small><b className={styles.metricAction}>View results</b></article>
     </section>
-    {fixtureView && <section id="fixture-operations" className={styles.launchPanel}>
-      <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>FIXTURE OPERATIONS</span><h2>{fixtureView==="all"?"All fixtures":fixtureView==="attention"?"Needs attention":fixtureView.charAt(0).toUpperCase()+fixtureView.slice(1)}</h2></div><button type="button" onClick={()=>setFixtureView(null)}>Close</button></div>
-      {reminderNotice && <p role="status">{reminderNotice}</p>}
-      <div className={styles.divisionList}>
-        {fixtureRows.map((fixture)=><div className={styles.divisionRow} key={fixture.id}><div><strong>{fixture.home_label || "Players"} vs {fixture.away_label || "Players"}</strong><span>Week {fixture.week_number} · Play by {fixture.play_by} · {fixture.status}</span></div>{fixture.status!=="confirmed" && <button type="button" onClick={()=>sendFixtureReminder(fixture)}>{fixtureView==="awaiting"?"Remind captain for result":"Send reminder"}</button>}</div>)}
-        {!fixtureRows.length && <p>No fixtures in this view.</p>}
+    {fixtureView && <section id="fixture-operations" className={styles.fixtureOperations}>
+      <div className={styles.fixtureHeader}><div><span className={styles.eyebrow}>FIXTURE OPERATIONS</span><h2>{fixtureView==="all"?"All fixtures":fixtureView==="attention"?"Needs attention":fixtureView.charAt(0).toUpperCase()+fixtureView.slice(1)}</h2><p>{fixtureRows.length} fixture{fixtureRows.length===1?"":"s"} in this view</p></div><button className={styles.fixtureClose} type="button" onClick={()=>setFixtureView(null)}>Close</button></div>
+      {reminderNotice && <p className={styles.fixtureNotice} role="status">{reminderNotice}</p>}
+      <div className={styles.fixtureList}>
+        {fixtureRows.map((fixture)=><article className={styles.fixtureOperationRow} key={fixture.id}>
+          <div className={styles.fixtureOperationMain}><strong>{fixture.home_label || "Players"} <span>vs</span> {fixture.away_label || "Players"}</strong><div className={styles.fixtureMeta}><span>Week {fixture.week_number}</span><span>Play by {fixture.play_by}</span><b data-status={fixture.status}>{fixture.status==="confirmed"?"Played":fixture.status.replaceAll("_"," ")}</b></div></div>
+          {fixture.status!=="confirmed" && <button className={styles.fixtureReminder} type="button" onClick={()=>sendFixtureReminder(fixture)}>{fixtureView==="awaiting"?"Request result":"Send reminder"}</button>}
+        </article>)}
+        {!fixtureRows.length && <div className={styles.fixtureEmpty}>No fixtures in this view.</div>}
       </div>
     </section>}
     <div id="club-leagues" className={styles.sectionHeading}><div><span className={styles.eyebrow}>LEAGUE MANAGEMENT</span><h2>Leagues</h2></div>
