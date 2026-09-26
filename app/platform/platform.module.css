@@ -77,3 +77,5 @@
 @media(max-width:560px){.addClubForm{grid-template-columns:1fr}}
 
 .fieldHint{display:block;color:#7b8da0;font-size:10px;font-weight:600;line-height:1.35;text-transform:none;margin-top:-2px}
+/* Rallora controls */
+.controls button,.actionRow button,.card>button,.switchAccount,.loginForm button{min-height:var(--control-h);border-radius:var(--radius-control);font-size:var(--control-font);font-weight:var(--control-weight);transition:transform .16s ease,box-shadow .16s ease}.controls button:hover,.actionRow button:hover,.card>button:hover,.switchAccount:hover,.loginForm button:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(6,26,57,.12)}
