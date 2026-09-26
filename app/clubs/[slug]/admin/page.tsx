@@ -324,23 +324,26 @@ export default function ClubAdministration() {
         <a href={`/clubs/${encodeURIComponent(view.club.slug)}`}>View public hub</a>
       </div>
       <div className={styles.adminShortcuts}>
+        <a href="#club-leagues">Leagues</a>
+        <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/registrations`}>Registrations</Link>
+        <a href="#club-management">Teams &amp; players</a>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/staff`}>Club staff</Link>
-        <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/integrations`}>Integrations {view.playtomicConnected ? "✓" : ""}</Link>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/captain`}>Captain centre</Link>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/events`}>Events</Link>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/social`}>Social Studio</Link>
+        <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/integrations`}>Integrations {view.playtomicConnected ? "✓" : ""}</Link>
       </div>
     </section>
     <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>CLUB OVERVIEW</span><h2>Your club at a glance</h2></div>
       <p>Live totals and season structure for {view.club.name}.</p></div>
     <section className={styles.metrics} aria-label="League operations overview">
-      <article onClick={()=>openFixtureView("all")}><span>Active leagues</span><strong>{view.summaries.filter(({season})=>season.status==="active").length}</strong><small>Currently being played · View</small></article>
-      <article onClick={()=>openFixtureView("all")}><span>Total fixtures</span><strong>{totals.fixtures}</strong><small>Across all leagues · View</small></article>
-      <article onClick={()=>openFixtureView("outstanding")}><span>Outstanding</span><strong>{Math.max(0, totals.outstanding - bookedFixtureIds.size)}</strong><small>No confirmed booking yet · View</small></article>
-      <article onClick={()=>openFixtureView("booked")}><span>Booked</span><strong>{bookedFixtureIds.size}</strong><small>Playtomic matched 4/4 · View</small></article>
-      <article onClick={()=>openFixtureView("awaiting")}><span>Awaiting result</span><strong>{Math.max(totals.awaitingResult, finishedWithoutResult)}</strong><small>Played, captain action needed · View</small></article>
-      <article onClick={()=>openFixtureView("attention")}><span>Needs attention</span><strong>{totals.overdue + possibleBookings}</strong><small>{possibleBookings ? possibleBookings+" possible 3/4 booking"+(possibleBookings===1?"":"s")+" to review · View" : "Overdue fixtures · View"}</small></article>
-      <article onClick={()=>openFixtureView("played")}><span>Played</span><strong>{totals.confirmed}</strong><small>Confirmed results · View</small></article>
+      <article onClick={()=>document.getElementById("club-leagues")?.scrollIntoView({behavior:"smooth",block:"start"})}><span>Active leagues</span><strong>{view.summaries.filter(({season})=>season.status==="active").length}</strong><small>Currently being played</small><b className={styles.metricAction}>View leagues →</b></article>
+      <article onClick={()=>openFixtureView("all")}><span>Total fixtures</span><strong>{totals.fixtures}</strong><small>Across all leagues</small><b className={styles.metricAction}>View fixtures →</b></article>
+      <article onClick={()=>openFixtureView("outstanding")}><span>Outstanding</span><strong>{Math.max(0, totals.outstanding - bookedFixtureIds.size)}</strong><small>No confirmed booking yet</small><b className={styles.metricAction}>View fixtures →</b></article>
+      <article onClick={()=>openFixtureView("booked")}><span>Booked</span><strong>{bookedFixtureIds.size}</strong><small>Playtomic matched 4/4</small><b className={styles.metricAction}>View bookings →</b></article>
+      <article onClick={()=>openFixtureView("awaiting")}><span>Awaiting result</span><strong>{Math.max(totals.awaitingResult, finishedWithoutResult)}</strong><small>Played, captain action needed</small><b className={styles.metricAction}>Review results →</b></article>
+      <article onClick={()=>openFixtureView("attention")}><span>Needs attention</span><strong>{totals.overdue + possibleBookings}</strong><small>{possibleBookings ? possibleBookings+" possible 3/4 booking"+(possibleBookings===1?"":"s")+" to review" : "Overdue fixtures"}</small><b className={styles.metricAction}>View overdue →</b></article>
+      <article onClick={()=>openFixtureView("played")}><span>Played</span><strong>{totals.confirmed}</strong><small>Confirmed results</small><b className={styles.metricAction}>View results →</b></article>
     </section>
     {fixtureView && <section id="fixture-operations" className={styles.launchPanel}>
       <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>FIXTURE OPERATIONS</span><h2>{fixtureView==="all"?"All fixtures":fixtureView==="attention"?"Needs attention":fixtureView.charAt(0).toUpperCase()+fixtureView.slice(1)}</h2></div><button type="button" onClick={()=>setFixtureView(null)}>Close</button></div>
@@ -350,8 +353,8 @@ export default function ClubAdministration() {
         {!fixtureRows.length && <p>No fixtures in this view.</p>}
       </div>
     </section>}
-    <div className={styles.sectionHeading}><h2>Club seasons</h2>
-      <p>Each season below belongs to {view.club.name}.</p></div>
+    <div id="club-leagues" className={styles.sectionHeading}><div><span className={styles.eyebrow}>LEAGUE MANAGEMENT</span><h2>Leagues</h2></div>
+      <p>Manage leagues, divisions, fixtures and results.</p></div>
     <section className={styles.grid}>
       {view.summaries.map(({ season, divisions, teams, fixtures, confirmed, outstanding, awaitingResult, overdue, divisionSummaries }) =>
         <article className={styles.card} key={season.id}>
@@ -360,21 +363,24 @@ export default function ClubAdministration() {
           </div>
           <h3>{season.name}</h3>
           <div className={styles.numbers}>
-            <span><strong>{divisions}</strong> divisions</span>
-            <span><strong>{teams}</strong> player pairs</span>
-            <span><strong>{fixtures}</strong> fixtures</span>
-            <span><strong>{outstanding}</strong> outstanding</span>
-            <span><strong>{awaitingResult}</strong> awaiting result</span>
-            <span><strong>{confirmed}</strong> played</span>
+            <span><strong>{divisions}</strong> {divisions === 1 ? "division" : "divisions"}</span>
+            <span><strong>{teams}</strong> {teams === 1 ? "team" : "teams"}</span>
+            <span><strong>{fixtures}</strong> {fixtures === 1 ? "fixture" : "fixtures"}</span>
+          </div>
+          <div className={styles.operationStats}>
+            <span><strong>{outstanding}</strong> Outstanding</span>
+            <span><strong>{awaitingResult}</strong> Awaiting result</span>
+            <span><strong>{confirmed}</strong> Played</span>
           </div>
           <div className={styles.divisionList}>
             <h4>Divisions</h4>
             {divisionSummaries.map((division) => <div key={division.id} className={styles.divisionRow}>
-              <div><strong>{division.name}</strong><span>{division.teams.length} player pairs</span></div>
+              <div><strong>{division.name}</strong><span>{division.teams.length} {division.teams.length === 1 ? "team" : "teams"}</span></div>
+              <button type="button" className={styles.divisionAction} onClick={() => window.dispatchEvent(new CustomEvent("rallora:edit-season",{detail:{seasonId:season.id}}))}>Manage division →</button>
             </div>)}
             {!divisionSummaries.length && <p>No divisions yet.</p>}
           </div>
-          <a href={`/clubs/${encodeURIComponent(view.club.slug)}`}>View season in club hub →</a>
+          <a className={styles.cardAction} href={`/clubs/${encodeURIComponent(view.club.slug)}`}>View public season →</a>
         </article>)}
       {!view.summaries.length && <article className={styles.card}>
         <h3>No seasons yet</h3><p>Club seasons will appear here when configured.</p>
