@@ -160,3 +160,23 @@
 
 /* Rallora surface hierarchy */
 .metrics article:nth-child(2n){background:linear-gradient(145deg,#f9fcfe,#f2f8fb)}.metrics article:nth-child(3n){background:linear-gradient(145deg,#fdfefe,#edf7fb)}.card{background:linear-gradient(145deg,rgba(253,254,254,.96),rgba(244,249,252,.96))}.launchPanel:not(.fixtureOperations){background:linear-gradient(145deg,#fdfefe,#f3f8fb)}.fixtureOperations{background:linear-gradient(145deg,rgba(253,254,254,.97),rgba(239,247,251,.97))}.fixtureOperationRow{background:#f8fbfd}.socialInvite{background:radial-gradient(circle at 90% 15%,rgba(0,176,254,.18),transparent 30%),linear-gradient(135deg,#061a39,#0a315d)}
+
+
+/* Unified admin actions and league cards */
+.metricAction{display:inline-flex;margin-top:12px;color:#0b4f7d;font-size:12px;font-weight:850;line-height:1.2}
+.operationStats{display:flex;flex-wrap:wrap;gap:8px;margin:-5px 0 20px}
+.operationStats span{display:inline-flex;align-items:center;gap:5px;padding:7px 9px;border-radius:999px;background:#edf4f8;color:#58718a;font-size:11px;font-weight:700}
+.operationStats strong{color:#17365c;font-size:12px}
+.card .divisionRow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 13px;background:#fbfdfe}
+.card .divisionRow>div{display:grid;gap:3px;min-width:0}
+.card .divisionRow>div strong{font-size:13px;color:#173354}
+.card .divisionRow>div span{font-size:11px;color:#6b8098}
+.divisionAction{border:0;background:transparent;color:#0b4f7d;font:inherit;font-size:11px;font-weight:850;cursor:pointer;white-space:nowrap;padding:7px 0}
+.cardAction{display:inline-flex!important;align-items:center;min-height:44px;text-decoration:none;color:#0b4f7d!important;font-size:12px!important;font-weight:850!important}
+@media(max-width:490px){.card .divisionRow{align-items:flex-start;flex-direction:column}.divisionAction{min-height:36px}.operationStats{gap:6px}}
+
+/* Mobile admin navigation: visible at a glance, never horizontal-scroll primary navigation */
+@media(max-width:700px){
+ .adminShortcuts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .adminShortcuts a{display:flex;align-items:center;justify-content:center;min-height:46px;margin:0;padding:9px 10px;text-align:center}
+}
