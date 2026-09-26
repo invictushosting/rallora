@@ -698,7 +698,41 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       </div> : <button type="button" onClick={() => setActiveTab("seasons")}>Go to Seasons &amp; Divisions →</button>}
       <p className={styles.registrationNote}>Your club registration terms are managed in Branding and shown to entrants during registration.</p>
     </section>}
-    {activeTab === "teams" && <div className={styles.teamManagement}><div className={styles.wide}><span className={styles.eyebrow}>PLAYERS &amp; PAIRINGS</span><h3>League pairings</h3><p>Manage current player pairings without breaking their fixtures or results.</p>{divisions.map(d=><section key={d.id} className={styles.pairingGroup}><h4>{d.season_name} · {d.name}</h4>{d.teams.map(t=><article key={t.id} className={styles.pairingRow}><div><strong>{[t.player_one_name,t.player_two_name].filter(Boolean).join(" / ")||t.name}</strong><span>{t.player_one_email||"No email"} · {t.player_two_email||"No email"}</span></div><div className={styles.pairingActions}><button type="button" onClick={()=>setReplaceTarget({teamId:t.id,slot:1})}>Replace player 1</button><button type="button" onClick={()=>setReplaceTarget({teamId:t.id,slot:2})}>Replace player 2</button></div></article>))}</section>)}{replaceTarget&&<div className={styles.replacePanel}><h4>Select replacement from waiting list</h4><select value={replacementId} onChange={e=>setReplacementId(e.target.value)}><option value="">Choose available player</option>{waitlist.map(w=><option key={w.id} value={w.id}>{w.player_name}{w.playtomic_rating!=null?` · Playtomic ${w.playtomic_rating}`:""}{w.preferred_level?` · ${w.preferred_level}`:""}</option>)}</select>{waitlist.find(w=>w.id===replacementId)?.availability&&<p>Availability: {waitlist.find(w=>w.id===replacementId)?.availability}</p>}<div className={styles.pairingActions}><button type="button" disabled={busy||!replacementId} onClick={()=>void replacePlayer()}>Replace player</button><button type="button" className={styles.secondaryButton} onClick={()=>setReplaceTarget(null)}>Cancel</button></div></div>}</div><form className={styles.form} onSubmit={createTeam}>
+    {activeTab === "teams" && <div className={styles.teamManagement}>
+      <div className={styles.wide}>
+        <span className={styles.eyebrow}>PLAYERS &amp; PAIRINGS</span>
+        <h3>League pairings</h3>
+        <p>Manage current player pairings without breaking their fixtures or results.</p>
+        {divisions.map((division) => <section key={division.id} className={styles.pairingGroup}>
+          <h4>{division.season_name} · {division.name}</h4>
+          {division.teams.map((team) => <article key={team.id} className={styles.pairingRow}>
+            <div>
+              <strong>{[team.player_one_name, team.player_two_name].filter(Boolean).join(" / ") || team.name}</strong>
+              <span>{team.player_one_email || "No email"} · {team.player_two_email || "No email"}</span>
+            </div>
+            <div className={styles.pairingActions}>
+              <button type="button" onClick={() => setReplaceTarget({ teamId: team.id, slot: 1 })}>Replace player 1</button>
+              <button type="button" onClick={() => setReplaceTarget({ teamId: team.id, slot: 2 })}>Replace player 2</button>
+            </div>
+          </article>)}
+        </section>)}
+        {replaceTarget && <div className={styles.replacePanel}>
+          <h4>Select replacement from waiting list</h4>
+          <select value={replacementId} onChange={(event) => setReplacementId(event.target.value)}>
+            <option value="">Choose available player</option>
+            {waitlist.map((player) => <option key={player.id} value={player.id}>
+              {player.player_name}{player.playtomic_rating != null ? ` · Playtomic ${player.playtomic_rating}` : ""}{player.preferred_level ? ` · ${player.preferred_level}` : ""}
+            </option>)}
+          </select>
+          {waitlist.find((player) => player.id === replacementId)?.availability &&
+            <p>Availability: {waitlist.find((player) => player.id === replacementId)?.availability}</p>}
+          <div className={styles.pairingActions}>
+            <button type="button" disabled={busy || !replacementId} onClick={() => void replacePlayer()}>Replace player</button>
+            <button type="button" className={styles.secondaryButton} onClick={() => setReplaceTarget(null)}>Cancel</button>
+          </div>
+        </div>}
+      </div>
+      <form className={styles.form} onSubmit={createTeam}>
       <h3>Add a player pairing manually</h3>
       <label>Division<select value={teamDivisionId}
         onChange={(event) => setTeamDivisionId(event.target.value)}>
