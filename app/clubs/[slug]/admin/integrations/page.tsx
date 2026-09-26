@@ -55,19 +55,18 @@ export default function IntegrationsPage(){
     </section>
     {state&&<section className={styles.message}><p>{state}</p></section>}
     {error&&<section className={styles.message}><p>{error}</p></section>}
-    <section className={styles.card}>
-      <span className={connected?styles.status:styles.statusDanger}>{connected?"Connected":integration?.status??"Not connected"}</span>
-      <h3>Playtomic Club API</h3>
-      <p>Generate External API credentials in Playtomic Manager → Settings → Developer Tools. Use the fields below to connect this club securely.</p>
+    <section className={`${styles.card} ${styles.integrationCard}`}>
+      <div className={styles.integrationTitle}><div><span className={connected?styles.status:styles.statusDanger}>{connected?"Connected":integration?.status??"Not connected"}</span><h3>Playtomic Club API</h3></div>{connected&&<span className={styles.integrationVerified}>✓ Secure connection</span>}</div>
+      <p className={styles.integrationIntro}>Generate External API credentials in Playtomic Manager → Settings → Developer Tools. Rallora stores the secret securely and uses the connection to match bookings to league fixtures.</p>
       <div className={styles.integrationHelp}>
         <article><strong>Venue ID</strong><p>The unique identifier for this Playtomic club/venue. You can find it in Playtomic Manager within the club’s Developer Tools or API settings.</p></article>
         <article><strong>Client ID</strong><p>The public identifier for your External API credentials. Find it in Playtomic Manager → Settings → Developer Tools after creating API credentials.</p></article>
         <article><strong>Client Secret</strong><p>The private secret paired with your Client ID. It is shown when the API credentials are created. Treat it like a password and do not share it.</p></article>
       </div>
-      {integration&&<div className={styles.numbers}>
-        <span><strong>{integration.client_id?"Saved":"—"}</strong> Client ID</span>
-        <span><strong>{integration.last_verified_at?new Date(integration.last_verified_at).toLocaleDateString("en-GB"):"—"}</strong> Last verified</span>
-        <span><strong>{integration.last_sync_at?new Date(integration.last_sync_at).toLocaleDateString("en-GB"):"—"}</strong> Last sync</span>
+      {integration&&<div className={styles.integrationStats}>
+        <span><strong>{integration.client_id?"Saved":"—"}</strong><small>Client ID</small></span>
+        <span><strong>{integration.last_verified_at?new Date(integration.last_verified_at).toLocaleDateString("en-GB"):"—"}</strong><small>Last verified</small></span>
+        <span><strong>{integration.last_sync_at?new Date(integration.last_sync_at).toLocaleDateString("en-GB"):"—"}</strong><small>Last sync</small></span>
       </div>}
       {integration?.last_error&&<p>{integration.last_error}</p>}
       {!demoMode&&<form className={styles.loginForm} onSubmit={connect}>
