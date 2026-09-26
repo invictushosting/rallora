@@ -343,7 +343,7 @@ export default function ClubAdministration() {
       <article onClick={()=>openFixtureView("played")}><span>Played</span><strong>{totals.confirmed}</strong><small>Confirmed results · View</small></article>
     </section>
     {fixtureView && <section id="fixture-operations" className={styles.launchPanel}>
-      <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>FIXTURE OPERATIONS</span><h2>{fixtureView==="all"?"All fixtures":fixtureView.charAt(0).toUpperCase()+fixtureView.slice(1)}</h2></div><button type="button" onClick={()=>setFixtureView(null)}>Close</button></div>
+      <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>FIXTURE OPERATIONS</span><h2>{fixtureView==="all"?"All fixtures":fixtureView==="attention"?"Needs attention":fixtureView.charAt(0).toUpperCase()+fixtureView.slice(1)}</h2></div><button type="button" onClick={()=>setFixtureView(null)}>Close</button></div>
       {reminderNotice && <p role="status">{reminderNotice}</p>}
       <div className={styles.divisionList}>
         {fixtureRows.map((fixture)=><div className={styles.divisionRow} key={fixture.id}><div><strong>{fixture.home_label || "Players"} vs {fixture.away_label || "Players"}</strong><span>Week {fixture.week_number} · Play by {fixture.play_by} · {fixture.status}</span></div>{fixture.status!=="confirmed" && <button type="button" onClick={()=>sendFixtureReminder(fixture)}>{fixtureView==="awaiting"?"Remind captain for result":"Send reminder"}</button>}</div>)}
