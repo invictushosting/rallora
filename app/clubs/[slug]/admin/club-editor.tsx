@@ -702,7 +702,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       <div className={styles.wide}>
         <span className={styles.eyebrow}>PLAYERS &amp; PAIRINGS</span>
         <h3>League pairings</h3>
-        <p>Manage current player pairings without breaking their fixtures or results.</p>
+        <p>View each pairing by player and make replacements without breaking fixtures or results.</p>
         {divisions.map((division) => <section key={division.id} className={styles.pairingGroup}>
           <h4>{division.season_name} · {division.name}</h4>
           {division.teams.map((team) => <article key={team.id} className={styles.pairingRow}>
@@ -710,9 +710,10 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
               <strong>{[team.player_one_name, team.player_two_name].filter(Boolean).join(" / ") || team.name}</strong>
               <span>{team.player_one_email || "No email"} · {team.player_two_email || "No email"}</span>
             </div>
-            <div className={styles.pairingActions}>
-              <button type="button" onClick={() => setReplaceTarget({ teamId: team.id, slot: 1 })}>Replace player 1</button>
-              <button type="button" onClick={() => setReplaceTarget({ teamId: team.id, slot: 2 })}>Replace player 2</button>
+            <div className={styles.pairingPlayers}>
+              <div><span>Player 1</span><strong>{team.player_one_name || "Player to be confirmed"}</strong><small>{team.player_one_email || "No email"}</small><button type="button" onClick={() => setReplaceTarget({ teamId: team.id, slot: 1 })}>Replace</button></div>
+              <span className={styles.pairingJoin}>+</span>
+              <div><span>Player 2</span><strong>{team.player_two_name || "Player to be confirmed"}</strong><small>{team.player_two_email || "No email"}</small><button type="button" onClick={() => setReplaceTarget({ teamId: team.id, slot: 2 })}>Replace</button></div>
             </div>
           </article>)}
         </section>)}
