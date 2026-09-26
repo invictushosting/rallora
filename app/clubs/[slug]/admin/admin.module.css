@@ -187,3 +187,11 @@
 .divisionAction:hover{background:#f7fbfe!important;border-color:#9fc8e3!important;box-shadow:0 6px 14px rgba(6,26,57,.07);transform:translateY(-1px)}
 .divisionAction:focus-visible{outline:3px solid rgba(0,176,254,.22);outline-offset:2px}
 @media(max-width:490px){.card .divisionRow{align-items:center;flex-direction:row}.divisionAction{min-height:38px;padding:8px 10px!important}}
+
+
+/* Touch-first admin actions: actions render as controls, never text links */
+.metricAction{display:flex;align-items:center;justify-content:center;width:100%;min-height:42px;margin-top:14px;padding:10px 14px;border:1px solid #c9ddec;border-radius:12px;background:#fff;color:#0b3b72;font-size:12px;font-weight:850;line-height:1;text-align:center;box-shadow:0 3px 9px rgba(6,26,57,.035);transition:background .16s ease,border-color .16s ease,box-shadow .16s ease,transform .16s ease}
+.metrics article:hover .metricAction{background:#f5fbff;border-color:#8dc7e8;box-shadow:0 6px 14px rgba(6,26,57,.07)}
+.metrics article:focus-within .metricAction{outline:3px solid rgba(0,176,254,.20);outline-offset:2px}
+.cardAction{display:flex!important;justify-content:center;width:100%;min-height:42px!important;margin-top:14px;padding:10px 14px!important;border:1px solid #c9ddec;border-radius:12px;background:#fff;color:#0b3b72!important;text-align:center;box-shadow:0 3px 9px rgba(6,26,57,.035)}
+@media(max-width:700px){.metricAction,.cardAction{min-height:46px!important;font-size:13px!important}.metrics article{display:flex;flex-direction:column}.metrics article .metricAction{margin-top:auto}.metrics article small{margin-bottom:14px}}
