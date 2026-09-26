@@ -12,10 +12,12 @@ button { cursor: pointer; }
   --cyan: #00B0FE;
   --ink: #061A39;
   --muted: #647b94;
-  --card: #ffffff;
-  --card-soft: #f8fcff;
-  --surface: #edf7fc;
-  --line: #d8e6f1;
+  --card: #fdfefe;
+  --card-soft: #f3f8fb;
+  --surface: #e9f2f7;
+  --surface-raised: #f7fafc;
+  --surface-tint: #eaf5fb;
+  --line: #d3e1eb;
   --shadow-sm: 0 8px 22px rgba(6,26,57,.06);
   --shadow-md: 0 16px 38px rgba(6,26,57,.09);
 }
