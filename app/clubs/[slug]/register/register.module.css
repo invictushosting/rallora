@@ -24,3 +24,6 @@
 .returningPlayer p{margin:5px 0 0;color:#4f6f65;font-size:12px;line-height:1.5}
 
 .modeSwitch{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 22px;padding:5px;background:#edf5fb;border-radius:14px}.modeSwitch button{background:transparent;color:#294566;padding:11px}.modeSwitch .modeActive{background:#061a39;color:#fff;box-shadow:0 5px 14px #061a3920}.card textarea{box-sizing:border-box;width:100%;min-height:90px;resize:vertical;border:1px solid #cedceb;border-radius:10px;padding:12px;font:inherit;color:#061a39;background:#fff}.check{display:flex!important;grid-template-columns:auto 1fr!important;align-items:center;gap:9px!important}.check input{width:18px!important;height:18px;margin:0}@media(max-width:560px){.modeSwitch{grid-template-columns:1fr}}
+
+/* Rallora controls */
+.form button{min-height:var(--control-h);border-radius:var(--radius-control);font-size:var(--control-font);font-weight:var(--control-weight);transition:transform .16s ease,box-shadow .16s ease}.form button:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(6,26,57,.12)}

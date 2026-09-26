@@ -33,3 +33,6 @@
 @media(max-width:600px){.heroTop{align-items:flex-start}.actionBadge{white-space:nowrap}.actionCentre{align-items:flex-start;flex-direction:column;gap:8px;padding:17px}.actionCentre h2{font-size:18px}.card small{line-height:1.35}}
 
 .ratingStrip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:15px}.ratingStrip span{font-size:8px;letter-spacing:.12em;font-weight:900;background:#eaf2ff;color:#2458a8;padding:5px 8px;border-radius:20px}.ratingStrip strong{font-size:11px;color:#dbe7f5;background:rgba(255,255,255,.08);padding:6px 9px;border-radius:9px}.finalResult{display:inline-grid!important;grid-template-columns:auto auto auto;gap:6px;align-items:center;background:#071c3b!important;color:white!important;padding:10px 13px!important;border-radius:10px}.finalResult small{grid-column:1/-1;font-size:7px;letter-spacing:.12em;color:#9db5d2;text-align:center}.finalResult em{font-style:normal;color:#8da5c1}
+
+/* Rallora controls */
+.card button{min-height:var(--control-h);border-radius:var(--radius-control);font-size:var(--control-font);font-weight:var(--control-weight);transition:transform .16s ease,box-shadow .16s ease}.card button:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(6,26,57,.12)}

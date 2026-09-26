@@ -18,3 +18,6 @@
 .applicationSuccess>div{margin:22px 0;padding:18px;background:#f4f9fc;border-radius:14px}.applicationSuccess ol{margin:10px 0 0;padding-left:21px;display:grid;gap:8px;color:#36536f;font-size:13px}
 .applicationSuccess>a{display:inline-flex;align-items:center;min-height:44px;color:#1467b8;font-weight:850;text-decoration:none}
 @media(max-width:700px){.applicationSuccess{padding:23px 18px;border-radius:17px}.applicationSuccess h2{font-size:25px}}
+
+/* Rallora controls */
+.form button{min-height:var(--control-h);border-radius:var(--radius-control);font-size:var(--control-font);font-weight:var(--control-weight);transition:transform .16s ease,box-shadow .16s ease}.form button:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(6,26,57,.12)}
