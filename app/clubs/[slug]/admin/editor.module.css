@@ -125,3 +125,9 @@
  .tabs button{width:100%;min-height:48px;white-space:normal;text-align:center;padding:10px 8px;border:1px solid #cfdee9;background:rgba(255,255,255,.62)}
  .tabs .selected{border-color:#061a39;background:#061a39;color:#fff}
 }
+
+
+/* Rallora tactile surface system */
+.card,.panel,.section,.formCard,.contentCard{border-width:1.5px;border-color:rgba(126,157,185,.34);box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 2px 0 rgba(118,148,174,.10),0 14px 32px rgba(21,54,89,.07)}
+button:not(:disabled),a[class*="Action"],a[class*="Button"]{border-width:1.5px;box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 2px 0 rgba(118,148,174,.12),0 5px 12px rgba(6,26,57,.06)}
+button:not(:disabled):active,a[class*="Action"]:active,a[class*="Button"]:active{transform:translateY(1px);box-shadow:0 1px 0 rgba(255,255,255,.85) inset,0 1px 0 rgba(118,148,174,.12),0 3px 7px rgba(6,26,57,.06)}
