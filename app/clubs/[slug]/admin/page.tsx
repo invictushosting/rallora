@@ -188,7 +188,7 @@ export default function ClubAdministration() {
               name: division.name as string,
               sort_order: division.sort_order as number,
               teams: roster.filter((team) => team.division_id === division.id)
-                .map((team) => ({ id: team.id, name: team.name })),
+                .map((team) => ({ id: team.id, name: team.name, player_one_name: team.player_one_name, player_two_name: team.player_two_name, player_one_email: team.player_one_email, player_two_email: team.player_two_email, player_one_rating: team.player_one_rating, player_two_rating: team.player_two_rating })),
             }));
           return {
             season,
