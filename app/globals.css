@@ -20,6 +20,13 @@ button { cursor: pointer; }
   --line: #d3e1eb;
   --shadow-sm: 0 8px 22px rgba(6,26,57,.06);
   --shadow-md: 0 16px 38px rgba(6,26,57,.09);
+  --radius-control: 12px;
+  --radius-card: 20px;
+  --control-h: 44px;
+  --control-pad: 0 14px;
+  --control-weight: 800;
+  --control-font: 13px;
+  --focus-ring: 0 0 0 3px rgba(0,176,254,.20);
 }
 
 .app-shell { min-height: 100vh; padding-bottom: 78px; }
@@ -1966,3 +1973,20 @@ input:focus,select:focus,textarea:focus{outline:2px solid rgba(0,176,254,.18);ou
 table th{background:#eef6fb;color:#56718e}
 table tbody tr:nth-child(even){background:rgba(238,247,252,.52)}
 table tbody tr:hover{background:#e8f6fc}
+
+
+/* Rallora interaction system: shared premium control language */
+:where(button,a,input,select,textarea){-webkit-tap-highlight-color:transparent}
+:where(button,a):focus-visible{outline:0;box-shadow:var(--focus-ring)}
+:where(button):disabled{cursor:not-allowed;opacity:.58}
+.rallora-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:var(--control-h);padding:var(--control-pad);border-radius:var(--radius-control);font-size:var(--control-font);font-weight:var(--control-weight);line-height:1;text-decoration:none;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background .16s ease,color .16s ease}
+.rallora-btn:hover{transform:translateY(-1px)}
+.rallora-btn--primary{border:1px solid var(--cyan);background:var(--cyan);color:var(--navy);box-shadow:0 7px 18px rgba(0,176,254,.16)}
+.rallora-btn--primary:hover{background:#22bbff;border-color:#22bbff;box-shadow:0 10px 22px rgba(0,176,254,.20)}
+.rallora-btn--navy{border:1px solid var(--navy);background:var(--navy);color:#fff;box-shadow:0 7px 18px rgba(6,26,57,.13)}
+.rallora-btn--secondary{border:1px solid #cfe0ef;background:#fff;color:#0b3b72;box-shadow:0 3px 9px rgba(6,26,57,.035)}
+.rallora-btn--secondary:hover{border-color:#9fc8e3;background:#f8fbfe;box-shadow:0 7px 16px rgba(6,26,57,.07)}
+.rallora-btn--ghost{border:1px solid #d7e3ed;background:#edf4f8;color:#234665}
+.rallora-link{display:inline-flex;align-items:center;gap:5px;min-height:40px;color:#0b4f7d;font-size:12px;font-weight:850;text-decoration:none}
+.rallora-card{border:1px solid rgba(116,151,184,.20);border-radius:var(--radius-card);background:linear-gradient(145deg,rgba(253,254,254,.98),rgba(244,249,252,.98));box-shadow:var(--shadow-sm)}
+.rallora-status{display:inline-flex;align-items:center;min-height:28px;padding:0 10px;border-radius:999px;font-size:11px;font-weight:850;line-height:1}
