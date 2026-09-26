@@ -180,3 +180,10 @@
  .adminShortcuts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
  .adminShortcuts a{display:flex;align-items:center;justify-content:center;min-height:46px;margin:0;padding:9px 10px;text-align:center}
 }
+
+
+/* Consistent compact secondary actions */
+.divisionAction{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:8px 12px!important;border:1px solid #cfe0ef!important;border-radius:10px!important;background:#fff!important;color:#0b3b72!important;font:inherit!important;font-size:11px!important;font-weight:850!important;line-height:1!important;cursor:pointer;white-space:nowrap;box-shadow:0 3px 8px rgba(6,26,57,.035);transition:background .16s ease,border-color .16s ease,transform .16s ease,box-shadow .16s ease}
+.divisionAction:hover{background:#f7fbfe!important;border-color:#9fc8e3!important;box-shadow:0 6px 14px rgba(6,26,57,.07);transform:translateY(-1px)}
+.divisionAction:focus-visible{outline:3px solid rgba(0,176,254,.22);outline-offset:2px}
+@media(max-width:490px){.card .divisionRow{align-items:center;flex-direction:row}.divisionAction{min-height:38px;padding:8px 10px!important}}
