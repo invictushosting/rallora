@@ -402,3 +402,6 @@
  .matchTeam strong,.matchTeam:first-child strong,.matchTeam:last-child strong{font-size:12px!important;line-height:1.28!important;text-align:center!important}
  .score{width:32px!important;height:32px!important}
 }
+
+/* Public hub surface hierarchy */
+.page{background:radial-gradient(circle at 88% 5%,rgba(0,176,254,.07),transparent 28%),linear-gradient(180deg,#f3f8fb 0%,#e9f2f7 52%,#f5f8fa 100%)}.metrics article:nth-child(odd){background:linear-gradient(145deg,#fdfefe,#f1f7fa)}.metrics article:nth-child(even){background:linear-gradient(145deg,#f8fcfe,#edf6fa)}.card{background:linear-gradient(145deg,#fdfefe,#f4f9fb);border-color:#d5e2eb;box-shadow:0 12px 32px rgba(21,54,89,.055)}.seasonPicker select{background:#f9fcfd}.notice{background:#eef7fb}
