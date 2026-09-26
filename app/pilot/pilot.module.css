@@ -36,3 +36,6 @@
  .resultGraphic{min-height:280px}
  .teams{gap:8px 12px}
 }
+
+/* Rallora premium control normalization */
+:where(button){font-weight:var(--control-weight);transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background .16s ease}:where(button):hover{transform:translateY(-1px)}
