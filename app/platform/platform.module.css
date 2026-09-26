@@ -79,9 +79,3 @@
 .fieldHint{display:block;color:#7b8da0;font-size:10px;font-weight:600;line-height:1.35;text-transform:none;margin-top:-2px}
 /* Rallora controls */
 .controls button,.actionRow button,.card>button,.switchAccount,.loginForm button{min-height:var(--control-h);border-radius:var(--radius-control);font-size:var(--control-font);font-weight:var(--control-weight);transition:transform .16s ease,box-shadow .16s ease}.controls button:hover,.actionRow button:hover,.card>button:hover,.switchAccount:hover,.loginForm button:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(6,26,57,.12)}
-
-
-/* Rallora tactile surface system */
-.card,.panel,.section,.formCard,.contentCard{border-width:1.5px;border-color:rgba(126,157,185,.34);box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 2px 0 rgba(118,148,174,.10),0 14px 32px rgba(21,54,89,.07)}
-button:not(:disabled),a[class*="Action"],a[class*="Button"]{border-width:1.5px;box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 2px 0 rgba(118,148,174,.12),0 5px 12px rgba(6,26,57,.06)}
-button:not(:disabled):active,a[class*="Action"]:active,a[class*="Button"]:active{transform:translateY(1px);box-shadow:0 1px 0 rgba(255,255,255,.85) inset,0 1px 0 rgba(118,148,174,.12),0 3px 7px rgba(6,26,57,.06)}
