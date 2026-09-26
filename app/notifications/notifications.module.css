@@ -5,3 +5,9 @@
 /* Branded notifications navigation */
 .shell header{align-items:center;gap:18px;min-height:52px}.brand{display:inline-flex;align-items:center}.headerActions{display:flex;align-items:center;gap:18px;margin-left:auto}.headerActions a{display:inline-flex;align-items:center;min-height:40px;padding:0 12px;border:1px solid #cadbea;border-radius:999px;background:#fff;color:#174f86!important;font-size:11px;font-weight:850;letter-spacing:0}.headerActions span{font-size:10px;letter-spacing:1.2px;color:#31516f}
 @media(max-width:620px){.shell header{align-items:flex-start}.brand :global(svg){max-width:142px;height:auto}.headerActions{align-items:flex-end;flex-direction:column;gap:6px}.headerActions a{min-height:38px;padding:0 10px}.headerActions span{font-size:8px}}
+
+
+/* Rallora tactile surface system */
+.card,.panel,.section,.formCard,.contentCard{border-width:1.5px;border-color:rgba(126,157,185,.34);box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 2px 0 rgba(118,148,174,.10),0 14px 32px rgba(21,54,89,.07)}
+button:not(:disabled),a[class*="Action"],a[class*="Button"]{border-width:1.5px;box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 2px 0 rgba(118,148,174,.12),0 5px 12px rgba(6,26,57,.06)}
+button:not(:disabled):active,a[class*="Action"]:active,a[class*="Button"]:active{transform:translateY(1px);box-shadow:0 1px 0 rgba(255,255,255,.85) inset,0 1px 0 rgba(118,148,174,.12),0 3px 7px rgba(6,26,57,.06)}
