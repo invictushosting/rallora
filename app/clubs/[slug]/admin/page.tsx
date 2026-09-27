@@ -173,9 +173,9 @@ export default function ClubAdministration() {
                   .in("division_id", divisionIds).order("name", { ascending: true })
               : Promise.resolve({ data: [] as { id: string; division_id: string; name: string; player_one_name:string|null; player_two_name:string|null; player_one_email:string|null; player_two_email:string|null; player_one_rating:number|null; player_two_rating:number|null }[], error: null }),
             fixtureIds.length
-              ? supabase.from("results").select("id,fixture_id,score")
+              ? supabase.from("results").select("id,fixture_id,home_score,away_score")
                   .in("fixture_id", fixtureIds).eq("status", "confirmed")
-              : Promise.resolve({ data: [] as { id:string; fixture_id: string; score:string|null }[], error: null }),
+              : Promise.resolve({ data: [] as { id:string; fixture_id: string; home_score:string|null; away_score:string|null }[], error: null }),
             fixtureIds.length
               ? supabase.from("result_submissions").select("id,fixture_id,home_score,away_score,notes,status,updated_at").in("fixture_id",fixtureIds).order("updated_at",{ascending:false})
               : Promise.resolve({ data: [] as { id:string; fixture_id:string; home_score:string|null; away_score:string|null; notes:string|null; status:string; updated_at:string }[], error:null }),
@@ -186,7 +186,7 @@ export default function ClubAdministration() {
           const knownFixtureIds = new Set(fixtureIds);
           const roster = (teamsReply.data ?? []) as { id: string; division_id: string; name: string; player_one_name:string|null; player_two_name:string|null; player_one_email:string|null; player_two_email:string|null; player_one_rating:number|null; player_two_rating:number|null }[];
           const labels = new Map(roster.map((team)=>[team.id,[team.player_one_name,team.player_two_name].filter(Boolean).join(" / ") || "Players to be confirmed"]));
-          const resultByFixture = new Map((resultsReply.data ?? []).map((result)=>[result.fixture_id,{id:result.id as string,score:(result.score as string|null) ?? null}]));
+          const resultByFixture = new Map((resultsReply.data ?? []).map((result)=>[result.fixture_id,{id:result.id as string,score:[result.home_score,result.away_score].filter(Boolean).join(" : ") || null}]));
           const submissionByFixture = new Map<string,{id:string;home_score:string|null;away_score:string|null;notes:string|null;status:string}>();
           for (const submission of (submissionsReply.data ?? [])) if (!submissionByFixture.has(submission.fixture_id)) submissionByFixture.set(submission.fixture_id,submission);
           allFixtures.push(...seasonFixtures.map((fixture)=>({...fixture,home_label:labels.get(fixture.home_team_id),away_label:labels.get(fixture.away_team_id),result_id:resultByFixture.get(fixture.id)?.id ?? null,result_score:resultByFixture.get(fixture.id)?.score ?? null,submission_id:submissionByFixture.get(fixture.id)?.id ?? null,submitted_home_score:submissionByFixture.get(fixture.id)?.home_score ?? null,submitted_away_score:submissionByFixture.get(fixture.id)?.away_score ?? null,dispute_note:submissionByFixture.get(fixture.id)?.status==="disputed"?submissionByFixture.get(fixture.id)?.notes ?? null:null})));
