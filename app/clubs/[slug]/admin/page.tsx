@@ -18,7 +18,7 @@ type Season = { id: string; club_id: string; name: string; status: string; fixtu
 type Membership = { club_id: string; user_id: string; role: string; status: string };
 type DivisionSummary = { id: string; name: string; sort_order: number;
   teams: { id: string; name: string; player_one_name:string|null; player_two_name:string|null; player_one_email:string|null; player_two_email:string|null; player_one_rating:number|null; player_two_rating:number|null }[] };
-type AdminFixture = { id:string; season_id:string; division_id:string; home_team_id:string; away_team_id:string; week_number:number; play_by:string; status:string; home_label?:string; away_label?:string; result_id?:string|null; result_score?:string|null };
+type AdminFixture = { id:string; season_id:string; division_id:string; home_team_id:string; away_team_id:string; week_number:number; play_by:string; status:string; home_label?:string; away_label?:string; result_id?:string|null; result_score?:string|null; submission_id?:string|null; submitted_home_score?:string|null; submitted_away_score?:string|null; dispute_note?:string|null };
 type Summary = {
   season: Season;
   divisions: number;
@@ -47,8 +47,9 @@ export default function ClubAdministration() {
   const [password, setPassword] = useState("");
   const [signInLoading, setSignInLoading] = useState(false);
   const [signInError, setSignInError] = useState("");
-  const [fixtureView, setFixtureView] = useState<"all"|"outstanding"|"booked"|"awaiting"|"attention"|"played"|null>(null);
+  const [fixtureView, setFixtureView] = useState<"all"|"outstanding"|"booked"|"awaiting"|"attention"|"played"|"disputed"|null>(null);
   const [reminderNotice, setReminderNotice] = useState("");
+  const [resultBusy, setResultBusy] = useState("");
   async function signIn(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSignInError("");
@@ -166,7 +167,7 @@ export default function ClubAdministration() {
           const seasonFixtures = (fixtureReply.data ?? []) as AdminFixture[];
 
           const fixtureIds = seasonFixtures.map((item) => item.id);
-          const [teamsReply, resultsReply] = await Promise.all([
+          const [teamsReply, resultsReply, submissionsReply] = await Promise.all([
             divisionIds.length
               ? supabase.from("teams").select("id,division_id,name,player_one_name,player_two_name,player_one_email,player_two_email,player_one_rating,player_two_rating")
                   .in("division_id", divisionIds).order("name", { ascending: true })
@@ -175,14 +176,20 @@ export default function ClubAdministration() {
               ? supabase.from("results").select("id,fixture_id,score")
                   .in("fixture_id", fixtureIds).eq("status", "confirmed")
               : Promise.resolve({ data: [] as { id:string; fixture_id: string; score:string|null }[], error: null }),
+            fixtureIds.length
+              ? supabase.from("result_submissions").select("id,fixture_id,home_score,away_score,notes,status,updated_at").in("fixture_id",fixtureIds).order("updated_at",{ascending:false})
+              : Promise.resolve({ data: [] as { id:string; fixture_id:string; home_score:string|null; away_score:string|null; notes:string|null; status:string; updated_at:string }[], error:null }),
           ]);
           if (teamsReply.error) throw teamsReply.error;
           if (resultsReply.error) throw resultsReply.error;
+          if (submissionsReply.error) throw submissionsReply.error;
           const knownFixtureIds = new Set(fixtureIds);
           const roster = (teamsReply.data ?? []) as { id: string; division_id: string; name: string; player_one_name:string|null; player_two_name:string|null; player_one_email:string|null; player_two_email:string|null; player_one_rating:number|null; player_two_rating:number|null }[];
           const labels = new Map(roster.map((team)=>[team.id,[team.player_one_name,team.player_two_name].filter(Boolean).join(" / ") || "Players to be confirmed"]));
           const resultByFixture = new Map((resultsReply.data ?? []).map((result)=>[result.fixture_id,{id:result.id as string,score:(result.score as string|null) ?? null}]));
-          allFixtures.push(...seasonFixtures.map((fixture)=>({...fixture,home_label:labels.get(fixture.home_team_id),away_label:labels.get(fixture.away_team_id),result_id:resultByFixture.get(fixture.id)?.id ?? null,result_score:resultByFixture.get(fixture.id)?.score ?? null})));
+          const submissionByFixture = new Map<string,{id:string;home_score:string|null;away_score:string|null;notes:string|null;status:string}>();
+          for (const submission of (submissionsReply.data ?? [])) if (!submissionByFixture.has(submission.fixture_id)) submissionByFixture.set(submission.fixture_id,submission);
+          allFixtures.push(...seasonFixtures.map((fixture)=>({...fixture,home_label:labels.get(fixture.home_team_id),away_label:labels.get(fixture.away_team_id),result_id:resultByFixture.get(fixture.id)?.id ?? null,result_score:resultByFixture.get(fixture.id)?.score ?? null,submission_id:submissionByFixture.get(fixture.id)?.id ?? null,submitted_home_score:submissionByFixture.get(fixture.id)?.home_score ?? null,submitted_away_score:submissionByFixture.get(fixture.id)?.away_score ?? null,dispute_note:submissionByFixture.get(fixture.id)?.status==="disputed"?submissionByFixture.get(fixture.id)?.notes ?? null:null})));
           const divisionSummaries: DivisionSummary[] = (divisionReply.data ?? [])
             .map((division) => ({
               id: division.id as string,
@@ -291,6 +298,7 @@ export default function ClubAdministration() {
   const fixtureRows = view.fixtures.filter((fixture)=>{
     if (!fixtureView || fixtureView==="all") return true;
     const booking = confirmedBookings.find((item)=>item.matched_fixture_id===fixture.id && item.booking_status!=="CANCELED");
+    if (fixtureView==="disputed") return fixture.status==="disputed";
     if (fixtureView==="booked") return Boolean(booking && booking.booking_status!=="FINISHED");
     if (fixtureView==="played") return fixture.status==="confirmed";
     if (fixtureView==="awaiting") return Boolean(booking?.booking_status==="FINISHED" && fixture.status!=="confirmed");
@@ -302,9 +310,20 @@ export default function ClubAdministration() {
     const booking = bookingForFixture(fixture.id);
     if (booking?.match_state==="confirmed" && booking.matched_player_count===4) return {tone:"green",label:"Court booked"};
     if (booking?.match_state==="possible" || booking?.matched_player_count===3) return {tone:"amber",label:"Booking pending"};
+    if (fixture.status==="disputed") return {tone:"red",label:"Disputed result"};
     if (fixture.status==="confirmed") return {tone:"green",label:"Result confirmed"};
     return {tone:"red",label:"Court not booked"};
   };
+  const disputedCount = view.fixtures.filter((fixture)=>fixture.status==="disputed").length;
+  async function resolveDisputedResult(fixture:AdminFixture){
+    const home=(document.getElementById(`resolve-home-${fixture.id}`) as HTMLInputElement|null)?.value.trim() || fixture.submitted_home_score || "";
+    const away=(document.getElementById(`resolve-away-${fixture.id}`) as HTMLInputElement|null)?.value.trim() || fixture.submitted_away_score || "";
+    const winner=(document.getElementById(`resolve-winner-${fixture.id}`) as HTMLSelectElement|null)?.value || null;
+    const notes=(document.getElementById(`resolve-notes-${fixture.id}`) as HTMLTextAreaElement|null)?.value.trim() || null;
+    if(!home||!away||!winner){setReminderNotice("Enter both scores and choose the winning pairing before confirming.");return;}
+    setResultBusy(fixture.id); const reply=await supabase.rpc("rallora_admin_resolve_result",{p_fixture_id:fixture.id,p_home_score:home,p_away_score:away,p_winner_team_id:winner,p_notes:notes}); setResultBusy("");
+    if(reply.error){setReminderNotice(reply.error.message);return;} document.getElementById(`result-${fixture.id}`)?.hidePopover(); setRevision(v=>v+1); setReminderNotice("Disputed result resolved and standings updated.");
+  }
   const demoMode = view.club.slug==="rallora-demo";
   function sendFixtureReminder(fixture: AdminFixture) {
     if (demoMode) setReminderNotice("Demo reminder prepared for "+fixture.home_label+" vs "+fixture.away_label+". No external message was sent.");
@@ -355,13 +374,14 @@ export default function ClubAdministration() {
       <article onClick={()=>openFixtureView("played")}><span>Played</span><strong>{totals.confirmed}</strong><small>Confirmed results</small><b className={styles.metricAction}>View results</b></article>
     </section>
     {fixtureView && <section id="fixture-operations" className={styles.fixtureOperations}>
-      <div className={styles.fixtureHeader}><div><span className={styles.eyebrow}>FIXTURE OPERATIONS</span><h2>{fixtureView==="all"?"All fixtures":fixtureView==="outstanding"?"To book":fixtureView==="booked"?"Booked fixtures":fixtureView==="awaiting"?"Awaiting result":fixtureView==="played"?"Played fixtures":"Needs attention"}</h2><p>{fixtureRows.length} fixture{fixtureRows.length===1?"":"s"} in this view</p></div><button className={styles.fixtureClose} type="button" onClick={()=>setFixtureView(null)}>Close</button></div>
+      <div className={styles.fixtureHeader}><div><span className={styles.eyebrow}>FIXTURE OPERATIONS</span><h2>{fixtureView==="all"?"All fixtures":fixtureView==="outstanding"?"To book":fixtureView==="booked"?"Booked fixtures":fixtureView==="awaiting"?"Awaiting result":fixtureView==="played"?"Played fixtures":fixtureView==="disputed"?"Disputed results":"Needs attention"}</h2><p>{fixtureRows.length} fixture{fixtureRows.length===1?"":"s"} in this view</p></div><button className={styles.fixtureClose} type="button" onClick={()=>setFixtureView(null)}>Close</button></div>
       <div className={styles.fixtureFilters} aria-label="Filter fixtures by status">
         {([
           ["all","All",view.fixtures.length],
           ["outstanding","To book",Math.max(0, totals.outstanding - bookedFixtureIds.size)],
           ["booked","Booked",bookedFixtureIds.size],
           ["awaiting","Awaiting result",Math.max(totals.awaitingResult, finishedWithoutResult)],
+          ["disputed","Disputed result",disputedCount],
           ["played","Played",totals.confirmed],
           ["attention","Needs attention",totals.overdue + possibleBookings],
         ] as const).map(([value,label,count])=><button key={value} type="button" className={fixtureView===value?styles.fixtureFilterActive:""} onClick={()=>openFixtureView(value)}>{label} <span>{count}</span></button>)}
@@ -372,10 +392,12 @@ export default function ClubAdministration() {
           <div className={styles.fixtureOperationMain}><strong>{fixture.home_label || "Players"} <span>vs</span> {fixture.away_label || "Players"}</strong><div className={styles.fixtureMeta}><span>Week {fixture.week_number}</span><span>Play by {fixture.play_by}</span><b data-status={fixture.status}>{fixture.status==="confirmed"?"Played":fixture.status.replaceAll("_"," ")}</b></div></div>
           <div className={styles.fixtureActions}>
             <span className={styles.bookingHealth} data-tone={bookingHealth(fixture).tone}><i aria-hidden="true" />{bookingHealth(fixture).label}</span>
+            {fixture.status==="disputed" && <button className={styles.fixtureTakeAction} type="button" onClick={()=>document.getElementById(`result-${fixture.id}`)?.showPopover()}>Take action</button>}
             {fixture.status==="confirmed" && <button className={styles.fixtureResult} type="button" onClick={()=>document.getElementById(`result-${fixture.id}`)?.showPopover()}>See result</button>}
             {demoMode && bookingForFixture(fixture.id) && <a className={styles.playtomicView} href="https://app.playtomic.com/" target="_blank" rel="noreferrer">View in Playtomic ↗</a>}
-            {fixture.status!=="confirmed" && <button className={styles.fixtureReminder} type="button" onClick={()=>sendFixtureReminder(fixture)}>{fixtureView==="awaiting"?"Request result":"Send reminder"}</button>}
+            {fixture.status!=="confirmed" && fixture.status!=="disputed" && <button className={styles.fixtureReminder} type="button" onClick={()=>sendFixtureReminder(fixture)}>{fixtureView==="awaiting"?"Request result":"Send reminder"}</button>}
           </div>
+          {fixture.status==="disputed" && <div id={`result-${fixture.id}`} popover="auto" className={styles.resultPopover}><button className={styles.resultPopoverClose} type="button" popoverTarget={`result-${fixture.id}`} popoverTargetAction="hide" aria-label="Close result">×</button><span className={styles.disputeEyebrow}>DISPUTED RESULT</span><h3>{fixture.home_label || "Players"} <span>vs</span> {fixture.away_label || "Players"}</h3><strong className={styles.resultScore}>{fixture.submitted_home_score || "—"} : {fixture.submitted_away_score || "—"}</strong><div className={styles.disputeNote}><strong>Information from the disputing team</strong><p>{fixture.dispute_note || "No additional information was provided with this dispute."}</p></div><div className={styles.resolveFields}><label>Home score<input id={`resolve-home-${fixture.id}`} defaultValue={fixture.submitted_home_score || ""}/></label><label>Away score<input id={`resolve-away-${fixture.id}`} defaultValue={fixture.submitted_away_score || ""}/></label><label>Winner<select id={`resolve-winner-${fixture.id}`} defaultValue=""><option value="">Choose winner</option><option value={fixture.home_team_id}>{fixture.home_label || "Home"}</option><option value={fixture.away_team_id}>{fixture.away_label || "Away"}</option></select></label><label>Organiser note<textarea id={`resolve-notes-${fixture.id}`} maxLength={1000} placeholder="Optional note about the decision"/></label></div><div className={styles.disputeActions}><button type="button" disabled={resultBusy===fixture.id} onClick={()=>void resolveDisputedResult(fixture)}>{resultBusy===fixture.id?"Saving…":"Confirm resolved result"}</button>{bookingForFixture(fixture.id)&&<a href="https://app.playtomic.com/" target="_blank" rel="noreferrer">View in Playtomic ↗</a>}</div></div>}
           {fixture.status==="confirmed" && <div id={`result-${fixture.id}`} popover="auto" className={styles.resultPopover}><button className={styles.resultPopoverClose} type="button" popoverTarget={`result-${fixture.id}`} popoverTargetAction="hide" aria-label="Close result">×</button><span className={styles.eyebrow}>CONFIRMED RESULT</span><h3>{fixture.home_label || "Players"} <span>vs</span> {fixture.away_label || "Players"}</h3><strong className={styles.resultScore}>{fixture.result_score || "Result confirmed"}</strong><p>Week {fixture.week_number} · Result confirmed in Rallora</p></div>}
         </article>)}
         {!fixtureRows.length && <div className={styles.fixtureEmpty}>No fixtures in this view.</div>}
