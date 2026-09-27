@@ -1,6 +1,7 @@
 "use client";
 
 import RalloraLogo from "@/app/components/rallora-logo";
+import SupportForm from "@/app/components/support-form";
 import Loading from "@/app/loading";
 
 import { useEffect, useMemo, useState } from "react";
@@ -530,5 +531,5 @@ export default function ClubAdministration() {
         id:season.id,name:season.name,status:season.status,
       }))} />
     <p className={styles.note}>All changes are restricted to this club by verified membership and database permissions.</p>
-  </div></main>;
+  </div>{view.status==="ready"&&<SupportForm clubId={view.club.id}/>}</main>;
 }
