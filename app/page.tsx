@@ -11,7 +11,7 @@ export default function RalloraHome(){
   async function submit(event:React.FormEvent<HTMLFormElement>){
     event.preventDefault();setBusy(true);setError("");
     try{
-      const form=new FormData(event.currentTarget);
+      const formElement=event.currentTarget;\n      const form=new FormData(formElement);
       const payload={
         clubName:String(form.get("clubName")||"").trim(),
         name:String(form.get("name")||"").trim(),
@@ -25,7 +25,7 @@ export default function RalloraHome(){
       const response=await fetch("/api/pilot-enquiries",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
       const body=await response.json().catch(()=>({})) as {error?:string};
       if(!response.ok)throw new Error(body.error||"We couldn't send your enquiry.");
-      setSubmitted(true);event.currentTarget.reset();
+      formElement.reset();setSubmitted(true);
     }catch(reason){setError(reason instanceof Error?reason.message:"We couldn't send your enquiry. Please try again.");}
     finally{setBusy(false);}
   }
