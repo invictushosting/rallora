@@ -574,7 +574,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       </div>
       <label>Website<input type="url" value={websiteUrl} onChange={event=>setWebsiteUrl(event.target.value)} /></label>
       <label>Player court booking link<input type="url" value={bookingUrl} onChange={event=>setBookingUrl(event.target.value)} placeholder="https://app.playtomic.io/..." /><small>Shown as Book court on fixtures that still need arranging.</small></label>
-      <label>Contact email<input type="email" value={contactEmail} onChange={event=>setContactEmail(event.target.value)} /><small>Replies from players can be directed here.</small></label>\n      <label>Email sender name<input maxLength={100} value={emailSenderName} onChange={event=>setEmailSenderName(event.target.value)} placeholder={name} /><small>Emails appear as “{emailSenderName.trim() || name} &lt;support@rallora.app&gt;”. Defaults to the club name.</small></label>
+      <label>Contact email<input type="email" value={contactEmail} onChange={event=>setContactEmail(event.target.value)} /><small>Replies from players can be directed here.</small></label>
+      <label>Email sender name<input maxLength={100} value={emailSenderName} onChange={event=>setEmailSenderName(event.target.value)} placeholder={name} /><small>Emails appear as “{emailSenderName.trim() || name} &lt;support@rallora.app&gt;”. Defaults to the club name.</small></label>
       <label>Venue name<input value={venueName} maxLength={160} onChange={event=>setVenueName(event.target.value)} /></label>
       <label>Address<input value={address} maxLength={200} onChange={event=>setAddress(event.target.value)} /></label>
       <label>Town or city<input value={town} maxLength={100} onChange={event=>setTown(event.target.value)} /></label>
@@ -585,7 +586,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       <label className={styles.wide}>Player registration terms<textarea rows={5} maxLength={3000}
         value={registrationTerms} onChange={event=>setRegistrationTerms(event.target.value)}
         placeholder="For example: all league matches must be played at this venue." /></label>
-      <button disabled={busy} type="submit">{busy ? "Saving…" : "Save club branding"}</button>\n      <div className={styles.wide}><strong>Test club email</strong><p>Send a live branded email using this club’s sender identity.</p><label>Send test to<input type="email" value={testEmail} onChange={event=>setTestEmail(event.target.value)} placeholder="you@example.com" /></label><button type="button" disabled={testEmailBusy} onClick={()=>void sendTestEmail()}>{testEmailBusy?"Sending…":"Send test email"}</button></div>
+      <button disabled={busy} type="submit">{busy ? "Saving…" : "Save club branding"}</button>
+      <div className={styles.wide}><strong>Test club email</strong><p>Send a live branded email using this club’s sender identity.</p><label>Send test to<input type="email" value={testEmail} onChange={event=>setTestEmail(event.target.value)} placeholder="you@example.com" /></label><button type="button" disabled={testEmailBusy} onClick={()=>void sendTestEmail()}>{testEmailBusy?"Sending…":"Send test email"}</button></div>
     </form>}
     {activeTab === "seasons" && <div className={styles.columns}>
       <form className={styles.form} onSubmit={createSeason}>
