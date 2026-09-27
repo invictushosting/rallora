@@ -249,12 +249,12 @@ export default function ClubAdministration() {
   if (view.status !== "ready") {
     const title = view.status === "signed_out" ? "Sign in required" :
       view.status === "forbidden" ? "Access denied" :
-      view.status === "missing" ? "Club not found" : "Unable to load this club";
+      view.status === "missing" ? "Club not found" : "You hit a Double Fault!";
     const explanation = view.status === "signed_out"
       ? "Sign in to access this club’s administrative dashboard."
       : view.status === "forbidden"
         ? "Your account has no active administrative membership for this club."
-        : view.status === "error" ? view.message
+        : view.status === "error" ? "Something went wrong loading this club. Head back to the club hub and try again."
           : view.status === "missing" ? "This club could not be found." : "";
     return <main className={styles.page}><section className={styles.message} role="status">
       <RalloraLogo variant="light" width={214} /><h1>{title}</h1><p>{explanation}</p>
