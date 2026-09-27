@@ -26,7 +26,7 @@ export default function RalloraHome(){
       const response=await fetch("/api/pilot-enquiries",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
       const body=await response.json().catch(()=>({})) as {error?:string};
       if(!response.ok)throw new Error(body.error||"We couldn't send your enquiry.");
-      formElement.reset();setSubmitted(true);
+      setSubmitted(true);
     }catch(reason){setError(reason instanceof Error?reason.message:"We couldn't send your enquiry. Please try again.");}
     finally{setBusy(false);}
   }
