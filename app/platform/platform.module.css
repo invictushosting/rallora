@@ -95,3 +95,26 @@
 .crmToolbar{justify-content:flex-start;align-items:end;gap:12px}.crmToolbar label:first-child{flex:0 0 180px}.crmToolbar label:last-child{flex:1;max-width:440px}.crmToolbar input,.crmToolbar select{width:100%}@media(max-width:700px){.crmToolbar{align-items:stretch}.crmToolbar label:first-child,.crmToolbar label:last-child{flex:1 1 100%;max-width:none}}
 
 .crmStageGate{display:grid;gap:9px;padding:13px;border:1px solid #dce8f2;border-radius:10px;background:#f8fbfd}.crmStageGate>strong{font-size:9px;text-transform:uppercase;color:#65758b}.crmStageGate>span{font-size:16px;font-weight:850;color:#061a39}.crmStageGate label{display:grid;gap:5px;font-size:9px;font-weight:850;text-transform:uppercase;color:#65758b}.crmStageGate textarea{border:1px solid #cad8e8;border-radius:9px;padding:10px;background:#fff;color:#061a39;font:inherit;text-transform:none}.crmStageGate>button{background:#061a39;color:#fff}.crmStageBranches{display:grid;grid-template-columns:1fr 1fr;gap:7px}.crmStageBranches button{min-height:36px;border:1px solid #d5e3ef;border-radius:8px;background:#eef5fb;color:#061a39;font-size:10px;font-weight:800;cursor:pointer}.crmStageGate small{color:#0878ad;font-weight:800}@media(max-width:520px){.crmStageBranches{grid-template-columns:1fr}}
+
+/* CRM desktop readability */
+@media(min-width:801px){
+  .crmSummary{padding:19px 22px}
+  .crmSummary strong{font-size:18px}
+  .crmSummary small,.crmMeta{font-size:13px;line-height:1.4}
+  .crmSummary em{font-size:12px;padding:7px 12px}
+  .crmDetail{gap:28px;padding:24px}
+  .crmControls{gap:12px}
+  .crmControls label,.crmStageGate label{font-size:12px;line-height:1.35}
+  .crmControls input,.crmControls select,.crmControls textarea,.crmActivityEntry input,.crmStageGate textarea{font-size:14px;line-height:1.4}
+  .crmQuickActions a{font-size:13px}
+  .crmStageGate>strong,.crmNextAction strong{font-size:11px}
+  .crmStageGate>span{font-size:18px}
+  .crmStageBranches button{font-size:12px}
+  .crmNextAction span{font-size:14px}
+  .crmNextAction time{font-size:12px}
+  .crmActivity h4{font-size:18px}
+  .crmTimeline span{font-size:11px}
+  .crmTimeline p{font-size:14px;line-height:1.45}
+  .crmTimeline time{font-size:12px}
+  .crmEmpty{font-size:13px}
+}
