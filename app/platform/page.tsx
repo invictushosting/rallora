@@ -17,7 +17,7 @@ type Entitlement = { feature_key:string; is_enabled:boolean };
 type ClubSummary = { club: Club; seasons: Season[]; teams: number; fixtures: number;
   members:number; players:number; subscription:Subscription|null; features:Entitlement[] };
 type Application = { id:string; applicant_name:string|null; club_name:string; requested_slug:string; contact_email:string; contact_phone:string|null; plan_code:string; status:string; created_at:string };
-type PilotEnquiry = { id:string; club_name:string; contact_name:string; contact_email:string; contact_phone:string|null; club_location:string; court_count:number|null; enquiry_type:string; message:string|null; status:string; created_at:string };
+type PilotEnquiry = { id:string; club_name:string; contact_name:string; contact_email:string; contact_phone:string|null; club_location:string; court_count:number|null; enquiry_type:string; message:string|null; status:string; source:string; assignee:string|null; internal_notes:string|null; next_follow_up_at:string|null; last_contacted_at:string|null; lost_reason:string|null; linked_club_id:string|null; created_at:string; updated_at:string };
 type Readiness = Record<string,number>;
 type SupportRequest = { id:string; club_id:string|null; requester_name:string|null; requester_email:string; category:string; subject:string; message:string; priority:string; status:string; assignee:string|null; internal_notes:string|null; created_at:string };
 type FormatRequest = {
@@ -44,6 +44,8 @@ export default function PlatformControlCentre() {
   const [showAddClub,setShowAddClub]=useState(false);
   const [supportFilter,setSupportFilter]=useState("open");
   const [supportCategory,setSupportCategory]=useState("all");
+  const [crmFilter,setCrmFilter]=useState("active");
+  const [crmSearch,setCrmSearch]=useState("");
   const [supportSelected,setSupportSelected]=useState<string|null>(null);
   const [notificationReads,setNotificationReads]=useState<Set<string>>(new Set());
   const load=useCallback(async()=>{
@@ -109,7 +111,7 @@ export default function PlatformControlCentre() {
           supabase.from("rallora_club_applications")
             .select("id,applicant_name,club_name,requested_slug,contact_email,contact_phone,plan_code,status,created_at")
             .order("created_at",{ascending:false}),
-          supabase.from("rallora_pilot_enquiries").select("id,club_name,contact_name,contact_email,contact_phone,club_location,court_count,enquiry_type,message,status,created_at").order("created_at",{ascending:false}),
+          supabase.from("rallora_pilot_enquiries").select("id,club_name,contact_name,contact_email,contact_phone,club_location,court_count,enquiry_type,message,status,source,assignee,internal_notes,next_follow_up_at,last_contacted_at,lost_reason,linked_club_id,created_at,updated_at").order("created_at",{ascending:false}),
           supabase.from("rallora_format_requests")
             .select("id,club_id,format_name,description,team_structure,group_structure,match_structure,scheduling_rules,scoring_rules,promotion_relegation_rules,special_rules,reference_link,status,implemented_format_key,platform_notes,created_at")
             .order("created_at",{ascending:false}),
@@ -159,7 +161,9 @@ export default function PlatformControlCentre() {
     setNotice(success);setBusy("");await load();
   }
   function approveApplication(id:string){return action(`application-${id}`,supabase.rpc("rallora_approve_club_application",{p_application_id:id}),"Club approved and activated.");}
-  function updatePilotEnquiry(id:string,status:string){return action(`pilot-${id}`,supabase.from("rallora_pilot_enquiries").update({status}).eq("id",id),"Pilot enquiry updated.");}
+  async function updatePilotEnquiry(id:string,status:string){const current=view.status==="ready"?view.pilotEnquiries.find(item=>item.id===id):null;const updates:Record<string,string|null>={status,updated_at:new Date().toISOString()};if(status==="contacted")updates.last_contacted_at=new Date().toISOString();await action(`pilot-${id}`,supabase.from("rallora_pilot_enquiries").update(updates).eq("id",id),"CRM stage updated.");const {data:{user}}=await supabase.auth.getUser();await supabase.from("rallora_enquiry_activities").insert({enquiry_id:id,user_id:user?.id??null,activity_type:status==="won"?"won":status==="lost"?"lost":"status_change",detail:`${current?.status??"unknown"} → ${status}`});}
+  async function saveCrmLead(id:string){const assignee=(document.getElementById(`crm-assignee-${id}`) as HTMLInputElement)?.value.trim()||null;const notes=(document.getElementById(`crm-notes-${id}`) as HTMLTextAreaElement)?.value.trim()||null;const follow=(document.getElementById(`crm-follow-${id}`) as HTMLInputElement)?.value||null;await action(`pilot-${id}`,supabase.from("rallora_pilot_enquiries").update({assignee,internal_notes:notes,next_follow_up_at:follow?new Date(follow).toISOString():null,updated_at:new Date().toISOString()}).eq("id",id),"Lead details saved.");}
+  async function addCrmNote(id:string){const input=document.getElementById(`crm-activity-${id}`) as HTMLInputElement;const detail=input?.value.trim();if(!detail)return;const {data:{user}}=await supabase.auth.getUser();const {error}=await supabase.from("rallora_enquiry_activities").insert({enquiry_id:id,user_id:user?.id??null,activity_type:"note",detail});if(error){setNotice(error.message);return}input.value="";setNotice("CRM activity added.");}
   async function setNotificationRead(type:string,id:string,read:boolean){const {data:{user}}=await supabase.auth.getUser();if(!user)return;const key=`${type}:${id}`;setNotificationReads(current=>{const next=new Set(current);read?next.add(key):next.delete(key);return next;});const request=read?supabase.from("rallora_platform_notification_reads").upsert({user_id:user.id,notification_type:type,notification_id:id,read_at:new Date().toISOString()}):supabase.from("rallora_platform_notification_reads").delete().eq("user_id",user.id).eq("notification_type",type).eq("notification_id",id);const {error}=await request;if(error){setNotice(error.message);await load();}}
   function declineApplication(id:string){return action(`application-${id}`,supabase.rpc("rallora_platform_decline_application",{p_application_id:id}),"Application declined.");}
   function setClubStatus(id:string,value:boolean){return action(`club-${id}`,supabase.rpc("rallora_platform_set_club_status",{p_club_id:id,p_is_active:value}),value?"Club activated.":"Club suspended.");}
@@ -308,16 +312,18 @@ export default function PlatformControlCentre() {
         </article>)}
         {!view.supportRequests.length&&<article className={styles.card}><h3>Support inbox clear</h3><p>Bug reports, general help and registration support requests will appear here.</p></article>}
       </section>
-      <div id="platform-inbox" className={styles.sectionHeading}><div><small>PILOT PIPELINE</small><h2>Pilot enquiries</h2></div><p>Leads submitted through the public Rallora landing page.</p></div>
-      <section className={styles.grid} aria-label="Pilot enquiries">
-        {view.pilotEnquiries.map(enquiry=><article className={styles.card} key={enquiry.id}>
-          <span className={styles.status}>{enquiry.status}</span><h3>{enquiry.club_name}</h3>
-          <p className={styles.slug}>{enquiry.enquiry_type==="pilot"?"Pilot club":"Further information"} · {enquiry.club_location}</p>
-          <dl className={styles.applicationDetails}><div><dt>Contact</dt><dd>{enquiry.contact_name}</dd></div><div><dt>Email</dt><dd><a href={`mailto:${enquiry.contact_email}`}>{enquiry.contact_email}</a></dd></div><div><dt>Phone</dt><dd>{enquiry.contact_phone||"Not supplied"}</dd></div><div><dt>Courts</dt><dd>{enquiry.court_count??"Not supplied"}</dd></div><div><dt>Received</dt><dd>{new Date(enquiry.created_at).toLocaleString("en-GB")}</dd></div></dl>
-          {enquiry.message&&<p><strong>Message:</strong> {enquiry.message}</p>}
-          <div className={styles.controls}><label>Status<select value={enquiry.status} onChange={event=>void updatePilotEnquiry(enquiry.id,event.target.value)} disabled={busy===`pilot-${enquiry.id}`}><option value="new">New</option><option value="contacted">Contacted</option><option value="qualified">Qualified</option><option value="closed">Closed</option></select></label></div>
+      <div id="platform-inbox" className={styles.sectionHeading}><div><small>ENQUIRIES / CRM</small><h2>Club pipeline</h2></div><p>Manage club leads from first enquiry through to onboarding.</p></div>
+      <div className={styles.supportToolbar}><label>Pipeline<select value={crmFilter} onChange={e=>setCrmFilter(e.target.value)}><option value="active">Active pipeline</option><option value="new">New</option><option value="contacted">Contacted</option><option value="meeting">Meeting booked</option><option value="nurture">Nurture</option><option value="qualified">Qualified</option><option value="won">Won</option><option value="lost">Lost</option><option value="all">All leads</option></select></label><label>Search<input value={crmSearch} onChange={e=>setCrmSearch(e.target.value)} placeholder="Club, contact, email or location"/></label></div>
+      <section className={styles.grid} aria-label="Enquiry CRM">
+        {view.pilotEnquiries.filter(enquiry=>{const active=!["won","lost","closed"].includes(enquiry.status);const statusOk=crmFilter==="all"||(crmFilter==="active"?active:enquiry.status===crmFilter);const q=crmSearch.trim().toLowerCase();return statusOk&&(!q||[enquiry.club_name,enquiry.contact_name,enquiry.contact_email,enquiry.club_location].some(value=>value.toLowerCase().includes(q)))}).map(enquiry=><article className={styles.card} key={enquiry.id}>
+          <span className={styles.status}>{enquiry.status.replace("_"," ")}</span><h3>{enquiry.club_name}</h3>
+          <p className={styles.slug}>{enquiry.enquiry_type==="pilot"?"Pilot club":"Further information"} · {enquiry.club_location} · {enquiry.source}</p>
+          <dl className={styles.applicationDetails}><div><dt>Contact</dt><dd>{enquiry.contact_name}</dd></div><div><dt>Email</dt><dd><a href={`mailto:${enquiry.contact_email}`}>{enquiry.contact_email}</a></dd></div><div><dt>Phone</dt><dd>{enquiry.contact_phone?<a href={`tel:${enquiry.contact_phone}`}>{enquiry.contact_phone}</a>:"Not supplied"}</dd></div><div><dt>Courts</dt><dd>{enquiry.court_count??"Not supplied"}</dd></div><div><dt>Received</dt><dd>{new Date(enquiry.created_at).toLocaleString("en-GB")}</dd></div><div><dt>Last contact</dt><dd>{enquiry.last_contacted_at?new Date(enquiry.last_contacted_at).toLocaleString("en-GB"):"Not contacted"}</dd></div></dl>
+          {enquiry.message&&<p><strong>Enquiry:</strong> {enquiry.message}</p>}
+          <div className={styles.controls}><label>Stage<select value={enquiry.status} onChange={event=>void updatePilotEnquiry(enquiry.id,event.target.value)} disabled={busy===`pilot-${enquiry.id}`}><option value="new">New</option><option value="contacted">Contacted</option><option value="meeting">Meeting booked</option><option value="nurture">Nurture</option><option value="qualified">Qualified</option><option value="won">Won</option><option value="lost">Lost</option></select></label><label>Assigned to<input id={`crm-assignee-${enquiry.id}`} defaultValue={enquiry.assignee??""} placeholder="Rallora team member"/></label><label>Next follow-up<input id={`crm-follow-${enquiry.id}`} type="datetime-local" defaultValue={enquiry.next_follow_up_at?new Date(enquiry.next_follow_up_at).toISOString().slice(0,16):""}/></label><label>Internal notes<textarea id={`crm-notes-${enquiry.id}`} defaultValue={enquiry.internal_notes??""} rows={3} placeholder="Private sales / onboarding notes"/></label><button disabled={busy===`pilot-${enquiry.id}`} onClick={()=>void saveCrmLead(enquiry.id)}>Save lead</button></div>
+          <div className={styles.controls}><a href={`mailto:${enquiry.contact_email}`}>Email contact</a>{enquiry.contact_phone&&<a href={`tel:${enquiry.contact_phone}`}>Call contact</a>}<label>Activity / note<input id={`crm-activity-${enquiry.id}`} placeholder="e.g. Demo booked for Tuesday"/></label><button onClick={()=>void addCrmNote(enquiry.id)}>Add activity</button>{enquiry.status==="qualified"&&<button onClick={()=>{setShowAddClub(true);setNotice(`Qualified lead: ${enquiry.club_name}. Use Add club below to complete onboarding.`)}}>Convert to club</button>}</div>
         </article>)}
-        {!view.pilotEnquiries.length&&<article className={styles.card}><h3>No pilot enquiries yet</h3><p>New landing-page enquiries will appear here.</p></article>}
+        {!view.pilotEnquiries.length&&<article className={styles.card}><h3>No enquiries yet</h3><p>Website and manually-added club leads will appear here.</p></article>}
       </section>
       <div className={styles.sectionHeading}><div><small>ONBOARDING</small><h2>Club applications</h2></div><p>Review clubs that applied through Rallora.</p></div>
       <section className={styles.grid} aria-label="Club applications">
