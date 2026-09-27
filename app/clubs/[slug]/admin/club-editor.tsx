@@ -149,6 +149,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [websiteUrl,setWebsiteUrl]=useState(club.website_url??"");
   const [bookingUrl,setBookingUrl]=useState(club.booking_url??"");
   const [contactEmail,setContactEmail]=useState(club.contact_email??"");
+  const [testEmail,setTestEmail]=useState("");
+  const [testEmailBusy,setTestEmailBusy]=useState(false);
   const [emailSenderName,setEmailSenderName]=useState(club.email_sender_name??club.name);
   const [venueName,setVenueName]=useState(club.venue_name??"");
   const [address,setAddress]=useState(club.address_line_1??"");
@@ -362,6 +364,18 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
     }, "Club branding saved.");
   }
 
+  async function sendTestEmail() {
+    if (!testEmail.trim()) { setError("Enter an email address for the test."); return; }
+    setError(""); setMessage(""); setTestEmailBusy(true);
+    try {
+      const response=await fetch("/api/email/test",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({clubId:club.id,to:testEmail.trim()})});
+      const payload=await response.json().catch(()=>({})) as {error?:string};
+      if(!response.ok) throw new Error(payload.error||"Test email could not be sent.");
+      setMessage(`Test email sent to ${testEmail.trim()} from ${emailSenderName.trim()||name} <support@rallora.app>.`);
+    } catch(caught) { setError(caught instanceof Error?caught.message:"Test email could not be sent."); }
+    finally { setTestEmailBusy(false); }
+  }
+
   async function createSeason(event: React.FormEvent) {
     event.preventDefault();
     await submit(async () => {
@@ -571,7 +585,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       <label className={styles.wide}>Player registration terms<textarea rows={5} maxLength={3000}
         value={registrationTerms} onChange={event=>setRegistrationTerms(event.target.value)}
         placeholder="For example: all league matches must be played at this venue." /></label>
-      <button disabled={busy} type="submit">{busy ? "Saving…" : "Save club branding"}</button>
+      <button disabled={busy} type="submit">{busy ? "Saving…" : "Save club branding"}</button>\n      <div className={styles.wide}><strong>Test club email</strong><p>Send a live branded email using this club’s sender identity.</p><label>Send test to<input type="email" value={testEmail} onChange={event=>setTestEmail(event.target.value)} placeholder="you@example.com" /></label><button type="button" disabled={testEmailBusy} onClick={()=>void sendTestEmail()}>{testEmailBusy?"Sending…":"Send test email"}</button></div>
     </form>}
     {activeTab === "seasons" && <div className={styles.columns}>
       <form className={styles.form} onSubmit={createSeason}>
