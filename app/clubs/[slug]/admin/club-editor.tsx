@@ -9,7 +9,7 @@ export type EditableClub = {
   id: string; slug: string; name: string;
   short_name: string | null; primary_color: string | null;
   welcome_text: string | null; logo_url:string|null; cover_image_url:string|null; website_url:string|null; booking_url:string|null;
-  contact_email:string|null; venue_name:string|null; address_line_1:string|null;
+  contact_email:string|null; email_sender_name:string|null; venue_name:string|null; address_line_1:string|null;
   town:string|null; postcode:string|null; player_registration_terms:string|null;
   playtomic_setup_choice:"later"|null;
 };
@@ -149,6 +149,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [websiteUrl,setWebsiteUrl]=useState(club.website_url??"");
   const [bookingUrl,setBookingUrl]=useState(club.booking_url??"");
   const [contactEmail,setContactEmail]=useState(club.contact_email??"");
+  const [emailSenderName,setEmailSenderName]=useState(club.email_sender_name??club.name);
   const [venueName,setVenueName]=useState(club.venue_name??"");
   const [address,setAddress]=useState(club.address_line_1??"");
   const [town,setTown]=useState(club.town??"");
@@ -270,7 +271,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
     setShortName(club.short_name ?? "");
     setColour(club.primary_color || "#2458ff");
     setWelcomeText(club.welcome_text ?? "");
-    setLogoUrl(club.logo_url??"");setCoverImageUrl(club.cover_image_url??"");setWebsiteUrl(club.website_url??"");setContactEmail(club.contact_email??"");
+    setLogoUrl(club.logo_url??"");setCoverImageUrl(club.cover_image_url??"");setWebsiteUrl(club.website_url??"");setContactEmail(club.contact_email??"");setEmailSenderName(club.email_sender_name??club.name);
     setVenueName(club.venue_name??"");setAddress(club.address_line_1??"");setTown(club.town??"");
     setPostcode(club.postcode??"");setRegistrationTerms(club.player_registration_terms??"");
   }, [club]);
@@ -352,7 +353,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
           name: name.trim(), short_name: shortName.trim() || null,
           primary_color: colour, welcome_text: welcomeText.trim() || null,
           logo_url:logoUrl.trim()||null,cover_image_url:coverImageUrl.trim()||null,website_url:websiteUrl.trim()||null,booking_url:bookingUrl.trim()||null,
-          contact_email:contactEmail.trim()||null,venue_name:venueName.trim()||null,
+          contact_email:contactEmail.trim()||null,email_sender_name:emailSenderName.trim()||name.trim(),venue_name:venueName.trim()||null,
           address_line_1:address.trim()||null,town:town.trim()||null,postcode:postcode.trim()||null,
           player_registration_terms:registrationTerms.trim()||null,
         }).eq("id", club.id).eq("slug", club.slug).select("id");
@@ -559,7 +560,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       </div>
       <label>Website<input type="url" value={websiteUrl} onChange={event=>setWebsiteUrl(event.target.value)} /></label>
       <label>Player court booking link<input type="url" value={bookingUrl} onChange={event=>setBookingUrl(event.target.value)} placeholder="https://app.playtomic.io/..." /><small>Shown as Book court on fixtures that still need arranging.</small></label>
-      <label>Contact email<input type="email" value={contactEmail} onChange={event=>setContactEmail(event.target.value)} /></label>
+      <label>Contact email<input type="email" value={contactEmail} onChange={event=>setContactEmail(event.target.value)} /><small>Replies from players can be directed here.</small></label>\n      <label>Email sender name<input maxLength={100} value={emailSenderName} onChange={event=>setEmailSenderName(event.target.value)} placeholder={name} /><small>Emails appear as “{emailSenderName.trim() || name} &lt;support@rallora.app&gt;”. Defaults to the club name.</small></label>
       <label>Venue name<input value={venueName} maxLength={160} onChange={event=>setVenueName(event.target.value)} /></label>
       <label>Address<input value={address} maxLength={200} onChange={event=>setAddress(event.target.value)} /></label>
       <label>Town or city<input value={town} maxLength={100} onChange={event=>setTown(event.target.value)} /></label>
