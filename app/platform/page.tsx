@@ -113,7 +113,8 @@ export default function PlatformControlCentre() {
           supabase.from("rallora_format_requests")
             .select("id,club_id,format_name,description,team_structure,group_structure,match_structure,scheduling_rules,scoring_rules,promotion_relegation_rules,special_rules,reference_link,status,implemented_format_key,platform_notes,created_at")
             .order("created_at",{ascending:false}),
-          supabase.from("rallora_support_requests").select("id,club_id,requester_name,requester_email,category,subject,message,priority,status,assignee,internal_notes,created_at").order("created_at",{ascending:false}),\n          supabase.from("rallora_platform_notification_reads").select("notification_type,notification_id"),
+          supabase.from("rallora_support_requests").select("id,club_id,requester_name,requester_email,category,subject,message,priority,status,assignee,internal_notes,created_at").order("created_at",{ascending:false}),
+          supabase.from("rallora_platform_notification_reads").select("notification_type,notification_id"),
         ]);
         if (applicationsReply.error) throw applicationsReply.error;
         if (pilotEnquiriesReply.error) throw pilotEnquiriesReply.error;
