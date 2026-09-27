@@ -206,7 +206,7 @@ export default function PlatformControlCentre() {
       <Link className={styles.brand} href="/" aria-label="Rallora home"><RalloraLogo variant="light" width={184}/></Link>
       <div className={styles.navTitle}><strong>Platform Control Centre</strong><span>Rallora operations</span></div>
       <div className={styles.navActions}>
-        <Link href="/notifications">Notifications</Link>
+        {view.status==="ready"?<Link href="#platform-inbox">Notifications{(view.pilotEnquiries.filter(item=>item.status==="new").length+view.supportRequests.filter(item=>item.status==="new").length+view.applications.filter(item=>item.status==="pending").length)>0&&<strong style={{marginLeft:6,display:"inline-flex",minWidth:20,height:20,padding:"0 6px",alignItems:"center",justifyContent:"center",borderRadius:999,background:"#00B0FE",color:"#061A39",fontSize:11}}>{view.pilotEnquiries.filter(item=>item.status==="new").length+view.supportRequests.filter(item=>item.status==="new").length+view.applications.filter(item=>item.status==="pending").length}</strong>}</Link>:<Link href="#platform-inbox">Notifications</Link>}
         <Link href="/account">Security</Link>
         {view.status==="ready"&&<button className={styles.signOut} disabled={busy==="sign-out"} onClick={()=>void signOut()}>Sign out</button>}
       </div>
@@ -302,7 +302,7 @@ export default function PlatformControlCentre() {
         </article>)}
         {!view.supportRequests.length&&<article className={styles.card}><h3>Support inbox clear</h3><p>Bug reports, general help and registration support requests will appear here.</p></article>}
       </section>
-      <div className={styles.sectionHeading}><div><small>PILOT PIPELINE</small><h2>Pilot enquiries</h2></div><p>Leads submitted through the public Rallora landing page.</p></div>
+      <div id="platform-inbox" className={styles.sectionHeading}><div><small>PILOT PIPELINE</small><h2>Pilot enquiries</h2></div><p>Leads submitted through the public Rallora landing page.</p></div>
       <section className={styles.grid} aria-label="Pilot enquiries">
         {view.pilotEnquiries.map(enquiry=><article className={styles.card} key={enquiry.id}>
           <span className={styles.status}>{enquiry.status}</span><h3>{enquiry.club_name}</h3>
