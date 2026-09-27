@@ -44,7 +44,8 @@ export default function PlatformControlCentre() {
   const [showAddClub,setShowAddClub]=useState(false);
   const [supportFilter,setSupportFilter]=useState("open");
   const [supportCategory,setSupportCategory]=useState("all");
-  const [supportSelected,setSupportSelected]=useState<string|null>(null);\n  const [notificationReads,setNotificationReads]=useState<Set<string>>(new Set());
+  const [supportSelected,setSupportSelected]=useState<string|null>(null);
+  const [notificationReads,setNotificationReads]=useState<Set<string>>(new Set());
   const load=useCallback(async()=>{
       try {
         const { data: { user }, error: authError } = await supabase.auth.getUser();
