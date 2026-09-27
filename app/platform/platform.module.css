@@ -91,3 +91,5 @@
 .crmNextAction{display:grid;gap:5px;padding:12px;border:1px solid #dce8f2;border-radius:10px;background:#f5f9fc}.crmNextAction strong{font-size:10px;text-transform:uppercase;color:#65758b}.crmNextAction span{font-size:12px;font-weight:800}.crmNextAction time{font-size:11px;color:#65758b}.crmNextAction button{margin-top:5px;background:#eef5fb;color:#061a39;border:1px solid #d5e3ef}
 
 .crmNextAction{display:grid;gap:5px;padding:12px;border:1px solid #dce8f2;border-radius:10px;background:#f5f9fc}.crmNextAction strong{font-size:10px;text-transform:uppercase;color:#65758b}.crmNextAction span{font-size:12px;font-weight:800}.crmNextAction time{font-size:11px;color:#65758b}.crmNextAction button{margin-top:5px;background:#eef5fb;color:#061a39;border:1px solid #d5e3ef}
+
+.crmToolbar{justify-content:flex-start;align-items:end;gap:12px}.crmToolbar label:first-child{flex:0 0 180px}.crmToolbar label:last-child{flex:1;max-width:440px}.crmToolbar input,.crmToolbar select{width:100%}@media(max-width:700px){.crmToolbar{align-items:stretch}.crmToolbar label:first-child,.crmToolbar label:last-child{flex:1 1 100%;max-width:none}}
