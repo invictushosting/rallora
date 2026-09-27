@@ -18,7 +18,7 @@ type Season = { id: string; club_id: string; name: string; status: string; fixtu
 type Membership = { club_id: string; user_id: string; role: string; status: string };
 type DivisionSummary = { id: string; name: string; sort_order: number;
   teams: { id: string; name: string; player_one_name:string|null; player_two_name:string|null; player_one_email:string|null; player_two_email:string|null; player_one_rating:number|null; player_two_rating:number|null }[] };
-type AdminFixture = { id:string; season_id:string; division_id:string; home_team_id:string; away_team_id:string; week_number:number; play_by:string; status:string; home_label?:string; away_label?:string; home_score?:string|null; away_score?:string|null; winner_team_id?:string|null };
+type AdminFixture = { id:string; season_id:string; division_id:string; home_team_id:string; away_team_id:string; week_number:number; play_by:string; status:string; home_label?:string; away_label?:string; result_id?:string|null; result_score?:string|null };
 type Summary = {
   season: Season;
   divisions: number;
@@ -172,16 +172,17 @@ export default function ClubAdministration() {
                   .in("division_id", divisionIds).order("name", { ascending: true })
               : Promise.resolve({ data: [] as { id: string; division_id: string; name: string; player_one_name:string|null; player_two_name:string|null; player_one_email:string|null; player_two_email:string|null; player_one_rating:number|null; player_two_rating:number|null }[], error: null }),
             fixtureIds.length
-              ? supabase.from("results").select("fixture_id")
+              ? supabase.from("results").select("id,fixture_id,score")
                   .in("fixture_id", fixtureIds).eq("status", "confirmed")
-              : Promise.resolve({ data: [] as { fixture_id: string }[], error: null }),
+              : Promise.resolve({ data: [] as { id:string; fixture_id: string; score:string|null }[], error: null }),
           ]);
           if (teamsReply.error) throw teamsReply.error;
           if (resultsReply.error) throw resultsReply.error;
           const knownFixtureIds = new Set(fixtureIds);
           const roster = (teamsReply.data ?? []) as { id: string; division_id: string; name: string; player_one_name:string|null; player_two_name:string|null; player_one_email:string|null; player_two_email:string|null; player_one_rating:number|null; player_two_rating:number|null }[];
           const labels = new Map(roster.map((team)=>[team.id,[team.player_one_name,team.player_two_name].filter(Boolean).join(" / ") || "Players to be confirmed"]));
-          allFixtures.push(...seasonFixtures.map((fixture)=>({...fixture,home_label:labels.get(fixture.home_team_id),away_label:labels.get(fixture.away_team_id)})));
+          const resultByFixture = new Map((resultsReply.data ?? []).map((result)=>[result.fixture_id,{id:result.id as string,score:(result.score as string|null) ?? null}]));
+          allFixtures.push(...seasonFixtures.map((fixture)=>({...fixture,home_label:labels.get(fixture.home_team_id),away_label:labels.get(fixture.away_team_id),result_id:resultByFixture.get(fixture.id)?.id ?? null,result_score:resultByFixture.get(fixture.id)?.score ?? null})));
           const divisionSummaries: DivisionSummary[] = (divisionReply.data ?? [])
             .map((division) => ({
               id: division.id as string,
@@ -371,9 +372,11 @@ export default function ClubAdministration() {
           <div className={styles.fixtureOperationMain}><strong>{fixture.home_label || "Players"} <span>vs</span> {fixture.away_label || "Players"}</strong><div className={styles.fixtureMeta}><span>Week {fixture.week_number}</span><span>Play by {fixture.play_by}</span><b data-status={fixture.status}>{fixture.status==="confirmed"?"Played":fixture.status.replaceAll("_"," ")}</b></div></div>
           <div className={styles.fixtureActions}>
             <span className={styles.bookingHealth} data-tone={bookingHealth(fixture).tone}><i aria-hidden="true" />{bookingHealth(fixture).label}</span>
-            {fixture.status==="confirmed" && <Link className={styles.fixtureResult} href={`/clubs/${encodeURIComponent(view.club.slug)}/fixtures?fixture=${encodeURIComponent(fixture.id)}`}>See result</Link>}
+            {fixture.status==="confirmed" && <button className={styles.fixtureResult} type="button" onClick={()=>document.getElementById(`result-${fixture.id}`)?.showPopover()}>See result</button>}
+            {demoMode && bookingForFixture(fixture.id) && <a className={styles.playtomicView} href="https://app.playtomic.com/" target="_blank" rel="noreferrer">View in Playtomic ↗</a>}
             {fixture.status!=="confirmed" && <button className={styles.fixtureReminder} type="button" onClick={()=>sendFixtureReminder(fixture)}>{fixtureView==="awaiting"?"Request result":"Send reminder"}</button>}
           </div>
+          {fixture.status==="confirmed" && <div id={`result-${fixture.id}`} popover="auto" className={styles.resultPopover}><button className={styles.resultPopoverClose} type="button" popoverTarget={`result-${fixture.id}`} popoverTargetAction="hide" aria-label="Close result">×</button><span className={styles.eyebrow}>CONFIRMED RESULT</span><h3>{fixture.home_label || "Players"} <span>vs</span> {fixture.away_label || "Players"}</h3><strong className={styles.resultScore}>{fixture.result_score || "Result confirmed"}</strong><p>Week {fixture.week_number} · Result confirmed in Rallora</p></div>}
         </article>)}
         {!fixtureRows.length && <div className={styles.fixtureEmpty}>No fixtures in this view.</div>}
       </div>
