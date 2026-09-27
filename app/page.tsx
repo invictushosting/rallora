@@ -11,7 +11,8 @@ export default function RalloraHome(){
   async function submit(event:React.FormEvent<HTMLFormElement>){
     event.preventDefault();setBusy(true);setError("");
     try{
-      const formElement=event.currentTarget;\n      const form=new FormData(formElement);
+      const formElement=event.currentTarget;
+      const form=new FormData(formElement);
       const payload={
         clubName:String(form.get("clubName")||"").trim(),
         name:String(form.get("name")||"").trim(),
