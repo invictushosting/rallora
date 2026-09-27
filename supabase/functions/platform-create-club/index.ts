@@ -74,9 +74,7 @@ Deno.serve(async (req: Request) => {
     !plans.has(plan) ||
     contactName.length < 2 ||
     contactPhone.length < 7 ||
-    address1.length < 3 ||
-    town.length < 2 ||
-    postcode.length < 2
+    town.length < 2
   ) return json({ error: "Check the club and owner details, then try again." }, 400);
 
   async function findUserByEmail(email: string) {

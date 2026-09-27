@@ -35,5 +35,9 @@ export async function POST(request:NextRequest){
   });
 
   const payload=await response.json().catch(()=>({error:"Could not create the club."})) as Record<string,unknown>;
+  if(response.ok&&typeof body.enquiryId==="string"&&typeof payload.clubId==="string"){
+    const linked=await db.from("rallora_pilot_enquiries").update({linked_club_id:payload.clubId,updated_at:new Date().toISOString()}).eq("id",body.enquiryId).eq("status","won");
+    if(linked.error)return reply({...payload,warning:"Club created, but the CRM lead could not be linked automatically."},200);
+  }
   return reply(payload,response.status);
 }

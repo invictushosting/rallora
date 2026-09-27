@@ -207,10 +207,11 @@ export default function PlatformControlCentre() {
       town:String(form.get("town")).trim(),
       postcode:String(form.get("postcode")).trim(),
       country:String(form.get("country")).trim(),
+      enquiryId:crmConvertLead?.id??null,
     })});
-    const body=await response.json().catch(()=>({})) as {error?:string;ownerCreated?:boolean};
+    const body=await response.json().catch(()=>({})) as {error?:string;ownerCreated?:boolean;clubId?:string};
     if(!response.ok){setNotice(body.error||"Could not create the club.");setBusy("");return}
-    setNotice(body.ownerCreated?"Club and owner account created. Share the temporary login details with the owner.":"Club created and linked to the existing owner account.");
+    setNotice(body.ownerCreated?"Club and owner account created. Share the temporary login details with the owner.":"Club created and linked to the existing owner account.");setCrmConvertLead(null);
     setBusy("");setShowAddClub(false);await load();
   }
   async function signIn(event:React.FormEvent<HTMLFormElement>){event.preventDefault();setBusy("sign-in");setNotice("");const {error}=await supabase.auth.signInWithPassword({email:email.trim(),password});if(error){setNotice(error.message);setBusy("");return}setPassword("");setBusy("");await load()}
@@ -265,13 +266,13 @@ export default function PlatformControlCentre() {
       {showAddClub&&<form id="platform-add-club" className={styles.addClubForm} onSubmit={createClub}>
         <div><span>{crmConvertLead?"CRM ONBOARDING":"MANUAL ONBOARDING"}</span><h3>{crmConvertLead?`Convert ${crmConvertLead.club_name} to a club`:"Add a club"}</h3><p>{crmConvertLead?"Lead details have been carried across from CRM. Complete the remaining club setup below.":"Use this when Rallora is onboarding a club directly. If the owner does not have a Rallora account yet, one will be created at the same time."}</p></div>
         <label>Club name<input name="name" required minLength={2} maxLength={120} placeholder="Example Padel Club" defaultValue={crmConvertLead?.club_name??""}/></label>
-        <label>Club web address<div className={styles.slugInput}><span>rallora.app/clubs/</span><input name="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="example-padel"/></div></label>
+        <label>Club web address<div className={styles.slugInput}><span>rallora.app/clubs/</span><input name="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="example-padel" defaultValue={crmConvertLead?crmSlug(crmConvertLead.club_name):""}/></div></label>
         <label>Owner email<input name="ownerEmail" type="email" required placeholder="owner@example.com" defaultValue={crmConvertLead?.contact_email??""}/></label><label>Temporary password<span className={styles.fieldHint}>Only used if this owner does not already have a Rallora account.</span><input name="ownerPassword" type="password" minLength={8} autoComplete="new-password" placeholder="Minimum 8 characters"/></label>
         <label>Primary contact name<input name="contactName" required minLength={2} placeholder="Club owner / manager" defaultValue={crmConvertLead?.contact_name??""}/></label>
         <label>Mobile number<input name="contactPhone" type="tel" autoComplete="tel" required minLength={7} placeholder="+44 7..." defaultValue={crmConvertLead?.contact_phone??""}/></label>
-        <label>Address line 1<input name="address1" required minLength={3} placeholder="Venue address"/></label>
+        <label>Address line 1<input name="address1" minLength={3} placeholder="Venue address"/></label>
         <label>Town / city<input name="town" required minLength={2} placeholder="Manchester" defaultValue={crmConvertLead?.club_location??""}/></label>
-        <label>Postcode<input name="postcode" required minLength={2} placeholder="M1 1AA"/></label>
+        <label>Postcode / ZIP<input name="postcode" minLength={2} placeholder="Postcode / ZIP"/></label>
         <label>Country<input name="country" required defaultValue="United Kingdom"/></label>
         <label>Plan<select name="plan" defaultValue="league"><option value="starter">Starter</option><option value="league">Growth</option><option value="pro">Pro</option></select></label>
         <button disabled={busy==="create-club"}>{busy==="create-club"?"Creating club…":"Create club & activate owner"}</button>
