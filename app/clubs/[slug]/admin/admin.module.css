@@ -187,3 +187,23 @@
 .divisionAction:hover{background:#f7fbfe!important;border-color:#9fc8e3!important;box-shadow:0 6px 14px rgba(6,26,57,.07);transform:translateY(-1px)}
 .divisionAction:focus-visible{outline:3px solid rgba(0,176,254,.22);outline-offset:2px}
 @media(max-width:490px){.card .divisionRow{align-items:center;flex-direction:row}.divisionAction{min-height:38px;padding:8px 10px!important}}
+
+
+/* League/admin interaction polish */
+.metricAction{display:inline-flex!important;margin-top:10px;color:#087fb7!important;font-size:11px!important;font-weight:900!important;letter-spacing:0!important}
+.operationStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0 18px}
+.operationStats span{display:grid;gap:3px;padding:10px 11px;border:1px solid #dfe9f1;border-radius:11px;background:rgba(255,255,255,.68);font-size:10px;font-weight:750;color:#6b8097}
+.operationStats strong{font-size:16px;color:#17365c}
+.divisionRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px}
+.divisionRow>div{display:grid;gap:3px}.divisionRow>div>strong{font-size:12px;color:#17365c}.divisionRow>div>span{font-size:10px;color:#7890a9}
+.divisionAction{border:0;background:transparent;color:#087fb7;font-size:11px;font-weight:850;cursor:pointer;padding:6px}
+.cardAction{display:inline-flex;margin-top:3px;padding:9px 11px;border-radius:9px;background:#edf5fa;text-decoration:none;color:#164f7a!important}
+#club-leagues{scroll-margin-top:20px}
+@media(max-width:620px){
+ .adminShortcuts{grid-template-columns:1fr 1fr!important;gap:7px}
+ .adminShortcuts a{display:flex!important;align-items:center;justify-content:center;margin:0!important;min-height:44px!important;padding:9px 7px!important}
+ .operationStats{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+ .operationStats span{padding:9px 7px;text-align:center}
+ .divisionRow{align-items:center;flex-direction:row!important}
+ .divisionAction{min-height:40px;text-align:right}
+}
