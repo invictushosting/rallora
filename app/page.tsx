@@ -12,17 +12,19 @@ export default function RalloraHome(){
     event.preventDefault();setBusy(true);setError("");
     try{
       const form=new FormData(event.currentTarget);
-      const reply=await supabase.from("rallora_pilot_enquiries").insert({
-        club_name:String(form.get("clubName")||"").trim(),
-        contact_name:String(form.get("name")||"").trim(),
-        contact_email:String(form.get("email")||"").trim().toLowerCase(),
-        contact_phone:String(form.get("phone")||"").trim()||null,
-        club_location:String(form.get("location")||"").trim(),
-        court_count:String(form.get("courts")||"").trim()?Number(form.get("courts")):null,
-        enquiry_type:String(form.get("interest")||"pilot"),
+      const payload={
+        clubName:String(form.get("clubName")||"").trim(),
+        name:String(form.get("name")||"").trim(),
+        email:String(form.get("email")||"").trim().toLowerCase(),
+        phone:String(form.get("phone")||"").trim()||null,
+        location:String(form.get("location")||"").trim(),
+        courts:String(form.get("courts")||"").trim()?Number(form.get("courts")):null,
+        interest:String(form.get("interest")||"pilot"),
         message:String(form.get("message")||"").trim()||null,
-      });
-      if(reply.error)throw reply.error;
+      };
+      const response=await fetch("/api/pilot-enquiries",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+      const body=await response.json().catch(()=>({})) as {error?:string};
+      if(!response.ok)throw new Error(body.error||"We couldn't send your enquiry.");
       setSubmitted(true);event.currentTarget.reset();
     }catch(reason){setError(reason instanceof Error?reason.message:"We couldn't send your enquiry. Please try again.");}
     finally{setBusy(false);}
