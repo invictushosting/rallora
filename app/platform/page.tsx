@@ -41,6 +41,9 @@ export default function PlatformControlCentre() {
   const [password,setPassword]=useState("");
   const [readiness,setReadiness]=useState<Readiness|null>(null);
   const [showAddClub,setShowAddClub]=useState(false);
+  const [supportFilter,setSupportFilter]=useState("open");
+  const [supportCategory,setSupportCategory]=useState("all");
+  const [supportSelected,setSupportSelected]=useState<string|null>(null);
   const load=useCallback(async()=>{
       try {
         const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -156,7 +159,7 @@ export default function PlatformControlCentre() {
   function setClubStatus(id:string,value:boolean){return action(`club-${id}`,supabase.rpc("rallora_platform_set_club_status",{p_club_id:id,p_is_active:value}),value?"Club activated.":"Club suspended.");}
   function setPlan(id:string,plan:string,status:string){return action(`plan-${id}`,supabase.rpc("rallora_platform_set_plan",{p_club_id:id,p_plan_code:plan,p_status:status}),"Subscription updated.");}
   function setFeature(id:string,feature:string,enabled:boolean){return action(`feature-${id}-${feature}`,supabase.rpc("rallora_platform_set_feature",{p_club_id:id,p_feature_key:feature,p_enabled:enabled}),"Feature access updated.");}
-  function updateSupportRequest(id:string,status:string){return action(`support-${id}`,supabase.from("rallora_support_requests").update({status,updated_at:new Date().toISOString()}).eq("id",id),"Support request updated.");}
+  function updateSupportRequest(id:string,status:string){return action(`support-${id}`,supabase.from("rallora_support_requests").update({status,updated_at:new Date().toISOString()}).eq("id",id),"Support request updated.");}\n  function saveSupportDetails(id:string){const priority=(document.getElementById(`support-priority-${id}`) as HTMLSelectElement)?.value;const assignee=(document.getElementById(`support-assignee-${id}`) as HTMLInputElement)?.value.trim()||null;const internal_notes=(document.getElementById(`support-notes-${id}`) as HTMLTextAreaElement)?.value.trim()||null;return action(`support-${id}`,supabase.from("rallora_support_requests").update({priority,assignee,internal_notes,updated_at:new Date().toISOString()}).eq("id",id),"Support request saved.");}
   function updateFormatRequest(id:string){
     const status=(document.getElementById(`format-status-${id}`) as HTMLSelectElement)?.value||"reviewing";
     const notes=(document.getElementById(`format-notes-${id}`) as HTMLTextAreaElement)?.value.trim()||null;
@@ -276,13 +279,25 @@ export default function PlatformControlCentre() {
       <section className={styles.metrics} aria-label="Support summary">
         {([["New",view.supportRequests.filter(r=>r.status==="new").length],["Open",view.supportRequests.filter(r=>["new","in_progress"].includes(r.status)).length],["Urgent",view.supportRequests.filter(r=>r.priority==="urgent"&&!["resolved","closed"].includes(r.status)).length],["Waiting",view.supportRequests.filter(r=>r.status==="waiting").length]] as [string,number][]).map(([label,count])=><div className={styles.metric} key={label}><span>{label}</span><strong>{count}</strong></div>)}
       </section>
-      <section className={styles.grid} aria-label="Support requests">
-        {view.supportRequests.map(request=><article className={styles.card} key={request.id}>
-          <span className={styles.status}>{request.priority.toUpperCase()}</span><h3>{request.subject}</h3>
-          <p className={styles.slug}>{request.category.replaceAll("_"," ")} · {new Date(request.created_at).toLocaleString("en-GB")}</p>
-          <dl className={styles.applicationDetails}><div><dt>Requester</dt><dd>{request.requester_name||"Not supplied"}</dd></div><div><dt>Email</dt><dd><a href={`mailto:${request.requester_email}`}>{request.requester_email}</a></dd></div><div><dt>Club</dt><dd>{summaries.find(item=>item.club.id===request.club_id)?.club.name||"Platform / not linked"}</dd></div><div><dt>Assignee</dt><dd>{request.assignee||"Unassigned"}</dd></div></dl>
-          <p>{request.message}</p>
-          <div className={styles.controls}><label>Status<select value={request.status} onChange={event=>void updateSupportRequest(request.id,event.target.value)} disabled={busy===`support-${request.id}`}><option value="new">New</option><option value="in_progress">In progress</option><option value="waiting">Waiting on customer</option><option value="resolved">Resolved</option><option value="closed">Closed</option></select></label></div>
+      <div className={styles.supportToolbar}>
+        <div>{["open","new","waiting","resolved","all"].map(filter=><button key={filter} className={supportFilter===filter?styles.filterActive:""} onClick={()=>setSupportFilter(filter)}>{filter==="waiting"?"Waiting":filter.charAt(0).toUpperCase()+filter.slice(1)}</button>)}</div>
+        <select value={supportCategory} onChange={e=>setSupportCategory(e.target.value)} aria-label="Filter support category"><option value="all">All categories</option><option value="bug">Bugs</option><option value="general_help">General help</option><option value="registration">Registration</option><option value="billing">Billing</option><option value="feature_request">Feature requests</option><option value="other">Other</option></select>
+      </div>
+      <section className={styles.supportList} aria-label="Support requests">
+        {view.supportRequests.filter(r=>(supportCategory==="all"||r.category===supportCategory)&&(supportFilter==="all"||(supportFilter==="open"?["new","in_progress"].includes(r.status):r.status===supportFilter))).map(request=><article className={`${styles.supportTicket} ${request.priority==="urgent"?styles.ticketUrgent:""}`} key={request.id}>
+          <button className={styles.ticketSummary} onClick={()=>setSupportSelected(supportSelected===request.id?null:request.id)}>
+            <span className={`${styles.priorityDot} ${styles[`priority_${request.priority}`]}`} aria-hidden="true"/><span><strong>{request.subject}</strong><small>{request.category.replaceAll("_"," ")} · {summaries.find(item=>item.club.id===request.club_id)?.club.name||request.requester_email}</small></span><em>{request.status.replaceAll("_"," ")}</em><time>{new Date(request.created_at).toLocaleDateString("en-GB")}</time>
+          </button>
+          {supportSelected===request.id&&<div className={styles.ticketDetail}>
+            <div><h3>{request.subject}</h3><p>{request.message}</p><dl className={styles.applicationDetails}><div><dt>Requester</dt><dd>{request.requester_name||"Not supplied"}</dd></div><div><dt>Email</dt><dd><a href={`mailto:${request.requester_email}`}>{request.requester_email}</a></dd></div><div><dt>Club</dt><dd>{summaries.find(item=>item.club.id===request.club_id)?.club.name||"Platform / not linked"}</dd></div><div><dt>Received</dt><dd>{new Date(request.created_at).toLocaleString("en-GB")}</dd></div></dl></div>
+            <div className={styles.ticketControls}>
+              <label>Status<select value={request.status} onChange={e=>void updateSupportRequest(request.id,e.target.value)} disabled={busy===`support-${request.id}`}><option value="new">New</option><option value="in_progress">In progress</option><option value="waiting">Waiting on customer</option><option value="resolved">Resolved</option><option value="closed">Closed</option></select></label>
+              <label>Priority<select id={`support-priority-${request.id}`} defaultValue={request.priority}><option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></label>
+              <label>Assigned to<input id={`support-assignee-${request.id}`} defaultValue={request.assignee??""} placeholder="Team member"/></label>
+              <label>Internal notes<textarea id={`support-notes-${request.id}`} defaultValue={request.internal_notes??""} rows={4} placeholder="Private notes for the Rallora team."/></label>
+              <button disabled={busy===`support-${request.id}`} onClick={()=>void saveSupportDetails(request.id)}>{busy===`support-${request.id}`?"Saving…":"Save ticket"}</button>
+            </div>
+          </div>}
         </article>)}
         {!view.supportRequests.length&&<article className={styles.card}><h3>Support inbox clear</h3><p>Bug reports, general help and registration support requests will appear here.</p></article>}
       </section>
