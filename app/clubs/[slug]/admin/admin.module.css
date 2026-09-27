@@ -207,3 +207,14 @@
  .divisionRow{align-items:center;flex-direction:row!important}
  .divisionAction{min-height:40px;text-align:right}
 }
+
+
+/* Fixture operations status filters */
+.fixtureFilters{display:flex;flex-wrap:wrap;gap:8px;margin:-3px 0 18px;padding-bottom:18px;border-bottom:1px solid #e7eef5}
+.fixtureFilters button{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:8px 12px;border:1px solid #cbddea;border-radius:999px;background:#f8fbfd;color:#294866;font:inherit;font-size:11px;font-weight:850;cursor:pointer;transition:background .16s ease,border-color .16s ease,color .16s ease,transform .16s ease}
+.fixtureFilters button:hover{border-color:#9fc8e3;background:#fff;transform:translateY(-1px)}
+.fixtureFilters button span{display:grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#e7f1f7;color:#315675;font-size:10px;font-weight:900}
+.fixtureFilters .fixtureFilterActive{background:#061A39;border-color:#061A39;color:#fff;box-shadow:0 5px 13px rgba(6,26,57,.13)}
+.fixtureFilters .fixtureFilterActive span{background:rgba(255,255,255,.16);color:#fff}
+#fixture-operations .sectionHeading>div>p{margin:4px 0 0;color:#6b8097;font-size:11px}
+@media(max-width:490px){.fixtureFilters{display:grid;grid-template-columns:1fr 1fr;gap:7px}.fixtureFilters button{justify-content:space-between;width:100%;border-radius:11px;padding:8px 10px}}
