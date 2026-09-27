@@ -346,7 +346,17 @@ export default function ClubAdministration() {
       <article onClick={()=>openFixtureView("played")}><span>Played</span><strong>{totals.confirmed}</strong><small>Confirmed results</small><b className={styles.metricAction}>View results →</b></article>
     </section>
     {fixtureView && <section id="fixture-operations" className={styles.launchPanel}>
-      <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>FIXTURE OPERATIONS</span><h2>{fixtureView==="all"?"All fixtures":fixtureView==="attention"?"Needs attention":fixtureView.charAt(0).toUpperCase()+fixtureView.slice(1)}</h2></div><button type="button" onClick={()=>setFixtureView(null)}>Close</button></div>
+      <div className={styles.sectionHeading}><div><span className={styles.eyebrow}>FIXTURE OPERATIONS</span><h2>{fixtureView==="all"?"All fixtures":fixtureView==="outstanding"?"To book":fixtureView==="booked"?"Booked fixtures":fixtureView==="awaiting"?"Awaiting result":fixtureView==="played"?"Played fixtures":"Needs attention"}</h2><p>{fixtureRows.length} fixture{fixtureRows.length===1?"":"s"} in this view</p></div><button type="button" onClick={()=>setFixtureView(null)}>Close</button></div>
+      <div className={styles.fixtureFilters} aria-label="Filter fixtures by status">
+        {([
+          ["all","All",view.fixtures.length],
+          ["outstanding","To book",Math.max(0, totals.outstanding - bookedFixtureIds.size)],
+          ["booked","Booked",bookedFixtureIds.size],
+          ["awaiting","Awaiting result",Math.max(totals.awaitingResult, finishedWithoutResult)],
+          ["played","Played",totals.confirmed],
+          ["attention","Needs attention",totals.overdue + possibleBookings],
+        ] as const).map(([value,label,count])=><button key={value} type="button" className={fixtureView===value?styles.fixtureFilterActive:""} onClick={()=>openFixtureView(value)}>{label} <span>{count}</span></button>)}
+      </div>
       {reminderNotice && <p role="status">{reminderNotice}</p>}
       <div className={styles.divisionList}>
         {fixtureRows.map((fixture)=><div className={styles.divisionRow} key={fixture.id}><div><strong>{fixture.home_label || "Players"} vs {fixture.away_label || "Players"}</strong><span>Week {fixture.week_number} · Play by {fixture.play_by} · {fixture.status}</span></div>{fixture.status!=="confirmed" && <button type="button" onClick={()=>sendFixtureReminder(fixture)}>{fixtureView==="awaiting"?"Remind captain for result":"Send reminder"}</button>}</div>)}
