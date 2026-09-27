@@ -3,6 +3,7 @@ import Link from "next/link";
 import {useEffect,useMemo,useState} from "react";
 import {createClient} from "@/lib/supabase";
 import RalloraLogo from "@/app/components/rallora-logo";
+import SupportForm from "@/app/components/support-form";
 import styles from "./account.module.css";
 
 type ClubAccess={club_id:string;role:string;clubs:{slug:string;name:string}|null};
@@ -85,5 +86,6 @@ export default function AccountPage(){
     </form>}
 
     {message&&<p className={styles.message} role="status">{message}</p>}
+    {signedIn&&<SupportForm clubId={clubAccess.length===1?clubAccess[0].club_id:undefined}/>}
   </section></main>
 }
