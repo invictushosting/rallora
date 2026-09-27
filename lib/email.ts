@@ -1,5 +1,3 @@
-import { Resend } from "resend";
-
 const DEFAULT_FROM = "Rallora <support@rallora.app>";
 
 function cleanSenderName(value: string) {
@@ -18,12 +16,28 @@ export type RalloraEmail = {
 export async function sendRalloraEmail(message: RalloraEmail) {
   const key = process.env.RESEND_API_KEY;
   if (!key) throw new Error("RESEND_API_KEY is not configured.");
-  const resend = new Resend(key);
-  const from = message.clubName ? `${cleanSenderName(message.clubName)} <support@rallora.app>` : DEFAULT_FROM;
-  const { data, error } = await resend.emails.send({
-    from, to: message.to, subject: message.subject, html: message.html,
-    text: message.text, replyTo: message.replyTo || "support@rallora.app",
+
+  const from = message.clubName
+    ? `${cleanSenderName(message.clubName)} <support@rallora.app>`
+    : DEFAULT_FROM;
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to: Array.isArray(message.to) ? message.to : [message.to],
+      subject: message.subject,
+      html: message.html,
+      text: message.text,
+      reply_to: message.replyTo || "support@rallora.app",
+    }),
   });
-  if (error) throw new Error(error.message);
+
+  const data = (await response.json().catch(() => ({}))) as { id?: string; message?: string; name?: string };
+  if (!response.ok) throw new Error(data.message || data.name || "Email could not be sent.");
   return data;
 }
