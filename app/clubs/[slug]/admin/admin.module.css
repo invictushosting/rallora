@@ -225,3 +225,11 @@
 .fixtureFilters .fixtureFilterActive{background:#061A39;border-color:#061A39;color:#fff;box-shadow:0 5px 13px rgba(6,26,57,.13)}
 .fixtureFilters .fixtureFilterActive span{background:rgba(255,255,255,.16);color:#fff}
 @media(max-width:490px){.fixtureFilters{display:grid;grid-template-columns:1fr 1fr;gap:7px}.fixtureFilters button{justify-content:space-between;width:100%;border-radius:11px;padding:8px 10px}}
+
+
+/* Fixture pill and result action refinement */
+.fixtureFilters button{min-height:44px;padding:9px 15px;font-size:12px}
+.fixtureFilters button span{min-width:24px;height:24px;font-size:11px}
+.bookingHealth{min-height:38px;padding:0 13px;font-size:11px}
+.fixtureResult{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 14px;border:1.5px solid #08284d;border-radius:12px;background:#0b315b;color:#fff!important;text-decoration:none;font-size:12px;font-weight:850;box-shadow:0 2px 0 #061a39,0 7px 14px rgba(6,26,57,.12)}
+@media(max-width:700px){.fixtureResult{width:100%;min-height:46px}}

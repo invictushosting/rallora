@@ -300,11 +300,10 @@ export default function ClubAdministration() {
   const bookingHealth = (fixture:AdminFixture) => {
     const booking = bookingForFixture(fixture.id);
     if (booking?.match_state==="confirmed" && booking.matched_player_count===4) return {tone:"green",label:"Court booked"};
-    if (booking?.match_state==="possible" || booking?.matched_player_count===3) return {tone:"amber",label:"Booking to review"};
+    if (booking?.match_state==="possible" || booking?.matched_player_count===3) return {tone:"amber",label:"Booking pending"};
     if (fixture.status==="confirmed") return {tone:"green",label:"Result confirmed"};
     return {tone:"red",label:"Court not booked"};
   };
-  const playtomicBookingUrl = "https://app.playtomic.io/";
   const demoMode = view.club.slug==="rallora-demo";
   function sendFixtureReminder(fixture: AdminFixture) {
     if (demoMode) setReminderNotice("Demo reminder prepared for "+fixture.home_label+" vs "+fixture.away_label+". No external message was sent.");
@@ -372,7 +371,7 @@ export default function ClubAdministration() {
           <div className={styles.fixtureOperationMain}><strong>{fixture.home_label || "Players"} <span>vs</span> {fixture.away_label || "Players"}</strong><div className={styles.fixtureMeta}><span>Week {fixture.week_number}</span><span>Play by {fixture.play_by}</span><b data-status={fixture.status}>{fixture.status==="confirmed"?"Played":fixture.status.replaceAll("_"," ")}</b></div></div>
           <div className={styles.fixtureActions}>
             <span className={styles.bookingHealth} data-tone={bookingHealth(fixture).tone}><i aria-hidden="true" />{bookingHealth(fixture).label}</span>
-            {fixture.status!=="confirmed" && !bookedFixtureIds.has(fixture.id) && <a className={styles.playtomicButton} href={playtomicBookingUrl} target="_blank" rel="noreferrer">Book on Playtomic</a>}
+            {fixture.status==="confirmed" && <Link className={styles.fixtureResult} href={`/clubs/${encodeURIComponent(view.club.slug)}/fixtures?fixture=${encodeURIComponent(fixture.id)}`}>See result</Link>}
             {fixture.status!=="confirmed" && <button className={styles.fixtureReminder} type="button" onClick={()=>sendFixtureReminder(fixture)}>{fixtureView==="awaiting"?"Request result":"Send reminder"}</button>}
           </div>
         </article>)}
