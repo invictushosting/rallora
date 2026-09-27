@@ -6,9 +6,10 @@ export async function POST(request:Request){
     const body=await request.json() as Record<string,unknown>;
     const clubName=String(body.clubName||"").trim(),name=String(body.name||"").trim(),email=String(body.email||"").trim().toLowerCase(),location=String(body.location||"").trim();
     if(clubName.length<2||name.length<2||!email.includes("@")||location.length<2)return NextResponse.json({error:"Please complete the required fields."},{status:400});
-    const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     if(!url||!key)return NextResponse.json({error:"Enquiries are temporarily unavailable."},{status:503});
-    const supabase=createClient(url,key,{auth:{persistSession:false}});
+    // Public enquiry inserts are deliberately limited by RLS to new rows only. No service-role credential is required here.
+    const supabase=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
     const {error}=await supabase.from("rallora_pilot_enquiries").insert({club_name:clubName,contact_name:name,contact_email:email,contact_phone:body.phone?String(body.phone).trim():null,club_location:location,court_count:body.courts?Number(body.courts):null,enquiry_type:body.interest==="information"?"information":"pilot",message:body.message?String(body.message).trim().slice(0,1500):null});
     if(error)throw error;
     const resendKey=process.env.RESEND_API_KEY;
