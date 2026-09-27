@@ -243,3 +243,12 @@
 .resultPopover h3{margin:9px 34px 14px 0;font-size:20px}.resultPopover h3 span{color:#7b91a6;font-weight:650}.resultPopover p{margin:12px 0 0;color:#6b8097;font-size:12px}.resultScore{display:block;padding:18px;border-radius:14px;background:#f3f8fb;font-size:24px;text-align:center}
 .resultPopoverClose{position:absolute;right:16px;top:14px;width:36px;height:36px;border:1px solid #d5e2eb;border-radius:50%;background:#fff;color:#294866;font-size:22px;cursor:pointer}
 @media(max-width:700px){.playtomicView{width:100%;min-height:46px}.resultPopover{padding:22px 18px}}
+
+
+/* Disputed result operations */
+.fixtureTakeAction{flex:0 0 auto;min-height:42px;padding:0 14px;border:1.5px solid #8b2635;border-radius:12px;background:#8b2635;color:#fff;font:inherit;font-size:12px;font-weight:850;cursor:pointer}
+.disputeEyebrow{display:inline-flex;padding:6px 9px;border-radius:999px;background:#fff0f1;color:#8b2635;font-size:10px;font-weight:900;letter-spacing:.08em}
+.disputeNote{margin:16px 0;padding:15px;border:1px solid #f0cdd2;border-radius:13px;background:#fff7f8}.disputeNote strong{font-size:12px;color:#7d2533}.disputeNote p{margin:7px 0 0!important;color:#425d76!important;font-size:13px!important;line-height:1.5}
+.resolveFields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}.resolveFields label{display:grid;gap:6px;font-size:11px;font-weight:850}.resolveFields label:nth-last-child(1){grid-column:1/-1}.resolveFields input,.resolveFields select,.resolveFields textarea{width:100%;box-sizing:border-box;border:1px solid #cad9e8;border-radius:10px;padding:11px;font:inherit;color:#102d49;background:#fff}.resolveFields textarea{min-height:80px;resize:vertical}
+.disputeActions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.disputeActions button,.disputeActions a{display:inline-flex;align-items:center;justify-content:center;min-height:43px;padding:0 14px;border-radius:11px;font-size:12px;font-weight:850;text-decoration:none;cursor:pointer}.disputeActions button{border:0;background:#0b315b;color:#fff}.disputeActions a{border:1px solid #bfd0df;background:#fff;color:#23435f}
+@media(max-width:700px){.fixtureTakeAction{width:100%;min-height:46px}.resolveFields{grid-template-columns:1fr}.resolveFields label:nth-last-child(1){grid-column:auto}.disputeActions>*{width:100%}}
