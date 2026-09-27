@@ -19,6 +19,7 @@ type ClubSummary = { club: Club; seasons: Season[]; teams: number; fixtures: num
 type Application = { id:string; applicant_name:string|null; club_name:string; requested_slug:string; contact_email:string; contact_phone:string|null; plan_code:string; status:string; created_at:string };
 type PilotEnquiry = { id:string; club_name:string; contact_name:string; contact_email:string; contact_phone:string|null; club_location:string; court_count:number|null; enquiry_type:string; message:string|null; status:string; created_at:string };
 type Readiness = Record<string,number>;
+type SupportRequest = { id:string; club_id:string|null; requester_name:string|null; requester_email:string; category:string; subject:string; message:string; priority:string; status:string; assignee:string|null; internal_notes:string|null; created_at:string };
 type FormatRequest = {
   id:string; club_id:string; format_name:string; description:string; team_structure:string|null;
   group_structure:string|null; match_structure:string|null; scheduling_rules:string|null;
@@ -29,7 +30,7 @@ type FormatRequest = {
 type View =
   | { status: "loading" | "signed_out" | "forbidden" }
   | { status: "error"; message: string }
-  | { status: "ready"; clubs: ClubSummary[]; applications: Application[]; pilotEnquiries: PilotEnquiry[]; formatRequests: FormatRequest[] };
+  | { status: "ready"; clubs: ClubSummary[]; applications: Application[]; pilotEnquiries: PilotEnquiry[]; formatRequests: FormatRequest[]; supportRequests: SupportRequest[] };
 
 export default function PlatformControlCentre() {
   const supabase = useMemo(() => createClient(), []);
@@ -99,7 +100,7 @@ export default function PlatformControlCentre() {
             };
           }),
         );
-        const [applicationsReply,pilotEnquiriesReply,formatRequestsReply] = await Promise.all([
+        const [applicationsReply,pilotEnquiriesReply,formatRequestsReply,supportRequestsReply] = await Promise.all([
           supabase.from("rallora_club_applications")
             .select("id,applicant_name,club_name,requested_slug,contact_email,contact_phone,plan_code,status,created_at")
             .order("created_at",{ascending:false}),
@@ -107,10 +108,12 @@ export default function PlatformControlCentre() {
           supabase.from("rallora_format_requests")
             .select("id,club_id,format_name,description,team_structure,group_structure,match_structure,scheduling_rules,scoring_rules,promotion_relegation_rules,special_rules,reference_link,status,implemented_format_key,platform_notes,created_at")
             .order("created_at",{ascending:false}),
+          supabase.from("rallora_support_requests").select("id,club_id,requester_name,requester_email,category,subject,message,priority,status,assignee,internal_notes,created_at").order("created_at",{ascending:false}),
         ]);
         if (applicationsReply.error) throw applicationsReply.error;
         if (pilotEnquiriesReply.error) throw pilotEnquiriesReply.error;
         if (formatRequestsReply.error) throw formatRequestsReply.error;
+        if (supportRequestsReply.error) throw supportRequestsReply.error;
         const readinessReply=await supabase.rpc("rallora_pilot_readiness_report");
         if(readinessReply.error) throw readinessReply.error;
         setReadiness((readinessReply.data??{}) as Readiness);
@@ -120,6 +123,7 @@ export default function PlatformControlCentre() {
           applications: (applicationsReply.data ?? []) as Application[],
           pilotEnquiries: (pilotEnquiriesReply.data ?? []) as PilotEnquiry[],
           formatRequests: (formatRequestsReply.data ?? []) as FormatRequest[],
+          supportRequests: (supportRequestsReply.data ?? []) as SupportRequest[],
         });
       } catch (e) {
         setView({
@@ -152,6 +156,7 @@ export default function PlatformControlCentre() {
   function setClubStatus(id:string,value:boolean){return action(`club-${id}`,supabase.rpc("rallora_platform_set_club_status",{p_club_id:id,p_is_active:value}),value?"Club activated.":"Club suspended.");}
   function setPlan(id:string,plan:string,status:string){return action(`plan-${id}`,supabase.rpc("rallora_platform_set_plan",{p_club_id:id,p_plan_code:plan,p_status:status}),"Subscription updated.");}
   function setFeature(id:string,feature:string,enabled:boolean){return action(`feature-${id}-${feature}`,supabase.rpc("rallora_platform_set_feature",{p_club_id:id,p_feature_key:feature,p_enabled:enabled}),"Feature access updated.");}
+  function updateSupportRequest(id:string,status:string){return action(`support-${id}`,supabase.from("rallora_support_requests").update({status,updated_at:new Date().toISOString()}).eq("id",id),"Support request updated.");}
   function updateFormatRequest(id:string){
     const status=(document.getElementById(`format-status-${id}`) as HTMLSelectElement)?.value||"reviewing";
     const notes=(document.getElementById(`format-notes-${id}`) as HTMLTextAreaElement)?.value.trim()||null;
@@ -266,6 +271,20 @@ export default function PlatformControlCentre() {
             <div className={styles.clubActions}><a href={`/clubs/${encodeURIComponent(club.slug)}/admin`}>Open club admin</a><a href={`/clubs/${encodeURIComponent(club.slug)}`}>View public hub</a></div>
           </article>)}
         {!summaries.length&&<article className={styles.card}><h3>No clubs yet</h3><p>Add a club manually or approve an application below.</p></article>}
+      </section>
+      <div className={styles.sectionHeading}><div><small>SUPPORT & REQUESTS</small><h2>Support dashboard</h2></div><p>One operational inbox for bugs, help, registration and customer requests.</p></div>
+      <section className={styles.metrics} aria-label="Support summary">
+        {([["New",view.supportRequests.filter(r=>r.status==="new").length],["Open",view.supportRequests.filter(r=>["new","in_progress"].includes(r.status)).length],["Urgent",view.supportRequests.filter(r=>r.priority==="urgent"&&!["resolved","closed"].includes(r.status)).length],["Waiting",view.supportRequests.filter(r=>r.status==="waiting").length]] as [string,number][]).map(([label,count])=><div className={styles.metric} key={label}><span>{label}</span><strong>{count}</strong></div>)}
+      </section>
+      <section className={styles.grid} aria-label="Support requests">
+        {view.supportRequests.map(request=><article className={styles.card} key={request.id}>
+          <span className={styles.status}>{request.priority.toUpperCase()}</span><h3>{request.subject}</h3>
+          <p className={styles.slug}>{request.category.replaceAll("_"," ")} · {new Date(request.created_at).toLocaleString("en-GB")}</p>
+          <dl className={styles.applicationDetails}><div><dt>Requester</dt><dd>{request.requester_name||"Not supplied"}</dd></div><div><dt>Email</dt><dd><a href={`mailto:${request.requester_email}`}>{request.requester_email}</a></dd></div><div><dt>Club</dt><dd>{summaries.find(item=>item.club.id===request.club_id)?.club.name||"Platform / not linked"}</dd></div><div><dt>Assignee</dt><dd>{request.assignee||"Unassigned"}</dd></div></dl>
+          <p>{request.message}</p>
+          <div className={styles.controls}><label>Status<select value={request.status} onChange={event=>void updateSupportRequest(request.id,event.target.value)} disabled={busy===`support-${request.id}`}><option value="new">New</option><option value="in_progress">In progress</option><option value="waiting">Waiting on customer</option><option value="resolved">Resolved</option><option value="closed">Closed</option></select></label></div>
+        </article>)}
+        {!view.supportRequests.length&&<article className={styles.card}><h3>Support inbox clear</h3><p>Bug reports, general help and registration support requests will appear here.</p></article>}
       </section>
       <div className={styles.sectionHeading}><div><small>PILOT PIPELINE</small><h2>Pilot enquiries</h2></div><p>Leads submitted through the public Rallora landing page.</p></div>
       <section className={styles.grid} aria-label="Pilot enquiries">
