@@ -274,7 +274,7 @@ export default function PlatformControlCentre() {
         <label>Address line 1<input name="address1" minLength={3} placeholder="Venue address"/></label>
         <label>Town / city<input name="town" required minLength={2} placeholder="Manchester" defaultValue={crmConvertLead?.club_location??""}/></label>
         <label>Postcode / ZIP<input name="postcode" minLength={2} placeholder="Postcode / ZIP"/></label>
-        <label>Country<input name="country" required defaultValue="United Kingdom"/></label>
+        <label>Country<select name="country" required defaultValue={crmConvertLead?.club_location?.toLowerCase()==="greece"?"Greece":"United Kingdom"}><option value="United Kingdom">United Kingdom</option><option value="Greece">Greece</option><option value="Spain">Spain</option><option value="Portugal">Portugal</option><option value="Italy">Italy</option><option value="France">France</option><option value="Germany">Germany</option><option value="Netherlands">Netherlands</option><option value="Belgium">Belgium</option><option value="Sweden">Sweden</option><option value="Denmark">Denmark</option><option value="Finland">Finland</option><option value="Norway">Norway</option><option value="United Arab Emirates">United Arab Emirates</option><option value="Indonesia">Indonesia</option><option value="United States">United States</option><option value="Other">Other</option></select></label>
         <label>Plan<select name="plan" defaultValue="league"><option value="starter">Starter</option><option value="league">Growth</option><option value="pro">Pro</option></select></label>
         <button disabled={busy==="create-club"}>{busy==="create-club"?"Creating club…":"Create club & activate owner"}</button>
       </form>}
