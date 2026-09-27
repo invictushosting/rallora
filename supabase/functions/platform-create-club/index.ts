@@ -73,7 +73,6 @@ Deno.serve(async (req: Request) => {
     !/^\S+@\S+\.\S+$/.test(ownerEmail) ||
     !plans.has(plan) ||
     contactName.length < 2 ||
-    contactPhone.length < 7 ||
     town.length < 2
   ) return json({ error: "Check the club and owner details, then try again." }, 400);
 
