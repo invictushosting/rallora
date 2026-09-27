@@ -18,6 +18,7 @@ export default function AccountPage(){
   const [busy,setBusy]=useState(false);
   const [clubAccess,setClubAccess]=useState<ClubAccess[]>([]);
   const [returnClub,setReturnClub]=useState("");
+  const [platformAdmin,setPlatformAdmin]=useState(false);
 
   useEffect(()=>{
     setReturnClub(new URL(window.location.href).searchParams.get("club")||"");
@@ -26,6 +27,8 @@ export default function AccountPage(){
       if(error||!data.user){setSignedIn(false);return}
       setSignedIn(true);
       setEmail(data.user.email??"");
+       const platform=await supabase.from("rallora_platform_admins").select("user_id").eq("user_id",data.user.id).maybeSingle();
+       setPlatformAdmin(Boolean(platform.data));
       const memberships=await supabase.from("rallora_club_memberships")
         .select("club_id,role,clubs(slug,name)")
         .eq("user_id",data.user.id).eq("status","active");
@@ -50,8 +53,8 @@ export default function AccountPage(){
     setBusy(false);
   }
 
-  const returnHref=returnClub?`/clubs/${encodeURIComponent(returnClub)}/admin`:"/";
-  const returnLabel=returnClub?"← Back to club admin":"← Back to Rallora";
+  const returnHref=returnClub?`/clubs/${encodeURIComponent(returnClub)}/admin`:platformAdmin?"/platform":"/";
+  const returnLabel=returnClub?"← Back to club admin":platformAdmin?"← Back to Platform":"← Back to Rallora";
 
   return <main className={styles.page}><section className={styles.card}>
     <div className={styles.topbar}>
@@ -65,7 +68,7 @@ export default function AccountPage(){
 
     {signedIn&&<section className={styles.profileCard}>
       <div><span>Email</span><strong>{email}</strong></div>
-      <div><span>Account type</span><strong>{clubAccess.length?"Club administrator":"Rallora account"}</strong></div>
+      <div><span>Account type</span><strong>{platformAdmin?"Platform administrator":clubAccess.length?"Club administrator":"Rallora account"}</strong></div>
       {clubAccess.length>0&&<div className={styles.clubAccess}>
         <span>Club access</span>
         {clubAccess.map(item=><p key={item.club_id}><strong>{item.clubs?.name??"Club"}</strong><em>{item.role}</em></p>)}
@@ -86,6 +89,6 @@ export default function AccountPage(){
     </form>}
 
     {message&&<p className={styles.message} role="status">{message}</p>}
-    {signedIn&&<SupportForm clubId={clubAccess.length===1?clubAccess[0].club_id:undefined}/>}
+    {signedIn&&!platformAdmin&&<SupportForm clubId={clubAccess.length===1?clubAccess[0].club_id:undefined}/>}
   </section></main>
 }
