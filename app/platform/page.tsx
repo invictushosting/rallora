@@ -19,6 +19,7 @@ type ClubSummary = { club: Club; seasons: Season[]; teams: number; fixtures: num
 type Application = { id:string; applicant_name:string|null; club_name:string; requested_slug:string; contact_email:string; contact_phone:string|null; plan_code:string; status:string; created_at:string };
 type PilotEnquiry = { id:string; club_name:string; contact_name:string; contact_email:string; contact_phone:string|null; club_location:string; court_count:number|null; enquiry_type:string; message:string|null; status:string; source:string; assignee:string|null; internal_notes:string|null; next_follow_up_at:string|null; last_contacted_at:string|null; lost_reason:string|null; linked_club_id:string|null; created_at:string; updated_at:string };
 type Readiness = Record<string,number>;
+function crmSlug(value:string){return value.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,80)}
 type SupportRequest = { id:string; club_id:string|null; requester_name:string|null; requester_email:string; category:string; subject:string; message:string; priority:string; status:string; assignee:string|null; internal_notes:string|null; created_at:string };
 type FormatRequest = {
   id:string; club_id:string; format_name:string; description:string; team_structure:string|null;
