@@ -119,7 +119,9 @@ export default function PlatformControlCentre() {
         if (applicationsReply.error) throw applicationsReply.error;
         if (pilotEnquiriesReply.error) throw pilotEnquiriesReply.error;
         if (formatRequestsReply.error) throw formatRequestsReply.error;
-        if (supportRequestsReply.error) throw supportRequestsReply.error;\n        if (notificationReadsReply.error) throw notificationReadsReply.error;\n        setNotificationReads(new Set((notificationReadsReply.data??[]).map(row=>`${row.notification_type}:${row.notification_id}`)));
+        if (supportRequestsReply.error) throw supportRequestsReply.error;
+        if (notificationReadsReply.error) throw notificationReadsReply.error;
+        setNotificationReads(new Set((notificationReadsReply.data??[]).map(row=>`${row.notification_type}:${row.notification_id}`)));
         const readinessReply=await supabase.rpc("rallora_pilot_readiness_report");
         if(readinessReply.error) throw readinessReply.error;
         setReadiness((readinessReply.data??{}) as Readiness);
@@ -157,7 +159,8 @@ export default function PlatformControlCentre() {
     setNotice(success);setBusy("");await load();
   }
   function approveApplication(id:string){return action(`application-${id}`,supabase.rpc("rallora_approve_club_application",{p_application_id:id}),"Club approved and activated.");}
-  function updatePilotEnquiry(id:string,status:string){return action(`pilot-${id}`,supabase.from("rallora_pilot_enquiries").update({status}).eq("id",id),"Pilot enquiry updated.");}\n  async function setNotificationRead(type:string,id:string,read:boolean){const {data:{user}}=await supabase.auth.getUser();if(!user)return;const key=`${type}:${id}`;setNotificationReads(current=>{const next=new Set(current);read?next.add(key):next.delete(key);return next;});const request=read?supabase.from("rallora_platform_notification_reads").upsert({user_id:user.id,notification_type:type,notification_id:id,read_at:new Date().toISOString()}):supabase.from("rallora_platform_notification_reads").delete().eq("user_id",user.id).eq("notification_type",type).eq("notification_id",id);const {error}=await request;if(error){setNotice(error.message);await load();}}
+  function updatePilotEnquiry(id:string,status:string){return action(`pilot-${id}`,supabase.from("rallora_pilot_enquiries").update({status}).eq("id",id),"Pilot enquiry updated.");}
+  async function setNotificationRead(type:string,id:string,read:boolean){const {data:{user}}=await supabase.auth.getUser();if(!user)return;const key=`${type}:${id}`;setNotificationReads(current=>{const next=new Set(current);read?next.add(key):next.delete(key);return next;});const request=read?supabase.from("rallora_platform_notification_reads").upsert({user_id:user.id,notification_type:type,notification_id:id,read_at:new Date().toISOString()}):supabase.from("rallora_platform_notification_reads").delete().eq("user_id",user.id).eq("notification_type",type).eq("notification_id",id);const {error}=await request;if(error){setNotice(error.message);await load();}}
   function declineApplication(id:string){return action(`application-${id}`,supabase.rpc("rallora_platform_decline_application",{p_application_id:id}),"Application declined.");}
   function setClubStatus(id:string,value:boolean){return action(`club-${id}`,supabase.rpc("rallora_platform_set_club_status",{p_club_id:id,p_is_active:value}),value?"Club activated.":"Club suspended.");}
   function setPlan(id:string,plan:string,status:string){return action(`plan-${id}`,supabase.rpc("rallora_platform_set_plan",{p_club_id:id,p_plan_code:plan,p_status:status}),"Subscription updated.");}
