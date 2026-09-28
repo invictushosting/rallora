@@ -284,15 +284,18 @@ export default function ClubAdministration() {
   const bookedFixtureIds = new Set(confirmedBookings.filter((booking)=>booking.booking_status!=="CANCELED").map((booking)=>booking.matched_fixture_id).filter(Boolean));
   const possibleBookings = view.playtomicBookings.filter((booking)=>booking.match_state==="possible" && booking.matched_player_count===3).length;
   const finishedWithoutResult = confirmedBookings.filter((booking)=>booking.booking_status==="FINISHED" && booking.matched_fixture_id && !view.fixtures.some((fixture)=>fixture.id===booking.matched_fixture_id && fixture.status==="confirmed")).length;
-  const activeSeason = view.summaries.find(({season})=>season.status==="active");
-  const registrationReady = Boolean(activeSeason && activeSeason.divisions>0);
+  const firstCompetition = view.summaries[0];
+  const publishedCompetition = view.summaries.find(({season})=>season.registration_published);
+  const registrationReady = Boolean(publishedCompetition);
   const playtomicDeferred = view.club.playtomic_setup_choice === "later";
   const playtomicSetupDone = view.playtomicConnected || playtomicDeferred;
+  const clubProfileDone = Boolean(view.club.logo_url && view.club.cover_image_url && view.club.welcome_text);
+  const registrationSettingsDone = Boolean(view.club.player_registration_terms);
+  const competitionCreated = Boolean(firstCompetition);
   const launchSteps = [
-    {label:"Brand your club",done:Boolean(view.club.logo_url && view.club.cover_image_url && view.club.welcome_text),hint:"Add your logo, cover image and welcome message.",tab:"branding" as const,action:"Start branding"},
-    {label:"Create your first season",done:view.summaries.length>0,hint:"Create a draft season before anything goes live.",tab:"seasons" as const,action:"Create season"},
-    {label:"Add divisions",done:totals.divisions>0,hint:"Set up the divisions your player pairings will compete in.",tab:"seasons" as const,action:"Add divisions"},
-    {label:"Open player registration",done:registrationReady,hint:"Activate your season and open registration so players can enter their pairing.",tab:"registration" as const,action:registrationReady?"Review registration":"Prepare registration"},
+    {label:"Club profile & branding",done:clubProfileDone,hint:"Add your logo, cover image, venue details and welcome message.",tab:"branding" as const,action:"Complete profile"},
+    {label:"Player registration settings",done:registrationSettingsDone,hint:"Set the club-level registration terms players will see.",tab:"branding" as const,action:"Set registration terms"},
+    {label:"Create your first competition",done:competitionCreated,hint:"Use the guided builder to create your first private competition draft.",tab:"seasons" as const,action:"Create competition"},
   ];
   const launchComplete = launchSteps.every((step)=>step.done) && playtomicSetupDone;
   const openFixtureView = (value: typeof fixtureView) => { setFixtureView(value); setReminderNotice(""); window.setTimeout(()=>document.getElementById("fixture-operations")?.scrollIntoView({behavior:"smooth",block:"start"}),0); };
@@ -442,8 +445,8 @@ export default function ClubAdministration() {
         <div className={styles.completeState}>
           <span className={styles.completeCheck}>✓</span>
           <div><span>SETUP COMPLETE</span><h2>Your club setup is complete</h2>
-            <p>Your club is ready to launch: branding, season structure and team registration are configured. Playtomic is either connected or intentionally left for later.</p></div>
-          <strong>5/5</strong>
+            <p>Your club-level setup is complete. Competition registration, divisions, fixtures and launch are managed inside each competition.</p></div>
+          <strong>4/4</strong>
         </div>
         <div className={styles.completeActions}>
           <button type="button" onClick={() => document.getElementById("club-management")?.scrollIntoView({behavior:"smooth",block:"start"})}>Review club setup ↓</button>
@@ -452,7 +455,7 @@ export default function ClubAdministration() {
       </> : <>
         <div className={styles.launchHead}><div><span>GET STARTED</span><h2>Set up your club</h2>
           <p>Follow these steps to get your club ready. Each one takes you straight to the right setup area.</p></div>
-          <strong>{launchSteps.filter(step=>step.done).length + (playtomicSetupDone?1:0)}/5</strong></div>
+          <strong>{launchSteps.filter(step=>step.done).length + (playtomicSetupDone?1:0)}/4</strong></div>
         <ol className={styles.launchList}>{launchSteps.map((step,index)=><li key={step.label} className={step.done?styles.launchDone:""}>
           <button className={styles.launchLink} type="button" onClick={() => {
             window.dispatchEvent(new CustomEvent("rallora:open-club-setup",{detail:{tab:step.tab}}));
@@ -464,7 +467,7 @@ export default function ClubAdministration() {
         </li>)}</ol>
         <div className={styles.playtomicSetup}>
           <div className={styles.playtomicSetupCopy}>
-            <span className={playtomicSetupDone?styles.completeCheck:styles.launchNumber}>{playtomicSetupDone?"✓":"5"}</span>
+            <span className={playtomicSetupDone?styles.completeCheck:styles.launchNumber}>{playtomicSetupDone?"✓":"3"}</span>
             <div><strong>Connect Playtomic</strong>
               <p>{view.playtomicConnected
                 ? "Playtomic is connected. You can manage or re-verify it from Integrations."
@@ -481,11 +484,11 @@ export default function ClubAdministration() {
             </label>}
           </div>
         </div>
-        {registrationReady && <div className={styles.launchActions}>
+        {competitionCreated && <div className={styles.launchActions}><button type="button" onClick={()=>window.dispatchEvent(new CustomEvent("rallora:open-club-setup",{detail:{tab:"seasons"}}))}>Continue competition setup →</button>{registrationReady && <>
           <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/register`}>Open team registration →</Link>
-          <button type="button" onClick={()=>void navigator.clipboard.writeText(`${window.location.origin}/clubs/${view.club.slug}/register`)}>Copy registration link</button>
+          <button type="button" onClick={()=>void navigator.clipboard.writeText(`${window.location.origin}/clubs/${view.club.slug}/register`)}>Copy registration link</button></>}
         </div>}
-        {!registrationReady && <p className={styles.launchGate}>Team registration becomes available once you have an active season with at least one division.</p>}
+        {competitionCreated && !registrationReady && <p className={styles.launchGate}>Player registration is opened from the competition setup journey when you are ready to publish it.</p>}
       </>}
     </section>
     <ClubEditor
