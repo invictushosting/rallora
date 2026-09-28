@@ -165,6 +165,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [registrationOpens, setRegistrationOpens] = useState("");
   const [registrationCloses, setRegistrationCloses] = useState("");
   const [leagueFormat, setLeagueFormat] = useState<"standard"|"promotion_relegation_cycles">("standard");
+  const [competitionPreset,setCompetitionPreset]=useState<"custom"|"box"|"seasonal">("custom");
   const [teamsPerDivision, setTeamsPerDivision] = useState("4");
   const [matchesPerCycle, setMatchesPerCycle] = useState("3");
   const [assignmentMode, setAssignmentMode] = useState<"manual"|"combined_rating">("combined_rating");
@@ -627,33 +628,34 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         </section>
         <section className={styles.seasonSection}>
           <div className={styles.seasonSectionHead}><span>3</span><div><strong>Format &amp; divisions</strong><p>Choose the competition structure and how teams are grouped.</p></div></div>
-        <label>League format<select value={leagueFormat} disabled={formatLocked} onChange={e=>setLeagueFormat(e.target.value as "standard"|"promotion_relegation_cycles")}>
-          <option value="standard">Standard divisions</option>
-          <option value="promotion_relegation_cycles">Short cycles with promotion &amp; relegation</option>
-        </select></label>
+        <div className={styles.wide}><span className={styles.choiceLabel}>What kind of competition are you running?</span><div className={styles.formatChoices}>
+          <button type="button" className={competitionPreset==="box"?styles.formatChoiceSelected:styles.formatChoice} disabled={formatLocked} onClick={()=>{setCompetitionPreset("box");setLeagueFormat("promotion_relegation_cycles");setTeamsPerDivision("5");setPromotionPlaces("2");setRelegationPlaces("2");setCycleMatchMode("single_round_robin");setRequireCycleCompletion(true);setNewFixtureScheduleMode("date_window")}}><strong>Rolling box league</strong><span>Fixed pairs play everyone in a small division, then teams move up or down for the next cycle.</span><small>Popular club setup · suggested: 5 teams, 4 matches each, 2 up / 2 down</small></button>
+          <button type="button" className={competitionPreset==="seasonal"?styles.formatChoiceSelected:styles.formatChoice} disabled={formatLocked} onClick={()=>{setCompetitionPreset("seasonal");setLeagueFormat("standard");setTeamsPerDivision("6");setNewFixtureScheduleMode("date_window")}}><strong>Seasonal divisions</strong><span>Fixed pairs play a round robin over a longer season with promotion/relegation handled between seasons.</span><small>Suggested: 6 teams per division · flexible date window</small></button>
+          <button type="button" className={competitionPreset==="custom"?styles.formatChoiceSelected:styles.formatChoice} disabled={formatLocked} onClick={()=>setCompetitionPreset("custom")}><strong>Build my own</strong><span>Configure the division size, scheduling and movement rules yourself.</span><small>Best when your club already has its own format.</small></button>
+        </div></div>
         {formatLocked && <p className={styles.lockWarning}>⚠ League format is locked because {editingSeason?.registrations} player/team registration{editingSeason?.registrations===1?" has":"s have"} already been received. You can still update non-structural details.</p>}
         <div className={styles.formatRequestPrompt}>
           <strong>Can’t see the format you need?</strong>
           <p>Tell Rallora how your club runs it and we’ll review whether it can be added specifically to your account.</p>
           <a href={`/clubs/${encodeURIComponent(club.slug)}/admin/format-request`}>Request a format →</a>
         </div>
-        <label>Division assignment<select value={assignmentMode} onChange={e=>setAssignmentMode(e.target.value as "manual"|"combined_rating")}>
-          <option value="combined_rating">Auto seed by combined Playtomic rating</option>
-          <option value="manual">Club assigns teams manually</option>
+        <label>How should Rallora place teams into divisions?<select value={assignmentMode} onChange={e=>setAssignmentMode(e.target.value as "manual"|"combined_rating")}>
+          <option value="combined_rating">Use combined Playtomic ratings</option>
+          <option value="manual">I’ll arrange the divisions myself</option>
         </select></label>
-        <label>Maximum divisions / groups<input type="number" min="1" max="100" value={maxDivisions}
+        <label>Maximum number of divisions<input type="number" min="1" max="100" value={maxDivisions}
           onChange={e=>setMaxDivisions(e.target.value)} /></label>
-        <label>Target teams per division / group<input type="number" min="2" max="100" value={teamsPerDivision}
+        <label>Teams normally in each division<input type="number" min="2" max="100" value={teamsPerDivision}
           onChange={e=>setTeamsPerDivision(e.target.value)} /></label>
         <label className={styles.wide}><span>Uneven registrations</span>
           <span className={styles.inlineCheck}><input type="checkbox" checked={allowOverflowWhenUneven}
             onChange={e=>setAllowOverflowWhenUneven(e.target.checked)} />
-            Allow Rallora to place extra teams into a group only when registrations do not divide evenly.</span>
-          <small>Example: target 4 teams per group. If the final total cannot be split evenly, Rallora may create a 5-team group rather than reject registrations or create an undersized extra group.</small>
+            Allow one division to contain an extra team when registrations do not divide evenly.</span>
+          <small>Example: if you target 4 teams but receive 17 registrations, Rallora can create three divisions of 4 and one division of 5.</small>
         </label>
         </section>
         {leagueFormat==="promotion_relegation_cycles" && <section className={styles.seasonSection}>
-          <div className={styles.seasonSectionHead}><span>4</span><div><strong>Promotion &amp; relegation</strong><p>Configure the rolling-cycle movement rules.</p></div></div>
+          <div className={styles.seasonSectionHead}><span>4</span><div><strong>Rolling cycle</strong><p>Choose what happens when each round of the box league finishes.</p></div></div>
           <label>Teams per group<input type="number" min="2" max="100" value={teamsPerDivision} onChange={e=>setTeamsPerDivision(e.target.value)} /></label>
           <label>Promotion places<input type="number" min="0" max="20" value={promotionPlaces} onChange={e=>setPromotionPlaces(e.target.value)} /></label>
           <label>Relegation places<input type="number" min="0" max="20" value={relegationPlaces} onChange={e=>setRelegationPlaces(e.target.value)} /></label>
