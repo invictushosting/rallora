@@ -33,6 +33,7 @@ export type EditableSeason = {
   fixture_schedule_mode: "weekly" | "date_window";
   registration_opens_at: string | null;
   registration_closes_at: string | null;
+  registration_published: boolean;
   league_format: "standard" | "promotion_relegation_cycles";
   teams_per_division: number | null;
   matches_per_cycle: number | null;
