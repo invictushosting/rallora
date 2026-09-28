@@ -138,3 +138,15 @@
 @media(max-width:700px){.competitionHubHead,.competitionCard{flex-direction:column;align-items:stretch}.competitionHubHead button,.competitionCardActions button{width:100%}.builderTop{align-items:flex-start;flex-direction:column}}
 
 .choiceLabel{display:block;margin-bottom:9px;color:#173354;font-size:12px;font-weight:850}.formatChoices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.formatChoice,.formatChoiceSelected{display:grid;gap:6px;text-align:left;padding:15px;border:1px solid #cbdce8;border-radius:14px;background:#fff;color:#173354;cursor:pointer}.formatChoiceSelected{border:2px solid #00b0fe;background:#eef9ff;padding:14px}.formatChoices strong{font-size:13px}.formatChoices span{font-size:11px;line-height:1.45;color:#60758d}.formatChoices small{font-size:10px;line-height:1.4;color:#7890a9;font-weight:750}@media(max-width:800px){.formatChoices{grid-template-columns:1fr}}
+
+/* Guided competition format cards */
+.formatChoices{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
+.formatChoice,.formatChoiceSelected{position:relative;min-height:158px;padding:17px!important;border:1px solid #cbdce8!important;background:#fff!important;color:#173354!important;box-shadow:none!important}
+.formatChoice:hover{border-color:#91b6ce!important;background:#fafdff!important}
+.formatChoiceSelected{padding:16px!important;border:2px solid #00b0fe!important;background:#f0faff!important;box-shadow:0 8px 22px rgba(0,176,254,.08)!important}
+.formatChoiceSelected:after{content:"✓ Selected";position:absolute;right:12px;bottom:11px;color:#0879aa;font-size:9px;font-weight:900;letter-spacing:.3px}
+.choiceTitle{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.choiceTitle strong{font-size:14px;color:#061a39}.choiceTitle em{padding:4px 7px;border-radius:999px;background:#061a39;color:#fff;font-size:8px;font-style:normal;font-weight:900;text-transform:uppercase;letter-spacing:.5px}
+.formatChoices span{font-size:11px;line-height:1.55;color:#526b83}.formatChoices small{padding-right:54px;color:#6f879e}
+.presetSummary{display:grid;gap:4px;margin-top:12px;padding:13px 14px;border:1px solid #bfe5f6;border-radius:12px;background:#f2fbff}.presetSummary strong{font-size:12px;color:#075f88}.presetSummary span{font-size:11px;color:#173354;font-weight:750}.presetSummary small{font-size:10px;color:#6b8096}
+.formatRequestPrompt{padding:12px 14px}.formatRequestPrompt summary{cursor:pointer;color:#385a77;font-size:11px;font-weight:850}.formatRequestPrompt[open] summary{margin-bottom:8px}.formatRequestPrompt p{margin:0 0 9px}
+@media(max-width:900px){.formatChoices{grid-template-columns:1fr}.formatChoice,.formatChoiceSelected{min-height:auto}}
