@@ -125,3 +125,14 @@
  .tabs button{width:100%;min-height:48px;white-space:normal;text-align:center;padding:10px 8px;border:1px solid #cfdee9;background:rgba(255,255,255,.62)}
  .tabs .selected{border-color:#061a39;background:#061a39;color:#fff}
 }
+
+
+.competitionWorkspace{display:grid;gap:20px}
+.competitionHub{display:grid;gap:18px}
+.competitionHubHead{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding:22px;border:1px solid #d3e2eb;border-radius:18px;background:#f9fcfd}
+.competitionHubHead h3{margin:6px 0;font-size:22px;color:#061a39}.competitionHubHead p{margin:0;max-width:650px;color:#60758d;font-size:12px;line-height:1.6}
+.competitionHubHead button,.competitionEmpty button,.competitionCardActions button{border:0;border-radius:10px;background:#00b0fe;color:#061a39;font-weight:900;padding:12px 15px;cursor:pointer}
+.competitionEmpty{padding:28px;border:1px dashed #b9cce0;border-radius:18px;background:#fff;text-align:center}.competitionEmpty strong{display:block;font-size:18px;color:#061a39}.competitionEmpty p{margin:7px auto 16px;max-width:560px;color:#60758d;font-size:12px;line-height:1.6}
+.competitionList{display:grid;gap:12px}.competitionCard{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:18px;border:1px solid #d3e2eb;border-radius:16px;background:#fff}.competitionCard h4{margin:7px 0 4px;font-size:17px;color:#061a39}.competitionCard p{margin:0;color:#60758d;font-size:11px}.statusPill{display:inline-flex;padding:5px 8px;border-radius:999px;background:#e8f2f9;color:#31516f;font-size:9px;font-weight:900;letter-spacing:.7px}.competitionCardActions button{background:#061a39;color:#fff}
+.builderShell{display:grid;gap:14px}.builderTop{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid #cfe0eb;border-radius:14px;background:#eef7fb}.builderTop>button{border:0;background:transparent;color:#173354;font-weight:850;cursor:pointer}.builderTop div{display:grid;gap:2px}.builderTop strong{color:#061a39;font-size:13px}.builderTop span{color:#60758d;font-size:11px}
+@media(max-width:700px){.competitionHubHead,.competitionCard{flex-direction:column;align-items:stretch}.competitionHubHead button,.competitionCardActions button{width:100%}.builderTop{align-items:flex-start;flex-direction:column}}

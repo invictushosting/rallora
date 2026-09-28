@@ -98,6 +98,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const supabase = useMemo(() => createClient(), []);
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<"branding" | "seasons" | "registration" | "teams" | "fixtures">("branding");
+  const [showCompetitionBuilder,setShowCompetitionBuilder]=useState(false);
   const [message, setMessage] = useState("");
   const [waitlist,setWaitlist]=useState<{id:string;season_id:string;player_name:string;email:string;playtomic_rating:number|null;preferred_level:string|null;availability:string|null;status:string}[]>([]);
   const [replaceTarget,setReplaceTarget]=useState<{teamId:string;slot:1|2}|null>(null); const [replacementId,setReplacementId]=useState("");
@@ -198,6 +199,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       setRequireCycleCompletion(season.require_cycle_completion ?? true);
       setLeagueRules(season.league_rules?.length ? season.league_rules : COMMON_RULES);
       setActiveTab("seasons");
+      setShowCompetitionBuilder(true);
       setMessage("");
       setError("");
       requestAnimationFrame(() => {
@@ -415,6 +417,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       }
       setNewSeason("");
       setEditingSeasonId(null);
+      setShowCompetitionBuilder(false);
     }, editingSeasonId ? "League updated." : "Draft season created. It will not be public until activated.");
   }
 
@@ -541,11 +544,11 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
     <div className={styles.editorHead}><div>
       <span className={styles.eyebrow}>CLUB MANAGEMENT</span>
       <h2>Manage {club.name}</h2>
-      <p>Set up and manage your seasons, registrations, teams and fixtures.</p>
+      <p>Everything you need to set up, launch and run your club competitions.</p>
     </div><span className={styles.badge}>CLUB ADMIN</span></div>
     <div className={styles.tabs}>
-      {([["branding","Branding"],["seasons","Leagues"],
-        ["registration","Registration"],["teams","Teams"],["fixtures","Fixtures"]] as const).map(([id,label]) =>
+      {([["branding","Club profile"],["seasons","Competitions"],
+        ["registration","Registration"],["teams","Players & teams"],["fixtures","Fixtures"]] as const).map(([id,label]) =>
         <button type="button" key={id} onClick={() => {
           setActiveTab(id); setMessage(""); setError("");
         }} className={activeTab === id ? styles.selected : ""}>{label}</button>)}
@@ -590,26 +593,32 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       <button disabled={busy} type="submit">{busy ? "Saving…" : "Save club branding"}</button>
       <div className={styles.wide}><strong>Test club email</strong><p>Send a live branded email using this club’s sender identity.</p><label>Send test to<input type="email" value={testEmail} onChange={event=>setTestEmail(event.target.value)} placeholder="you@example.com" /></label><button type="button" disabled={testEmailBusy} onClick={()=>void sendTestEmail()}>{testEmailBusy?"Sending…":"Send test email"}</button>{testEmailSent && <p className={styles.success} role="status">✓ {testEmailSent}</p>}</div>
     </form>}
-    {activeTab === "seasons" && <div className={styles.columns}>
+    {activeTab === "seasons" && <div className={styles.competitionWorkspace}>
+      {!showCompetitionBuilder && !editingSeasonId && <section className={styles.competitionHub}>
+        <div className={styles.competitionHubHead}><div><span className={styles.eyebrow}>COMPETITIONS</span><h3>Run your club competitions</h3><p>Create, launch and manage every league from one place. Rallora will guide you through each step.</p></div><button type="button" onClick={()=>setShowCompetitionBuilder(true)}>+ Create competition</button></div>
+        {seasons.length===0 ? <div className={styles.competitionEmpty}><strong>No competitions yet</strong><p>Start with your first competition. It will stay private as a draft until you are ready to activate it.</p><button type="button" onClick={()=>setShowCompetitionBuilder(true)}>Create your first competition →</button></div> :
+        <div className={styles.competitionList}>{seasons.map(season=><article className={styles.competitionCard} key={season.id}><div><span className={styles.statusPill}>{season.status.toUpperCase()}</span><h4>{season.name}</h4><p>{season.league_format==="promotion_relegation_cycles"?"Rolling divisions with promotion & relegation":"Standard divisions"} · {season.registrations} registration{season.registrations===1?"":"s"} · {season.divisions.length} division{season.divisions.length===1?"":"s"}</p></div><div className={styles.competitionCardActions}><button type="button" onClick={()=>window.dispatchEvent(new CustomEvent("rallora:edit-season",{detail:{seasonId:season.id}}))}>{season.status==="draft"?"Continue setup":"Manage competition"} →</button></div></article>)}</div>}
+      </section>}
+      {(showCompetitionBuilder||editingSeasonId) && <div className={styles.builderShell}><div className={styles.builderTop}><button type="button" onClick={()=>{setShowCompetitionBuilder(false);setEditingSeasonId(null);setMessage("");setError("")}}>← Competitions</button><div><strong>{editingSeasonId?"Edit competition":"Guided competition builder"}</strong><span>{editingSeasonId?"Update the competition safely.":"Follow the steps below — your competition stays private until you activate it."}</span></div></div>
       <form className={styles.form} onSubmit={createSeason}>
         <div className={styles.seasonEditorIntro}>
           <span className={styles.eyebrow}>{editingSeasonId ? "EDIT LEAGUE" : "NEW LEAGUE"}</span>
-          <h3>{editingSeasonId ? `Edit ${editingSeason?.name ?? "league"}` : "Create a league"}</h3>
+          <h3>{editingSeasonId ? `Edit ${editingSeason?.name ?? "competition"}` : "Create a competition"}</h3>
           <p>{editingSeasonId ? "Update this league without rebuilding it. Structural settings may be protected once registrations exist." : "New leagues start as drafts and stay private until you activate them."}</p>
         </div>
         <section className={styles.seasonSection}>
-          <div className={styles.seasonSectionHead}><span>1</span><div><strong>League details</strong><p>Name the league and choose how fixtures are scheduled.</p></div></div>
-        <label>Season name<input required maxLength={100}
+          <div className={styles.seasonSectionHead}><span>1</span><div><strong>Competition basics</strong><p>Give it a name and tell Rallora how teams should play their matches.</p></div></div>
+        <label>Competition name<input required maxLength={100}
           value={newSeason} placeholder="Autumn 2026"
           onChange={(event) => setNewSeason(event.target.value)} /></label>
-        <label>Fixture scheduling<select value={newFixtureScheduleMode}
+        <label>How should teams play their matches?<select value={newFixtureScheduleMode}
           onChange={(event)=>setNewFixtureScheduleMode(event.target.value as "weekly" | "date_window")}>
-          <option value="weekly">Weekly rounds</option>
-          <option value="date_window">Start &amp; end date window</option>
+          <option value="weekly">Weekly rounds — each round has a deadline</option>
+          <option value="date_window">Play within a date window — teams arrange matches</option>
         </select></label>
         <p className={styles.wide}>{newFixtureScheduleMode==="weekly"
-          ? "Fixtures are organised by week number, with a completion deadline."
-          : "Each fixture has an available-from date and a complete-by date."}</p>
+          ? "Choose this when each round is tied to a week and completion deadline."
+          : "Choose this when teams arrange their own match at any time inside the published window."}</p>
         </section>
         <section className={styles.seasonSection}>
           <div className={styles.seasonSectionHead}><span>2</span><div><strong>Registration</strong><p>Control when players can enter this league.</p></div></div>
@@ -684,13 +693,13 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         </div>
         </section>
         <div className={styles.seasonFormActions}>
-          <button disabled={busy} type="submit">{editingSeasonId ? "Save league changes" : "Create draft season"}</button>
+          <button disabled={busy} type="submit">{editingSeasonId ? "Save competition changes" : "Review & create draft competition"}</button>
           {editingSeasonId && <button type="button" className={styles.secondaryButton} onClick={()=>{
             setEditingSeasonId(null); setNewSeason(""); setMessage(""); setError("");
           }}>Cancel edit</button>}
         </div>
-      </form>
-      <form className={styles.form} onSubmit={createDivision}>
+      </form></div>}
+      {seasons.length>0 && !showCompetitionBuilder && !editingSeasonId && <form className={styles.form} onSubmit={createDivision}>
         <h3>Add a division</h3>
         <label>Season<select value={divisionSeasonId}
           onChange={(event) => setDivisionSeasonId(event.target.value)}>
@@ -700,7 +709,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
           onChange={(event) => setNewDivision(event.target.value)} /></label>
         <button disabled={busy || !seasons.length} type="submit">Add division</button>
         <div className={styles.wide}><h3>Season status</h3>{seasons.map((season)=><div key={season.id}><strong>{season.name}</strong> · {season.status} <button type="button" disabled={busy||season.status==="active"} onClick={()=>void setSeasonStatus(season.id,"active")}>Activate</button> <button type="button" disabled={busy||season.status==="completed"} onClick={()=>void setSeasonStatus(season.id,"completed")}>Complete</button></div>)}</div>
-      </form>
+      </form>}
     </div>}
     {activeTab === "registration" && <section className={styles.registrationPanel}>
       <div>
