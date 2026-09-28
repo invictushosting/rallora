@@ -166,6 +166,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [registrationCloses, setRegistrationCloses] = useState("");
   const [leagueFormat, setLeagueFormat] = useState<"standard"|"promotion_relegation_cycles">("promotion_relegation_cycles");
   const [competitionPreset,setCompetitionPreset]=useState<"custom"|"box"|"seasonal">("box");
+  const [showAdvancedCompetition,setShowAdvancedCompetition]=useState(false);
   const [teamsPerDivision, setTeamsPerDivision] = useState("5");
   const [matchesPerCycle, setMatchesPerCycle] = useState("3");
   const [assignmentMode, setAssignmentMode] = useState<"manual"|"combined_rating">("combined_rating");
@@ -629,13 +630,15 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         <section className={styles.seasonSection}>
           <div className={styles.seasonSectionHead}><span>3</span><div><strong>Competition format</strong><p>Choose a ready-made padel format. You can customise it afterwards.</p></div></div>
         <div className={styles.wide}><span className={styles.choiceLabel}>How do you want this competition to run?</span><div className={styles.formatChoices}>
-          <button type="button" className={competitionPreset==="box"?styles.formatChoiceSelected:styles.formatChoice} disabled={formatLocked} onClick={()=>{setCompetitionPreset("box");setLeagueFormat("promotion_relegation_cycles");setTeamsPerDivision("5");setPromotionPlaces("2");setRelegationPlaces("2");setCycleMatchMode("single_round_robin");setRequireCycleCompletion(true);setNewFixtureScheduleMode("date_window")}}><div className={styles.choiceTitle}><strong>Rolling box league</strong><em>Recommended</em></div><span>Great for an ongoing competitive club league. Teams play everyone in their division, then move up or down after each cycle.</span><small>5 teams · 4 matches each · 2 promoted · 2 relegated</small></button>
-          <button type="button" className={competitionPreset==="seasonal"?styles.formatChoiceSelected:styles.formatChoice} disabled={formatLocked} onClick={()=>{setCompetitionPreset("seasonal");setLeagueFormat("standard");setTeamsPerDivision("6");setNewFixtureScheduleMode("date_window")}}><div className={styles.choiceTitle}><strong>Seasonal divisions</strong></div><span>Fixed pairs play a round robin over a longer season, with movement handled between seasons.</span><small>6 teams per division · flexible date window</small></button>
-          <button type="button" className={competitionPreset==="custom"?styles.formatChoiceSelected:styles.formatChoice} disabled={formatLocked} onClick={()=>setCompetitionPreset("custom")}><div className={styles.choiceTitle}><strong>Custom competition</strong></div><span>Configure the division size, scheduling and movement rules yourself.</span><small>Best when your club already has its own established format.</small></button>
+          <button type="button" className={competitionPreset==="box"?styles.formatChoiceSelected:styles.formatChoice} disabled={formatLocked} onClick={()=>{setCompetitionPreset("box");setShowAdvancedCompetition(false);setLeagueFormat("promotion_relegation_cycles");setTeamsPerDivision("5");setPromotionPlaces("2");setRelegationPlaces("2");setCycleMatchMode("single_round_robin");setRequireCycleCompletion(true);setNewFixtureScheduleMode("date_window")}}><div className={styles.choiceTitle}><strong>Rolling box league</strong><em>Recommended</em></div><span>Great for an ongoing competitive club league. Teams play everyone in their division, then move up or down after each cycle.</span><small>5 teams · 4 matches each · 2 promoted · 2 relegated</small></button>
+          <button type="button" className={competitionPreset==="seasonal"?styles.formatChoiceSelected:styles.formatChoice} disabled={formatLocked} onClick={()=>{setCompetitionPreset("seasonal");setShowAdvancedCompetition(false);setLeagueFormat("standard");setTeamsPerDivision("6");setNewFixtureScheduleMode("date_window")}}><div className={styles.choiceTitle}><strong>Seasonal divisions</strong></div><span>Fixed pairs play a round robin over a longer season, with movement handled between seasons.</span><small>6 teams per division · flexible date window</small></button>
+          <button type="button" className={competitionPreset==="custom"?styles.formatChoiceSelected:styles.formatChoice} disabled={formatLocked} onClick={()=>{setCompetitionPreset("custom");setShowAdvancedCompetition(true)}}><div className={styles.choiceTitle}><strong>Custom competition</strong></div><span>Configure the division size, scheduling and movement rules yourself.</span><small>Best when your club already has its own established format.</small></button>
         </div>
         {competitionPreset!=="custom" && <div className={styles.presetSummary}><strong>✓ Rallora has set this up for you</strong><span>{competitionPreset==="box" ? "5 teams per division · everyone plays once · 2 promoted · 2 relegated · flexible date window" : "6 teams per division · round robin · flexible date window"}</span><small>You can change these settings below if your club runs things differently.</small></div>}
         </div>
+        {competitionPreset!=="custom" && <div className={styles.advancedToggle}><button type="button" onClick={()=>setShowAdvancedCompetition(v=>!v)}>{showAdvancedCompetition?"Hide advanced competition settings ↑":"Advanced competition settings ↓"}</button><span>Change seeding, division limits and uneven-registration behaviour.</span></div>}
         {formatLocked && <p className={styles.lockWarning}>⚠ League format is locked because {editingSeason?.registrations} player/team registration{editingSeason?.registrations===1?" has":"s have"} already been received. You can still update non-structural details.</p>}
+        {(competitionPreset==="custom"||showAdvancedCompetition) && <div className={styles.advancedSettings}>
         <details className={styles.formatRequestPrompt}><summary>Can’t see the format you need?</summary><div>
           <p>Tell Rallora how your club runs it and we’ll review whether it can be added specifically to your account.</p>
           <a href={`/clubs/${encodeURIComponent(club.slug)}/admin/format-request`}>Request a format →</a></div></details>
@@ -651,8 +654,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
           <span className={styles.inlineCheck}><input type="checkbox" checked={allowOverflowWhenUneven}
             onChange={e=>setAllowOverflowWhenUneven(e.target.checked)} />
             Allow one division to contain an extra team when registrations do not divide evenly.</span>
-          <small>Example: if you target 4 teams but receive 17 registrations, Rallora can create three divisions of 4 and one division of 5.</small>
-        </label>
+          <small>Example: if you target {teamsPerDivision || "4"} teams per division and registrations do not divide evenly, Rallora can place the remaining team into one division rather than create an undersized extra division.</small>
+        </label></div>}
         </section>
         {leagueFormat==="promotion_relegation_cycles" && <section className={styles.seasonSection}>
           <div className={styles.seasonSectionHead}><span>4</span><div><strong>Rolling cycle</strong><p>Choose what happens when each round of the box league finishes.</p></div></div>
