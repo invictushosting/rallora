@@ -15,7 +15,7 @@ import PaymentSetup from "./payment-setup";
 
 type Club = EditableClub;
 type LeagueRule = { key:string; label:string; text:string; enabled:boolean; custom?:boolean };
-type Season = { id: string; club_id: string; name: string; status: string; fixture_schedule_mode: "weekly" | "date_window"; registration_opens_at:string|null; registration_closes_at:string|null; league_format:"standard"|"promotion_relegation_cycles"; teams_per_division:number|null; matches_per_cycle:number|null; division_assignment_mode:"manual"|"combined_rating"; max_divisions:number|null; allow_overflow_when_uneven:boolean; promotion_places:number; relegation_places:number; cycle_match_mode:"single_round_robin"|"double_round_robin"; require_cycle_completion:boolean; league_rules:LeagueRule[] };
+type Season = { id: string; club_id: string; name: string; status: string; fixture_schedule_mode: "weekly" | "date_window"; registration_opens_at:string|null; registration_closes_at:string|null; registration_published:boolean; league_format:"standard"|"promotion_relegation_cycles"; teams_per_division:number|null; matches_per_cycle:number|null; division_assignment_mode:"manual"|"combined_rating"; max_divisions:number|null; allow_overflow_when_uneven:boolean; promotion_places:number; relegation_places:number; cycle_match_mode:"single_round_robin"|"double_round_robin"; require_cycle_completion:boolean; league_rules:LeagueRule[] };
 type Membership = { club_id: string; user_id: string; role: string; status: string };
 type DivisionSummary = { id: string; name: string; sort_order: number;
   teams: { id: string; name: string; player_one_name:string|null; player_two_name:string|null; player_one_email:string|null; player_two_email:string|null; player_one_rating:number|null; player_two_rating:number|null }[] };
@@ -134,7 +134,7 @@ export default function ClubAdministration() {
         }
 
         const [seasonReply, sponsorReply, playtomicReply, bookingReply] = await Promise.all([
-          supabase.from("seasons").select("id,club_id,name,status,fixture_schedule_mode,registration_opens_at,registration_closes_at,league_format,teams_per_division,matches_per_cycle,division_assignment_mode,max_divisions,allow_overflow_when_uneven,promotion_places,relegation_places,cycle_match_mode,require_cycle_completion,league_rules")
+          supabase.from("seasons").select("id,club_id,name,status,fixture_schedule_mode,registration_opens_at,registration_closes_at,registration_published,league_format,teams_per_division,matches_per_cycle,division_assignment_mode,max_divisions,allow_overflow_when_uneven,promotion_places,relegation_places,cycle_match_mode,require_cycle_completion,league_rules")
             .eq("club_id", club.id).order("created_at", { ascending: false }),
           supabase.from("sponsors").select("id", { count: "exact", head: true })
             .eq("club_id", club.id).eq("is_active", true),
@@ -496,6 +496,7 @@ export default function ClubAdministration() {
         fixture_schedule_mode: summary.season.fixture_schedule_mode,
         registration_opens_at: summary.season.registration_opens_at,
         registration_closes_at: summary.season.registration_closes_at,
+        registration_published: summary.season.registration_published,
         league_format: summary.season.league_format,
         teams_per_division: summary.season.teams_per_division,
         matches_per_cycle: summary.season.matches_per_cycle,

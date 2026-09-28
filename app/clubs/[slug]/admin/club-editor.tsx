@@ -33,6 +33,7 @@ export type EditableSeason = {
   fixture_schedule_mode: "weekly" | "date_window";
   registration_opens_at: string | null;
   registration_closes_at: string | null;
+  registration_published: boolean;
   league_format: "standard" | "promotion_relegation_cycles";
   teams_per_division: number | null;
   matches_per_cycle: number | null;
@@ -393,6 +394,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         fixture_schedule_mode: newFixtureScheduleMode,
         registration_opens_at: registrationOpens || null,
         registration_closes_at: registrationCloses || null,
+        registration_published: false,
         league_format: leagueFormat,
         teams_per_division: leagueFormat==="promotion_relegation_cycles" ? Number(teamsPerDivision) : null,
         matches_per_cycle: leagueFormat==="promotion_relegation_cycles" ? Number(matchesPerCycle) : null,
@@ -422,7 +424,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       setNewSeason("");
       setEditingSeasonId(null);
       setShowCompetitionBuilder(false);
-    }, editingSeasonId ? "League updated." : "Draft season created. It will not be public until activated.");
+    }, editingSeasonId ? "Competition updated." : "Draft competition created. It will stay private until you activate it.");
   }
 
   async function createDivision(event: React.FormEvent) {
@@ -506,6 +508,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       setFixtureHome(""); setFixtureAway("");
     }, "Fixture created. Confirm its publication timing before announcing.");
   }
+
+  async function setRegistrationPublished(seasonId:string,published:boolean){await submit(async()=>{const season=seasons.find(s=>s.id===seasonId);if(!season)throw new Error("Competition could not be found.");if(published&&(!season.registration_opens_at||!season.registration_closes_at))throw new Error("Set registration opening and closing dates before publishing registration.");const {error}=await supabase.from("seasons").update({registration_published:published}).eq("id",seasonId).eq("club_id",club.id);if(error)throw error;},published?"Registration is now visible on the public club page.":"Registration has been hidden from the public club page.");}
 
   async function setSeasonStatus(seasonId:string,status:"draft"|"active"|"completed") { await submit(async()=>{const {error}=await supabase.rpc("rallora_set_season_status",{p_season_id:seasonId,p_status:status});if(error)throw error;},`Season marked ${status}.`); }
 
@@ -708,17 +712,22 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
           }}>Cancel edit</button>}
         </div>
       </form></div>}
-      {seasons.length>0 && !showCompetitionBuilder && !editingSeasonId && <form className={styles.form} onSubmit={createDivision}>
-        <h3>Add a division</h3>
-        <label>Season<select value={divisionSeasonId}
-          onChange={(event) => setDivisionSeasonId(event.target.value)}>
-          {seasons.map((item) => <option value={item.id} key={item.id}>
-            {item.name} · {item.status}</option>)}</select></label>
-        <label>Division name<input required maxLength={100} value={newDivision}
-          onChange={(event) => setNewDivision(event.target.value)} /></label>
-        <button disabled={busy || !seasons.length} type="submit">Add division</button>
-        <div className={styles.wide}><h3>Season status</h3>{seasons.map((season)=><div key={season.id}><strong>{season.name}</strong> · {season.status} <button type="button" disabled={busy||season.status==="active"} onClick={()=>void setSeasonStatus(season.id,"active")}>Activate</button> <button type="button" disabled={busy||season.status==="completed"} onClick={()=>void setSeasonStatus(season.id,"completed")}>Complete</button></div>)}</div>
-      </form>}
+      {seasons.length>0 && !showCompetitionBuilder && !editingSeasonId && <section className={styles.readinessWrap}>
+        {seasons.filter(s=>s.status==="draft").map(season=>{const registrationOpen=Boolean(season.registration_published);const teamsReady=season.registrations>0;const divisionsReady=season.divisions.length>0;const canActivate=teamsReady&&divisionsReady;return <article className={styles.readinessCard} key={season.id}>
+          <div className={styles.readinessHead}><div><span className={styles.eyebrow}>COMPETITION SETUP</span><h3>{season.name}</h3><p>Your competition is saved privately. Complete the steps below before going live.</p></div><span className={styles.statusPill}>DRAFT</span></div>
+          <div className={styles.readinessProgress}><strong>Competition readiness</strong><span>{[true,registrationOpen,teamsReady,divisionsReady,false,false,canActivate].filter(Boolean).length} of 7 steps ready</span></div>
+          <div className={styles.readinessSteps}>
+            <div className={styles.readyStep}><b>✓</b><div><strong>Competition configured</strong><span>Format, scheduling and rules are saved.</span></div><button type="button" onClick={()=>window.dispatchEvent(new CustomEvent("rallora:edit-season",{detail:{seasonId:season.id}}))}>Edit</button></div>
+            <div className={registrationOpen?styles.readyStep:styles.nextStep}><b>{registrationOpen?"✓":"1"}</b><div><strong>Open registration</strong><span>{registrationOpen?"Players can now see this competition and register from the public club page.":"Publish this competition for registration without making divisions or fixtures live."}</span></div><button type="button" disabled={busy} onClick={()=>void setRegistrationPublished(season.id,!registrationOpen)}>{registrationOpen?"Close / hide registration":"Open registration →"}</button></div>
+            <div className={teamsReady?styles.readyStep:registrationOpen?styles.nextStep:styles.lockedStep}><b>{teamsReady?"✓":"2"}</b><div><strong>Add or approve teams</strong><span>{registrationOpen?`${season.registrations} registration${season.registrations===1?"":"s"} received.`:"Available after registration is opened."}</span></div><button type="button" disabled={!registrationOpen} onClick={()=>setActiveTab("registration")}>{teamsReady?"Review teams":"View registrations"} →</button></div>
+            <div className={divisionsReady?styles.readyStep:styles.lockedStep}><b>{divisionsReady?"✓":"3"}</b><div><strong>Build divisions</strong><span>{divisionsReady?`${season.divisions.length} division${season.divisions.length===1?"":"s"} ready.`:teamsReady?"Use your registrations to build the competition structure.":"Available once teams have registered."}</span></div>{teamsReady&&<button type="button" onClick={()=>{setDivisionSeasonId(season.id);setShowAdvancedCompetition(true)}}>Set up divisions →</button>}</div>
+            <div className={divisionsReady?styles.nextStep:styles.lockedStep}><b>4</b><div><strong>Generate fixtures</strong><span>{divisionsReady?"Divisions are ready for fixture generation.":"Available once divisions are ready."}</span></div>{divisionsReady&&<button type="button" onClick={()=>setActiveTab("fixtures")}>Go to fixtures →</button>}</div>
+            <div className={styles.lockedStep}><b>5</b><div><strong>Preview competition</strong><span>Check the player-facing competition before launch.</span></div><button type="button" disabled={!divisionsReady}>Preview →</button></div>
+            <div className={canActivate?styles.nextStep:styles.lockedStep}><b>6</b><div><strong>Activate competition</strong><span>{canActivate?"Core setup is ready. Activate when you are happy with the preview.":"Locked until teams and divisions are ready."}</span></div><button type="button" disabled={!canActivate||busy} onClick={()=>void setSeasonStatus(season.id,"active")}>Activate →</button></div>
+          </div>
+          <details className={styles.manualSetup}><summary>Advanced / manual setup</summary><form className={styles.manualDivisionForm} onSubmit={createDivision}><input type="hidden" value={season.id}/><label>Division name<input required maxLength={100} value={divisionSeasonId===season.id?newDivision:""} onFocus={()=>setDivisionSeasonId(season.id)} onChange={e=>{setDivisionSeasonId(season.id);setNewDivision(e.target.value)}} /></label><button disabled={busy} type="submit">Add division manually</button></form></details>
+        </article>})}
+      </section>}
     </div>}
     {activeTab === "registration" && <section className={styles.registrationPanel}>
       <div>

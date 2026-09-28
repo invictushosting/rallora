@@ -21,7 +21,7 @@ type Club = {
 };
 type Season = {
   id: string; club_id: string; name: string; status: string;
-  starts_on: string | null; created_at: string;
+  starts_on: string | null; created_at: string; registration_published:boolean; registration_opens_at:string|null; registration_closes_at:string|null;
 };
 type Division = { id: string; season_id: string; name: string; sort_order: number };
 type Team = {
@@ -157,10 +157,10 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
         }
         const [seasonsReply, sponsorsReply, announcementsReply] = await Promise.all([
           supabase.from("seasons")
-            .select("id,club_id,name,status,starts_on,created_at")
+            .select("id,club_id,name,status,starts_on,created_at,registration_published,registration_opens_at,registration_closes_at")
             .eq("club_id", club.id)
             // Do not show draft seasons or their fixtures on public club pages.
-            .in("status", ["active", "completed"])
+            .or("status.in.(active,completed),and(status.eq.draft,registration_published.eq.true)")
             .order("created_at", { ascending: false }),
           supabase.from("sponsors")
             .select("id,name,sponsor_type,logo_url,website_url")
@@ -176,7 +176,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
         if (announcementsReply.error) throw announcementsReply.error;
         const seasons = ((seasonsReply.data ?? []) as Season[])
           .filter((season) => season.club_id === club.id &&
-            ["active", "completed"].includes(season.status))
+            (["active", "completed"].includes(season.status) || (season.status==="draft" && season.registration_published)))
           .sort((a, b) => Number(b.status === "active") -
             Number(a.status === "active"));
         if (alive) {
