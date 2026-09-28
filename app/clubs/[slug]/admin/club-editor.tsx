@@ -167,6 +167,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [leagueFormat, setLeagueFormat] = useState<"standard"|"promotion_relegation_cycles">("promotion_relegation_cycles");
   const [competitionPreset,setCompetitionPreset]=useState<"custom"|"box"|"seasonal">("box");
   const [showAdvancedCompetition,setShowAdvancedCompetition]=useState(false);
+  const [builderStep,setBuilderStep]=useState(1);
   const [teamsPerDivision, setTeamsPerDivision] = useState("5");
   const [matchesPerCycle, setMatchesPerCycle] = useState("3");
   const [assignmentMode, setAssignmentMode] = useState<"manual"|"combined_rating">("combined_rating");
@@ -202,6 +203,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       setLeagueRules(season.league_rules?.length ? season.league_rules : COMMON_RULES);
       setActiveTab("seasons");
       setShowCompetitionBuilder(true);
+      setBuilderStep(1);
       setMessage("");
       setError("");
       requestAnimationFrame(() => {
@@ -597,8 +599,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
     </form>}
     {activeTab === "seasons" && <div className={styles.competitionWorkspace}>
       {!showCompetitionBuilder && !editingSeasonId && <section className={styles.competitionHub}>
-        <div className={styles.competitionHubHead}><div><span className={styles.eyebrow}>COMPETITIONS</span><h3>Run your club competitions</h3><p>Create, launch and manage every league from one place. Rallora will guide you through each step.</p></div><button type="button" onClick={()=>setShowCompetitionBuilder(true)}>+ Create competition</button></div>
-        {seasons.length===0 ? <div className={styles.competitionEmpty}><strong>No competitions yet</strong><p>Start with your first competition. It will stay private as a draft until you are ready to activate it.</p><button type="button" onClick={()=>setShowCompetitionBuilder(true)}>Create your first competition →</button></div> :
+        <div className={styles.competitionHubHead}><div><span className={styles.eyebrow}>COMPETITIONS</span><h3>Run your club competitions</h3><p>Create, launch and manage every league from one place. Rallora will guide you through each step.</p></div><button type="button" onClick={()=>{setShowCompetitionBuilder(true);setBuilderStep(1)}}>+ Create competition</button></div>
+        {seasons.length===0 ? <div className={styles.competitionEmpty}><strong>No competitions yet</strong><p>Start with your first competition. It will stay private as a draft until you are ready to activate it.</p><button type="button" onClick={()=>{setShowCompetitionBuilder(true);setBuilderStep(1)}}>Create your first competition →</button></div> :
         <div className={styles.competitionList}>{seasons.map(season=><article className={styles.competitionCard} key={season.id}><div><span className={styles.statusPill}>{season.status.toUpperCase()}</span><h4>{season.name}</h4><p>{season.league_format==="promotion_relegation_cycles"?"Rolling divisions with promotion & relegation":"Standard divisions"} · {season.registrations} registration{season.registrations===1?"":"s"} · {season.divisions.length} division{season.divisions.length===1?"":"s"}</p></div><div className={styles.competitionCardActions}><button type="button" onClick={()=>window.dispatchEvent(new CustomEvent("rallora:edit-season",{detail:{seasonId:season.id}}))}>{season.status==="draft"?"Continue setup":"Manage competition"} →</button></div></article>)}</div>}
       </section>}
       {(showCompetitionBuilder||editingSeasonId) && <div className={styles.builderShell}><div className={styles.builderTop}><button type="button" onClick={()=>{setShowCompetitionBuilder(false);setEditingSeasonId(null);setMessage("");setError("")}}>← All competitions</button><div><strong>{editingSeasonId?"Edit competition":"Guided competition builder"}</strong><span>{editingSeasonId?"Update the competition safely.":"Follow the steps below — your competition stays private until you activate it."}</span></div></div>
@@ -608,7 +610,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
           <h3>{editingSeasonId ? `Edit ${editingSeason?.name ?? "competition"}` : "Create a competition"}</h3>
           <p>{editingSeasonId ? "Update this competition without rebuilding it. Structural settings may be protected once registrations exist." : "New competitions start as drafts and stay private until you activate them."}</p>
         </div>
-        <section className={styles.seasonSection}>
+        <section className={`${styles.seasonSection} ${builderStep===1?styles.wizardActive:styles.wizardCollapsed}`} onClick={()=>builderStep!==1&&setBuilderStep(1)}>
           <div className={styles.seasonSectionHead}><span>1</span><div><strong>Competition basics</strong><p>Give it a name and tell Rallora how teams should play their matches.</p></div></div>
         <label>Competition name<input required maxLength={100}
           value={newSeason} placeholder="Autumn 2026"
@@ -622,12 +624,12 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
           ? "Choose this when each round is tied to a week and completion deadline."
           : "Choose this when teams arrange their own match at any time inside the published window."}</p>
         </section>
-        <section className={styles.seasonSection}>
+        <section className={`${styles.seasonSection} ${builderStep===2?styles.wizardActive:styles.wizardCollapsed}`} onClick={()=>builderStep!==2&&setBuilderStep(2)}>
           <div className={styles.seasonSectionHead}><span>2</span><div><strong>Registration</strong><p>Control when players can enter this competition.</p></div></div>
         <label>Registration opens<input type="datetime-local" value={registrationOpens} onChange={e=>setRegistrationOpens(e.target.value)} /></label>
         <label>Registration closes<input type="datetime-local" value={registrationCloses} onChange={e=>setRegistrationCloses(e.target.value)} /></label>
         </section>
-        <section className={styles.seasonSection}>
+        <section className={`${styles.seasonSection} ${builderStep===3?styles.wizardActive:styles.wizardCollapsed}`} onClick={()=>builderStep!==3&&setBuilderStep(3)}>
           <div className={styles.seasonSectionHead}><span>3</span><div><strong>Competition format</strong><p>Choose a ready-made padel format. You can customise it afterwards.</p></div></div>
         <div className={styles.wide}><span className={styles.choiceLabel}>How do you want this competition to run?</span><div className={styles.formatChoices}>
           <button type="button" className={competitionPreset==="box"?styles.formatChoiceSelected:styles.formatChoice} disabled={formatLocked} onClick={()=>{setCompetitionPreset("box");setShowAdvancedCompetition(false);setLeagueFormat("promotion_relegation_cycles");setTeamsPerDivision("5");setPromotionPlaces("2");setRelegationPlaces("2");setCycleMatchMode("single_round_robin");setRequireCycleCompletion(true);setNewFixtureScheduleMode("date_window")}}><div className={styles.choiceTitle}><strong>Rolling box league</strong><em>Recommended</em></div><span>Great for an ongoing competitive club league. Teams play everyone in their division, then move up or down after each cycle.</span><small>5 teams · 4 matches each · 2 promoted · 2 relegated</small></button>
@@ -657,7 +659,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
           <small>Example: if you target {teamsPerDivision || "4"} teams per division and registrations do not divide evenly, Rallora can place the remaining team into one division rather than create an undersized extra division.</small>
         </label></div>}
         </section>
-        {leagueFormat==="promotion_relegation_cycles" && <section className={styles.seasonSection}>
+        {leagueFormat==="promotion_relegation_cycles" && <section className={`${styles.seasonSection} ${builderStep===4?styles.wizardActive:styles.wizardCollapsed}`} onClick={()=>builderStep!==4&&setBuilderStep(4)}>
           <div className={styles.seasonSectionHead}><span>4</span><div><strong>Rolling cycle</strong><p>Choose what happens when each round of the box league finishes.</p></div></div>
           <label>Teams per group<input type="number" min="2" max="100" value={teamsPerDivision} onChange={e=>setTeamsPerDivision(e.target.value)} /></label>
           <label>Promotion places<input type="number" min="0" max="20" value={promotionPlaces} onChange={e=>setPromotionPlaces(e.target.value)} /></label>
@@ -673,7 +675,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
           </label>
           <p className={styles.wide}>Fixtures are calculated from the actual group size. For example, a 4-team group playing everyone once gives 3 matches per team; a 5-team overflow group gives 4.</p>
         </section>}
-        <section className={styles.seasonSection}>
+        <section className={`${styles.seasonSection} ${builderStep===(leagueFormat==="promotion_relegation_cycles"?5:4)?styles.wizardActive:styles.wizardCollapsed}`} onClick={()=>setBuilderStep(leagueFormat==="promotion_relegation_cycles"?5:4)}>
           <div className={styles.seasonSectionHead}><span>{leagueFormat==="promotion_relegation_cycles" ? "5" : "4"}</span><div><strong>League rules</strong><p>Choose the rules players will see for this competition.</p></div></div>
         <div className={styles.ruleBuilder}>
           <div className={styles.ruleBuilderHead}>
@@ -697,8 +699,10 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
           </div>
         </div>
         </section>
+        <div className={styles.wizardNav}><button type="button" className={styles.secondaryButton} disabled={builderStep===1} onClick={()=>setBuilderStep(s=>Math.max(1,s-1))}>← Back</button><span>Step {builderStep} of {leagueFormat==="promotion_relegation_cycles"?6:5}</span><button type="button" onClick={()=>setBuilderStep(s=>Math.min(leagueFormat==="promotion_relegation_cycles"?6:5,s+1))}>{builderStep>=(leagueFormat==="promotion_relegation_cycles"?5:4)?"Review competition →":"Continue →"}</button></div>
+        {builderStep===(leagueFormat==="promotion_relegation_cycles"?6:5) && <section className={styles.reviewPanel}><span className={styles.eyebrow}>FINAL REVIEW</span><h3>{newSeason||"Untitled competition"}</h3><div className={styles.reviewGrid}><div><strong>Scheduling</strong><span>{newFixtureScheduleMode==="weekly"?"Weekly rounds":"Flexible date window"}</span></div><div><strong>Format</strong><span>{competitionPreset==="box"?"Rolling box league":competitionPreset==="seasonal"?"Seasonal divisions":"Custom competition"}</span></div><div><strong>Division size</strong><span>{teamsPerDivision} teams</span></div>{leagueFormat==="promotion_relegation_cycles"&&<div><strong>Movement</strong><span>{promotionPlaces} promoted · {relegationPlaces} relegated</span></div>}</div><p>Nothing goes live yet. Rallora will create this as a private draft so you can add teams, review divisions and generate fixtures before activation.</p></section>}
         <div className={styles.seasonFormActions}>
-          <button disabled={busy} type="submit">{editingSeasonId ? "Save competition changes" : "Review & create draft competition"}</button>
+          {builderStep===(leagueFormat==="promotion_relegation_cycles"?6:5) && <button disabled={busy} type="submit">{editingSeasonId ? "Save competition changes" : "Create private draft competition →"}</button>}
           {editingSeasonId && <button type="button" className={styles.secondaryButton} onClick={()=>{
             setEditingSeasonId(null); setNewSeason(""); setMessage(""); setError("");
           }}>Cancel edit</button>}
