@@ -496,6 +496,7 @@ export default function ClubAdministration() {
         fixture_schedule_mode: summary.season.fixture_schedule_mode,
         registration_opens_at: summary.season.registration_opens_at,
         registration_closes_at: summary.season.registration_closes_at,
+        registration_published: summary.season.registration_published,
         league_format: summary.season.league_format,
         teams_per_division: summary.season.teams_per_division,
         matches_per_cycle: summary.season.matches_per_cycle,
