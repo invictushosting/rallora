@@ -601,12 +601,12 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         {seasons.length===0 ? <div className={styles.competitionEmpty}><strong>No competitions yet</strong><p>Start with your first competition. It will stay private as a draft until you are ready to activate it.</p><button type="button" onClick={()=>setShowCompetitionBuilder(true)}>Create your first competition →</button></div> :
         <div className={styles.competitionList}>{seasons.map(season=><article className={styles.competitionCard} key={season.id}><div><span className={styles.statusPill}>{season.status.toUpperCase()}</span><h4>{season.name}</h4><p>{season.league_format==="promotion_relegation_cycles"?"Rolling divisions with promotion & relegation":"Standard divisions"} · {season.registrations} registration{season.registrations===1?"":"s"} · {season.divisions.length} division{season.divisions.length===1?"":"s"}</p></div><div className={styles.competitionCardActions}><button type="button" onClick={()=>window.dispatchEvent(new CustomEvent("rallora:edit-season",{detail:{seasonId:season.id}}))}>{season.status==="draft"?"Continue setup":"Manage competition"} →</button></div></article>)}</div>}
       </section>}
-      {(showCompetitionBuilder||editingSeasonId) && <div className={styles.builderShell}><div className={styles.builderTop}><button type="button" onClick={()=>{setShowCompetitionBuilder(false);setEditingSeasonId(null);setMessage("");setError("")}}>← Competitions</button><div><strong>{editingSeasonId?"Edit competition":"Guided competition builder"}</strong><span>{editingSeasonId?"Update the competition safely.":"Follow the steps below — your competition stays private until you activate it."}</span></div></div>
+      {(showCompetitionBuilder||editingSeasonId) && <div className={styles.builderShell}><div className={styles.builderTop}><button type="button" onClick={()=>{setShowCompetitionBuilder(false);setEditingSeasonId(null);setMessage("");setError("")}}>← All competitions</button><div><strong>{editingSeasonId?"Edit competition":"Guided competition builder"}</strong><span>{editingSeasonId?"Update the competition safely.":"Follow the steps below — your competition stays private until you activate it."}</span></div></div>
       <form className={styles.form} onSubmit={createSeason}>
         <div className={styles.seasonEditorIntro}>
-          <span className={styles.eyebrow}>{editingSeasonId ? "EDIT LEAGUE" : "NEW LEAGUE"}</span>
+          <span className={styles.eyebrow}>{editingSeasonId ? "EDIT COMPETITION" : "NEW COMPETITION"}</span>
           <h3>{editingSeasonId ? `Edit ${editingSeason?.name ?? "competition"}` : "Create a competition"}</h3>
-          <p>{editingSeasonId ? "Update this league without rebuilding it. Structural settings may be protected once registrations exist." : "New leagues start as drafts and stay private until you activate them."}</p>
+          <p>{editingSeasonId ? "Update this competition without rebuilding it. Structural settings may be protected once registrations exist." : "New competitions start as drafts and stay private until you activate them."}</p>
         </div>
         <section className={styles.seasonSection}>
           <div className={styles.seasonSectionHead}><span>1</span><div><strong>Competition basics</strong><p>Give it a name and tell Rallora how teams should play their matches.</p></div></div>
@@ -623,7 +623,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
           : "Choose this when teams arrange their own match at any time inside the published window."}</p>
         </section>
         <section className={styles.seasonSection}>
-          <div className={styles.seasonSectionHead}><span>2</span><div><strong>Registration</strong><p>Control when players can enter this league.</p></div></div>
+          <div className={styles.seasonSectionHead}><span>2</span><div><strong>Registration</strong><p>Control when players can enter this competition.</p></div></div>
         <label>Registration opens<input type="datetime-local" value={registrationOpens} onChange={e=>setRegistrationOpens(e.target.value)} /></label>
         <label>Registration closes<input type="datetime-local" value={registrationCloses} onChange={e=>setRegistrationCloses(e.target.value)} /></label>
         </section>
