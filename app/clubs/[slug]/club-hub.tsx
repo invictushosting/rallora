@@ -335,6 +335,8 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
 
   const { club, seasons, content } = clubState;
   const currentSeason = seasons.find((season) => season.id === seasonId);
+  const registrationOpen = Boolean(currentSeason?.registration_published && currentSeason.status === "draft");
+  const registrationDeadline = currentSeason?.registration_closes_at ? dateLabel(currentSeason.registration_closes_at) : null;
   const clubLogo = safeImage(club.logo_url);
   const clubCover = safeImage(club.cover_image_url);
   const teamNames = new Map(data.teams.map((team) => [team.id, playerPair(team)]));
@@ -528,7 +530,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
           <RalloraLogo variant="light" width={210} /></Link>
         <div className={styles.headerLinks}>
           <Link href="/#clubs" className={styles.adminLink}>All clubs</Link>
-          <Link href={`/clubs/${encodeURIComponent(slug)}/register`} className={styles.registerLink}>Join league</Link>
+          <Link href={`/clubs/${encodeURIComponent(slug)}/register`} className={styles.registerLink}>{registrationOpen ? "Register" : "Competitions"}</Link>
           <Link href={`/clubs/${encodeURIComponent(slug)}/captain`} className={styles.adminLink}>Captain login</Link>
           <Link href={`/clubs/${encodeURIComponent(slug)}/admin`} className={styles.adminLink}>Club admin</Link>
         </div>
@@ -541,8 +543,14 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
             <h1>{club.name}</h1></div>
         </div>
         <p>{club.welcome_text || "Fixtures, results and league tables. All in one place."}</p>
+        {registrationOpen && currentSeason && <div className={styles.registrationCallout}>
+          <div><span className={styles.statusPill}>Registration open</span>
+            <strong>{currentSeason.name}</strong>
+            {registrationDeadline && <small>Entries close {registrationDeadline}</small>}</div>
+          <Link href={`/clubs/${encodeURIComponent(slug)}/register?season=${encodeURIComponent(currentSeason.id)}`}>Register now</Link>
+        </div>}
         <div className={styles.heroActions}>
-          <Link href={`/clubs/${encodeURIComponent(slug)}/register`}>Join this league</Link>
+          {!registrationOpen && <Link href={`/clubs/${encodeURIComponent(slug)}/register`}>View competitions</Link>}
           <Link href={`/clubs/${encodeURIComponent(slug)}/events`}>Club events</Link>
           <Link href="/notifications">League updates</Link>
         </div>
@@ -558,7 +566,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
           <span>Season</span>
           <select value={seasonId} onChange={(event) => setSeasonId(event.target.value)}>
             {seasons.map((season) => <option key={season.id} value={season.id}>
-              {season.name} · {season.status}</option>)}
+              {season.name} · {season.status === "draft" && season.registration_published ? "Registration open" : season.status}</option>)}
           </select>
         </label>}
       </div>
