@@ -27,3 +27,12 @@
 
 /* Rallora controls */
 .form button{min-height:var(--control-h);border-radius:var(--radius-control);font-size:var(--control-font);font-weight:var(--control-weight);transition:transform .16s ease,box-shadow .16s ease}.form button:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(6,26,57,.12)}
+
+
+/* Registration navigation hierarchy */
+.topNav{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:26px;padding-bottom:16px;border-bottom:1px solid #e5edf5}
+.topNav .back{display:inline-flex;align-items:center;gap:7px;min-height:40px;margin:0;padding:0 2px;color:#244d78;font-size:12px;font-weight:800}
+.topNav .back span:first-child{display:grid;place-items:center;width:28px;height:28px;border:1px solid #d8e4ef;border-radius:9px;background:#f7fafc;color:#061a39;font-size:14px}
+.topNav .eyebrow{white-space:nowrap;text-align:right}
+@media(max-width:560px){.topNav{margin:-4px 0 22px;padding-bottom:13px}.topNav .back{min-height:38px}.topNav .eyebrow{font-size:9px;letter-spacing:1.15px}.topNav .back span:first-child{width:30px;height:30px}}
+@media(max-width:360px){.topNav .eyebrow{display:none}}
