@@ -36,3 +36,10 @@
 .topNav .eyebrow{white-space:nowrap;text-align:right}
 @media(max-width:560px){.topNav{margin:-4px 0 22px;padding-bottom:13px}.topNav .back{min-height:38px}.topNav .eyebrow{font-size:9px;letter-spacing:1.15px}.topNav .back span:first-child{width:30px;height:30px}}
 @media(max-width:360px){.topNav .eyebrow{display:none}}
+
+/* Mobile-first stepped registration */
+.progress{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 0 20px;color:#617a96;font-size:11px;font-weight:850}.progress>div{display:flex;gap:5px;flex:1;max-width:230px}.progress i{height:4px;flex:1;border-radius:999px;background:#dce7f1}.progress .progressOn{background:#00B0FE}
+.choiceGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.choiceGrid button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:4px;min-height:82px;padding:15px;background:#f7fafc!important;color:#294566!important;border:1px solid #d7e4ef!important}.choiceGrid button strong{font-size:13px}.choiceGrid button span{font-size:11px;font-weight:600;color:#71849a}.choiceGrid .choiceActive{background:#061a39!important;color:#fff!important;border-color:#061a39!important}.choiceGrid .choiceActive span{color:#c7d8e9}
+.review{display:grid;gap:10px}.review>div{display:grid;gap:3px;padding:14px 15px;border:1px solid #dce7f3;border-radius:13px;background:#f8fbfe}.review span{font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.06em;color:#71849a}.review strong{font-size:14px}.review small{font-size:11px}
+.stepActions{display:grid;grid-template-columns:auto 1fr;gap:10px;position:sticky;bottom:0;padding-top:8px;background:linear-gradient(transparent,#fff 20%)}.stepActions>button:only-child{grid-column:1/-1}.stepActions .secondary{background:#eef4f8;color:#294566;min-width:90px}
+@media(max-width:560px){.card{min-height:calc(100vh - 24px)}.choiceGrid{grid-template-columns:1fr}.choiceGrid button{min-height:76px}.stepActions{margin:8px -4px -4px;padding:18px 4px 4px}.stepActions button{min-height:52px}.progress{margin-top:2px}}
