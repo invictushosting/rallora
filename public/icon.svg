@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Rallora R and padel ball mark">
+<rect width="128" height="128" rx="28" fill="#061A39"/>
+<path d="M24 31h58c13 0 22 8 22 20 0 10-6 17-16 20l15 22H82L66 72H49v21H27V55h55c3 0 5-2 5-4s-2-4-5-4H24V31Z" fill="#FFFFFF"/>
+<path d="M28 93 53 61h25L53 93H28Z" fill="#FFFFFF"/>
+<circle cx="94" cy="91" r="18" fill="#00B0FE"/>
+<path d="M80 84c5 .6 8.4 3.1 11.4 7 3.2 4 6.7 6.7 14 7.4" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+</svg>
