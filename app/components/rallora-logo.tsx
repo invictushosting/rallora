@@ -7,7 +7,7 @@ type RalloraLogoProps = {
 };
 
 /**
- * Approved Rallora racket-R artwork, traced from the supplied v1 brand board.
+ * Approved Rallora wordmark with the locked cyan padel-ball O.
  * "light" = navy + cyan for pale surfaces; "dark" = white + cyan on navy.
  * Custom wordmark must always use the artwork, never recreated as live text.
  */
@@ -18,7 +18,7 @@ export default function RalloraLogo({
     src={`/brand/rallora-horizontal-${variant}.svg`}
     alt="Rallora"
     width={width}
-    height={Math.round(width * 167 / 581)}
+    height={Math.round(width * 55 / 386)}
     className={className}
     style={{ display: "block", width, maxWidth: "100%", height: "auto" }}
   />;
