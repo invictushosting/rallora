@@ -7,19 +7,20 @@ type RalloraLogoProps = {
 };
 
 /**
- * Approved Rallora racket-R artwork, traced from the supplied v1 brand board.
- * "light" = navy + cyan for pale surfaces; "dark" = white + cyan on navy.
- * Custom wordmark must always use the artwork, never recreated as live text.
+ * Rallora approved board-exact master artwork.
+ * Uses the locked PNG masters uploaded to public/brand.
+ * Do not redraw or recreate the wordmark or ball in code.
  */
 export default function RalloraLogo({
   variant = "light", width = 218, className,
 }: RalloraLogoProps) {
   return <Image
-    src={`/brand/rallora-horizontal-${variant}.svg`}
+    src={`/brand/rallora-horizontal-${variant}.png`}
     alt="Rallora"
     width={width}
-    height={Math.round(width * 167 / 581)}
+    height={Math.round(width * 115 / 462)}
     className={className}
     style={{ display: "block", width, maxWidth: "100%", height: "auto" }}
+    priority
   />;
 }
