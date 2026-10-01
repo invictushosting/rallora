@@ -113,3 +113,26 @@
 .pilotBenefits{max-width:1164px;margin:0 auto 48px;padding:0 28px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.pilotBenefits div{padding:24px;border-top:1px solid #cbdde7}.pilotBenefits span{font-size:10px;font-weight:900;letter-spacing:.12em}.pilotBenefits p{margin:9px 0 0;color:#647b91;font-size:13px;line-height:1.55}.pilotFooter{max-width:none;margin:0;padding:0;background:#061A39}.pilotFooterInner{max-width:1220px;margin:auto;padding:34px 28px 38px;display:flex;align-items:center;justify-content:space-between;gap:32px}.pilotFooterInner img{image-rendering:auto}.pilotFooterText{margin-left:auto;display:flex;align-items:center;gap:28px;color:#fff}.pilotFooterText strong{font-size:9px;letter-spacing:.14em;color:#00B0FE}.pilotFooterText span{font-size:10px;white-space:nowrap;color:#c7d8e8}
 @media(max-width:900px){.pilotHero{grid-template-columns:1fr;gap:42px;margin-top:2vh}.pilotFormWrap{max-width:620px}.pilotBenefits{grid-template-columns:1fr}.pilotBenefits div{padding:18px 0}}
 @media(max-width:560px){.pilotHeader{padding:22px 18px}.pilotHeader>span{display:none}.pilotHero{padding:24px 18px 54px}.pilotIntro h1{font-size:42px}.pilotIntro>p{font-size:15px}.pilotFlow{gap:6px;margin-top:30px}.pilotFlow i{display:none}.pilotFormWrap{padding:24px 18px;border-radius:20px}.pilotFormGrid{grid-template-columns:1fr}.pilotBenefits{padding:0 18px;margin-bottom:45px}.pilotFooter{margin:0;padding:0}.pilotFooterInner{padding:26px 18px}.pilotFooterText{gap:12px;flex-direction:column;align-items:flex-end}}
+
+
+/* Desktop pilot landing refinement — Gold Master */
+@media(min-width:901px){
+ .pilotPage{min-height:100vh}
+ .pilotHeader{max-width:1380px;padding:32px 36px 18px}
+ .pilotHeader img{width:250px!important;max-width:250px!important}
+ .pilotHeader>span{font-size:11px;letter-spacing:.17em}
+ .pilotHero{max-width:1380px;margin:0 auto;padding:38px 36px 66px;grid-template-columns:minmax(0,1.08fr) minmax(460px,.78fr);gap:84px;align-items:center}
+ .pilotIntro{padding:12px 0 8px}
+ .pilotIntro h1{max-width:720px;margin:20px 0 24px;font-size:clamp(58px,5vw,82px);line-height:.96}
+ .pilotIntro>p{max-width:680px;font-size:17px;line-height:1.7}
+ .pilotIntro>strong{margin-top:24px;font-size:14px}
+ .pilotFlow{margin-top:38px;gap:10px}
+ .pilotFlow span{padding:9px 13px}
+ .pilotFormWrap{padding:38px;border-radius:28px;box-shadow:0 24px 70px rgba(6,26,57,.10)}
+ .pilotForm h2,.pilotSuccess h2{font-size:30px}
+ .pilotBenefits{max-width:1308px;margin:0 auto 58px;padding:0 36px;gap:24px}
+ .pilotBenefits div{padding:27px 26px 20px 0}
+ .pilotFooterInner{max-width:1380px;padding:40px 36px 44px}
+ .pilotFooterInner>img{width:285px!important;max-width:285px!important}
+ .pilotFooterText{gap:34px}
+}
