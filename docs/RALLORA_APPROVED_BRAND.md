@@ -1,50 +1,34 @@
-# Rallora approved identity | implementation source of truth
+# Rallora Gold Master | implementation source of truth
 
-**Source:** `Rallora_Brand_Guidelines_v1.pdf`, and
-`Rallora_Complete_Brand_Pack.zip` in the Padel League App Project Library,
-dated September 2026. The approved logo is artwork; do not draw a plain `R`
-or typeset "Rallora" and present either as the finished identity.
+**Authoritative source:** `Rallora_Gold_Master_FINAL`, approved 1 October 2026.
 
-## Exact brand specifications
+This Gold Master supersedes all earlier preview-derived, auto-traced, temporary, or legacy Rallora artwork. The Rallora logo is supplied artwork: never redraw the R, typeset the wordmark, trace a preview, or substitute an older export.
+
+## Core identity
 - Deep navy: `#061A39`
 - Electric cyan: `#00B0FE`
 - White: `#FFFFFF`
 - Cool mist: `#E8F2F9`
-- Typography for product UI: Inter; Lato as fallback
-- Mark: recognisable padel racket integrated into the R monogram.
-- Signature mark is **flat navy + electric cyan**, never a gradient.
-- The source artwork includes custom wordmark; preserve lockup proportions.
-- Use supplied horizontal lockup in wide headers (minimum width 160px),
-  symbol in square avatars/app icons (minimum size 32px), and stacked
-  lockup at minimum 220px wide.
-- Clear space: >= 1/4 mark width; do not stretch, outline or add effects.
-- Proposed campaign line "PADEL, CONNECTED." is provisional, not
-  permanently adopted without sign-off.
+- Product UI typography: Inter; Lato fallback
+- Preserve the supplied artwork proportions and clear space.
+- No gradients, outlines, stretching or effects on the master identity.
 
-## Website implementation status
-- Applied exact colours to the Rallora platform homepage, platform control
-  centre, shared club centres, club admin UI, browser theme and PWA manifest.
-- Club pages retain their own individual colour accents in league content;
-  master Rallora identity remains navy/cyan.
-- After the owner supplied the approved `Rallora_Brand_Pack_Preview(1).png`,
-  the **actual racket-R artwork and custom wordmark** were isolated from that
-  approval reference into digital-only SVGs in `public/brand/`. The dark and
-  light horizontal lockups now appear in platform and club headers, replacing
-  the old temporary typed letter-R. SVGs are auto-traced from supplied artwork,
-  not redrawn from memory.
-- Replaced the legacy GSM PWA icons at `public/icon-192.png` and
-  `public/icon-512.png` with Rallora racket-R PNG assets. Also installed a
-  180px Apple touch icon, favicon.ico, dynamic-svg-compatible `app/icon.svg`,
-  and 1200x630 Rallora-branded social preview. Updated Next metadata and
-  colour theme to use the approved navy/cyan identity.
-- The **original complete ZIP with the production vector/PNG exports is still
-  not readable by the Project Library raw-byte materializer**. If accessible
-  later, replace the auto-traced preview-derived SVGs with those original
-  clean export masters. Do not use auto-traced assets for print, engraving or
-  embroidery until inspected. Website assets are suitable for online preview.
+## Production web assets
+The verified Gold Master web lockups are:
+- `public/brand/rallora-logo-light.svg` — navy/cyan artwork for light surfaces.
+- `public/brand/rallora-logo-dark.svg` — white/cyan artwork for dark/navy surfaces.
+- `public/brand/rallora-brandmark-light.svg`
+- `public/brand/rallora-brandmark-dark.svg`
 
-## Avoid
-- A new visual identity instead of approved artwork.
-- Replacing the club-specific GSM crest with Rallora's mark within GSM
-  club-specific competition displays.
-- Committing proprietary font files; CSS fallback fonts are enough.
+`app/components/rallora-logo.tsx` is the standard product implementation and must continue to use these Gold Master SVGs.
+
+## Email
+Transactional email headers on navy must use the **dark-surface Gold Master lockup** (`rallora-logo-dark.svg` artwork), not the old `rallora-horizontal-light.png` export and never a typed RALLORA wordmark.
+
+For broad email-client compatibility, a Gold Master PNG raster export should be used when available at the public email asset URL; SVG remains the verified artwork source.
+
+## Legacy asset policy
+Earlier preview-derived/auto-traced assets are deprecated. Do not introduce new references to them. Remove legacy duplicates only after confirming no live product, metadata, PWA or email reference depends on them.
+
+## Gold Master rule
+If an asset conflicts with the approved Gold Master package, the Gold Master wins.
