@@ -7,8 +7,8 @@ type RalloraLogoProps = {
 };
 
 /**
- * Rallora Brand Master v2 artwork.
- * Uses the approved Gold Master production SVGs in public/brand.
+ * Rallora Gold Master artwork.
+ * Uses the approved v3.1 Safe Canvas production SVGs in public/brand.
  * Do not redraw, trace or recreate the R, wordmark or ball in code.
  */
 export default function RalloraLogo({
@@ -18,7 +18,7 @@ export default function RalloraLogo({
     src={`/brand/rallora-logo-${variant}.svg`}
     alt="Rallora"
     width={width}
-    height={Math.round(width * 115 / 462)}
+    height={Math.round(width * 230 / 980)}
     className={className}
     style={{ display: "block", width, maxWidth: "100%", height: "auto" }}
     priority
