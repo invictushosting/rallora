@@ -13,8 +13,13 @@ export const metadata: Metadata = {
   description: "Rallora. The connected padel league platform for clubs, players and communities.",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: [{ url: "/favicon.ico", sizes: "any" }, { url: "/icon.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    icon: [
+      { url: "/brand/favicon.ico", sizes: "any" },
+      { url: "/brand/rallora-app-icon.svg", type: "image/svg+xml" },
+      { url: "/brand/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/brand/favicon-16.png", sizes: "16x16", type: "image/png" }
+    ],
+    apple: [{ url: "/brand/apple-touch-icon-180.png", sizes: "180x180", type: "image/png" }],
   },
   openGraph: {
     title: "Rallora",
