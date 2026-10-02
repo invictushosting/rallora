@@ -337,7 +337,6 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
   const currentSeason = seasons.find((season) => season.id === seasonId);
   const registrationOpen = Boolean(currentSeason?.registration_published && currentSeason.status === "draft");
   const registrationDeadline = currentSeason?.registration_closes_at ? dateLabel(currentSeason.registration_closes_at) : null;
-  const isCarbonDemo = slug === "carbon-padel-demo";
   const clubLogo = safeImage(club.logo_url);
   const clubCover = safeImage(club.cover_image_url);
   const teamNames = new Map(data.teams.map((team) => [team.id, playerPair(team)]));
@@ -524,7 +523,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
   }
 
   return <main className={styles.page}
-    style={{ "--club-color": safeColor(club.primary_color), "--club-bg": isCarbonDemo ? "#f2efe8" : undefined, "--club-ink": isCarbonDemo ? "#161616" : undefined } as React.CSSProperties}>
+    style={{ "--club-color": safeColor(club.primary_color), "--club-secondary": safeColor(club.secondary_color || "#061A39"), "--club-accent": safeColor(club.accent_color || club.primary_color), "--club-bg": `color-mix(in srgb, ${safeColor(club.primary_color)} 5%, #f7f8fa)`, "--club-ink": safeColor(club.secondary_color || "#061A39") } as React.CSSProperties}>
     <div className={styles.shell}>
       <header className={styles.header}>
         <Link href="/" className={styles.brand} aria-label="Rallora home">
