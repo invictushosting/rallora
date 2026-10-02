@@ -413,5 +413,14 @@
 .registrationCallout>a:focus-visible{outline:3px solid #fff;outline-offset:3px}
 @media(max-width:540px){.registrationCallout{align-items:stretch;flex-direction:column;padding:17px;margin-top:20px}.registrationCallout strong{font-size:18px}.registrationCallout>a{width:100%;min-height:52px;font-size:15px}.heroActions{grid-template-columns:1fr 1fr}.heroActions a:last-child{grid-column:auto}}
 
-/* Club-brand variables allow showcase clubs to retain their own visual identity while Rallora stays the platform chrome. */
-.page[style*="--club-bg"] .hero{background:#161616;color:#f7f4ed}.page[style*="--club-bg"] .hero::after{opacity:.18}.page[style*="--club-bg"] .eyebrow{color:var(--club-color)}.page[style*="--club-bg"] .toolbar h2,.page[style*="--club-bg"] .divisionHeader h3{color:#161616}.page[style*="--club-bg"] .metrics article,.page[style*="--club-bg"] .card,.page[style*="--club-bg"] .seasonPicker select{background:#fffdf8}.page[style*="--club-bg"] .tabs .selectedTab{background:#161616;color:#fff}.page[style*="--club-bg"] .registerLink{background:#161616;border-color:#161616}
+
+/* Club brand system: public league surfaces inherit each club's configured identity. */
+.hero{background:var(--club-secondary,#061A39)}
+.hero::after{border-color:var(--club-color)}
+.eyebrow{color:var(--club-accent,var(--club-color))}
+.registerLink{background:var(--club-secondary,#061A39);border-color:var(--club-secondary,#061A39)}
+.tabs .selectedTab{background:var(--club-secondary,#061A39);color:#fff;box-shadow:inset 0 -3px var(--club-color)}
+.divisionHeader{border-left-color:var(--club-color)}
+.metrics article{border-left:3px solid var(--club-color)}
+.metrics article,.card,.seasonPicker select{background:#fff}
+.points{color:var(--club-color)}
