@@ -1,3 +1,4 @@
+import Image from "next/image";
 import styles from "../loading.module.css";
 
 export default function RalloraLoader({ overlay=false }: { overlay?: boolean }) {
@@ -5,22 +6,27 @@ export default function RalloraLoader({ overlay=false }: { overlay?: boolean }) 
     <div className={overlay ? styles.overlay : styles.screen} role="status" aria-live="polite" aria-label="Loading Rallora">
       <div className={styles.loaderCard}>
         <div className={styles.brandMark} aria-hidden="true">
-          <div className={styles.motionRing} />
-          <div className={styles.rLogo}>
-            <span className={styles.rTop} />
-            <span className={styles.rCurve} />
-            <span className={styles.rLeg} />
-            <div className={styles.logoRacket}>
-              <div className={styles.logoRacketFace}>
-                <i/><i/><i/><i/><i/><i/><i/><i/><i/>
-              </div>
-              <div className={styles.logoRacketHandle} />
-            </div>
-          </div>
+          <span className={styles.motionRing} />
+          <Image
+            src="/brand/rallora-brandmark-light.svg"
+            alt=""
+            width={150}
+            height={150}
+            priority
+            className={styles.masterMark}
+          />
         </div>
-        <p className={styles.kicker}>RALLORA</p>
+        <Image
+          src="/brand/rallora-logo-light.svg"
+          alt="Rallora"
+          width={245}
+          height={58}
+          priority
+          className={styles.wordmark}
+        />
         <h1>Warming up the glass…</h1>
         <p className={styles.quip}>One quick rally and we’ll have you back on court.</p>
+        <span className={styles.loadingLine} aria-hidden="true"><i /></span>
       </div>
     </div>
   );
