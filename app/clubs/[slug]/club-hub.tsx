@@ -238,15 +238,15 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
     async function loadSeason() {
       try {
         const today = new Date().toISOString().slice(0, 10);
+        const fixtureQuery = supabase.from("fixtures")
+          .select("id,season_id,division_id,home_team_id,away_team_id,play_by,week_number,fixture_group_name,status,court,available_from,arrangement_status,booking_starts_at,booking_ends_at,booking_type,booking_court,booking_matched_players")
+          .eq("season_id", verifiedSeasonId);
         const [divisionReply, fixtureReply, standingReply, cupReply, manualReply] =
           await Promise.all([
             supabase.from("divisions")
               .select("id,season_id,name,sort_order")
               .eq("season_id", verifiedSeasonId).order("sort_order", { ascending: true }),
-            supabase.from("fixtures")
-              .select("id,season_id,division_id,home_team_id,away_team_id,play_by,week_number,fixture_group_name,status,court,available_from,arrangement_status,booking_starts_at,booking_ends_at,booking_type,booking_court,booking_matched_players")
-              .eq("season_id", verifiedSeasonId)
-              .or(`available_from.is.null,available_from.lte.${today}`)
+            (previewSeasonId ? fixtureQuery : fixtureQuery.or(`available_from.is.null,available_from.lte.${today}`))
               .order("play_by", { ascending: true }),
             supabase.from("standings")
               .select("team_id,division_id,played,won,drawn,lost,points,score_diff")
@@ -268,7 +268,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
           .filter((fixture) =>
             fixture.season_id === verifiedSeasonId &&
             divisionIds.has(fixture.division_id) &&
-            (!fixture.available_from || fixture.available_from <= today));
+            (Boolean(previewSeasonId) || !fixture.available_from || fixture.available_from <= today));
         const fixtureIds = fixtures.map((fixture) => fixture.id);
         const [teamsReply, resultReply] = await Promise.all([
           divisionIds.size
@@ -324,7 +324,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
     }
     void loadSeason();
     return () => { alive = false; };
-  }, [clubState, seasonId, supabase]);
+  }, [clubState, seasonId, supabase, previewSeasonId]);
 
   if (clubState.kind === "loading") return <Loading />;
 
