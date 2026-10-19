@@ -13,17 +13,20 @@ Use this checklist for every real pilot. Do not use the demo club as the startin
 - Add logo, cover image, welcome message, venue/contact details and player registration terms.
 - Create the first season as a draft.
 - Add all required divisions.
-- Activate the season only when its division structure is correct.
-- Open the team-registration link from the Pilot Setup panel and send it to captains.
+- Keep the competition as a draft while collecting registrations and building divisions.
+- Set the registration dates, publish registration and share the competition entry link with captains.
 
 ## Registration
 - Submit one real test team before broadly sharing the link.
 - Confirm the captain account, partner details and Playtomic rating state are shown correctly.
 - Approve the team into the intended division.
 - Confirm the captain can open Captain Centre and the partner can claim their membership.
+- Review entries, close registration and assign at least two active pairings to every division.
 
 ## League launch
-- Create a test fixture with a publish date and play-by deadline.
+- Generate the complete fixture schedule with a start date and play-by deadline.
+- Use the private competition preview to check every division and fixture before activation.
+- Activate only after registration is closed and every active pairing has a non-cancelled fixture. The server enforces these checks. Activating completes the club’s previous active competition.
 - Confirm both teams and the public club hub show only the intended published data.
 - Captain submits the result; opponent confirms it.
 - Confirm the official result and standings update.
