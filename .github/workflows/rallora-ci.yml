@@ -114,3 +114,5 @@ jobs:
 
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261019094049_result_review_audit_trail.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_result_review_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261019104202_enforce_competition_launch_readiness.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_activation_readiness_assertions.sql
