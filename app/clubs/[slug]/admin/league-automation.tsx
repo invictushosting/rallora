@@ -28,10 +28,14 @@ export default function LeagueAutomation({ seasons, fixtures, slug, onSaved }: P
   async function generate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!canGenerate || busy) return;
+    const fields = new FormData(event.currentTarget);
+    const start = String(fields.get("starts_on") ?? "");
+    const end = String(fields.get("ends_on") ?? "");
+    if (!start || !end || end < start) { setMessage("Choose a valid start and end date."); return; }
     setBusy(true); setMessage(""); setCreatedId("");
     try {
       const { data, error } = await supabase.rpc(nextCycle ? "rallora_create_next_cycle" : "rallora_generate_round_robin", {
-        p_season_id: seasonId, p_starts_on: startsOn, p_ends_on: endsOn,
+        p_season_id: seasonId, p_starts_on: start, p_ends_on: end,
       });
       if (error) throw error;
       const result = data as { season_id: string; fixture_count: number; teams_carried?: number; promoted?: number; relegated?: number };
@@ -51,7 +55,7 @@ export default function LeagueAutomation({ seasons, fixtures, slug, onSaved }: P
       {seasons.map(item => <option key={item.id} value={item.id}>{item.name} · {item.status}</option>)}
     </select></label>
     {season && <div className={styles.wide}>
-      <p>{season.cycle_match_mode === "double_round_robin" ? "Home and away" : "Single round-robin"} · {season.divisions.length} divisions · {existing.length ? `${existing.length} existing fixtures` : `${expected} fixtures to generate`}.</p>
+      <p>{season.cycle_match_mode === "double_round_robin" ? "Home and away" : "Single round-robin"} · {season.divisions.length} division{season.divisions.length === 1 ? "" : "s"} · {existing.length ? `${existing.length} existing fixtures` : `${expected} fixtures to generate`}.</p>
       {nextCycle && <p>The final table decides movement: {season.promotion_places} up and {season.relegation_places} down, except at the top and bottom divisions. Ties use points, wins, score difference, then pairing name. Pairings and captain access carry into a new private draft. Previous fixtures and results are then locked as history.</p>}
       {nextCycle && !season.require_cycle_completion && <p>This competition allows an unfinished cycle to close. Unplayed fixtures will be left behind; submitted and disputed results must still be resolved first.</p>}
       {season.registration_published && <p>Close registration before generating fixtures.</p>}
@@ -60,8 +64,8 @@ export default function LeagueAutomation({ seasons, fixtures, slug, onSaved }: P
       {nextCycle && season.status === "draft" && <p>Activate and play this cycle before preparing its successor.</p>}
       {season.fixture_schedule_mode === "weekly" && <p>Allow at least {rounds * 7} days for {rounds} weekly rounds.</p>}
     </div>}
-    <label>{nextCycle ? "Next cycle starts" : "Fixtures start"}<input type="date" required disabled={busy} min={nextCycle && season?.ends_on ? new Date(new Date(`${season.ends_on}T00:00:00Z`).getTime() + 86400000).toISOString().slice(0,10) : undefined} value={startsOn} onChange={event => setStartsOn(event.target.value)} /></label>
-    <label>{nextCycle ? "Next cycle ends" : "Fixtures end"}<input type="date" required disabled={busy} min={startsOn || undefined} value={endsOn} onChange={event => setEndsOn(event.target.value)} /></label>
+    <label>{nextCycle ? "Next cycle starts" : "Fixtures start"}<input name="starts_on" type="date" required disabled={busy} min={nextCycle && season?.ends_on ? new Date(new Date(`${season.ends_on}T00:00:00Z`).getTime() + 86400000).toISOString().slice(0,10) : undefined} value={startsOn} onChange={event => setStartsOn(event.target.value)} /></label>
+    <label>{nextCycle ? "Next cycle ends" : "Fixtures end"}<input name="ends_on" type="date" required disabled={busy} min={startsOn || undefined} value={endsOn} onChange={event => setEndsOn(event.target.value)} /></label>
     <button type="submit" disabled={busy || !canGenerate}>{busy ? "Preparing fixtures…" : nextCycle ? "Prepare next cycle" : "Generate all fixtures"}</button>
     {message && <p className={styles.wide} role="status">{message}</p>}
     {createdId && <Link className={styles.wide} href={`/clubs/${slug}/admin/preview/${createdId}`}>Review competition →</Link>}
