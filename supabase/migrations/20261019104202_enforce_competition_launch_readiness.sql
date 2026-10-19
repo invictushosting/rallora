@@ -51,6 +51,7 @@ begin
   select * into v_season from public.seasons where id=p_season_id for update;
   if not found then raise exception 'Season not found'; end if;
   if not public.rallora_can_manage_club(v_season.club_id) then raise exception 'Not authorised'; end if;
+  if v_season.status=p_status then return; end if;
   if p_status='active' then
     perform id from public.clubs where id=v_season.club_id for no key update;
     update public.seasons set status='completed' where club_id=v_season.club_id and status='active' and id<>p_season_id;
