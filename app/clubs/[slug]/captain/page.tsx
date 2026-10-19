@@ -115,7 +115,7 @@ export default function CaptainCentre() {
       {captainTeams.length>1&&<label>Captain pairing<select disabled={Boolean(busy)} value={team?.id??""} onChange={event=>{setSelectedId(event.target.value);setFixtures([]);setNotice("Loading captain access…");}}>{captainTeams.map(item=><option key={item.id} value={item.id}>{item.season.name} · {[item.player_one_name,item.player_two_name].filter(Boolean).join(" / ")||item.name}</option>)}</select></label>}
     </section>
     {notice&&<p className={styles.notice} role="status">{notice}</p>}
-    {!team&&<Link href={`/account?club=${encodeURIComponent(slug)}`}>Open your account →</Link>}
+    {!team&&<Link href={`/account?club=${encodeURIComponent(slug)}&return=captain`}>Open your account →</Link>}
     {team&&!notice&&fixtures.length===0&&<p className={styles.notice}>Your captain access is active. There are no fixtures available for your pairing yet.</p>}
     {team&&fixtures.length>0&&<section className={styles.actionCentre}><div><span>NEXT UP</span><h2>{actionCount?`${actionCount} match${actionCount===1?"":"es"} need your attention`:"You’re all caught up"}</h2></div><p>{actionCount?"Submit scores or review an opponent result below.":"No captain actions are waiting right now."}</p></section>}
     <section className={styles.grid}>{fixtureCards.map(({fixture,official,submission,confirmed,needsReview,needsSubmit,action,label})=>{

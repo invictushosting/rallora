@@ -18,10 +18,13 @@ export default function AccountPage(){
   const [busy,setBusy]=useState(false);
   const [clubAccess,setClubAccess]=useState<ClubAccess[]>([]);
   const [returnClub,setReturnClub]=useState("");
+  const [returnToCaptain,setReturnToCaptain]=useState(false);
   const [platformAdmin,setPlatformAdmin]=useState(false);
 
   useEffect(()=>{
-    setReturnClub(new URL(window.location.href).searchParams.get("club")||"");
+    const params=new URL(window.location.href).searchParams;
+    setReturnClub(params.get("club")||"");
+    setReturnToCaptain(params.get("return")==="captain");
     void (async()=>{
       const {data,error}=await supabase.auth.getUser();
       if(error||!data.user){setSignedIn(false);return}
@@ -53,8 +56,9 @@ export default function AccountPage(){
     setBusy(false);
   }
 
-  const returnHref=returnClub?`/clubs/${encodeURIComponent(returnClub)}/admin`:platformAdmin?"/platform":"/";
-  const returnLabel=returnClub?"← Back to club admin":platformAdmin?"← Back to Platform":"← Back to Rallora";
+  const canManageReturnClub=platformAdmin||clubAccess.some(item=>item.clubs?.slug===returnClub&&["owner","admin","organiser"].includes(item.role));
+  const returnHref=returnClub?`/clubs/${encodeURIComponent(returnClub)}${returnToCaptain?"/captain":canManageReturnClub?"/admin":""}`:platformAdmin?"/platform":"/";
+  const returnLabel=returnClub?(returnToCaptain?"← Back to Captain Centre":canManageReturnClub?"← Back to club admin":"← Back to club"):platformAdmin?"← Back to Platform":"← Back to Rallora";
 
   return <main className={styles.page}><section className={styles.card}>
     <div className={styles.topbar}>
