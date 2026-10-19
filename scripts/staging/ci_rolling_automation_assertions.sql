@@ -46,7 +46,7 @@ begin
   for i in 1..8 loop
     team:=('70000000-0000-0000-0000-'||lpad(i::text,12,'0'))::uuid;
     insert into public.teams(id,division_id,name,player_one_name,player_two_name)
-      values(team,case when i<=4 then div_a else div_b end,'Team '||i,'Player '||i,'Partner '||i);
+      values(team,case when i<=4 then div_a else div_b end,'Team '||((i-1)%4+1),'Player '||i,'Partner '||i);
     if i=1 then
       insert into public.rallora_team_registration_requests(club_id,season_id,division_id,team_id,player_user_id,player_name,status)
         values(club,source,div_a,team,'11111111-1111-1111-1111-111111111111','Captain A','approved') returning id into request;

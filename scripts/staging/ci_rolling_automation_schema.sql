@@ -19,3 +19,5 @@ alter table public.seasons
   add column if not exists league_rules jsonb not null default '[]';
 alter table public.fixtures add column if not exists fixture_group_type text not null default 'weekly',
   add column if not exists fixture_group_name text,add column if not exists fixtures_per_team integer;
+
+create unique index if not exists ci_team_reference_unique on public.teams(division_id,name);
