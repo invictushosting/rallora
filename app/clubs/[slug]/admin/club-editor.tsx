@@ -381,7 +381,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       const response=await fetch("/api/email/test",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({clubId:club.id,to:testEmail.trim()})});
       const payload=await response.json().catch(()=>({})) as {error?:string};
       if(!response.ok) throw new Error(payload.error||"Test email could not be sent.");
-      setTestEmailSent(`Email sent successfully to ${testEmail.trim()}.`);
+      setTestEmailSent(`Test email accepted for sending to ${testEmail.trim()}. Check your inbox and spam folder.`);
     } catch(caught) { setError(caught instanceof Error?caught.message:"Test email could not be sent."); }
     finally { setTestEmailBusy(false); }
   }
