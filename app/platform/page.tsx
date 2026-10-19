@@ -19,6 +19,10 @@ type ClubSummary = { club: Club; seasons: Season[]; teams: number; fixtures: num
 type Application = { id:string; applicant_name:string|null; club_name:string; requested_slug:string; contact_email:string; contact_phone:string|null; plan_code:string; status:string; created_at:string };
 type PilotEnquiry = { id:string; club_name:string; contact_name:string; contact_email:string; contact_phone:string|null; club_location:string; court_count:number|null; enquiry_type:string; message:string|null; status:string; source:string; assignee:string|null; internal_notes:string|null; next_follow_up_at:string|null; last_contacted_at:string|null; lost_reason:string|null; linked_club_id:string|null; created_at:string; updated_at:string };
 type Readiness = Record<string,number>;
+const activityMetrics = new Set([
+  "active_clubs", "active_seasons", "registrations", "roster_memberships",
+  "captains", "open_fixtures", "submitted_fixtures", "confirmed_fixtures",
+]);
 function crmSlug(value:string){return value.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,80)}
 type SupportRequest = { id:string; club_id:string|null; requester_name:string|null; requester_email:string; category:string; subject:string; message:string; priority:string; status:string; assignee:string|null; internal_notes:string|null; created_at:string };
 type FormatRequest = {
@@ -379,8 +383,16 @@ export default function PlatformControlCentre() {
         })}
         {!view.formatRequests.length&&<article className={styles.card}><h3>No format requests</h3><p>Requests submitted by club organisers will appear here.</p></article>}
       </section>
-      <div className={styles.sectionHeading}><div><small>PLATFORM HEALTH</small><h2>Operational checks</h2></div><p>Exceptions and data-quality checks across Rallora.</p></div>
-      {readiness&&<section className={`${styles.metrics} ${styles.readinessMetrics}`} aria-label="Platform health">{Object.entries(readiness).map(([key,value])=><div className={`${styles.metric} ${Number(value)>0?styles.healthAttention:styles.healthOk}`} key={key}><span>{key.replaceAll("_"," ")}</span><strong>{Number(value).toLocaleString("en-GB")}</strong></div>)}</section>}
+      <div className={styles.sectionHeading}><div><small>PLATFORM HEALTH</small><h2>Operational checks</h2></div><p>Activity totals and data-quality checks across Rallora, including demo and test clubs.</p></div>
+      {readiness&&<section className={`${styles.metrics} ${styles.readinessMetrics}`} aria-label="Platform health">{Object.entries(readiness).map(([key,value])=>{
+        const activity=activityMetrics.has(key);
+        const needsReview=!activity&&Number(value)>0;
+        return <div className={`${styles.metric} ${activity?styles.healthActivity:needsReview?styles.healthAttention:styles.healthOk}`} key={key}>
+          <span>{key.replaceAll("_"," ")}</span>
+          <strong>{Number(value).toLocaleString("en-GB")}</strong>
+          <small className={styles.healthLabel}>{activity?"Activity total":needsReview?"Review needed":"Clear"}</small>
+        </div>;
+      })}</section>}
       <p className={styles.footnote}>Subscription controls are ready for a payment provider to be connected later; no automatic charges are taken.</p>
     </>}
   </div></main>;
