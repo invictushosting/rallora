@@ -256,13 +256,18 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const fixtureScheduleMode = selectedFixtureSeason?.fixture_schedule_mode ?? "weekly";
   const editingSeason = editingSeasonId ? seasons.find((item)=>item.id===editingSeasonId) : null;
   const formatLocked = Boolean(editingSeason && editingSeason.registrations > 0);
-  const recoveryOptions = fixtures.filter((fixture)=>!fixtureDivisionId || fixture.division_id===fixtureDivisionId);
+  const archivedSeasonIds = new Set(seasons.map(season => season.previous_season_id).filter(Boolean));
+  const recoveryOptions = fixtures.filter(fixture => fixture.status !== "cancelled" && !archivedSeasonIds.has(fixture.season_id));
+  const recoveredFixture = recoveryOptions.find(fixture => fixture.id === recoveryFixture);
+  const recoveryDivision = divisions.find(division => division.id === recoveredFixture?.division_id);
+  const recoveryTeams = recoveryDivision?.teams ?? [];
   const eligibleTeams = selectedDivision?.teams ?? [];
   const selectedManagedFixture = fixtures.find((fixture)=>fixture.id===manageFixture);
   const managedDivision = selectedManagedFixture ? divisions.find((division)=>division.id===selectedManagedFixture.division_id) : undefined;
   const managedHome = managedDivision?.teams.find((team)=>team.id===selectedManagedFixture?.home_team_id)?.name ?? "Home";
   const managedAway = managedDivision?.teams.find((team)=>team.id===selectedManagedFixture?.away_team_id)?.name ?? "Away";
-  const managedLocked = selectedManagedFixture?.status==="confirmed" || selectedManagedFixture?.status==="cancelled";
+  const managedArchived = Boolean(selectedManagedFixture && archivedSeasonIds.has(selectedManagedFixture.season_id));
+  const managedLocked = managedArchived || selectedManagedFixture?.status==="confirmed" || selectedManagedFixture?.status==="cancelled";
 
   useEffect(() => {
     if (!seasons.some((season) => season.id === divisionSeasonId)) {
@@ -540,19 +545,26 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
     await submit(async()=>{const {error}=await supabase.rpc("rallora_cancel_fixture",{p_fixture_id:manageFixture});if(error)throw error;},"Fixture cancelled.");
   }
 
-  async function resolveResult(event: React.FormEvent) {
+  async function resolveResult(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const fields = new FormData(event.currentTarget);
+    const home = String(fields.get("recovery_home") ?? "").trim();
+    const away = String(fields.get("recovery_away") ?? "").trim();
+    const winner = String(fields.get("recovery_winner") ?? "");
+    const notes = String(fields.get("recovery_notes") ?? "").trim();
     await submit(async () => {
-      if (!recoveryFixture) throw new Error("Enter the fixture ID to resolve.");
-      const { error: mutationError } = await supabase.rpc("rallora_admin_resolve_result", { p_fixture_id: recoveryFixture.trim(), p_home_score: recoveryHome.trim(), p_away_score: recoveryAway.trim(), p_winner_team_id: recoveryWinner.trim() || null, p_notes: recoveryNotes.trim() || null });
+      if (!recoveredFixture) throw new Error("Choose an editable fixture to resolve.");
+      if (!home || !away || !winner) throw new Error("Enter both scores and choose the winning pairing.");
+      const { error: mutationError } = await supabase.rpc("rallora_admin_resolve_result", { p_fixture_id: recoveryFixture.trim(), p_home_score: home, p_away_score: away, p_winner_team_id: winner, p_notes: notes || null });
       if (mutationError) throw mutationError;
       setRecoveryHome(""); setRecoveryAway(""); setRecoveryWinner(""); setRecoveryNotes("");
     }, "Official result saved and standings recalculated.");
   }
 
   async function reopenFixture() {
+    if (!recoveredFixture || recoveredFixture.status !== "confirmed") return;
+    if (!window.confirm("Reopen this result? Its official score will be removed and the standings recalculated. You can then enter the corrected result below.")) return;
     await submit(async () => {
-      if (!recoveryFixture) throw new Error("Enter the fixture ID to reopen.");
       const { error: mutationError } = await supabase.rpc("rallora_admin_reopen_fixture", { p_fixture_id: recoveryFixture.trim() });
       if (mutationError) throw mutationError;
     }, "Fixture reopened and standings recalculated.");
@@ -874,8 +886,27 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       <label>Publish on<input type="date" value={managePublish} onChange={(event)=>setManagePublish(event.target.value)} /></label>
       <label>Play by<input type="date" value={manageDeadline} onChange={(event)=>setManageDeadline(event.target.value)} /></label>
       <button type="button" disabled={busy||!manageFixture||managedLocked} onClick={()=>void updateFixtureSchedule()}>Update fixture schedule</button>
-      <button type="button" className={styles.danger} disabled={busy||!manageFixture||selectedManagedFixture?.status==="cancelled"||selectedManagedFixture?.status==="confirmed"} onClick={()=>void cancelFixture()}>Cancel fixture</button>
+      <button type="button" className={styles.danger} disabled={busy||!manageFixture||managedLocked} onClick={()=>void cancelFixture()}>Cancel fixture</button>
+      {managedArchived && <p className={styles.wide}>This cycle has a successor. Its fixtures and results are preserved as history.</p>}
       {selectedManagedFixture?.status==="confirmed"&&<p className={styles.wide}>This fixture has an official result. Use Result recovery to reopen it before making schedule or cancellation changes.</p>}
+    </form>
+    <form className={styles.form} onSubmit={resolveResult}>
+      <div className={styles.wide}><h3>Result recovery</h3><p>Enter a missing result, resolve a dispute or correct an official score. Cycles with a prepared successor remain locked as history.</p></div>
+      <label className={styles.wide}>Result fixture<select value={recoveryFixture} onChange={event => {
+        const fixture = recoveryOptions.find(item => item.id === event.target.value);
+        setRecoveryFixture(event.target.value); setRecoveryHome(fixture?.home_score ?? ""); setRecoveryAway(fixture?.away_score ?? "");
+        setRecoveryWinner(fixture?.winner_team_id ?? ""); setRecoveryNotes("");
+      }}><option value="">Choose fixture</option>{recoveryOptions.map(fixture => {
+        const division = divisions.find(item => item.id === fixture.division_id);
+        const label = (id: string) => { const team = division?.teams.find(item => item.id === id); return [team?.player_one_name,team?.player_two_name].filter(Boolean).join(" / ") || team?.name || "Players"; };
+        return <option key={fixture.id} value={fixture.id}>{division?.season_name} · Round {fixture.week_number} · {label(fixture.home_team_id)} vs {label(fixture.away_team_id)} · {fixture.status}</option>;
+      })}</select></label>
+      <label>Official home score<input name="recovery_home" required maxLength={100} value={recoveryHome} onChange={event=>setRecoveryHome(event.target.value)} /></label>
+      <label>Official away score<input name="recovery_away" required maxLength={100} value={recoveryAway} onChange={event=>setRecoveryAway(event.target.value)} /></label>
+      <label>Official winner<select name="recovery_winner" required value={recoveryWinner} onChange={event=>setRecoveryWinner(event.target.value)}><option value="">Choose winner</option>{recoveryTeams.filter(team=>team.id===recoveredFixture?.home_team_id||team.id===recoveredFixture?.away_team_id).map(team=><option key={team.id} value={team.id}>{[team.player_one_name,team.player_two_name].filter(Boolean).join(" / ")||team.name}</option>)}</select></label>
+      <label>Recovery note<input name="recovery_notes" maxLength={1000} value={recoveryNotes} onChange={event=>setRecoveryNotes(event.target.value)} /></label>
+      <button type="submit" disabled={busy||!recoveredFixture}>Save official result</button>
+      <button type="button" className={styles.danger} disabled={busy||recoveredFixture?.status!=="confirmed"} onClick={()=>void reopenFixture()}>Reopen official result</button>
     </form></div>}
   </section>;
 }
