@@ -576,10 +576,10 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       <h2>Manage {club.name}</h2>
       <p>Everything you need to set up, launch and run your club competitions.</p>
     </div><span className={styles.badge}>CLUB ADMIN</span></div>
-    <div className={styles.tabs}>
+    <div className={styles.tabs} role="group" aria-label="Club management sections">
       {([["branding","Club profile"],["seasons","Competitions"],
         ["registration","Registration"],["teams","Players & teams"],["fixtures","Fixtures"]] as const).map(([id,label]) =>
-        <button type="button" key={id} onClick={() => {
+        <button type="button" key={id} aria-pressed={activeTab===id} onClick={() => {
           setActiveTab(id); setMessage(""); setError("");
         }} className={activeTab === id ? styles.selected : ""}>{label}</button>)}
     </div>
