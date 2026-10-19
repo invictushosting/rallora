@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import styles from "./editor.module.css";
+import LeagueAutomation from "./league-automation";
 
 export type EditableClub = {
   id: string; slug: string; name: string;
@@ -17,7 +18,7 @@ export type EditableDivision = {
   id: string; name: string; sort_order: number;
   teams: { id: string; name: string; player_one_name?: string | null; player_two_name?: string | null; player_one_email?: string | null; player_two_email?: string | null; player_one_rating?: number | null; player_two_rating?: number | null }[];
 };
-type EditableFixture = { id:string; season_id:string; division_id:string; home_team_id:string; away_team_id:string; week_number:number; play_by:string; status:string; home_score?:string|null; away_score?:string|null; winner_team_id?:string|null };
+export type EditableFixture = { id:string; season_id:string; division_id:string; home_team_id:string; away_team_id:string; week_number:number; play_by:string; status:string; home_score?:string|null; away_score?:string|null; winner_team_id?:string|null };
 type LeagueRule = { key:string; label:string; text:string; enabled:boolean; custom?:boolean };
 const COMMON_RULES: LeagueRule[] = [
   {key:"venue",label:"Venue requirement",text:"League matches must be played at the club unless the organiser approves otherwise.",enabled:true},
@@ -30,6 +31,7 @@ const COMMON_RULES: LeagueRule[] = [
 ];
 export type EditableSeason = {
   id: string; club_id: string; name: string; status: string;
+  starts_on: string | null; ends_on: string | null; previous_season_id: string | null; rolling_cycle_number: number;
   fixture_schedule_mode: "weekly" | "date_window";
   registration_opens_at: string | null;
   registration_closes_at: string | null;
@@ -819,7 +821,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       </div>
       <button disabled={busy || !divisions.length} type="submit">Add pairing</button>
     </form></div>}
-    {activeTab === "fixtures" && <form className={styles.form} onSubmit={createFixture}>
+    {activeTab === "fixtures" && <div><LeagueAutomation seasons={seasons} fixtures={fixtures} slug={club.slug} onSaved={onSaved} /><form className={styles.form} onSubmit={createFixture}>
       <h3>Create a fixture</h3>
       <label>Division<select value={fixtureDivisionId}
         onChange={(event) => {
@@ -874,6 +876,6 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       <button type="button" disabled={busy||!manageFixture||managedLocked} onClick={()=>void updateFixtureSchedule()}>Update fixture schedule</button>
       <button type="button" className={styles.danger} disabled={busy||!manageFixture||selectedManagedFixture?.status==="cancelled"||selectedManagedFixture?.status==="confirmed"} onClick={()=>void cancelFixture()}>Cancel fixture</button>
       {selectedManagedFixture?.status==="confirmed"&&<p className={styles.wide}>This fixture has an official result. Use Result recovery to reopen it before making schedule or cancellation changes.</p>}
-    </form>}
+    </form></div>}
   </section>;
 }

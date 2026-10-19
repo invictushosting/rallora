@@ -105,3 +105,6 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_payment_options_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/006_manual_receipt_ledger.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_manual_receipt_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_rolling_automation_schema.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261019082325_automatic_fixtures_and_rolling_cycles.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_rolling_automation_assertions.sql
