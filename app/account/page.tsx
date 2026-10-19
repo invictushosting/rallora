@@ -75,6 +75,28 @@ export default function AccountPage(){
       </div>}
     </section>}
 
+    {signedIn&&<section className={styles.installSection} aria-labelledby="install-rallora-heading">
+      <h2 id="install-rallora-heading">Rallora on your home screen</h2>
+      <p>Add the Rallora icon for quick access to your leagues, fixtures and results.</p>
+      <details>
+        <summary>iPhone or iPad</summary>
+        <ol>
+          <li>Open Rallora in Safari.</li>
+          <li>Open the Share menu and choose <strong>Add to Home Screen</strong>. You may need to scroll down or use Edit Actions to find it.</li>
+          <li>If shown, turn on <strong>Open as Web App</strong>, then tap <strong>Add</strong>.</li>
+        </ol>
+      </details>
+      <details>
+        <summary>Android</summary>
+        <ol>
+          <li>Open Rallora in Chrome.</li>
+          <li>Open the three-dot menu and choose <strong>Add to home screen</strong> or <strong>Install app</strong>.</li>
+          <li>Follow the browser’s instructions to add the Rallora icon.</li>
+        </ol>
+      </details>
+      <p className={styles.installNote}>If you opened a link inside another app, open it in Safari or Chrome first. An internet connection is needed for live fixtures and results.</p>
+    </section>}
+
     {signedIn?<section className={styles.passwordSection}>
       <h2>Change password</h2>
       <p>Choose a new password with at least 8 characters.</p>
