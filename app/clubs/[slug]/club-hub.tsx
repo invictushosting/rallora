@@ -120,7 +120,7 @@ function playerPair(team: Team) {
   return playerNames(team).join(" / ") || "Players to be confirmed";
 }
 
-export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string } = {}) {
+export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugOverride?: string; previewSeasonId?: string } = {}) {
   const params = useParams();
   const slug = slugOverride ?? (typeof params.slug === "string" ? params.slug : "");
   const supabase = useMemo(() => createClient(), []);
@@ -156,12 +156,17 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
           if (alive) setClubState({ kind: "missing" });
           return;
         }
+        if (previewSeasonId) {
+          const { data: access, error: accessError } = await supabase.rpc("rallora_can_manage_club", { p_club_id: club.id });
+          if (accessError || !access) throw new Error("Sign in as a club administrator to preview this competition.");
+        }
+        const seasonQuery = supabase.from("seasons")
+          .select("id,club_id,name,status,starts_on,created_at,registration_published,registration_opens_at,registration_closes_at")
+          .eq("club_id", club.id);
         const [seasonsReply, sponsorsReply, announcementsReply] = await Promise.all([
-          supabase.from("seasons")
-            .select("id,club_id,name,status,starts_on,created_at,registration_published,registration_opens_at,registration_closes_at")
-            .eq("club_id", club.id)
-            // Do not show draft seasons or their fixtures on public club pages.
-            .or("status.in.(active,completed),and(status.eq.draft,registration_published.eq.true)")
+          (previewSeasonId
+            ? seasonQuery.eq("id", previewSeasonId)
+            : seasonQuery.or("status.in.(active,completed),and(status.eq.draft,registration_published.eq.true)"))
             .order("created_at", { ascending: false }),
           supabase.from("sponsors")
             .select("id,name,sponsor_type,logo_url,website_url")
@@ -177,9 +182,10 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
         if (announcementsReply.error) throw announcementsReply.error;
         const seasons = ((seasonsReply.data ?? []) as Season[])
           .filter((season) => season.club_id === club.id &&
-            (["active", "completed"].includes(season.status) || (season.status==="draft" && season.registration_published)))
+            (previewSeasonId ? season.id === previewSeasonId : (["active", "completed"].includes(season.status) || (season.status==="draft" && season.registration_published))))
           .sort((a, b) => Number(b.status === "active") -
             Number(a.status === "active"));
+        if (previewSeasonId && seasons.length !== 1) throw new Error("This competition could not be previewed for this club.");
         if (alive) {
           setClubState({
             kind: "ready", club: club as Club, seasons,
@@ -204,7 +210,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
     }
     void loadClub();
     return () => { alive = false; };
-  }, [slug, supabase]);
+  }, [slug, supabase, previewSeasonId]);
 
   useEffect(() => {
     setDivisionFilter("all");
@@ -526,6 +532,7 @@ export default function ClubLeagueHub({ slugOverride }: { slugOverride?: string 
   return <main className={styles.page}
     style={{ "--club-color": safeColor(club.primary_color), "--club-secondary": safeColor(club.secondary_color || "#061A39"), "--club-accent": safeColor(club.accent_color || club.primary_color), "--club-bg": `color-mix(in srgb, ${safeColor(club.primary_color)} 5%, #f7f8fa)`, "--club-ink": safeColor(club.secondary_color || "#061A39") } as React.CSSProperties}>
     <div className={styles.shell}>
+      {previewSeasonId && <aside role="status"><strong>Private competition preview</strong><p>Visible only to authorised club administrators. This does not publish the competition.</p><Link href={`/clubs/${encodeURIComponent(slug)}/admin`}>Back to club admin</Link></aside>}
       <header className={styles.header}>
         <Link href="/" className={styles.brand} aria-label="Rallora home">
           <RalloraLogo variant="light" width={210} /></Link>
