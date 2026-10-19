@@ -1,0 +1,9 @@
+# Automatic fixtures and rolling cycles
+
+The Fixtures tab now generates a complete single or double round-robin for each division. An odd division has one bye each round. Date-window leagues share a start and deadline; weekly leagues allocate seven days per round and reject an insufficient window. Existing fixtures are never replaced by generation.
+
+For active or completed rolling leagues, Prepare next cycle uses the current official table (points, wins, score difference, pairing name, then team ID), applies configured promotion and relegation except at boundary divisions, and creates a linked private draft with fresh standings and fixtures. Teams, approved roster access, registration records, outstanding partner invitations and season-specific scoring rules carry forward. The original teams remain in their original divisions. Activate the new draft separately after review. Preparing it locks source fixtures/results as history; organisers must resolve corrections before preparing the successor.
+
+Registration must be closed. Pending/disputed results always block rollover; unfinished matches block it when Require cycle completion is enabled. Invalid resulting division sizes, overlapping movement slots, repeated successors and cross-club requests are rejected. Database transactions make failure atomic. Privileged implementations use an unexposed private schema, fixed search paths, explicit authorisation and season row locks.
+
+Validation: SQL regression coverage includes five-team byes, double round-robin uniqueness, weekly date bounds, duplicate generation, cross-club access, incomplete/disputed cycle gates, failed-rollover rollback, promotion/relegation, fresh standings, captain access, pending invitations and immutable source results. The same suite runs on PostgreSQL 17 in GitHub Actions.
