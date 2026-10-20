@@ -9,6 +9,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import styles from "./club.module.css";
 import revision from "./club-revision.module.css";
+import {scoreSets} from "@/lib/leagues/scores";
 import {
   makeFixtureDeadlineIcs, makeResultsCsv, type ExportFixture,
 } from "@/lib/leagues/exports";
@@ -374,7 +375,6 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
   const filteredDivisions = data.divisions.filter((division) =>
     divisionFilter === "all" || division.id === divisionFilter);
 
-  function scoreSets(value: string | null | undefined) { return (value ?? "").split(",").map((set) => set.trim()).filter(Boolean); }
   function bookingLabel(value: string | null) {
     if (!value) return "";
     const date = new Date(value);

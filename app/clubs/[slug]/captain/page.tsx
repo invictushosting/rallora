@@ -124,9 +124,9 @@ export default function CaptainCentre() {
         <small>{label} · PLAY BY {new Date(`${fixture.play_by}T00:00:00`).toLocaleDateString("en-GB")}</small>
         <h2>{labels[fixture.home_team_id]??"Home"} <span>vs</span> {labels[fixture.away_team_id]??"Away"}</h2>
         {needsSubmit?<form onSubmit={event=>void submit(event,fixture)}>
-          <div><label>Home score<input name="home" required maxLength={100} autoComplete="off" placeholder="e.g. 6-4, 6-3"/></label><label>Away score<input name="away" required maxLength={100} autoComplete="off" placeholder="e.g. 4-6, 3-6"/></label></div>
+          <div><label>Home score<input name="home" required maxLength={100} autoComplete="off" placeholder="e.g. 6, 6"/></label><label>Away score<input name="away" required maxLength={100} autoComplete="off" placeholder="e.g. 4, 3"/></label></div>
           <label>Winner<select name="winner" required><option value="">Choose winner</option><option value={fixture.home_team_id}>{labels[fixture.home_team_id]}</option><option value={fixture.away_team_id}>{labels[fixture.away_team_id]}</option></select></label>
-          <label>Notes<input name="notes" maxLength={1000}/></label><p className={styles.helper}>Enter the match score exactly as played, choose the winner, then submit it to the opposing captain for confirmation.</p>
+          <label>Notes<input name="notes" maxLength={1000}/></label><p className={styles.helper}>Enter each pairing’s games in set order, separated by commas: home 6, 6 and away 4, 3 means a 6–4, 6–3 win. Choose the winner, then submit for opponent confirmation.</p>
           <button disabled={Boolean(busy)}>{busy===fixture.id?"Submitting…":"Review & submit result"}</button>
         </form>:<div className={styles.result}>
           {score?<strong className={styles.finalResult}><small>{confirmed?"FINAL":"SUBMITTED"}</small>{score.home_score} <em>:</em> {score.away_score}</strong>:<strong>{confirmed?"Result confirmed":"With your organiser"}</strong>}
