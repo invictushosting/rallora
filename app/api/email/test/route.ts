@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { sendRalloraEmail, escapeEmailHtml, isEmailAddress } from "@/lib/email";
+import { renderClubEmail } from "@/lib/email-templates";
 
 export async function POST(request: NextRequest) {
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL, anon=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -13,7 +14,7 @@ export async function POST(request: NextRequest) {
   const body=await request.json().catch(()=>null) as {clubId?:string;to?:string}|null;
   if(!body?.clubId||!body.to) return NextResponse.json({error:"Club and recipient are required."},{status:400});
   const [{data:club,error:clubError},{data:member},{data:platform}]=await Promise.all([
-    db.from("clubs").select("id,name,email_sender_name,contact_email").eq("id",body.clubId).single(),
+    db.from("clubs").select("id,name,slug,logo_url,primary_color,email_sender_name,contact_email").eq("id",body.clubId).single(),
     db.from("rallora_club_memberships").select("role,status").eq("club_id",body.clubId).eq("user_id",user.id).eq("status","active").maybeSingle(),
     db.from("rallora_platform_admins").select("user_id").eq("user_id",user.id).maybeSingle()
   ]);
@@ -26,7 +27,12 @@ export async function POST(request: NextRequest) {
     to:body.to, clubName:sender, replyTo:club.contact_email||"support@rallora.app",
     subject:`Your ${club.name} email setup is ready`,
     text:`This is a live Rallora email test for ${club.name}. Future league emails can use this club identity while being securely delivered by Rallora.`,
-    html:`<div style="background:#E8F2F9;padding:32px 16px;font-family:Inter,Lato,Arial,sans-serif;color:#061A39"><div style="max-width:560px;margin:auto;background:#FFFFFF;border-radius:18px;padding:32px"><h1 style="font-size:25px;margin:0 0 8px;color:#061A39">Email setup complete.</h1><p style="line-height:1.6;color:#52677c">This is a live email test for <strong>${escapeEmailHtml(club.name)}</strong>.</p><p style="line-height:1.6;color:#52677c">Future league updates can appear from <strong>${escapeEmailHtml(sender)}</strong>, securely delivered through Rallora.</p><div style="margin-top:28px;padding-top:20px;border-top:1px solid #E8F2F9;text-align:center"><a href="https://rallora.app" style="display:inline-block;text-decoration:none"><img src="https://rallora.app/brand/rallora-email-logo-final.png" width="160" alt="Rallora" style="display:block;width:160px;max-width:100%;height:auto;margin:0 auto;border:0" /></a><div style="margin-top:10px;font-size:12px;color:#8191a2">Powered by Rallora · Club league management</div></div></div></div>`
+    html:renderClubEmail({name:club.name,logoUrl:club.logo_url,primaryColour:club.primary_color},{
+      preview:`Your ${club.name} email setup is ready.`,eyebrow:"CLUB EMAIL TEST",title:"Your club.\nReady to connect.",
+      contentHtml:`<p>Hi there,</p><p>This is a live email test for <strong>${escapeEmailHtml(club.name)}</strong>.</p><p>Your club logo and colours lead the design, with Powered by Rallora branding below. League updates appear from <strong>${escapeEmailHtml(sender)}</strong>.</p>`,
+      action:{label:"View club hub",url:`https://www.rallora.app/clubs/${encodeURIComponent(club.slug)}`},
+      helpText:club.contact_email?"A question about your league? Reply to this email to contact your club.":"Need a hand? Reply to this email to contact Rallora support.",
+    })
   });
   return NextResponse.json({ok:true});
   } catch (error) {
