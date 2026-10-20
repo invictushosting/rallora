@@ -3,6 +3,8 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { sendRalloraEmail, escapeEmailHtml } from "@/lib/email";
 
+import { renderRalloraEmail } from "@/lib/email-templates";
+
 export async function POST(request:Request){
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL,anon=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if(!url||!anon)return NextResponse.json({error:"Support is unavailable."},{status:503});
@@ -17,6 +19,6 @@ export async function POST(request:Request){
   if(!allowed.includes(category))return NextResponse.json({error:"Invalid support category."},{status:400});
   const {error}=await db.from("rallora_support_requests").insert({club_id:body?.clubId||null,user_id:user.id,requester_name:body?.name?String(body.name).trim():null,requester_email:user.email,category,subject,message,priority:category==="bug"?"high":"normal"});
   if(error)return NextResponse.json({error:error.message},{status:500});
-  await sendRalloraEmail({to:"hello@rallora.app",subject:`New Rallora support request — ${subject}`,replyTo:user.email,text:`Category: ${category}\nFrom: ${user.email}\n\n${message}`,html:`<div style="font-family:Arial,sans-serif"><h2>New Rallora support request</h2><p><strong>Category:</strong> ${category.replaceAll("_"," ")}</p><p><strong>From:</strong> ${escapeEmailHtml(user.email)}</p><p><strong>Subject:</strong> ${escapeEmailHtml(subject)}</p><p>${escapeEmailHtml(message)}</p></div>`}).catch(error=>{console.error("support_email_failed",error instanceof Error?error.message:"Unknown delivery error")});
+  await sendRalloraEmail({to:"hello@rallora.app",subject:`New Rallora support request — ${subject}`,replyTo:user.email,text:`Category: ${category}\nFrom: ${user.email}\n\n${message}`,html:renderRalloraEmail({preview:`New support request: ${subject}`,eyebrow:"PLATFORM SUPPORT",title:"A club needs a hand.",contentHtml:`<div style="font-family:Arial,sans-serif"><h2>New Rallora support request</h2><p><strong>Category:</strong> ${category.replaceAll("_"," ")}</p><p><strong>From:</strong> ${escapeEmailHtml(user.email)}</p><p><strong>Subject:</strong> ${escapeEmailHtml(subject)}</p><p>${escapeEmailHtml(message)}</p></div>`})}).catch(error=>{console.error("support_email_failed",error instanceof Error?error.message:"Unknown delivery error")});
   return NextResponse.json({ok:true});
 }
