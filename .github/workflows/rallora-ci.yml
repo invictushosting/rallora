@@ -119,3 +119,4 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_activation_readiness_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261020073500_paired_set_score_totals.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_score_notation_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_partner_invite_assertions.sql
