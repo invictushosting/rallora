@@ -13,6 +13,7 @@ import ClubEditor, { type EditableClub, type EditableSeason } from "./club-edito
 import PrizePlanner from "./prize-planner";
 import { OFFICIAL_RESULT_STATUSES } from "@/lib/leagues/result-workflow";
 import PaymentSetup from "./payment-setup";
+import SponsorManager from "./sponsor-manager";
 
 type Club = EditableClub;
 type LeagueRule = { key:string; label:string; text:string; enabled:boolean; custom?:boolean };
@@ -388,6 +389,7 @@ export default function ClubAdministration() {
         <a href="#club-leagues">Leagues</a>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/registrations`}>Registrations</Link>
         <a href="#club-management">Teams &amp; players</a>
+        <a href="#club-sponsors">Sponsors</a>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/staff`}>Club staff</Link>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/reminders`}>Notifications & reminders</Link>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/captain`}>Captain centre</Link>
@@ -558,6 +560,7 @@ export default function ClubAdministration() {
       <a href={`/clubs/${encodeURIComponent(view.club.slug)}/social`}>
         Open Content Studio ↗</a>
     </section>
+    <SponsorManager clubId={view.club.id} slug={view.club.slug} seasons={view.summaries.map(summary => ({id:summary.season.id,name:summary.season.name,divisions:summary.divisionSummaries}))} />
     <PrizePlanner clubName={view.club.name}
       seasons={view.summaries.map(({season,teams})=>({
         id:season.id,name:season.name,status:season.status,teams,

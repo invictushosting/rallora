@@ -133,3 +133,5 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261021123430_configurable_notifications_and_competition_end.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261021125005_precise_reminder_windows.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_communication_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261021170531_sponsor_scopes_and_enquiries.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_sponsor_assertions.sql

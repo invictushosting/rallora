@@ -10,7 +10,9 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import styles from "./club.module.css";
-import revision from "./club-revision.module.css";
+import ClubSponsors from "@/app/components/club-sponsors";
+import ClubFooter from "@/app/components/club-footer";
+import { SPONSOR_FIELDS, type Sponsor } from "@/lib/sponsors";
 import {scoreSets} from "@/lib/leagues/scores";
 import {
   makeFixtureDeadlineIcs, makeResultsCsv, type ExportFixture,
@@ -21,6 +23,7 @@ type Club = {
   primary_color: string | null; secondary_color: string | null; accent_color: string | null;
   welcome_title: string | null;
   welcome_text: string | null; footer_text: string | null;
+  contact_email: string | null; website_url: string | null; sponsor_enquiries_enabled: boolean;
   logo_url: string | null; cover_image_url: string | null; booking_url: string | null;
 };
 type Season = {
@@ -51,10 +54,6 @@ type Result = {
 type Standing = {
   team_id: string; division_id: string; played: number; won: number;
   drawn: number; lost: number; points: number; score_diff: number;
-};
-type Sponsor = {
-  id: string; name: string; sponsor_type: string | null;
-  logo_url: string | null; website_url: string | null;
 };
 type Announcement = { id: string; title: string; body: string; created_at: string };
 type CupRule = {
@@ -152,7 +151,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
         }
         const { data: club, error: clubError } = await supabase
           .from("clubs")
-          .select("id,slug,name,short_name,primary_color,secondary_color,accent_color,welcome_title,welcome_text,footer_text,logo_url,cover_image_url,booking_url")
+          .select("id,slug,name,short_name,primary_color,secondary_color,accent_color,welcome_title,welcome_text,footer_text,logo_url,cover_image_url,booking_url,contact_email,website_url,sponsor_enquiries_enabled")
           .eq("slug", slug).eq("is_active", true).maybeSingle();
         if (clubError) throw clubError;
         if (!club) {
@@ -172,7 +171,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
             : seasonQuery.or("status.in.(active,completed),and(status.eq.draft,registration_published.eq.true)"))
             .order("created_at", { ascending: false }),
           supabase.from("sponsors")
-            .select("id,name,sponsor_type,logo_url,website_url")
+            .select(SPONSOR_FIELDS)
             .eq("club_id", club.id).eq("is_active", true)
             .order("sort_order", { ascending: true }),
           supabase.from("announcements")
@@ -568,9 +567,9 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
         </div>
         <div className={styles.heroFooter}>
           <span>{currentSeason?.name ?? club.welcome_title ?? "Club league"}</span>
-          <span>Powered by Rallora</span>
         </div>
       </section>
+      <ClubSponsors sponsors={content.sponsors} context={{clubId:club.id,seasonId}} position="after-header" />
       <div className={styles.toolbar}>
         <div><span className={styles.kicker}>YOUR CLUB. YOUR LEAGUE.</span>
           <h2>League centre</h2></div>
@@ -589,6 +588,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
           onClick={() => { setTab(item.id); setShowAll(false); setSearch(""); }}>
           {item.label}</button>)}
       </nav>
+      <ClubSponsors sponsors={content.sponsors} context={{clubId:club.id,seasonId}} position="above-tables" enquiry={currentSeason ? {enabled:club.sponsor_enquiries_enabled,email:club.contact_email,name:currentSeason.name} : undefined} />
       {!seasons.length ? <section className={styles.notice}>
         <h2>No published seasons</h2>
         <p>Once this club opens its league, tables and fixtures will appear here.</p>
@@ -622,14 +622,16 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
                   <span className={styles.kicker}>DIVISION {division.sort_order}</span>
                   <h3>{division.name}</h3>
                 </div>
+                <ClubSponsors sponsors={content.sponsors.filter(item => item.scope_type === "division")} context={{clubId:club.id,seasonId,divisionId:division.id}} position="after-header" />
                 <div className={styles.panels}>
-                  <div><div className={styles.card}><h4>League table</h4>{tableFor(division)}</div>{content.sponsors[0] && (() => { const sponsor = content.sponsors[0]; const url = safeLink(sponsor.website_url); const logo = safeLink(sponsor.logo_url); return <div className={styles.card}><span className={styles.kicker}>LEAGUE SPONSOR</span>{logo && <span className={revision.sponsorLogo}><img src={logo} alt={`${sponsor.name} logo`} /></span>}<h4>{sponsor.name}</h4><p>Proudly supporting {division.name}.</p>{url && <a href={url} target="_blank" rel="noopener noreferrer">Visit sponsor ↗</a>}</div>; })()}</div>
+                  <div><ClubSponsors sponsors={content.sponsors.filter(item => item.scope_type === "division")} context={{clubId:club.id,seasonId,divisionId:division.id}} position="above-tables" /><div className={styles.card}><h4>League table</h4>{tableFor(division)}</div><ClubSponsors sponsors={content.sponsors} context={{clubId:club.id,seasonId,divisionId:division.id}} position="beside-fixtures" /></div>
                   <div className={styles.card}><h4>Latest &amp; upcoming matches</h4>
                     {divisionFixtures.length
                       ? <ul className={styles.fixtures}>{divisionFixtures.map(fixtureRow)}</ul>
                       : <p className={styles.empty}>No published matches yet.</p>}
                   </div>
                 </div>
+                <ClubSponsors sponsors={content.sponsors.filter(item => item.scope_type === "division")} context={{clubId:club.id,seasonId,divisionId:division.id}} position="above-footer" />
               </section>;
             })}
             {!data.divisions.length && <section className={styles.notice}>
@@ -659,6 +661,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
                     onChange={(event) => { setSearch(event.target.value); setShowAll(false); }} />
                 </label>}
             </div>
+            <ClubSponsors sponsors={content.sponsors} context={{clubId:club.id,seasonId,divisionId:divisionFilter === "all" ? undefined : divisionFilter}} position="beside-fixtures" />
             <div className={styles.viewShare}>
               <span>Help players find this section of the league.</span>
               <button type="button" onClick={() => { void copyViewLink(); }}>
@@ -748,35 +751,8 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
             </>}
           </section>}
         </>}
-      <section className={styles.sponsorSection}>
-        <span className={styles.kicker}>{content.sponsors.length ? "PROUDLY SUPPORTED BY" : "PARTNER WITH THIS LEAGUE"}</span>
-        <h2>{content.sponsors.length ? "Club partners" : "Sponsor placements available"}</h2>
-        <p className={styles.sponsorIntro}>{content.sponsors.length
-          ? "The organisations supporting this club and its players."
-          : "Rallora gives clubs dedicated space to showcase league, division and event partners without cluttering the player experience."}</p>
-        <div className={styles.sponsorGrid}>
-          {content.sponsors.length ? content.sponsors.map((sponsor) => {
-            const url = safeLink(sponsor.website_url);
-            const logo = safeLink(sponsor.logo_url);
-            return <article className={styles.sponsorCard} key={sponsor.id}>
-              {logo && <span className={revision.sponsorLogo}>
-                <img src={logo} alt={`${sponsor.name} logo`} /></span>}
-              <strong>{sponsor.name}</strong><span>{sponsor.sponsor_type || "Club partner"}</span>
-              {url && <a href={url} target="_blank"
-                rel="noopener noreferrer">Visit partner ↗</a>}
-            </article>;
-          }) : ["Headline partner","Division partner","Event partner"].map((label)=>
-            <article className={styles.sponsorPlaceholder} key={label}>
-              <span className={styles.sponsorMark}>R</span>
-              <strong>Your brand here</strong>
-              <span>{label}</span>
-            </article>)}
-        </div>
-      </section>
-      <footer className={styles.footer}>
-        <p>{club.footer_text || "Your club. Your league."}</p>
-        <Link href="/">Powered by Rallora ↗</Link>
-      </footer>
+      <ClubSponsors sponsors={content.sponsors} context={{clubId:club.id,seasonId}} position="above-footer" />
+      <ClubFooter name={club.name} slug={slug} email={club.contact_email} website={club.website_url} text={club.footer_text} />
     </div>
   </main>;
 }
