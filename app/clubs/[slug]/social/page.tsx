@@ -501,7 +501,7 @@ export default function ClubSocialStudio() {
       </section>
     </div>
     <footer className={styles.footer}>Rallora Social · Create once. Share everywhere.
-      <span>No live social integrations, club database writes or AI charges enabled.</span>
+      <span>Connected publishing is not enabled. Download and share approved content manually.</span>
     </footer>
   </div></main>;
 }

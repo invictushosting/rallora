@@ -7,12 +7,12 @@ import styles from "./rallora-guide.module.css";
 
 type Item = { who: "guide" | "you"; text: string; href?: string; label?: string };
 const INITIAL: Item[] = [
-  { who: "guide", text: "Hi! I’m the Rallora Guide. I can point you to leagues, fixtures, Social Studio and club administration. Full AI answers from live league data are coming later." },
+  { who: "guide", text: "Hi! I’m the Rallora Guide. I can point you to leagues, fixtures, Social Studio and club administration." },
 ];
 
 function replyTo(question: string, slug: string): Item {
   const value = question.toLowerCase();
-  const clubHome = slug ? `/clubs/${slug}` : "/#clubs";
+  const clubHome = slug ? `/clubs/${slug}` : "/";
   const admin = slug ? `/clubs/${slug}/admin` : "/platform";
   const social = slug ? `/clubs/${slug}/social` : "/social";
   if (/social|facebook|instagram|whatsapp|post|news|graphic|share|email/.test(value)) {
@@ -30,7 +30,7 @@ function replyTo(question: string, slug: string): Item {
   if (/result|fixture|score|standings|table|division|match|team|season|cup/.test(value)) {
     return { who: "guide",
       text: "Fixtures, confirmed results and tables are shown in each published club league hub. I won't guess individual scores or dates.",
-      href: clubHome, label: slug ? "Open this club’s league hub" : "Find your club" };
+      href: clubHome, label: slug ? "Open this club’s league hub" : "Rallora home" };
   }
   if (/admin|signin|sign in|login|organis|edit|captain|account/.test(value)) {
     return { who: "guide",
@@ -40,11 +40,11 @@ function replyTo(question: string, slug: string): Item {
   if (/club|register|join|where|contact|help|support/.test(value)) {
     return { who: "guide",
       text: "Start from your club’s own hub for its published announcements and competition details. If information is missing, contact the organiser directly.",
-      href: clubHome, label: slug ? "View this club" : "Find a club" };
+      href: clubHome, label: slug ? "View this club" : "Contact Rallora" };
   }
   return { who: "guide",
     text: "I can help you find your club, see league tables and fixtures, prepare club social posts or discover Interclub. For a specific score or date, open the published club hub.",
-    href: clubHome, label: slug ? "Open this club" : "Explore clubs" };
+    href: clubHome, label: slug ? "Open this club" : "Rallora home" };
 }
 
 /**
@@ -93,7 +93,7 @@ export default function RalloraGuide() {
           placeholder="Find fixtures, Social, admin…" />
         <button type="submit" disabled={!input.trim()}>Send</button></div>
       </form>
-      <p className={styles.privacy}>Guided navigation, not live AI or support chat.
+      <p className={styles.privacy}>Navigation help only. For club enquiries, contact your organiser.
         No messages are saved or sent to a server.</p>
     </section>}
     <button className={styles.launch} type="button" onClick={() => setOpen(value => !value)}

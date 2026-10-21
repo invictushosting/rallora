@@ -20,7 +20,7 @@ const PRODUCTS: Record<ProductKey, {
       { title: "Club identity", text: "Every club retains its own colours, sponsors and league community." },
       { title: "Entry fees & prizes", text: "Plan free or paid league entry, sponsor contributions and cash or physical prizes. Checkout is not yet enabled." },
     ],
-    primaryLabel: "Explore clubs", primaryHref: "/#clubs",
+    primaryLabel: "Ask about leagues", primaryHref: "/",
   },
   social: {
     name: "Rallora Social", label: "02 / SOCIAL & COMMUNICATIONS",
@@ -33,7 +33,7 @@ const PRODUCTS: Record<ProductKey, {
       { title: "Branded graphics", text: "Download a ready-made results card with the club’s name and colours." },
       { title: "Connected publishing", text: "Account connections, approved WhatsApp messaging and scheduling are planned after permissions and consent checks." },
     ],
-    primaryLabel: "Explore Social", primaryHref: "/#clubs",
+    primaryLabel: "Ask about Social", primaryHref: "/",
   },
   interclub: {
     name: "Rallora Interclub", label: "03 / CONNECTED COMPETITIONS",
@@ -46,7 +46,7 @@ const PRODUCTS: Record<ProductKey, {
       { title: "Shared event hub", text: "One fixture, two clubs, an agreed result and a competition-specific table." },
       { title: "Built-in promotion", text: "Bring Rallora Social into match announcements, results and champions graphics." },
     ],
-    primaryLabel: "See current leagues", primaryHref: "/#clubs",
+    primaryLabel: "Register your interest", primaryHref: "/",
   },
 };
 

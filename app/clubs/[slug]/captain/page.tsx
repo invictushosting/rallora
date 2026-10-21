@@ -26,9 +26,9 @@ export default function CaptainCentre() {
     const version=++loadVersion.current;
     try {
       const auth=await supabase.auth.getUser();
-      if(auth.error) throw auth.error;
+      if(auth.error && auth.error.name!=="AuthSessionMissingError") throw auth.error;
       const user=auth.data.user;
-      if(!user){setTeam(null);setCaptainTeams([]);setFixtures([]);setNotice("Sign in with your captain account.");return;}
+      if(!user){setViewerId("");setTeam(null);setCaptainTeams([]);setFixtures([]);setSubmissions([]);setResults([]);setNotice("Sign in with your captain account to view your pairing and fixtures.");return;}
       const club=await supabase.from("clubs").select("id").eq("slug",slug).maybeSingle();
       if(club.error) throw club.error;
       if(!club.data) throw new Error("Club not found.");
@@ -116,7 +116,7 @@ export default function CaptainCentre() {
       {captainTeams.length>1&&<label>Captain pairing<select disabled={Boolean(busy)} value={team?.id??""} onChange={event=>{setSelectedId(event.target.value);setFixtures([]);setNotice("Loading captain access…");}}>{captainTeams.map(item=><option key={item.id} value={item.id}>{item.season.name} · {[item.player_one_name,item.player_two_name].filter(Boolean).join(" / ")||item.name}</option>)}</select></label>}
     </section>
     {notice&&<p className={styles.notice} role="status">{notice}</p>}
-    {!team&&<Link href={`/account?club=${encodeURIComponent(slug)}&return=captain`}>Open your account →</Link>}
+    {!team&&<Link href={viewerId?`/account?club=${encodeURIComponent(slug)}&return=captain`:"/login"}>{viewerId?"Open your account":"Sign in to your captain account"} →</Link>}
     {team&&!notice&&fixtures.length===0&&<p className={styles.notice}>Your captain access is active. There are no fixtures available for your pairing yet.</p>}
     {team&&fixtures.length>0&&<section className={styles.actionCentre}><div><span>NEXT UP</span><h2>{actionCount?`${actionCount} match${actionCount===1?"":"es"} need your attention`:"You’re all caught up"}</h2></div><p>{actionCount?"Submit scores or review an opponent result below.":"No captain actions are waiting right now."}</p></section>}
     <section className={styles.grid}>{fixtureCards.map(({fixture,official,submission,confirmed,needsReview,needsSubmit,action,label})=>{
