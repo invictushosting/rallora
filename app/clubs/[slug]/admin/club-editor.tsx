@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import styles from "./editor.module.css";
 import LeagueAutomation from "./league-automation";
+import BoxPlacement from "./box-placement";
 
 export type EditableClub = {
   id: string; slug: string; name: string;
@@ -142,8 +143,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       }
     }
   }, [searchParams]);
-  useEffect(()=>{if(activeTab!=="teams")return;void supabase.from("rallora_player_waitlist").select("id,season_id,player_name,email,playtomic_rating,preferred_level,availability,status").eq("club_id",club.id).eq("status","available").order("created_at").then(({data})=>setWaitlist((data??[]) as typeof waitlist));},[activeTab,club.id,supabase]);
-  async function replacePlayer(){if(!replaceTarget||!replacementId)return;setBusy(true);setError("");const r=await supabase.rpc("rallora_replace_pairing_player",{p_team_id:replaceTarget.teamId,p_slot:replaceTarget.slot,p_waitlist_id:replacementId,p_name:null,p_email:null,p_rating:null});setBusy(false);if(r.error){setError(r.error.message);return}setMessage("Replacement player added. Existing fixtures and results remain attached to the pairing.");setReplaceTarget(null);setReplacementId("");onSaved();}
+  useEffect(()=>{if(activeTab!=="teams")return;void supabase.from("rallora_player_pools").select("id,season_id,player_name,email,playtomic_rating,preferred_level,availability,status").eq("club_id",club.id).eq("status","available").order("created_at").then(({data})=>setWaitlist((data??[]) as typeof waitlist));},[activeTab,club.id,supabase]);
+  async function replacePlayer(){if(!replaceTarget||!replacementId)return;setBusy(true);setError("");const r=await supabase.rpc("rallora_replace_from_pool",{p_team_id:replaceTarget.teamId,p_slot:replaceTarget.slot,p_pool_id:replacementId});setBusy(false);if(r.error){setError(r.error.message);return}setMessage("Replacement player added. Existing fixtures and results remain attached to the pairing.");setReplaceTarget(null);setWaitlist(current=>current.filter(p=>p.id!==replacementId));setReplacementId("");onSaved();}
   const [name, setName] = useState(club.name);
   const [shortName, setShortName] = useState(club.short_name ?? "");
   const [colour, setColour] = useState(club.primary_color || "#2458ff");
@@ -767,6 +768,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       <p className={styles.registrationNote}>Your club registration terms are managed in Branding and shown to entrants during registration.</p>
     </section>}
     {activeTab === "teams" && <div className={styles.teamManagement}>
+      <BoxPlacement seasons={seasons} onSaved={onSaved} />
       <div className={styles.wide}>
         <span className={styles.eyebrow}>PLAYERS &amp; PAIRINGS</span>
         <h3>League pairings</h3>
@@ -779,17 +781,17 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
               <span>{team.player_one_email || "No email"} · {team.player_two_email || "No email"}</span>
             </div>
             <div className={styles.pairingPlayers}>
-              <div><span>Player 1</span><strong>{team.player_one_name || "Player to be confirmed"}</strong><small>{team.player_one_email || "No email"}</small><button type="button" onClick={() => setReplaceTarget({ teamId: team.id, slot: 1 })}>Replace</button></div>
+              <div><span>Player 1</span><strong>{team.player_one_name || "Player to be confirmed"}</strong><small>{team.player_one_email || "No email"}</small><button type="button" onClick={() => {setReplacementId("");setReplaceTarget({ teamId: team.id, slot: 1 });}}>Replace</button></div>
               <span className={styles.pairingJoin}>+</span>
-              <div><span>Player 2</span><strong>{team.player_two_name || "Player to be confirmed"}</strong><small>{team.player_two_email || "No email"}</small><button type="button" onClick={() => setReplaceTarget({ teamId: team.id, slot: 2 })}>Replace</button></div>
+              <div><span>Player 2</span><strong>{team.player_two_name || "Player to be confirmed"}</strong><small>{team.player_two_email || "No email"}</small><button type="button" onClick={() => {setReplacementId("");setReplaceTarget({ teamId: team.id, slot: 2 });}}>Replace</button></div>
             </div>
           </article>)}
         </section>)}
         {replaceTarget && <div className={styles.replacePanel}>
-          <h4>Select replacement from waiting list</h4>
+          <h4>Select replacement from standby or singles</h4>
           <select value={replacementId} onChange={(event) => setReplacementId(event.target.value)}>
             <option value="">Choose available player</option>
-            {waitlist.map((player) => <option key={player.id} value={player.id}>
+            {waitlist.filter(player => { const current=seasons.find(s=>s.divisions.some(d=>d.teams.some(t=>t.id===replaceTarget.teamId))); let cycle=current; const ids=new Set<string>(); while(cycle&&!ids.has(cycle.id)){ids.add(cycle.id);cycle=seasons.find(s=>s.id===cycle?.previous_season_id)} return ids.has(player.season_id); }).map((player) => <option key={player.id} value={player.id}>
               {player.player_name}{player.playtomic_rating != null ? ` · Playtomic ${player.playtomic_rating}` : ""}{player.preferred_level ? ` · ${player.preferred_level}` : ""}
             </option>)}
           </select>
