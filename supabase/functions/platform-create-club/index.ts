@@ -67,14 +67,6 @@ Deno.serve(async (req: Request) => {
   const country = text("country", 120) || "United Kingdom";
   const plan = text("plan", 20);
 
-  if (
-    name.length < 2 ||
-    !slugPattern.test(slug) ||
-    !/^\S+@\S+\.\S+$/.test(ownerEmail) ||
-    !plans.has(plan) ||
-    contactName.length < 2 ||
-    town.length < 2
-  ) return json({ error: "Check the club and owner details, then try again." }, 400);
 
   async function findUserByEmail(email: string) {
     for (let page = 1; page <= 20; page += 1) {
@@ -86,6 +78,35 @@ Deno.serve(async (req: Request) => {
     }
     throw new Error("User lookup exceeded the supported account range.");
   }
+
+  if (body?.action === "setup_owner") {
+    const existingClubId = text("clubId", 36);
+    if (!/^[0-9a-f-]{36}$/i.test(existingClubId) || !/^\S+@\S+\.\S+$/.test(ownerEmail)) return json({error:"Choose a club and valid owner email."},400);
+    const club = await adminClient.from("clubs").select("id,name").eq("id",existingClubId).maybeSingle();
+    if (club.error || !club.data) return json({error:"Club not found."},404);
+    let account;
+    try { account=await findUserByEmail(ownerEmail); } catch {return json({error:"Could not check the account."},503);}
+    let ownerCreated=false;
+    if (!account) {
+      if (ownerPassword.length<12 || ownerPassword.length>128) return json({error:"Choose a temporary password of 12–128 characters for the new owner."},400);
+      const created=await adminClient.auth.admin.createUser({email:ownerEmail,password:ownerPassword,email_confirm:true});
+      if(created.error||!created.data.user)return json({error:"Could not create the owner account. Check the email and password requirements."},400);
+      account=created.data.user;ownerCreated=true;
+    }
+    const saved=await adminClient.from("rallora_club_memberships").upsert({club_id:existingClubId,user_id:account.id,role:"owner",status:"active"},{onConflict:"club_id,user_id"});
+    if(saved.error)return json({error:"The account is ready, but club access could not be saved. Retry this action; the existing password will be preserved."},503);
+    return json({ok:true,clubId:existingClubId,ownerCreated,invitationSent:false});
+  }
+
+  if (
+    name.length < 2 ||
+    !slugPattern.test(slug) ||
+    !/^\S+@\S+\.\S+$/.test(ownerEmail) ||
+    !plans.has(plan) ||
+    contactName.length < 2 ||
+    town.length < 2
+  ) return json({ error: "Check the club and owner details, then try again." }, 400);
+
 
   let owner;
   try {

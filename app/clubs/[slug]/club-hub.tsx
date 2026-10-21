@@ -390,7 +390,8 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
     return minutes > 0 ? `${minutes} mins` : "";
   }
   function arrangementPanel(fixture: Fixture) {
-    const status = fixture.arrangement_status || "not_arranged";
+    const status = fixture.booking_type==="MANUAL" && fixture.booking_ends_at && new Date(fixture.booking_ends_at)<new Date() ? "result_required"
+      : fixture.booking_type==="MANUAL" && fixture.booking_starts_at && new Date(fixture.booking_starts_at)<new Date() ? "in_progress" : fixture.arrangement_status || "not_arranged";
     const arranged = ["arranged","in_progress","result_required"].includes(status);
     const title = status==="possible" ? "Possible booking found" : status==="cancelled" ? "Booking cancelled" :
       status==="result_required" ? "Match played · result required" : status==="in_progress" ? "Match in progress" :
@@ -399,6 +400,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
       ? [bookingLabel(fixture.booking_starts_at), fixture.booking_court, bookingDuration(fixture.booking_starts_at,fixture.booking_ends_at)].filter(Boolean).join(" · ")
       : status==="cancelled" ? "This fixture needs rearranging" : `No matching Playtomic booking detected · Play by ${dateLabel(fixture.play_by)}`;
     const meta = status==="possible" ? `${fixture.booking_matched_players ?? 0}/4 players matched · Club review required` :
+      arranged && fixture.booking_type==="MANUAL" ? "Agreed booking recorded by a captain" :
       arranged ? `${fixture.booking_type==="OPEN_MATCH" ? "Open Match" : "Playtomic booking"} · ${fixture.booking_matched_players ?? 4}/4 players matched` :
       status==="cancelled" ? "Arrange another match in Playtomic" : "Arrange your match in Playtomic";
     const bookingUrl = safeLink(club.booking_url);

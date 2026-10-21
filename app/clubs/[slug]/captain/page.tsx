@@ -1,5 +1,6 @@
 "use client";
 
+import FixtureBooking, {type FixtureArrangement} from "./fixture-booking";
 import BackLink from "@/app/components/back-link";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
@@ -21,6 +22,7 @@ export default function CaptainCentre() {
   const [submissions,setSubmissions]=useState<CaptainSubmission[]>([]), [results,setResults]=useState<OfficialResult[]>([]);
   const [notice,setNotice]=useState("Loading captain access…"), [busy,setBusy]=useState("");
   const loadVersion=useRef(0);
+  const [arrangements,setArrangements]=useState<FixtureArrangement[]>([]);
 
   const load=useCallback(async()=>{
     const version=++loadVersion.current;
@@ -40,6 +42,7 @@ export default function CaptainCentre() {
         .map(row=>({...row.teams as unknown as Omit<Team,"season">,season:row.seasons as unknown as Team["season"]}))
         .sort((a,b)=>Number(b.season.status==="active")-Number(a.season.status==="active")||b.season.created_at.localeCompare(a.season.created_at));
       const chosen=available.find(item=>item.id===selectedId)??available[0];
+      let booked:FixtureArrangement[]=[];
       let rows:Fixture[]=[], names:Record<string,string>={}, submitted:CaptainSubmission[]=[], official:OfficialResult[]=[];
       if(chosen&&chosen.season.status!=="draft") {
         const reply=await supabase.from("fixtures").select("id,home_team_id,away_team_id,play_by,status")
@@ -49,11 +52,14 @@ export default function CaptainCentre() {
         if(rows.length) {
           const teamIds=[...new Set(rows.flatMap(item=>[item.home_team_id,item.away_team_id]))];
           const ids=rows.map(item=>item.id);
-          const [pairings,scores,confirmed]=await Promise.all([
+          const [bookings,pairings,scores,confirmed]=await Promise.all([
+            supabase.from("rallora_fixture_arrangements").select("fixture_id,starts_at,ends_at,court").in("fixture_id",ids),
             supabase.from("teams").select("id,name,player_one_name,player_two_name").in("id",teamIds),
             supabase.from("result_submissions").select("id,fixture_id,submitting_team_id,submitted_by_user_id,home_score,away_score,notes,dispute_note,status,updated_at").in("fixture_id",ids).order("updated_at",{ascending:false}),
             supabase.from("results").select("fixture_id,home_score,away_score,status").in("fixture_id",ids).in("status",OFFICIAL_RESULT_STATUSES),
           ]);
+          if(bookings.error) throw bookings.error;
+          booked=(bookings.data??[]) as FixtureArrangement[];
           if(pairings.error) throw pairings.error;
           if(scores.error) throw scores.error;
           if(confirmed.error) throw confirmed.error;
@@ -62,7 +68,7 @@ export default function CaptainCentre() {
         }
       }
       if(version!==loadVersion.current) return;
-      setViewerId(user.id);setCaptainTeams(available);setTeam(chosen??null);setFixtures(rows);setLabels(names);setSubmissions(submitted);setResults(official);
+      setArrangements(booked);setViewerId(user.id);setCaptainTeams(available);setTeam(chosen??null);setFixtures(rows);setLabels(names);setSubmissions(submitted);setResults(official);
       setNotice(!chosen?"Your account is not assigned as a captain for this club yet. If your team was just approved, refresh this page or contact the organiser."
         :chosen.season.status==="draft"?"This cycle is being prepared. Fixtures become available when the organiser activates it."
         :chosen.season.status==="completed"?"This cycle is complete. Its results are shown for reference.":"");
@@ -124,6 +130,7 @@ export default function CaptainCentre() {
       return <article className={`${styles.card} ${action?styles.actionCard:""}`} key={fixture.id}>
         <small>{label} · PLAY BY {new Date(`${fixture.play_by}T00:00:00`).toLocaleDateString("en-GB")}</small>
         <h2>{labels[fixture.home_team_id]??"Home"} <span>vs</span> {labels[fixture.away_team_id]??"Away"}</h2>
+        {needsSubmit&&team?.season.status==="active"&&<FixtureBooking fixtureId={fixture.id} arrangement={arrangements.find(a=>a.fixture_id===fixture.id)} onSaved={()=>void load()}/>}
         {needsSubmit?<form onSubmit={event=>void submit(event,fixture)}>
           <div><label>Home score<input name="home" required maxLength={100} autoComplete="off" placeholder="e.g. 6, 6"/></label><label>Away score<input name="away" required maxLength={100} autoComplete="off" placeholder="e.g. 4, 3"/></label></div>
           <label>Winner<select name="winner" required><option value="">Choose winner</option><option value={fixture.home_team_id}>{labels[fixture.home_team_id]}</option><option value={fixture.away_team_id}>{labels[fixture.away_team_id]}</option></select></label>

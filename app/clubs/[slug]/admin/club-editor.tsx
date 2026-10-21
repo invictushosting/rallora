@@ -32,7 +32,7 @@ const COMMON_RULES: LeagueRule[] = [
 ];
 export type EditableSeason = {
   id: string; club_id: string; name: string; status: string;
-  starts_on: string | null; ends_on: string | null; previous_season_id: string | null; rolling_cycle_number: number;
+  competition_ends_on: string | null; starts_on: string | null; ends_on: string | null; previous_season_id: string | null; rolling_cycle_number: number;
   fixture_schedule_mode: "weekly" | "date_window";
   registration_opens_at: string | null;
   registration_closes_at: string | null;
