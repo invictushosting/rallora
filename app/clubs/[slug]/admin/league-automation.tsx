@@ -16,6 +16,7 @@ export default function LeagueAutomation({ seasons, fixtures, slug, onSaved }: P
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [createdId, setCreatedId] = useState("");
+  const [finishDate,setFinishDate]=useState("");
   const season = seasons.find(item => item.id === seasonId);
   const existing = fixtures.filter(item => item.season_id === seasonId);
   const successor = seasons.find(item => item.previous_season_id === seasonId);
@@ -31,7 +32,7 @@ export default function LeagueAutomation({ seasons, fixtures, slug, onSaved }: P
     const fields = new FormData(event.currentTarget);
     const start = String(fields.get("starts_on") ?? "");
     const end = String(fields.get("ends_on") ?? "");
-    if (!start || !end || end < start) { setMessage("Choose a valid start and end date."); return; }
+    if (!start || !end || end < start || Boolean(season?.competition_ends_on && end>season.competition_ends_on)) { setMessage("Choose a valid start and end date."); return; }
     setBusy(true); setMessage(""); setCreatedId("");
     try {
       const { data, error } = await supabase.rpc(nextCycle ? "rallora_create_next_cycle" : "rallora_generate_round_robin", {
@@ -51,7 +52,7 @@ export default function LeagueAutomation({ seasons, fixtures, slug, onSaved }: P
 
   return <form className={styles.form} onSubmit={generate}>
     <div className={styles.wide}><h3>Automatic fixtures & rolling cycles</h3><p>Schedule every pairing against each opponent. Odd-sized divisions receive a bye each round.</p></div>
-    <label className={styles.wide}>Competition<select value={seasonId} onChange={event => { setSeasonId(event.target.value); setStartsOn(""); setEndsOn(""); setMessage(""); setCreatedId(""); }}>
+    <label className={styles.wide}>Competition<select value={seasonId} onChange={event => { setSeasonId(event.target.value); setStartsOn(""); setEndsOn(""); setFinishDate(""); setMessage(""); setCreatedId(""); }}>
       {seasons.map(item => <option key={item.id} value={item.id}>{item.name} · {item.status}</option>)}
     </select></label>
     {season && <div className={styles.wide}>
@@ -64,8 +65,9 @@ export default function LeagueAutomation({ seasons, fixtures, slug, onSaved }: P
       {nextCycle && season.status === "draft" && <p>Activate and play this cycle before preparing its successor.</p>}
       {season.fixture_schedule_mode === "weekly" && <p>Allow at least {rounds * 7} days for {rounds} weekly rounds.</p>}
     </div>}
-    <label>{nextCycle ? "Next cycle starts" : "Fixtures start"}<input name="starts_on" type="date" required disabled={busy} min={nextCycle && season?.ends_on ? new Date(new Date(`${season.ends_on}T00:00:00Z`).getTime() + 86400000).toISOString().slice(0,10) : undefined} value={startsOn} onChange={event => setStartsOn(event.target.value)} /></label>
-    <label>{nextCycle ? "Next cycle ends" : "Fixtures end"}<input name="ends_on" type="date" required disabled={busy} min={startsOn || undefined} value={endsOn} onChange={event => setEndsOn(event.target.value)} /></label>
+    {season&&<div className={styles.wide}><h3>Competition finish date</h3><p>{season.competition_ends_on?`This league finishes on ${season.competition_ends_on}. No fixture cycle can run past this date.`:"Set the final date for the entire rolling league, separate from this cycle’s window."}</p><label>Overall finish<input type="date" disabled={busy||Boolean(successor)} value={finishDate||season.competition_ends_on||""} onChange={e=>setFinishDate(e.target.value)}/></label><button type="button" disabled={busy||!finishDate||Boolean(successor)} onClick={async()=>{setBusy(true);const result=await supabase.from("seasons").update({competition_ends_on:finishDate}).eq("id",season.id);setMessage(result.error?result.error.message:"Competition finish date saved.");setBusy(false);if(!result.error){setFinishDate("");onSaved();}}}>Save finish date</button></div>}
+    <label>{nextCycle ? "Next cycle starts" : "Fixtures start"}<input name="starts_on" type="date" max={season?.competition_ends_on??undefined} required disabled={busy} min={nextCycle && season?.ends_on ? new Date(new Date(`${season.ends_on}T00:00:00Z`).getTime() + 86400000).toISOString().slice(0,10) : undefined} value={startsOn} onChange={event => setStartsOn(event.target.value)} /></label>
+    <label>{nextCycle ? "Next cycle ends" : "Fixtures end"}<input name="ends_on" type="date" max={season?.competition_ends_on??undefined} required disabled={busy} min={startsOn || undefined} value={endsOn} onChange={event => setEndsOn(event.target.value)} /></label>
     <button type="submit" disabled={busy || !canGenerate}>{busy ? "Preparing fixtures…" : nextCycle ? "Prepare next cycle" : "Generate all fixtures"}</button>
     {message && <p className={styles.wide} role="status">{message}</p>}
     {createdId && <Link className={styles.wide} href={`/clubs/${slug}/admin/preview/${createdId}`}>Review competition →</Link>}

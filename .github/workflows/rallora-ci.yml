@@ -27,6 +27,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: node --experimental-strip-types --test tests/brand-colors.test.mjs
+      - run: node --experimental-strip-types --test tests/communication.test.mjs
       - run: node scripts/check-legacy-demo-rpcs.mjs
       - run: node --experimental-strip-types --test tests/social-channels.test.mjs
       - run: node --experimental-strip-types --test tests/leagues-exports.test.mjs
@@ -128,3 +129,6 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260929222500_player_entry_pathways.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261021113012_draft_box_placement_and_standby_replacements.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_box_placement_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_communication_schema.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261021123430_configurable_notifications_and_competition_end.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_communication_assertions.sql

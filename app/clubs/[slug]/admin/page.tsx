@@ -16,7 +16,7 @@ import PaymentSetup from "./payment-setup";
 
 type Club = EditableClub;
 type LeagueRule = { key:string; label:string; text:string; enabled:boolean; custom?:boolean };
-type Season = { starts_on:string|null; ends_on:string|null; previous_season_id:string|null; rolling_cycle_number:number; id: string; club_id: string; name: string; status: string; fixture_schedule_mode: "weekly" | "date_window"; registration_opens_at:string|null; registration_closes_at:string|null; registration_published:boolean; league_format:"standard"|"promotion_relegation_cycles"; teams_per_division:number|null; matches_per_cycle:number|null; division_assignment_mode:"manual"|"combined_rating"; max_divisions:number|null; allow_overflow_when_uneven:boolean; promotion_places:number; relegation_places:number; cycle_match_mode:"single_round_robin"|"double_round_robin"; require_cycle_completion:boolean; league_rules:LeagueRule[] };
+type Season = { competition_ends_on:string|null; starts_on:string|null; ends_on:string|null; previous_season_id:string|null; rolling_cycle_number:number; id: string; club_id: string; name: string; status: string; fixture_schedule_mode: "weekly" | "date_window"; registration_opens_at:string|null; registration_closes_at:string|null; registration_published:boolean; league_format:"standard"|"promotion_relegation_cycles"; teams_per_division:number|null; matches_per_cycle:number|null; division_assignment_mode:"manual"|"combined_rating"; max_divisions:number|null; allow_overflow_when_uneven:boolean; promotion_places:number; relegation_places:number; cycle_match_mode:"single_round_robin"|"double_round_robin"; require_cycle_completion:boolean; league_rules:LeagueRule[] };
 type Membership = { club_id: string; user_id: string; role: string; status: string };
 type DivisionSummary = { id: string; name: string; sort_order: number;
   teams: { id: string; name: string; player_one_name:string|null; player_two_name:string|null; player_one_email:string|null; player_two_email:string|null; player_one_rating:number|null; player_two_rating:number|null }[] };
@@ -33,7 +33,7 @@ type Summary = {
   registrations: number;
   divisionSummaries: DivisionSummary[];
 };
-type PlaytomicBooking = { matched_fixture_id:string|null; matched_player_count:number; match_state:"unmatched"|"possible"|"confirmed"|"ignored"; booking_status:string; starts_at:string; ends_at:string; court:string|null };
+type PlaytomicBooking = { manual?:boolean;  matched_fixture_id:string|null; matched_player_count:number; match_state:"unmatched"|"possible"|"confirmed"|"ignored"; booking_status:string; starts_at:string; ends_at:string; court:string|null };
 type View =
   | { status: "loading" | "signed_out" | "forbidden" | "missing" }
   | { status: "error"; message: string }
@@ -135,8 +135,8 @@ export default function ClubAdministration() {
           return;
         }
 
-        const [seasonReply, sponsorReply, playtomicReply, bookingReply] = await Promise.all([
-          supabase.from("seasons").select("id,club_id,name,status,starts_on,ends_on,previous_season_id,rolling_cycle_number,fixture_schedule_mode,registration_opens_at,registration_closes_at,registration_published,league_format,teams_per_division,matches_per_cycle,division_assignment_mode,max_divisions,allow_overflow_when_uneven,promotion_places,relegation_places,cycle_match_mode,require_cycle_completion,league_rules")
+        const [seasonReply, sponsorReply, playtomicReply, bookingReply, arrangementsReply] = await Promise.all([
+          supabase.from("seasons").select("id,club_id,name,status,starts_on,ends_on,competition_ends_on,previous_season_id,rolling_cycle_number,fixture_schedule_mode,registration_opens_at,registration_closes_at,registration_published,league_format,teams_per_division,matches_per_cycle,division_assignment_mode,max_divisions,allow_overflow_when_uneven,promotion_places,relegation_places,cycle_match_mode,require_cycle_completion,league_rules")
             .eq("club_id", club.id).order("created_at", { ascending: false }),
           supabase.from("sponsors").select("id", { count: "exact", head: true })
             .eq("club_id", club.id).eq("is_active", true),
@@ -144,11 +144,13 @@ export default function ClubAdministration() {
             .eq("club_id", club.id).eq("provider","playtomic").maybeSingle(),
           supabase.from("rallora_playtomic_bookings").select("matched_fixture_id,matched_player_count,match_state,booking_status,starts_at,ends_at,court")
             .eq("club_id", club.id),
+          supabase.from("rallora_fixture_arrangements").select("fixture_id,starts_at,ends_at,court").eq("club_id",club.id),
         ]);
         if (seasonReply.error) throw seasonReply.error;
         if (sponsorReply.error) throw sponsorReply.error;
         if (playtomicReply.error) throw playtomicReply.error;
         if (bookingReply.error) throw bookingReply.error;
+        if(arrangementsReply.error)throw arrangementsReply.error;
 
         const seasons = ((seasonReply.data ?? []) as Season[])
           .filter((season) => season.club_id === club.id);
@@ -223,7 +225,10 @@ export default function ClubAdministration() {
           sponsors: sponsorReply.count ?? 0,
           fixtures: allFixtures,
           playtomicConnected: playtomicReply.data?.status === "connected",
-          playtomicBookings: (bookingReply.data ?? []) as PlaytomicBooking[],
+          playtomicBookings: [
+            ...(arrangementsReply.data??[]).map(a=>({manual:true,matched_fixture_id:a.fixture_id,starts_at:a.starts_at,ends_at:a.ends_at,court:a.court,match_state:"confirmed" as const,matched_player_count:4,booking_status:new Date(a.ends_at)<new Date()?"FINISHED":"CONFIRMED"})),
+            ...(bookingReply.data??[]).filter(b=>!(arrangementsReply.data??[]).some(a=>a.fixture_id===b.matched_fixture_id))
+          ] as PlaytomicBooking[],
         });
       } catch (error) {
         if (alive) setView({
@@ -323,7 +328,7 @@ export default function ClubAdministration() {
   const bookingForFixture = (fixtureId:string) => view.playtomicBookings.find((item)=>item.matched_fixture_id===fixtureId && item.booking_status!=="CANCELED");
   const bookingHealth = (fixture:AdminFixture) => {
     const booking = bookingForFixture(fixture.id);
-    if (booking?.match_state==="confirmed" && booking.matched_player_count===4) return {tone:"green",label:"Court booked"};
+    if (booking?.match_state==="confirmed" && booking.matched_player_count===4) return {tone:"green",label:booking.manual?"Booking recorded":"Court booked"};
     if (booking?.match_state==="possible" || booking?.matched_player_count===3) return {tone:"amber",label:"Booking pending"};
     if (fixture.status==="disputed") return {tone:"red",label:"Disputed result"};
     if (fixture.status==="confirmed") return {tone:"green",label:"Result confirmed"};
@@ -340,9 +345,22 @@ export default function ClubAdministration() {
     if(reply.error){setReminderNotice(reply.error.message);return;} document.getElementById(`result-${fixture.id}`)?.hidePopover(); setRevision(v=>v+1); setReminderNotice("Disputed result resolved and standings updated.");
   }
   const demoMode = view.club.slug==="rallora-demo";
-  function sendFixtureReminder(fixture: AdminFixture) {
-    if (demoMode) setReminderNotice("Demo reminder prepared for "+fixture.home_label+" vs "+fixture.away_label+". No external message was sent.");
-    else setReminderNotice("Reminder delivery is being connected to the club notification service. No message was sent from this screen.");
+  async function sendFixtureReminder(fixture: AdminFixture) {
+    if (demoMode) {setReminderNotice("Demo mode: no message was sent.");return;}
+    if(resultBusy)return;
+    setResultBusy(fixture.id);setReminderNotice("");
+    try {
+      const preview=await supabase.rpc("rallora_fixture_reminder",{p_fixture_id:fixture.id,p_send:false});
+      if(preview.error)throw preview.error;
+      const data=preview.data as {enabled:boolean;category:string;recipients:{email:string}[]};
+      if(!data.enabled){setReminderNotice("Enable this reminder in Notifications & reminders first.");return;}
+      if(!data.recipients.length){setReminderNotice("No eligible captain needs this reminder. Check captain assignments and fixture status.");return;}
+      if(!window.confirm(`Queue a ${data.category.replaceAll("_"," ")} reminder for ${data.recipients.map(p=>p.email).join(", ")}? Club channels, sending hours and daily limits apply.`))return;
+      const sent=await supabase.rpc("rallora_fixture_reminder",{p_fixture_id:fixture.id,p_send:true});
+      if(sent.error)throw sent.error;
+      setReminderNotice(sent.data.queued?`${sent.data.queued} reminder(s) queued. Delivery follows your club settings; see Notifications & reminders for progress.`:"No new reminder queued. A reminder was already queued or sent in the past 24 hours, or the fixture no longer needs it.");
+    } catch(error){setReminderNotice(error&&typeof error==="object"&&"message" in error?String(error.message):"Could not queue the reminder. Please try again.");}
+    finally{setResultBusy("");}
   }
 
   return <main className={styles.page}><div className={styles.shell}>
@@ -371,6 +389,7 @@ export default function ClubAdministration() {
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/registrations`}>Registrations</Link>
         <a href="#club-management">Teams &amp; players</a>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/staff`}>Club staff</Link>
+        <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/reminders`}>Notifications & reminders</Link>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/captain`}>Captain centre</Link>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/events`}>Events</Link>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/social`}>Social Studio</Link>
@@ -383,7 +402,7 @@ export default function ClubAdministration() {
       <button type="button" className={styles.metricButton} aria-controls="club-leagues" onClick={()=>{const leagues=document.getElementById("club-leagues");leagues?.focus({preventScroll:true});leagues?.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});}}><span>Active leagues</span><strong>{view.summaries.filter(({season})=>season.status==="active").length}</strong><small>Currently being played</small><b className={styles.metricAction}>View leagues</b></button>
       <button type="button" className={styles.metricButton} aria-controls={fixtureView?"fixture-operations":undefined} aria-expanded={fixtureView==="all"} onClick={event=>openFixtureView("all",event.currentTarget)}><span>Total fixtures</span><strong>{totals.fixtures}</strong><small>Across all leagues</small><b className={styles.metricAction}>View fixtures</b></button>
       <button type="button" className={styles.metricButton} aria-controls={fixtureView?"fixture-operations":undefined} aria-expanded={fixtureView==="outstanding"} onClick={event=>openFixtureView("outstanding",event.currentTarget)}><span>Outstanding</span><strong>{Math.max(0, totals.outstanding - bookedFixtureIds.size)}</strong><small>No confirmed booking yet</small><b className={styles.metricAction}>View fixtures</b></button>
-      <button type="button" className={styles.metricButton} aria-controls={fixtureView?"fixture-operations":undefined} aria-expanded={fixtureView==="booked"} onClick={event=>openFixtureView("booked",event.currentTarget)}><span>Booked</span><strong>{bookedFixtureIds.size}</strong><small>Playtomic matched 4/4</small><b className={styles.metricAction}>View bookings</b></button>
+      <button type="button" className={styles.metricButton} aria-controls={fixtureView?"fixture-operations":undefined} aria-expanded={fixtureView==="booked"} onClick={event=>openFixtureView("booked",event.currentTarget)}><span>Booked</span><strong>{bookedFixtureIds.size}</strong><small>Recorded or Playtomic matched</small><b className={styles.metricAction}>View bookings</b></button>
       <button type="button" className={styles.metricButton} aria-controls={fixtureView?"fixture-operations":undefined} aria-expanded={fixtureView==="awaiting"} onClick={event=>openFixtureView("awaiting",event.currentTarget)}><span>Awaiting result</span><strong>{Math.max(totals.awaitingResult, finishedWithoutResult)}</strong><small>Played, captain action needed</small><b className={styles.metricAction}>Review results</b></button>
       <button type="button" className={styles.metricButton} aria-controls={fixtureView?"fixture-operations":undefined} aria-expanded={fixtureView==="attention"} onClick={event=>openFixtureView("attention",event.currentTarget)}><span>Needs attention</span><strong>{totals.overdue + possibleBookings}</strong><small>{possibleBookings ? possibleBookings+" possible 3/4 booking"+(possibleBookings===1?"":"s")+" to review" : "Overdue fixtures"}</small><b className={styles.metricAction}>View overdue</b></button>
       <button type="button" className={styles.metricButton} aria-controls={fixtureView?"fixture-operations":undefined} aria-expanded={fixtureView==="played"} onClick={event=>openFixtureView("played",event.currentTarget)}><span>Played</span><strong>{totals.confirmed}</strong><small>Confirmed results</small><b className={styles.metricAction}>View results</b></button>
@@ -410,7 +429,7 @@ export default function ClubAdministration() {
             {fixture.status==="disputed" && <button className={styles.fixtureTakeAction} type="button" onClick={()=>document.getElementById(`result-${fixture.id}`)?.showPopover()}>Take action</button>}
             {fixture.status==="confirmed" && <button className={styles.fixtureResult} type="button" onClick={()=>document.getElementById(`result-${fixture.id}`)?.showPopover()}>See result</button>}
             {demoMode && bookingForFixture(fixture.id) && <a className={styles.playtomicView} href="https://app.playtomic.com/" target="_blank" rel="noreferrer">View in Playtomic ↗</a>}
-            {fixture.status!=="confirmed" && fixture.status!=="disputed" && <button className={styles.fixtureReminder} type="button" onClick={()=>sendFixtureReminder(fixture)}>{fixtureView==="awaiting"?"Request result":"Send reminder"}</button>}
+            {fixture.status!=="confirmed" && fixture.status!=="disputed" && <button className={styles.fixtureReminder} type="button" disabled={Boolean(resultBusy)} onClick={()=>void sendFixtureReminder(fixture)}>{fixtureView==="awaiting"?"Request result":"Send reminder"}</button>}
           </div>
           {fixture.status==="disputed" && <div id={`result-${fixture.id}`} popover="auto" className={styles.resultPopover}><button className={styles.resultPopoverClose} type="button" popoverTarget={`result-${fixture.id}`} popoverTargetAction="hide" aria-label="Close result">×</button><span className={styles.disputeEyebrow}>DISPUTED RESULT</span><h3>{fixture.home_label || "Players"} <span>vs</span> {fixture.away_label || "Players"}</h3><strong className={styles.resultScore}>{fixture.submitted_home_score || "—"} : {fixture.submitted_away_score || "—"}</strong><div className={styles.disputeNote}><strong>Information from the disputing team</strong><p>{fixture.dispute_note || "No additional information was provided with this dispute."}</p></div><div className={styles.resolveFields}><label>Home score<input id={`resolve-home-${fixture.id}`} defaultValue={fixture.submitted_home_score || ""}/></label><label>Away score<input id={`resolve-away-${fixture.id}`} defaultValue={fixture.submitted_away_score || ""}/></label><label>Winner<select id={`resolve-winner-${fixture.id}`} defaultValue=""><option value="">Choose winner</option><option value={fixture.home_team_id}>{fixture.home_label || "Home"}</option><option value={fixture.away_team_id}>{fixture.away_label || "Away"}</option></select></label><label>Organiser note<textarea id={`resolve-notes-${fixture.id}`} maxLength={1000} placeholder="Optional note about the decision"/></label></div><div className={styles.disputeActions}><button type="button" disabled={resultBusy===fixture.id} onClick={()=>void resolveDisputedResult(fixture)}>{resultBusy===fixture.id?"Saving…":"Confirm resolved result"}</button>{bookingForFixture(fixture.id)&&<a href="https://app.playtomic.com/" target="_blank" rel="noreferrer">View in Playtomic ↗</a>}</div></div>}
           {fixture.status==="confirmed" && <div id={`result-${fixture.id}`} popover="auto" className={styles.resultPopover}><button className={styles.resultPopoverClose} type="button" popoverTarget={`result-${fixture.id}`} popoverTargetAction="hide" aria-label="Close result">×</button><span className={styles.eyebrow}>CONFIRMED RESULT</span><h3>{fixture.home_label || "Players"} <span>vs</span> {fixture.away_label || "Players"}</h3><strong className={styles.resultScore}>{fixture.result_score || "Result confirmed"}</strong><p>Week {fixture.week_number} · Result confirmed in Rallora</p></div>}
@@ -507,7 +526,7 @@ export default function ClubAdministration() {
       seasons={view.summaries.map((summary): EditableSeason => ({
         id: summary.season.id, name: summary.season.name,
         club_id: summary.season.club_id, status: summary.season.status,
-        starts_on: summary.season.starts_on, ends_on: summary.season.ends_on,
+        starts_on: summary.season.starts_on, ends_on: summary.season.ends_on, competition_ends_on: summary.season.competition_ends_on,
         previous_season_id: summary.season.previous_season_id, rolling_cycle_number: summary.season.rolling_cycle_number,
         fixture_schedule_mode: summary.season.fixture_schedule_mode,
         registration_opens_at: summary.season.registration_opens_at,

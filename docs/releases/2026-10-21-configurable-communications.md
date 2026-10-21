@@ -1,0 +1,19 @@
+# Club communication and pilot completion
+
+Organisers now have a Notifications & reminders page with an explicit enable switch, eight event categories, email/in-app choices, timing in hours, a club time zone, sending hours and a daily reminder cap. New clubs start paused. Existing account notifications remain available. Enabling communication does not backfill old registrations or invitations.
+
+The fixture reminder action previews eligible captain email addresses and queues only after organiser confirmation. Repeat manual requests within 24 hours are suppressed. Booking reminders stop when a captain records an agreed booking or a confirmed 4/4 Playtomic booking exists. Upcoming and missing-result reminders use recorded start/end times; confirmation reminders address only the opposing captain. Confirmed, disputed, cancelled and historical fixtures are excluded. The worker rechecks relevance and settings before dispatch.
+
+Registration receipts, decisions, partner claims, competition activation and result actions feed a durable queue. Partner invitations are sent only for approved, still-pending places; copied invitations in later cycles do not resend. Club identity, recipient and content are snapshotted for stable provider idempotency. Five jobs are claimed per worker invocation with a six-minute lease. Provider failures retry with backoff up to six claims and stop before the provider's 24-hour idempotency window expires. The delivery log distinguishes queued, sending, accepted, failed and cancelled. Accepted is not proof of inbox delivery.
+
+The scheduler invokes a fixed application endpoint every five minutes. Its random capability is held in a private, RLS-protected database table and sent only to that endpoint over HTTPS; neither browser clients nor the repository receive it. Public RPC wrappers use invoker security and internal worker operations validate the capability. Organiser actions use authenticated club authorisation and RLS. No provider credentials are added to the browser.
+
+Captains can record, update and clear an agreed court booking. This does not reserve or cancel a court. The booking is visible to both captains and appears in the club's booking view and public fixture status. Manual entry is available without a Playtomic connection.
+
+A structured competition finish date propagates to successive cycles and rejects windows or fixtures after that date. Clubs can set it in fixture automation. The next cycle still requires organiser preparation and review; promotion, relegation and fixture creation occur in that operation. This preserves the agreed organiser-controlled workflow.
+
+The platform can create or link an owner to an existing club without duplicating the club or sending an invitation. New accounts require a temporary password of at least 12 characters; existing passwords are preserved. This action requires a signed-in platform administrator. GSM owner provisioning and a fresh authenticated browser walkthrough remain separate operational checks until actually completed.
+
+Validation: 59 JavaScript tests, lint (no errors; 18 existing warnings), typecheck, production build and isolated database regressions. Communication regressions cover paused clubs, recipients, idempotency, manual duplicate suppression, booking cancellation of stale chases, concurrent claims, retries, accepted status, confirmation eligibility, disputes, channel choices, stale review emails, quiet hours, daily limits, RLS, cross-club access, timing validation, worker-token protection and competition finish dates. Test data is synthetic and rolled back; no real email or invitation is sent by these tests.
+
+Playtomic credentials and runtime sync configuration are still required for automatic integration. The pilot can use entered ratings and recorded bookings. Payments, WhatsApp/push, connected social publishing and Interclub remain outside the free pilot scope.

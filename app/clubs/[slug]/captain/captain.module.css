@@ -36,3 +36,5 @@
 
 /* Rallora controls */
 .card button{min-height:var(--control-h);border-radius:var(--radius-control);font-size:var(--control-font);font-weight:var(--control-weight);transition:transform .16s ease,box-shadow .16s ease}.card button:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(6,26,57,.12)}
+
+.booking{padding:18px 0;margin-bottom:20px;border-bottom:1px solid #c8dae8}.booking h3{font-size:16px;margin:0 0 12px}.booking>div{display:flex;flex-wrap:wrap;gap:10px}.booking button{min-height:44px;padding:10px 14px;background:#0b315b;color:white;border:1px solid #061a39;border-radius:10px;font-weight:700;cursor:pointer}.booking button:disabled{background:#e4eaf0;color:#536a80}
