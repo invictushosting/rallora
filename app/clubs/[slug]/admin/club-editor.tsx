@@ -289,7 +289,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
     setShortName(club.short_name ?? "");
     setColour(club.primary_color || "#2458ff");
     setWelcomeText(club.welcome_text ?? "");
-    setLogoUrl(club.logo_url??"");setCoverImageUrl(club.cover_image_url??"");setWebsiteUrl(club.website_url??"");setContactEmail(club.contact_email??"");setEmailSenderName(club.email_sender_name??club.name);
+    setLogoUrl(club.logo_url??"");setCoverImageUrl(club.cover_image_url??"");setWebsiteUrl(club.website_url??"");setBookingUrl(club.booking_url??"");setContactEmail(club.contact_email??"");setEmailSenderName(club.email_sender_name??club.name);
     setVenueName(club.venue_name??"");setAddress(club.address_line_1??"");setTown(club.town??"");
     setPostcode(club.postcode??"");setRegistrationTerms(club.player_registration_terms??"");
   }, [club]);
