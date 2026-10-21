@@ -24,7 +24,7 @@ export default function ProductsPage() {
   return <main className={styles.page}>
     <header className={styles.header}>
       <Link href="/" aria-label="Rallora home"><RalloraLogo width={205} /></Link>
-      <nav aria-label="Navigation"><Link href="/">Home</Link><Link href="/#clubs">Find a club</Link>
+      <nav aria-label="Navigation"><Link href="/">Home</Link><Link href="/">Contact Rallora</Link>
         <Link href="/platform">Club administration</Link></nav>
     </header>
     <div className={styles.shell}>
@@ -34,7 +34,7 @@ export default function ProductsPage() {
         <p>League management, club communications and future competitions between clubs.
           One Rallora identity, one club dashboard, room to grow.</p>
         <div className={styles.actions}>
-          <Link className={styles.cta} href="/#clubs">Find your club ↗</Link>
+          <Link className={styles.cta} href="/">Become a pilot club ↗</Link>
           <Link className={styles.outline} href="/leagues">Explore the platform →</Link>
         </div>
       </section>
@@ -50,10 +50,7 @@ export default function ProductsPage() {
           </article>)}
         </div>
       </section>
-      <aside className={styles.callout}><strong>Rallora AI: a layer across every product.</strong>
-        <p>The planned assistant will help players find published match information,
-          help organisers prepare social content, and eventually guide Interclub events.
-          Live AI chat is not switched on yet.</p></aside>
+
       <footer className={styles.footer}>Rallora · Padel, connected.</footer>
     </div>
   </main>;
