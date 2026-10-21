@@ -1,5 +1,7 @@
 "use client";
 
+import BackLink from "@/app/components/back-link";
+import {brandColor, readableInk, readableAccent} from "@/lib/brand-colors";
 import RalloraLogo from "@/app/components/rallora-logo";
 import Loading from "@/app/loading";
 
@@ -83,7 +85,7 @@ const EMPTY: LeagueData = {
   cupRules: [], cupQualifiers: [],
 };
 function safeColor(color: string | null) {
-  return color && /^#[\da-fA-F]{6}$/.test(color) ? color : "#2458ff";
+  return brandColor(color);
 }
 function safeImage(url: string | null) {
   if (!url) return null;
@@ -530,9 +532,9 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
   }
 
   return <main className={styles.page}
-    style={{ "--club-color": safeColor(club.primary_color), "--club-secondary": safeColor(club.secondary_color || "#061A39"), "--club-accent": safeColor(club.accent_color || club.primary_color), "--club-bg": `color-mix(in srgb, ${safeColor(club.primary_color)} 5%, #f7f8fa)`, "--club-ink": safeColor(club.secondary_color || "#061A39") } as React.CSSProperties}>
+    style={{ "--club-color": safeColor(club.primary_color), "--club-secondary": brandColor(club.secondary_color,"#061a39"), "--club-accent": safeColor(club.accent_color || club.primary_color), "--club-bg": `color-mix(in srgb, ${safeColor(club.primary_color)} 5%, #f7f8fa)`, "--club-ink": "#061a39", "--club-secondary-ink": readableInk(brandColor(club.secondary_color,"#061a39")), "--club-primary-ink": readableInk(safeColor(club.primary_color)), "--club-hero-accent": readableAccent(safeColor(club.accent_color || club.primary_color),brandColor(club.secondary_color,"#061a39")) } as React.CSSProperties}>
     <div className={styles.shell}>
-      {previewSeasonId && <aside role="status"><strong>Private competition preview</strong><p>Visible only to authorised club administrators. This does not publish the competition.</p><Link href={`/clubs/${encodeURIComponent(slug)}/admin`}>Back to club admin</Link></aside>}
+      {previewSeasonId && <aside role="status"><strong>Private competition preview</strong><p>Visible only to authorised club administrators. This does not publish the competition.</p><BackLink href={`/clubs/${encodeURIComponent(slug)}/admin`}>Back to club admin</BackLink></aside>}
       <header className={styles.header}>
         <Link href="/" className={styles.brand} aria-label="Rallora home">
           <RalloraLogo variant="light" width={210} /></Link>

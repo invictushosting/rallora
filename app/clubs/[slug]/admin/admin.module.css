@@ -38,8 +38,8 @@
 .loginForm{display:flex;flex-direction:column;gap:14px;text-align:left;margin:25px 0}
 .loginForm label{display:flex;flex-direction:column;gap:6px;color:#405c7c;font-size:12px;font-weight:800}
 .loginForm input{border:1px solid #cbd9e9;border-radius:10px;padding:13px 12px;font-size:15px;color:#061A39;background:white;min-width:0}
-.loginForm button{border:0;border-radius:11px;background:#00B0FE;color:white;padding:13px 17px;font-size:14px;font-weight:850;cursor:pointer}
-.loginForm button:disabled{opacity:.6;cursor:wait}
+.loginForm button{border:0;border-radius:11px;background:#00B0FE;color:#061a39;padding:13px 17px;font-size:14px;font-weight:850;cursor:pointer}
+.loginForm button:disabled{opacity:1;background:#e4edf4;color:#52667c;cursor:wait}
 .loginError{color:#ae2525!important;font-size:12px}
 
 .divisionList{border-top:1px solid #ecf0f6;margin:20px 0;padding-top:15px}
@@ -82,7 +82,7 @@
  .divisionRow summary span{white-space:normal}
 }
 
-.launchActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.launchActions a,.launchActions button{display:inline-flex;align-items:center;min-height:44px;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:#fff;color:#061a39;font:inherit;font-weight:800;text-decoration:none;cursor:pointer}.launchActions button{background:transparent;color:#fff}.launchGate{margin:16px 0 0;color:#b8cce0;font-size:13px}
+.launchActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.launchActions a,.launchActions button{display:inline-flex;align-items:center;min-height:44px;padding:10px 14px;border-radius:10px;border:1px solid #c6d5e2;background:#fff;color:#061a39;font:inherit;font-weight:800;text-decoration:none;cursor:pointer}.launchActions button{background:#061a39;border-color:#061a39;color:#fff}.launchGate{margin:16px 0 0;color:#52667c;font-size:13px}
 @media(max-width:540px){.launchActions{display:grid;grid-template-columns:1fr}.launchActions a,.launchActions button{justify-content:center;width:100%}}
 
 /* Operational dashboard hierarchy */

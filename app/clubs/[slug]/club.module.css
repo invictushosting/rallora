@@ -415,12 +415,19 @@
 
 
 /* Club brand system: public league surfaces inherit each club's configured identity. */
-.hero{background:var(--club-secondary,#061A39)}
+.hero{background:var(--club-secondary,#061A39);color:var(--club-secondary-ink,#fff)}
 .hero::after{border-color:var(--club-color)}
-.eyebrow{color:var(--club-accent,var(--club-color))}
-.registerLink{background:var(--club-secondary,#061A39);border-color:var(--club-secondary,#061A39)}
-.tabs .selectedTab{background:var(--club-secondary,#061A39);color:#fff;box-shadow:inset 0 -3px var(--club-color)}
+.eyebrow{color:var(--club-hero-accent,var(--club-color))}
+.registerLink{background:var(--club-secondary,#061A39);border-color:var(--club-secondary,#061A39);color:var(--club-secondary-ink,#fff)}
+.tabs .selectedTab{background:var(--club-secondary,#061A39);color:var(--club-secondary-ink,#fff);box-shadow:inset 0 -3px var(--club-color)}
 .divisionHeader{border-left-color:var(--club-color)}
 .metrics article{border-left:3px solid var(--club-color)}
 .metrics article,.card,.seasonPicker select{background:#fff}
 .points{color:var(--club-color)}
+
+/* Club backgrounds can be light or dark: pair every branded surface with readable ink. */
+.heroWithCover{background-image:linear-gradient(90deg,color-mix(in srgb,var(--club-secondary) 97%,transparent),color-mix(in srgb,var(--club-secondary) 92%,transparent)),var(--club-cover)}
+.hero>p,.heroFooter,.registrationCallout small{color:var(--club-secondary-ink,#fff)}
+.heroFooter,.registrationCallout{border-color:color-mix(in srgb,var(--club-secondary-ink) 22%,transparent)}
+.heroActions a{color:var(--club-secondary-ink,#fff);border-color:color-mix(in srgb,var(--club-secondary-ink) 32%,transparent);background:color-mix(in srgb,var(--club-secondary) 90%,var(--club-secondary-ink))}
+.heroActions a:first-child{background:var(--club-color);border-color:var(--club-color);color:var(--club-primary-ink,#fff)}

@@ -1,0 +1,5 @@
+.link{display:inline-flex;align-items:center;justify-content:center;gap:9px;width:fit-content;max-width:100%;min-height:44px;padding:10px 14px;border:1px solid #c8d9e6;border-radius:11px;background:#fafdff;color:#173354;font-size:13px;font-weight:800;line-height:1.35;text-decoration:none;box-shadow:0 2px 5px #061a3906;transition:background .16s ease,border-color .16s ease,box-shadow .16s ease}
+.link:hover{background:#edf6fc;border-color:#95b9d2;box-shadow:0 4px 10px #061a3910}
+.link:focus-visible{outline:3px solid #0876a7;outline-offset:3px}
+.icon{flex:0 0 16px}
+@media(prefers-reduced-motion:reduce){.link{transition:none}}

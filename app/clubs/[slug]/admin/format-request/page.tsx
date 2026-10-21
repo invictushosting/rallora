@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import BackLink from "@/app/components/back-link";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
@@ -73,7 +73,7 @@ export default function FormatRequestPage(){
 
   return <main className={styles.page}><div className={styles.shell}>
     <header className={styles.nav}>
-      <Link href={club?`/clubs/${club.slug}/admin`:`/clubs/${slug}/admin`} className={styles.wordmark}>← Club administration</Link>
+      <BackLink href={club?`/clubs/${club.slug}/admin`:`/clubs/${slug}/admin`}>Back to club admin</BackLink>
     </header>
     <section className={styles.hero}>
       <span className={styles.eyebrow}>LEAGUE FORMATS</span>
