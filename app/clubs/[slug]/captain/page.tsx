@@ -1,5 +1,6 @@
 "use client";
 
+import BackLink from "@/app/components/back-link";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useParams } from "next/navigation";
@@ -107,7 +108,7 @@ export default function CaptainCentre() {
     .sort((a,b)=>Number(b.action)-Number(a.action)||a.fixture.play_by.localeCompare(b.fixture.play_by));
   const actionCount=fixtureCards.filter(item=>item.action).length;
   return <main className={styles.page}><div className={styles.shell}>
-    <header><Link href={`/clubs/${slug}`}>← Club hub</Link><strong>RALLORA · CAPTAIN</strong></header>
+    <header><BackLink href={`/clubs/${slug}`}>Back to club</BackLink><strong>RALLORA · CAPTAIN</strong></header>
     <section className={styles.hero}><div className={styles.heroTop}><span>CAPTAIN CENTRE</span>{team&&<strong className={styles.actionBadge}>{actionCount} action{actionCount===1?"":"s"}</strong>}</div>
       <h1>{team?[team.player_one_name,team.player_two_name].filter(Boolean).join(" / ")||team.name:"Your pairing"}</h1>
       <p>Your match centre for fixtures, scores and result confirmation.</p>
