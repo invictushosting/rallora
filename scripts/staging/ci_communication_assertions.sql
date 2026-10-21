@@ -19,6 +19,10 @@ begin
  perform rallora_private.generate_reminders();
  if exists(select 1 from public.rallora_delivery_queue where fixture_id=fx) then raise exception 'Paused club generated reminders'; end if;
  update public.rallora_communication_settings set enabled=true where club_id=club;
+ update public.rallora_communication_settings set rules=jsonb_set(rules,'{booking,hours}','1') where club_id=club;
+ perform rallora_private.generate_reminders();
+ if exists(select 1 from public.rallora_delivery_queue where fixture_id=fx) then raise exception 'One-hour reminder rounded to a whole day'; end if;
+ update public.rallora_communication_settings set rules=jsonb_set(rules,'{booking,hours}','168') where club_id=club;
  perform rallora_private.generate_reminders();
  if (select count(*) from public.rallora_delivery_queue where fixture_id=fx)<>2 then raise exception 'Expected both captains to receive booking reminders'; end if;
  perform rallora_private.generate_reminders();
