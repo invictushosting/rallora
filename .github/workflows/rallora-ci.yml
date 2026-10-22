@@ -131,6 +131,7 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_box_placement_schema.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260929222500_player_entry_pathways.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261021113012_draft_box_placement_and_standby_replacements.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261022194257_fix_draft_box_fixture_activity_check.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_box_placement_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_communication_schema.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261021123430_configurable_notifications_and_competition_end.sql
