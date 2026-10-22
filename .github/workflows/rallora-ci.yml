@@ -38,6 +38,7 @@ jobs:
       - run: node --experimental-strip-types --test tests/email-templates.test.mjs
       - run: node --experimental-strip-types --test tests/registration-status.test.mjs
       - run: node --experimental-strip-types --test tests/registration-account.test.mjs
+      - run: node --experimental-strip-types --test tests/player-emails.test.mjs
       - run: node --experimental-strip-types --test tests/login-destinations.test.mjs
       - run: node --experimental-strip-types --test tests/result-workflow.test.mjs
       - run: node --experimental-strip-types --test tests/scores.test.mjs
@@ -137,3 +138,5 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_communication_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261021170531_sponsor_scopes_and_enquiries.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_sponsor_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261022134202_separate_playtomic_contact_emails.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_player_emails_assertions.sql

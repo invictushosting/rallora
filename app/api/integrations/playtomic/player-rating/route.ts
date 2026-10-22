@@ -63,7 +63,11 @@ export async function GET(request:NextRequest){
     const token=typeof tokenBody?.token==="string"?tokenBody.token:typeof tokenBody?.access_token==="string"?tokenBody.access_token:"";
     if(!token)return reply({error:"Playtomic did not return an access token."},502);
 
-    const wanted=user.email.trim().toLowerCase();
+    const {data:profile,error:profileError}=await db.from("rallora_player_profiles").select("playtomic_email").eq("user_id",user.id).maybeSingle();
+    if(profileError)return reply({error:"Could not load your Playtomic email."},503);
+    const savedEmail=profile?.playtomic_email;
+    const signupEmail=user.user_metadata?.playtomic_email;
+    const wanted=(savedEmail||(typeof signupEmail==="string"?signupEmail:"")||user.email).trim().toLowerCase();
     let cursor="";
     let found:null|{player_id:string;name?:string;email?:string;sports?:Array<{sport_id?:string;level_value?:number|null}>}=null;
     for(let page=0;page<20&&!found;page++){
@@ -87,7 +91,7 @@ export async function GET(request:NextRequest){
     const syncedAt=new Date().toISOString();
     const {error:linkError}=await admin.from("rallora_playtomic_player_links").upsert({
       club_id:club.id,user_id:user.id,playtomic_player_id:found.player_id,padel_rating:rating,
-      playtomic_name:found.name??null,playtomic_email:found.email??user.email,synced_at:syncedAt,updated_at:syncedAt,
+      playtomic_name:found.name??null,playtomic_email:found.email??wanted,synced_at:syncedAt,updated_at:syncedAt,
     },{onConflict:"club_id,user_id"});
     if(linkError)return reply({error:"Playtomic rating was found but could not be saved."},503);
     await admin.from("rallora_club_integrations").update({last_sync_at:syncedAt,last_error:null}).eq("id",integration.id);
