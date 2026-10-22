@@ -10,17 +10,17 @@ export type OfficialResult = {
 };
 
 export function captainResultState(fixture: { id: string; status: string }, teamId: string,
-  viewerId: string, seasonStatus: string | undefined, submissions: CaptainSubmission[], results: OfficialResult[]) {
+  viewerId: string, seasonStatus: string | undefined, submissions: CaptainSubmission[], results: OfficialResult[], platformAdmin = false) {
   const official = results.find(result => result.fixture_id === fixture.id && OFFICIAL_RESULT_STATUSES.includes(result.status));
   const submission = submissions.filter(item => item.fixture_id === fixture.id)
     .sort((a, b) => b.updated_at.localeCompare(a.updated_at) || a.id.localeCompare(b.id))[0];
   const confirmed = Boolean(official) || fixture.status === "confirmed";
   const playable = seasonStatus === "active" && !confirmed && fixture.status !== "cancelled";
-  const needsReview = Boolean(playable && submission?.status === "pending_opponent" && submission.submitting_team_id !== teamId && submission.submitted_by_user_id !== viewerId);
+  const needsReview = Boolean(playable && submission?.status === "pending_opponent" && submission.submitting_team_id !== teamId && (platformAdmin || submission.submitted_by_user_id !== viewerId));
   const needsSubmit = playable && fixture.status === "open" && !submission;
   return { official, submission, confirmed, needsReview, needsSubmit,
     action: needsReview || needsSubmit,
-    label: confirmed ? "CONFIRMED" : needsReview ? "REVIEW RESULT" : needsSubmit ? "SUBMIT RESULT"
+    label: fixture.status === "cancelled" ? "CANCELLED" : seasonStatus === "draft" ? "DRAFT" : confirmed ? "CONFIRMED" : needsReview ? "REVIEW RESULT" : needsSubmit ? "SUBMIT RESULT"
       : submission?.status === "disputed" || fixture.status === "disputed" ? "WITH ORGANISER"
       : submission?.status === "pending_opponent" ? "AWAITING CONFIRMATION" : "NO ACTION REQUIRED" };
 }

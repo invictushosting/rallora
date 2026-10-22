@@ -303,7 +303,7 @@ export default function PlatformControlCentre() {
             <strong>Seasons</strong>
             {seasons.map(s => <div className={styles.season} key={s.id}><span>{s.name}</span><em>{s.status}</em></div>)}
             {!seasons.length && <p>No seasons created yet.</p>}
-            <div className={styles.clubActions}><a href={`/clubs/${encodeURIComponent(club.slug)}/admin`}>Open club admin</a><a href={`/clubs/${encodeURIComponent(club.slug)}`}>View public hub</a></div>
+            <div className={styles.clubActions}><a href={`/clubs/${encodeURIComponent(club.slug)}/admin`}>Open club admin</a><a href={`/clubs/${encodeURIComponent(club.slug)}/captain`}>View as captain</a><a href={`/clubs/${encodeURIComponent(club.slug)}`}>View public hub</a><a href={`/clubs/${encodeURIComponent(club.slug)}/register`}>View player registration</a></div>
           </article>)}
         {!summaries.length&&<article className={styles.card}><h3>No clubs yet</h3><p>Add a club manually or approve an application below.</p></article>}
       </section>
