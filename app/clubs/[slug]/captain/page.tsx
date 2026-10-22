@@ -18,6 +18,7 @@ export default function CaptainCentre() {
   const supabase=useMemo(()=>createClient(),[]);
   const [team,setTeam]=useState<Team|null>(null), [captainTeams,setCaptainTeams]=useState<Team[]>([]);
   const [selectedId,setSelectedId]=useState(""), [viewerId,setViewerId]=useState("");
+  const [platformAdmin,setPlatformAdmin]=useState(false), [loading,setLoading]=useState(true);
   const [labels,setLabels]=useState<Record<string,string>>({}), [fixtures,setFixtures]=useState<Fixture[]>([]);
   const [submissions,setSubmissions]=useState<CaptainSubmission[]>([]), [results,setResults]=useState<OfficialResult[]>([]);
   const [notice,setNotice]=useState("Loading captain access…"), [busy,setBusy]=useState("");
@@ -26,29 +27,51 @@ export default function CaptainCentre() {
 
   const load=useCallback(async()=>{
     const version=++loadVersion.current;
+    setLoading(true);
     try {
       const auth=await supabase.auth.getUser();
       if(auth.error && auth.error.name!=="AuthSessionMissingError") throw auth.error;
       const user=auth.data.user;
-      if(!user){setViewerId("");setTeam(null);setCaptainTeams([]);setFixtures([]);setSubmissions([]);setResults([]);setNotice("Sign in with your captain account to view your pairing and fixtures.");return;}
+      if(version!==loadVersion.current)return;
+      if(!user){setPlatformAdmin(false);setViewerId("");setTeam(null);setCaptainTeams([]);setFixtures([]);setSubmissions([]);setResults([]);setNotice("Sign in with your captain account to view your pairing and fixtures.");return;}
       const club=await supabase.from("clubs").select("id").eq("slug",slug).maybeSingle();
       if(club.error) throw club.error;
       if(!club.data) throw new Error("Club not found.");
-      const roster=await supabase.from("rallora_team_roster_memberships")
+      const access=await supabase.rpc("rallora_is_platform_admin");
+      if(access.error)throw access.error;
+      const isAdmin=access.data===true;
+      let available:Team[]=[];
+      if(isAdmin){
+        // Use the real club roster, including pairings without an assigned captain.
+        // RLS still checks the signed-in administrator on every query.
+        const seasons=await supabase.from("seasons").select("id,name,status,created_at").eq("club_id",club.data.id);
+        if(seasons.error)throw seasons.error;
+        if(seasons.data?.length){
+          const divisions=await supabase.from("divisions").select("season_id,teams(id,name,player_one_name,player_two_name,player_one_rating,player_two_rating)").in("season_id",seasons.data.map(s=>s.id));
+          if(divisions.error)throw divisions.error;
+          const seasonMap=new Map(seasons.data.map(s=>[s.id,s]));
+          available=(divisions.data??[]).flatMap(d=>{
+            const season=seasonMap.get(d.season_id);
+            return season?(d.teams??[]).map(t=>({...t,season})):[];
+          });
+        }
+      }else{
+        const roster=await supabase.from("rallora_team_roster_memberships")
         .select("team_id,teams(id,name,player_one_name,player_two_name,player_one_rating,player_two_rating),seasons(name,status,created_at)")
         .eq("club_id",club.data.id).eq("player_user_id",user.id).eq("role","captain");
       if(roster.error) throw roster.error;
-      const available=(roster.data??[]).filter(row=>row.teams&&row.seasons)
-        .map(row=>({...row.teams as unknown as Omit<Team,"season">,season:row.seasons as unknown as Team["season"]}))
-        .sort((a,b)=>Number(b.season.status==="active")-Number(a.season.status==="active")||b.season.created_at.localeCompare(a.season.created_at));
+        available=(roster.data??[]).filter(row=>row.teams&&row.seasons)
+          .map(row=>({...row.teams as unknown as Omit<Team,"season">,season:row.seasons as unknown as Team["season"]}));
+      }
+      available.sort((a,b)=>Number(b.season.status==="active")-Number(a.season.status==="active")||b.season.created_at.localeCompare(a.season.created_at)||a.id.localeCompare(b.id));
       const chosen=available.find(item=>item.id===selectedId)??available[0];
       let booked:FixtureArrangement[]=[];
       let rows:Fixture[]=[], names:Record<string,string>={}, submitted:CaptainSubmission[]=[], official:OfficialResult[]=[];
-      if(chosen&&chosen.season.status!=="draft") {
+      if(chosen&&(isAdmin||chosen.season.status!=="draft")) {
         const reply=await supabase.from("fixtures").select("id,home_team_id,away_team_id,play_by,status")
           .or(`home_team_id.eq.${chosen.id},away_team_id.eq.${chosen.id}`).order("play_by");
         if(reply.error) throw reply.error;
-        rows=(reply.data??[]).filter(item=>item.status!=="cancelled");
+        rows=(reply.data??[]).filter(item=>isAdmin||item.status!=="cancelled");
         if(rows.length) {
           const teamIds=[...new Set(rows.flatMap(item=>[item.home_team_id,item.away_team_id]))];
           const ids=rows.map(item=>item.id);
@@ -68,24 +91,34 @@ export default function CaptainCentre() {
         }
       }
       if(version!==loadVersion.current) return;
-      setArrangements(booked);setViewerId(user.id);setCaptainTeams(available);setTeam(chosen??null);setFixtures(rows);setLabels(names);setSubmissions(submitted);setResults(official);
-      setNotice(!chosen?"Your account is not assigned as a captain for this club yet. If your team was just approved, refresh this page or contact the organiser."
+      setPlatformAdmin(isAdmin);setArrangements(booked);setViewerId(user.id);setCaptainTeams(available);setTeam(chosen??null);setFixtures(rows);setLabels(names);setSubmissions(submitted);setResults(official);
+      setNotice(!chosen?(isAdmin?"This club has no pairings yet. Create or approve teams in club admin to inspect their captain view.":"Your account is not assigned as a captain for this club yet. If your team was just approved, refresh this page or contact the organiser.")
         :chosen.season.status==="draft"?"This cycle is being prepared. Fixtures become available when the organiser activates it."
         :chosen.season.status==="completed"?"This cycle is complete. Its results are shown for reference.":"");
     } catch(error) {
-      if(version===loadVersion.current) {setFixtures([]);setNotice(error instanceof Error?error.message:"Captain access could not be loaded. Please refresh and try again.");}
+      if(version===loadVersion.current) {setPlatformAdmin(false);setTeam(null);setCaptainTeams([]);setFixtures([]);setNotice(error instanceof Error?error.message:"Captain access could not be loaded. Please refresh and try again.");}
+    } finally {
+      if(version===loadVersion.current)setLoading(false);
     }
   },[slug,supabase,selectedId]);
-  useEffect(()=>{if(slug)void load();return()=>{loadVersion.current++;};},[slug,load]);
+  useEffect(()=>{
+    if(slug)void load();
+    let timer:ReturnType<typeof setTimeout>|undefined;
+    const {data}=supabase.auth.onAuthStateChange(()=>{if(timer)clearTimeout(timer);timer=setTimeout(()=>void load(),0);});
+    return()=>{loadVersion.current++;if(timer)clearTimeout(timer);data.subscription.unsubscribe();};
+  },[slug,load,supabase]);
 
   async function submit(event:FormEvent<HTMLFormElement>,fixture:Fixture) {
-    event.preventDefault();if(busy)return;
+    event.preventDefault();if(busy||loading||!team)return;
     const fields=new FormData(event.currentTarget),home=String(fields.get("home")??"").trim(),away=String(fields.get("away")??"").trim(),winner=String(fields.get("winner")??"");
     if(!home||!away||!winner){setNotice("Enter both scores and choose the winning pairing.");return;}
     if(!window.confirm(`Submit ${labels[fixture.home_team_id]} ${home} – ${away} ${labels[fixture.away_team_id]}? The opposing captain will be asked to confirm it.`))return;
     setBusy(fixture.id);
     try {
-      const reply=await supabase.rpc("rallora_submit_captain_result",{p_fixture_id:fixture.id,p_home_score:home,p_away_score:away,p_winner_team_id:winner,p_notes:String(fields.get("notes")??"")});
+      const args={p_fixture_id:fixture.id,p_home_score:home,p_away_score:away,p_winner_team_id:winner,p_notes:String(fields.get("notes")??"")};
+      const reply=platformAdmin
+        ?await supabase.rpc("rallora_platform_submit_captain_result",{...args,p_team_id:team.id})
+        :await supabase.rpc("rallora_submit_captain_result",args);
       if(reply.error)throw reply.error;
       await load();
     } catch(error){setNotice(error&&typeof error==="object"&&"message" in error?String(error.message):"The result could not be submitted. Please try again.");}
@@ -93,7 +126,7 @@ export default function CaptainCentre() {
   }
 
   async function review(id:string,decision:"confirm"|"dispute") {
-    if(busy)return;
+    if(busy||loading)return;
     let note="";
     if(decision==="dispute") {
       const answer=window.prompt("Tell the club organiser what is wrong with this result. Include the correct score or any useful details.");
@@ -110,7 +143,7 @@ export default function CaptainCentre() {
     finally{setBusy("");}
   }
 
-  const fixtureCards=fixtures.map(fixture=>({fixture,...captainResultState(fixture,team?.id??"",viewerId,team?.season.status,submissions,results)}))
+  const fixtureCards=(loading?[]:fixtures).map(fixture=>({fixture,...captainResultState(fixture,team?.id??"",viewerId,team?.season.status,submissions,results,platformAdmin)}))
     .sort((a,b)=>Number(b.action)-Number(a.action)||a.fixture.play_by.localeCompare(b.fixture.play_by));
   const actionCount=fixtureCards.filter(item=>item.action).length;
   return <main className={styles.page}><div className={styles.shell}>
@@ -119,12 +152,13 @@ export default function CaptainCentre() {
       <h1>{team?[team.player_one_name,team.player_two_name].filter(Boolean).join(" / ")||team.name:"Your pairing"}</h1>
       <p>Your match centre for fixtures, scores and result confirmation.</p>
       {team&&<div className={styles.ratingStrip}><span>PLAYTOMIC</span><strong>{team.player_one_name} {team.player_one_rating?.toFixed(2)??"–"}</strong><strong>{team.player_two_name} {team.player_two_rating?.toFixed(2)??"–"}</strong></div>}
-      {captainTeams.length>1&&<label>Captain pairing<select disabled={Boolean(busy)} value={team?.id??""} onChange={event=>{setSelectedId(event.target.value);setFixtures([]);setNotice("Loading captain access…");}}>{captainTeams.map(item=><option key={item.id} value={item.id}>{item.season.name} · {[item.player_one_name,item.player_two_name].filter(Boolean).join(" / ")||item.name}</option>)}</select></label>}
+      {platformAdmin&&<p className={styles.adminNotice}><strong>Super admin · View as captain</strong><br/>Choose any pairing to inspect its fixtures and captain actions. Saving bookings, submitting scores and reviewing results changes live club data under your admin account.</p>}
+      {(platformAdmin&&captainTeams.length>0||captainTeams.length>1)&&<label>{platformAdmin?"View as captain — pairing":"Captain pairing"}<select disabled={Boolean(busy)||loading} value={team?.id??""} onChange={event=>{setLoading(true);setSelectedId(event.target.value);setFixtures([]);setNotice("Loading captain access…");}}>{captainTeams.map(item=><option key={item.id} value={item.id}>{item.season.name} ({item.season.status}) · {[item.player_one_name,item.player_two_name].filter(Boolean).join(" / ")||item.name}</option>)}</select></label>}
     </section>
     {notice&&<p className={styles.notice} role="status">{notice}</p>}
-    {!team&&<Link href={viewerId?`/account?club=${encodeURIComponent(slug)}&return=captain`:"/login"}>{viewerId?"Open your account":"Sign in to your captain account"} →</Link>}
-    {team&&!notice&&fixtures.length===0&&<p className={styles.notice}>Your captain access is active. There are no fixtures available for your pairing yet.</p>}
-    {team&&fixtures.length>0&&<section className={styles.actionCentre}><div><span>NEXT UP</span><h2>{actionCount?`${actionCount} match${actionCount===1?"":"es"} need your attention`:"You’re all caught up"}</h2></div><p>{actionCount?"Submit scores or review an opponent result below.":"No captain actions are waiting right now."}</p></section>}
+    {!loading&&!team&&<Link href={platformAdmin?`/clubs/${slug}/admin`:viewerId?`/account?club=${encodeURIComponent(slug)}&return=captain`:"/login"}>{platformAdmin?"Open club admin":viewerId?"Open your account":"Sign in to your captain account"} →</Link>}
+    {!loading&&team&&!notice&&fixtures.length===0&&<p className={styles.notice}>There are no fixtures available for this pairing yet.</p>}
+    {!loading&&team&&fixtures.length>0&&<section className={styles.actionCentre}><div><span>NEXT UP</span><h2>{actionCount?`${actionCount} match${actionCount===1?"":"es"} need your attention`:"You’re all caught up"}</h2></div><p>{actionCount?"Submit scores or review an opponent result below.":"No captain actions are waiting right now."}</p></section>}
     <section className={styles.grid}>{fixtureCards.map(({fixture,official,submission,confirmed,needsReview,needsSubmit,action,label})=>{
       const score=official??submission;
       return <article className={`${styles.card} ${action?styles.actionCard:""}`} key={fixture.id}>
@@ -137,7 +171,7 @@ export default function CaptainCentre() {
           <label>Notes<input name="notes" maxLength={1000}/></label><p className={styles.helper}>Enter each pairing’s games in set order, separated by commas: home 6, 6 and away 4, 3 means a 6–4, 6–3 win. Choose the winner, then submit for opponent confirmation.</p>
           <button disabled={Boolean(busy)}>{busy===fixture.id?"Submitting…":"Review & submit result"}</button>
         </form>:<div className={styles.result}>
-          {score?<strong className={styles.finalResult}><small>{confirmed?"FINAL":"SUBMITTED"}</small>{score.home_score} <em>:</em> {score.away_score}</strong>:<strong>{confirmed?"Result confirmed":"With your organiser"}</strong>}
+          {score?<strong className={styles.finalResult}><small>{confirmed?"FINAL":"SUBMITTED"}</small>{score.home_score} <em>:</em> {score.away_score}</strong>:<strong>{label==="DRAFT"?"Cycle being prepared":label==="CANCELLED"?"Fixture cancelled":confirmed?"Result confirmed":"With your organiser"}</strong>}
           <span>{confirmed?"Official result":label.toLowerCase()}</span>
           {needsReview&&submission&&<div><button disabled={Boolean(busy)} onClick={()=>void review(submission.id,"confirm")}>Confirm result</button><button disabled={Boolean(busy)} onClick={()=>void review(submission.id,"dispute")}>Dispute</button></div>}
           {!confirmed&&submission?.dispute_note&&<p className={styles.helper}>{submission.dispute_note}</p>}

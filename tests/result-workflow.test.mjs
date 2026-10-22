@@ -15,6 +15,17 @@ test('the newest review is selected regardless of database row order',()=>{
 test('a captain cannot review a submission they authored for another pairing',()=>{
  assert.equal(state([pending],[],'active','captain-b').needsReview,false);
 });
+test('super admin can review from the opposing pairing while retaining their identity',()=>{
+ assert.equal(captainResultState(fixture,'home','captain-b','active',[pending],[],true).needsReview,true);
+ assert.equal(captainResultState(fixture,'away','captain-b','active',[pending],[],true).needsReview,false);
+ for(const status of ['draft','completed'])assert.equal(captainResultState(fixture,'home','captain-b',status,[pending],[],true).action,false);
+});
+test('draft and cancelled fixtures remain identifiable without captain actions',()=>{
+ const draft=captainResultState({...fixture,status:'open'},'home','admin','draft',[],[],true);
+ assert.equal(draft.label,'DRAFT');assert.equal(draft.action,false);
+ const cancelled=captainResultState({...fixture,status:'cancelled'},'home','admin','active',[pending],[],true);
+ assert.equal(cancelled.label,'CANCELLED');assert.equal(cancelled.action,false);
+});
 test('completed and draft cycles do not ask captains to submit or review',()=>{
  for(const status of ['completed','draft']){assert.equal(state([pending],[],status).action,false);assert.equal(captainResultState({...fixture,status:'open'},'home','captain-a',status,[],[]).needsSubmit,false);}
 });
