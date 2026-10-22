@@ -259,4 +259,16 @@
 .fixtureFilters button:focus-visible{outline:3px solid #0876a7;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.metrics .metricButton,.metrics .metricButton::before,.metricAction,.fixtureFilters button{transition:none;transform:none!important}}
 
-.duplicateNotice{padding:14px;border:1px solid #e4bd6a;border-radius:12px;background:#fff8e8;color:#473816;margin:12px 0;overflow-wrap:anywhere}.duplicateNotice p{color:#594827}.duplicateNotice a{color:#174e80;text-decoration:underline}.duplicateNotice button{margin:8px 8px 0 0}.duplicateNotice select{width:100%}
+.duplicateNotice{padding:14px;border:1px solid #e4bd6a;border-radius:12px;background:#fff8e8;color:#473816;margin:12px 0;overflow-wrap:anywhere}.duplicateNotice p{color:#594827}.duplicateNotice a{color:#174e80;text-decoration:underline}.duplicateNotice label{display:grid;gap:8px;font-size:13px;font-weight:800}
+.duplicateNotice select{box-sizing:border-box;min-width:0;width:100%;min-height:46px;border:1px solid #bdcddd;border-radius:11px;padding:11px 34px 11px 12px;background:#fff;color:#061a39;font:inherit;font-size:14px;text-overflow:ellipsis}
+.registrationActions{flex-wrap:wrap}
+.registrationActions button,.duplicateActions button{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;min-height:46px;margin:0;border:1px solid #061a39;border-radius:12px;padding:12px 16px;background:#061a39;color:#fff;font:inherit;font-size:13px;font-weight:800;line-height:1.4;text-align:center;cursor:pointer;transition:background .16s ease,border-color .16s ease,box-shadow .16s ease}
+.registrationActions button:nth-child(2){border-color:#d9b4bd;background:#fff;color:#8b2635}
+.registrationActions button:nth-child(3){border-color:#b9d9eb;background:#e7f5fd;color:#123d62}
+.duplicateActions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.duplicateActions button+button{border-color:#bdcddd;background:#fff;color:#294566}
+.registrationActions button:hover:not(:disabled),.duplicateActions button:hover:not(:disabled){box-shadow:0 5px 14px #061a3918;filter:brightness(.97)}
+.registrationActions button:disabled,.duplicateActions button:disabled{border-color:#d1dce6;background:#e7edf3;color:#63758a;opacity:1;cursor:not-allowed;box-shadow:none}
+.registrationActions button:focus-visible,.duplicateActions button:focus-visible,.duplicateNotice select:focus-visible{outline:3px solid #00b0fe;outline-offset:3px}
+@media(max-width:600px){.registrationActions{display:grid;grid-template-columns:1fr;gap:10px}.registrationActions button{width:100%;min-height:48px}.duplicateActions{display:grid;grid-template-columns:1fr}.duplicateActions button{width:100%;min-height:48px}.duplicateNotice select{font-size:16px}}
+@media(prefers-reduced-motion:reduce){.registrationActions button,.duplicateActions button{transition:none}}

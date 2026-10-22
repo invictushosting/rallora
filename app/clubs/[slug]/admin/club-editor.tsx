@@ -778,12 +778,12 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
           {division.teams.map((team) => <article key={team.id} className={styles.pairingRow}>
             <div>
               <strong>{[team.player_one_name, team.player_two_name].filter(Boolean).join(" / ") || team.name}</strong>
-              <span>{team.player_one_email || "No email"} · {team.player_two_email || "No email"}</span>
+              <span>{team.player_one_rating!=null&&team.player_two_rating!=null?`Combined rating ${(Number(team.player_one_rating)+Number(team.player_two_rating)).toFixed(2)}`:"Player ratings below"}</span>
             </div>
             <div className={styles.pairingPlayers}>
-              <div><span>Player 1</span><strong>{team.player_one_name || "Player to be confirmed"}</strong><small>{team.player_one_email || "No email"}</small><button type="button" onClick={() => {setReplacementId("");setReplaceTarget({ teamId: team.id, slot: 1 });}}>Replace</button></div>
+              <div><span>Player 1</span><strong>{team.player_one_name || "Player to be confirmed"}</strong><small>{team.player_one_rating!=null?`Playtomic rating ${Number(team.player_one_rating).toFixed(2)}`:"Rating not provided"}</small><button type="button" onClick={() => {setReplacementId("");setReplaceTarget({ teamId: team.id, slot: 1 });}}>Replace</button></div>
               <span className={styles.pairingJoin}>+</span>
-              <div><span>Player 2</span><strong>{team.player_two_name || "Player to be confirmed"}</strong><small>{team.player_two_email || "No email"}</small><button type="button" onClick={() => {setReplacementId("");setReplaceTarget({ teamId: team.id, slot: 2 });}}>Replace</button></div>
+              <div><span>Player 2</span><strong>{team.player_two_name || "Player to be confirmed"}</strong><small>{team.player_two_rating!=null?`Playtomic rating ${Number(team.player_two_rating).toFixed(2)}`:"Rating not provided"}</small><button type="button" onClick={() => {setReplacementId("");setReplaceTarget({ teamId: team.id, slot: 2 });}}>Replace</button></div>
             </div>
           </article>)}
         </section>)}
