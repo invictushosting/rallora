@@ -19,3 +19,10 @@ test('declined and unfamiliar records cannot be labelled successfully approved',
  assert.equal(registrationStatus('declined').title,'Registration not approved');
  assert.equal(registrationStatus('withdrawn').title,'Registration on record');
 });
+
+test("duplicate closure is distinct from rejection and never promises approval",()=>{
+ const receipt=registrationStatus("duplicate");
+ assert.equal(receipt.title,"Duplicate registration closed");
+ assert.match(receipt.description,/does not reject/);
+ assert.match(receipt.description,/or confirm approval/);
+});

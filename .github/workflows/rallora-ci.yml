@@ -140,3 +140,5 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_sponsor_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261022134202_separate_playtomic_contact_emails.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_player_emails_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261022150402_duplicate_pairing_review.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_duplicate_pairing_assertions.sql

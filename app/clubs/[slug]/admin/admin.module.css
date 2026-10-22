@@ -258,3 +258,5 @@
 .metrics .metricButton:focus-visible,.fixtureOperations:focus-visible{outline:3px solid #0876a7;outline-offset:4px}
 .fixtureFilters button:focus-visible{outline:3px solid #0876a7;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.metrics .metricButton,.metrics .metricButton::before,.metricAction,.fixtureFilters button{transition:none;transform:none!important}}
+
+.duplicateNotice{padding:14px;border:1px solid #e4bd6a;border-radius:12px;background:#fff8e8;color:#473816;margin:12px 0;overflow-wrap:anywhere}.duplicateNotice p{color:#594827}.duplicateNotice a{color:#174e80;text-decoration:underline}.duplicateNotice button{margin:8px 8px 0 0}.duplicateNotice select{width:100%}
