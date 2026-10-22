@@ -18,6 +18,15 @@ import SponsorManager from "./sponsor-manager";
 type Club = EditableClub;
 type LeagueRule = { key:string; label:string; text:string; enabled:boolean; custom?:boolean };
 type Season = { competition_ends_on:string|null; starts_on:string|null; ends_on:string|null; previous_season_id:string|null; rolling_cycle_number:number; id: string; club_id: string; name: string; status: string; fixture_schedule_mode: "weekly" | "date_window"; registration_opens_at:string|null; registration_closes_at:string|null; registration_published:boolean; league_format:"standard"|"promotion_relegation_cycles"; teams_per_division:number|null; matches_per_cycle:number|null; division_assignment_mode:"manual"|"combined_rating"; max_divisions:number|null; allow_overflow_when_uneven:boolean; promotion_places:number; relegation_places:number; cycle_match_mode:"single_round_robin"|"double_round_robin"; require_cycle_completion:boolean; league_rules:LeagueRule[] };
+type ApplicationRatings = {created_team_id:string|null;captain_name:string;partner_name:string;captain_playtomic_rating:number|null;partner_playtomic_rating:number|null};
+function registrationRating(name:string|null,application:ApplicationRatings|undefined):number|null {
+  if(!name||!application)return null;
+  const normalise=(value:string)=>value.trim().replace(/\s+/g," ").toLowerCase();
+  const player=normalise(name);
+  if(player===normalise(application.captain_name))return application.captain_playtomic_rating;
+  if(player===normalise(application.partner_name))return application.partner_playtomic_rating;
+  return null;
+}
 type Membership = { club_id: string; user_id: string; role: string; status: string };
 type DivisionSummary = { id: string; name: string; sort_order: number;
   teams: { id: string; name: string; player_one_name:string|null; player_two_name:string|null; player_one_email:string|null; player_two_email:string|null; player_one_rating:number|null; player_two_rating:number|null }[] };
@@ -173,7 +182,7 @@ export default function ClubAdministration() {
           const seasonFixtures = (fixtureReply.data ?? []) as AdminFixture[];
 
           const fixtureIds = seasonFixtures.map((item) => item.id);
-          const [teamsReply, resultsReply, submissionsReply] = await Promise.all([
+          const [teamsReply, resultsReply, submissionsReply, applicationRatingsReply] = await Promise.all([
             divisionIds.length
               ? supabase.from("teams").select("id,division_id,name,player_one_name,player_two_name,player_one_email,player_two_email,player_one_rating,player_two_rating")
                   .in("division_id", divisionIds).order("name", { ascending: true })
@@ -185,7 +194,10 @@ export default function ClubAdministration() {
             fixtureIds.length
               ? supabase.from("result_submissions").select("id,fixture_id,home_score,away_score,notes,dispute_note,status,updated_at").in("fixture_id",fixtureIds).order("updated_at",{ascending:false})
               : Promise.resolve({ data: [] as { id:string; fixture_id:string; home_score:string|null; away_score:string|null; notes:string|null; dispute_note:string|null; status:string; updated_at:string }[], error:null }),
+            supabase.from("rallora_team_applications").select("created_team_id,captain_name,partner_name,captain_playtomic_rating,partner_playtomic_rating").eq("season_id",season.id).eq("status","approved"),
           ]);
+          if (applicationRatingsReply.error) throw applicationRatingsReply.error;
+          const applicationRatings = new Map(((applicationRatingsReply.data??[]) as ApplicationRatings[]).map(application=>[application.created_team_id,application]));
           if (teamsReply.error) throw teamsReply.error;
           if (resultsReply.error) throw resultsReply.error;
           if (submissionsReply.error) throw submissionsReply.error;
@@ -202,7 +214,7 @@ export default function ClubAdministration() {
               name: division.name as string,
               sort_order: division.sort_order as number,
               teams: roster.filter((team) => team.division_id === division.id)
-                .map((team) => ({ id: team.id, name: team.name, player_one_name: team.player_one_name, player_two_name: team.player_two_name, player_one_email: team.player_one_email, player_two_email: team.player_two_email, player_one_rating: team.player_one_rating, player_two_rating: team.player_two_rating })),
+                .map((team) => ({ id: team.id, name: team.name, player_one_name: team.player_one_name, player_two_name: team.player_two_name, player_one_email: team.player_one_email, player_two_email: team.player_two_email, player_one_rating: team.player_one_rating??registrationRating(team.player_one_name,applicationRatings.get(team.id)), player_two_rating: team.player_two_rating??registrationRating(team.player_two_name,applicationRatings.get(team.id)) })),
             }));
           return {
             season,
