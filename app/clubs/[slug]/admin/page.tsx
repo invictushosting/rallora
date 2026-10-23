@@ -398,6 +398,7 @@ export default function ClubAdministration() {
         <a href={`/clubs/${encodeURIComponent(view.club.slug)}`}>View public hub</a>
       </div>
       <div className={styles.adminShortcuts}>
+        <Link href={`/help/club-getting-started?club=${encodeURIComponent(view.club.slug)}`}>Help &amp; guides</Link>
         <a href="#club-leagues">Leagues</a>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/registrations`}>Registrations</Link>
         <a href="#club-management">Teams &amp; players</a>
