@@ -1,0 +1,187 @@
+/** Help content is shared by the public guides and the navigation helper.
+ * Review alongside changes to registration, competition setup and captain flows.
+ */
+export type HelpCategory = "players" | "captains" | "clubs" | "playtomic";
+export type HelpSection = { id: string; title: string; steps: string[]; note?: string };
+export type HelpArticle = {
+  slug: string; category: HelpCategory; title: string; summary: string;
+  keywords: string[]; sections: HelpSection[]; related: string[];
+};
+export const HELP_REVIEWED = "23 October 2026";
+export const HELP_CATEGORIES: { id: HelpCategory; title: string; description: string }[] = [
+  { id: "players", title: "Players", description: "Join a league, check your entry and get ready to play." },
+  { id: "captains", title: "Captains", description: "Arrange matches, submit scores and review results." },
+  { id: "clubs", title: "Club admins", description: "Set up competitions and manage your league day to day." },
+  { id: "playtomic", title: "Playtomic", description: "Connect your club or run your league without an integration." },
+];
+export const HELP_ARTICLES: HelpArticle[] = [
+  {
+    slug: "join-a-league", category: "players", title: "Join a league", summary: "Register a pair, find a partner or join the standby list.",
+    keywords: ["register", "registration", "join", "pair", "single", "partner", "standby", "waiting list", "sign up", "enter"],
+    sections: [
+      { id: "choose", title: "Choose how to enter", steps: ["Open your club’s league centre and choose the competition’s registration option. Entry must be open for that competition.", "Choose Register a pair if you have a partner, Register as a single if you need one, or Join standby list if you can step in as a replacement.", "Check the selected competition before continuing."], note: "Single and standby entries go to the club’s player lists. They do not guarantee a pairing or a competition place." },
+      { id: "details", title: "Complete your details", steps: ["Sign in to your existing Rallora account or create one. Enter the email used for your Playtomic profile where requested.", "If your Playtomic email is an Apple private relay address, supply a separate, working Rallora contact email when prompted.", "Add your player details and current rating when requested. For a pair, add your partner’s name, emails and rating too. Check spelling carefully." ] },
+      { id: "submit", title: "Submit the entry", steps: ["Complete any email verification requested, then return to the registration page.", "Review the final step and press the final submit button. Creating or verifying an account alone does not enter you into the league.", "Wait for the registration receipt or current status on screen. A pairing is reviewed by the organiser before going live."], note: "If you are unsure whether your entry arrived, check the existing status before submitting again. Ask the organiser to check it if necessary." },
+    ], related: ["registration-status", "emails-and-ratings", "captain-access"],
+  },
+  {
+    slug: "registration-status", category: "players", title: "Check your registration status", summary: "Understand pending, approved and duplicate entries.",
+    keywords: ["pending", "approved", "declined", "duplicate", "receipt", "submitted", "confirmation", "registered", "account"],
+    sections: [
+      { id: "check", title: "Check that the club received your entry", steps: ["Return to the same club registration page and competition, signed in to the account you used.", "Read the current registration status or receipt. If the page says your league entry has not been submitted yet, finish the details and final submission step.", "Pending means the organiser needs to review the pairing. Approval does not mean fixtures are already published; the competition must be prepared and activated." ] },
+      { id: "duplicates", title: "Fix a mistake or duplicate", steps: ["Contact the club organiser with the competition and both player names if anything is wrong.", "If both partners entered the same pair, tell the organiser which entry and captain you want to keep. Avoid making another application.", "A declined or closed duplicate entry is separate from the retained application. Ask the club to confirm the status of the entry you are keeping." ] },
+    ], related: ["join-a-league", "captain-access", "emails-and-ratings"],
+  },
+  {
+    slug: "emails-and-ratings", category: "players", title: "Rallora emails and Playtomic ratings", summary: "Use the right contact email and provide the details used for league placement.",
+    keywords: ["email", "relay", "apple", "hotmail", "rating", "ratings", "profile", "password", "login", "sign in", "not receiving"],
+    sections: [
+      { id: "emails", title: "Know which email to use", steps: ["Your Rallora account email is the one you use to sign in and receive Rallora account messages.", "Your Playtomic email identifies your Playtomic profile. Keep the actual Playtomic email here, including an Apple relay address if that is what Playtomic uses.", "When a separate Rallora contact email is requested, use an address you can receive messages at. Enter the equivalent details for your partner."], note: "Rallora and Playtomic are separate accounts. Signing in with Playtomic credentials is not a substitute for a Rallora account." },
+      { id: "ratings", title: "Enter and check ratings", steps: ["Provide your current Playtomic rating when the registration form asks for it. Repeat for your partner.", "The club may use the combined ratings for initial division placement, then make manual adjustments before activation.", "An automatic rating lookup depends on the club’s connection and available player data. If a lookup is unavailable, use the manual rating entry and ask the club about corrections." ] },
+      { id: "missing-email", title: "If an email does not arrive", steps: ["Check spam or junk and confirm you are checking your Rallora contact inbox.", "For sign-in problems, use the password recovery option on the sign-in page.", "For a registration decision or captain permission, contact your club organiser. For a technical account problem, contact support@rallora.app with your club and a description of the issue."], note: "Never send your password or Playtomic Client Secret in a support message." },
+    ], related: ["join-a-league", "playtomic-without-api", "captain-access"],
+  },
+  {
+    slug: "captain-access", category: "captains", title: "Open your captain centre", summary: "Find your pairing, fixtures and next actions.",
+    keywords: ["captain", "access", "permission", "pairing", "fixtures", "cannot see", "cant see", "not assigned", "login"],
+    sections: [
+      { id: "open", title: "Sign in as the assigned captain", steps: ["Open your club’s Captain centre or Captain login link and sign in with your Rallora account.", "If you captain more than one pairing, select the correct pairing and competition.", "Use the fixture cards and next-action area to see which results need submitting or reviewing." ] },
+      { id: "missing", title: "If your pairing or fixtures are missing", steps: ["Check you are using the Rallora account associated with the assigned captain, and the correct club.", "If approval has just happened, refresh the page. If no captain is assigned to your account, ask the organiser to check the pairing and captain assignment.", "Fixtures appear when the club has prepared the competition. Result actions require an active competition; draft and confirmed fixtures do not offer the same actions."], note: "Adding a partner’s details during registration does not give that partner captain permissions automatically." },
+    ], related: ["arrange-a-match", "submit-and-confirm-results", "registration-status"],
+  },
+  {
+    slug: "arrange-a-match", category: "captains", title: "Arrange and record a match booking", summary: "Book with your club, then record the agreed time in Rallora.",
+    keywords: ["book", "booking", "court", "arrange", "arranged", "time", "date", "cancel", "reschedule", "4/4"],
+    sections: [
+      { id: "book", title: "Agree a time and book the court", steps: ["Check the fixture deadline and agree a time with your opponents.", "Reserve the court through the club’s normal booking provider, such as Playtomic.", "If Playtomic is connected, use the correct four player profiles so the booking can be matched to the fixture. A full automatic match requires all four players."], note: "Recording a match in Rallora does not reserve or pay for a court." },
+      { id: "record", title: "Record an agreed booking manually", steps: ["Open the fixture in the Captain centre and find Agreed court booking.", "Choose Record agreed booking. Enter the start time in your device’s local time, choose the duration and optionally add the court.", "Press Save agreed booking. Both captains can see the recorded arrangement, and it informs reminders." ] },
+      { id: "change", title: "Change or cancel the arrangement", steps: ["Make any change or cancellation with the booking provider first and agree it with your opponents.", "Use Update recorded booking or Remove recorded booking in Rallora so the fixture information stays correct.", "If an automatic Playtomic match looks wrong or stays pending, ask the organiser to review it."], note: "Removing a recorded booking in Rallora does not cancel the actual court reservation." },
+    ], related: ["submit-and-confirm-results", "playtomic-booking-matching", "playtomic-without-api"],
+  },
+  {
+    slug: "submit-and-confirm-results", category: "captains", title: "Submit, confirm or dispute a result", summary: "Turn the match score into an official result and updated standings.",
+    keywords: ["result", "score", "scores", "confirm", "confirmation", "dispute", "disputed", "winner", "standings", "table", "points"],
+    sections: [
+      { id: "submit", title: "Submit the score", steps: ["After the match, open the correct fixture in the Captain centre.", "Enter both pairings’ scores in the format shown, select the winning pairing and check the player names.", "Submit and confirm the prompt. The opposing captain is then asked to check the result."], note: "Scores are submitted in Rallora. The Playtomic connection does not import official league results." },
+      { id: "review", title: "Confirm or dispute", steps: ["The opposing captain opens the result awaiting review and checks the submitted score.", "Confirm it if correct. The result becomes official and the league standings update.", "If it is wrong, choose the dispute action and add a clear note explaining the issue. The club organiser reviews it." ] },
+      { id: "status", title: "Understand the result status", steps: ["Awaiting confirmation means the opposing captain still needs to review the submitted result.", "With organiser or Disputed result means the club needs to resolve it. Do not create another fixture or submit a duplicate entry.", "If an official result needs correcting, contact the organiser so they can review the score and use the official-result tools." ] },
+    ], related: ["captain-access", "club-results", "arrange-a-match"],
+  },
+  {
+    slug: "club-getting-started", category: "clubs", title: "Get your club ready", summary: "Set up branding, staff and your first competition.",
+    keywords: ["setup", "start", "onboard", "club admin", "branding", "logo", "staff", "sponsor", "dashboard"],
+    sections: [
+      { id: "access", title: "Open club administration", steps: ["Sign in with the organiser account granted access to your club. If access is missing, contact Rallora support.", "Use Club profile & branding in the setup checklist to add the approved club logo, cover, contact details and welcome text.", "Check player registration settings and terms. Use Club staff to manage the people who should administer the club." ] },
+      { id: "prepare", title: "Prepare the player experience", steps: ["Create your first competition as a private draft and work through its readiness steps.", "Set Notifications & reminders to the channels, timings and sending hours your club wants.", "Add any club or league sponsors in Sponsors, check the public hub and preview the competition before activating it." ] },
+      { id: "optional", title: "Choose whether to connect Playtomic", steps: ["Your club can run registrations, fixtures and results without an API connection.", "To use supported booking matching and player lookups, follow the Playtomic setup guide and verify the connection under Integrations.", "Share the player and captain guides with your league entrants." ] },
+    ], related: ["create-and-launch-competition", "club-reminders", "connect-playtomic"],
+  },
+  {
+    slug: "create-and-launch-competition", category: "clubs", title: "Create and launch a competition", summary: "From a private draft to open entry, divisions, fixtures and activation.",
+    keywords: ["create", "competition", "season", "league", "launch", "activate", "draft", "visible", "publish", "registration window", "format", "box"],
+    sections: [
+      { id: "draft", title: "Create the private draft", steps: ["From club admin, use Create your first competition or open the league builder in Seasons & Divisions.", "Choose the competition format, dates, registration window, division sizes and scoring rules. For a rolling box league, also check cycle timing, promotion/relegation and the overall end date.", "Review the final step and create the private draft. Check every setting against the club’s published league rules." ] },
+      { id: "entry", title: "Open and review registration", steps: ["Use Open registration on the competition readiness card. Check the registration dates too; publishing entry and being within its window are both needed for players to enter.", "Review pairing applications in Registrations. Check both player names, contact details, ratings and duplicate warnings before approving.", "When entry is complete, close registration before building the divisions. Publishing registration makes entry available without publishing a finished fixture list." ] },
+      { id: "divisions", title: "Place teams and prepare fixtures", steps: ["Build the competition divisions from reviewed registrations. Use combined Playtomic ratings for initial placement if that is the club’s chosen method.", "Review the draft placements and manually move or swap teams where needed before activation. Placement changes can clear untouched draft fixtures; generate fixtures again after your final adjustments.", "Generate fixtures, then use Preview competition to check the player-facing competition." ] },
+      { id: "activate", title: "Activate when ready", steps: ["Check that entry is closed, each division has at least two teams and every team has fixtures.", "Confirm deadlines, scores, captain assignments and the public preview.", "Choose Activate. An active competition enables the match and result flow for players. If activation is blocked, complete the missing readiness requirements shown."], note: "Opening registration and activating a competition are separate steps. Always check the public club hub after each publication change." },
+    ], related: ["manage-teams-and-entries", "club-reminders", "club-results"],
+  },
+  {
+    slug: "manage-teams-and-entries", category: "clubs", title: "Manage entries, divisions and replacements", summary: "Review duplicate applications, adjust draft placement and replace a player.",
+    keywords: ["teams", "players", "move", "division", "placement", "replace", "replacement", "drop out", "standby", "duplicate", "approve", "decline"],
+    sections: [
+      { id: "entries", title: "Review applications", steps: ["Open Registrations from club admin and check each pairing’s player names, emails and ratings.", "Check duplicate warnings before approving. If the same pair was entered twice, establish which entry to retain and use the duplicate action to close the extra entry.", "Use a decline decision for an entry that should not proceed, and check that the intended pairing remains approved or pending as appropriate." ] },
+      { id: "placement", title: "Adjust draft division placement", steps: ["Open the draft competition’s placement controls after registrations are reviewed.", "Use Starting boxes & manual adjustments to review the rating-based arrangement. Choose the Pairing to move and Destination box. If that box is full, select a pairing to swap with, then use Move pairing or Swap pairings.", "Check every pairing is in the right place. Changing boxes can clear untouched draft fixtures, so generate fixtures again after finalising placements and before launching." ] },
+      { id: "replacement", title: "Replace a player who drops out", steps: ["Open Teams & players and find the correct competition pairing.", "Use Replace for the relevant player slot and select an eligible available player from the standby list.", "Check the updated pairing and captain access, then let the affected players know. Review any already-booked court details with them."], note: "If the required replacement is not available in the list, check the competition’s standby entries before making another pairing." },
+    ], related: ["create-and-launch-competition", "registration-status", "captain-access"],
+  },
+  {
+    slug: "club-reminders", category: "clubs", title: "Configure notifications and reminders", summary: "Choose what is sent, which channels are used and when messages can go out.",
+    keywords: ["reminder", "reminders", "notification", "notifications", "email", "sending hours", "delivery", "chase", "overdue"],
+    sections: [
+      { id: "configure", title: "Set club communication preferences", steps: ["Open Notifications & reminders from club admin.", "Set the club time zone, sending hours and daily limit.", "Enable the reminder types you want. Choose Email and/or In-app for each type, set the available timing or repeat interval and save communication settings." ] },
+      { id: "bookings", title: "Keep fixture information up to date", steps: ["Record agreed bookings or review matched Playtomic bookings so arrangement reminders can stop.", "Upcoming-match and missing-result reminders need a recorded booking. Check the arrangement if a reminder seems unexpected.", "Use Send reminder on an eligible fixture when needed and review the confirmation before sending. Club settings and sending limits still apply." ] },
+      { id: "delivery", title: "Check message activity", steps: ["Review Recent delivery activity and refresh it to see queue status or errors.", "Accepted by email provider means the provider accepted the email; it does not prove it reached the recipient’s inbox.", "If a player is missing email, check their Rallora contact address and ask them to check spam. In-app notifications are available through their Rallora notification area." ] },
+    ], related: ["arrange-a-match", "emails-and-ratings", "club-results"],
+  },
+  {
+    slug: "club-results", category: "clubs", title: "Review results and resolve disputes", summary: "Monitor fixtures, investigate disagreements and correct official scores.",
+    keywords: ["dispute", "disputed", "resolve", "official", "result", "override", "correction", "reopen", "standings", "points"],
+    sections: [
+      { id: "monitor", title: "Find the fixtures needing attention", steps: ["Use the fixture totals and filters in club admin to review To book, Booked, Awaiting result, Disputed result and Played.", "Open the result details for the correct fixture and check the pairings, submitted score and any dispute note.", "Ask the captains for clarification where needed before deciding the official result." ] },
+      { id: "resolve", title: "Resolve or correct a result", steps: ["Use the dispute resolution or official-result tools for the selected fixture.", "Enter and check both scores and the winning pairing before saving. This changes the official result and standings.", "If an already-confirmed result needs further investigation, use the available reopen control or contact Rallora support. Check the public table after any correction."], note: "A court booking or finished Playtomic booking does not establish the official match score. The result is confirmed through Rallora’s result flow." },
+    ], related: ["submit-and-confirm-results", "club-reminders", "playtomic-booking-matching"],
+  },
+  {
+    slug: "connect-playtomic", category: "playtomic", title: "Connect your club to Playtomic", summary: "Enter the Venue ID, Client ID and Client Secret, then verify the connection.",
+    keywords: ["playtomic", "integration", "connect", "api", "venue id", "client id", "client secret", "key", "champion", "master", "developer"],
+    sections: [
+      { id: "prepare", title: "Get your club’s API credentials", steps: ["The Rallora integration is intended for Playtomic Champion and Master clubs with External API access. Ask Playtomic if you are unsure about your entitlement.", "Sign in to Playtomic Manager as an authorised club administrator. Find the club’s External API or Developer Tools settings and generate credentials.", "Obtain the Venue ID for the correct club, plus the Client ID and matching Client Secret. If these are unavailable in your account, ask Playtomic support."], note: "Keep the Client Secret private. Do not send it to players or paste it into the help assistant or a support message." },
+      { id: "verify", title: "Connect in Rallora", steps: ["Open Club admin, then Integrations.", "Enter Venue ID, Client ID and Client Secret in the matching fields. Press Connect & verify.", "Wait for the connected and verified state. Check any error shown before retrying. A wrong venue or mismatched credentials need correcting at source." ] },
+      { id: "scope", title: "Understand the connection", steps: ["Rallora uses a read-only connection for supported booking matching and player rating lookups. It does not create, change or cancel court reservations.", "A complete automatic fixture match requires the four correct players. Official league scores are still submitted and reviewed in Rallora.", "Use Disconnect Playtomic in Integrations to remove the saved connection when needed. You can continue operating the league manually."], note: "The integration page shows verification and sync information. Connected does not guarantee every booking or player rating can be matched." },
+    ], related: ["playtomic-booking-matching", "playtomic-without-api", "emails-and-ratings"],
+  },
+  {
+    slug: "playtomic-booking-matching", category: "playtomic", title: "How Playtomic booking matching works", summary: "Understand full matches, pending bookings and results that still need entering.",
+    keywords: ["playtomic", "booking", "matching", "4/4", "3/4", "pending", "sync", "live data", "court", "open match"],
+    sections: [
+      { id: "match", title: "What counts as a match", steps: ["Players book through Playtomic as usual using the correct player profiles.", "Rallora checks available booking data against league fixtures. A full automatic match requires all four fixture players to match.", "A partial or possible match, such as three of four players, can appear as Booking pending for the club to review. It is not a fully confirmed match." ] },
+      { id: "missing", title: "If a booking is missing", steps: ["Check the club connection and sync information under Integrations.", "Confirm the correct venue and all four player profiles are on the booking, and check the players’ Playtomic emails in Rallora.", "If it still does not match, record the agreed booking manually and ask the organiser to investigate. Do not rely on a partial booking match as proof that the fixture is arranged." ] },
+      { id: "played", title: "After the match", steps: ["A completed booking can indicate that a fixture is awaiting its result.", "The captain still submits the score in Rallora and the opposing captain confirms or disputes it.", "Only the official result updates the league standings. Booking status alone does not award points." ] },
+    ], related: ["connect-playtomic", "arrange-a-match", "submit-and-confirm-results"],
+  },
+  {
+    slug: "playtomic-without-api", category: "playtomic", title: "Run a league without Playtomic connected", summary: "Use manual ratings and agreed bookings, and connect later if the club chooses.",
+    keywords: ["without", "manual", "no api", "refuse", "later", "disconnect", "offline", "rating", "booking"],
+    sections: [
+      { id: "manual", title: "Run the normal league flow", steps: ["Players register in Rallora and supply current ratings where requested. The club reviews entries and places the pairs.", "Captains arrange and reserve courts through the club’s usual booking provider.", "Captains use Record agreed booking in Rallora, then submit and confirm scores after playing. Club reminders use the recorded arrangement and saved communication settings." ] },
+      { id: "later", title: "Connect later", steps: ["Keep players’ correct Playtomic emails on their Rallora details so later matching and lookups have the required identifiers.", "When the club is ready, connect and verify its credentials under Integrations. Existing Rallora accounts and registrations do not need to be recreated.", "Check available player ratings and future booking matches after connection. A connection does not guarantee a missing rating can be found or that earlier bookings will be imported." ] },
+    ], related: ["arrange-a-match", "connect-playtomic", "emails-and-ratings"],
+  },
+];
+
+export function safeClubSlug(value: unknown): string {
+  return typeof value === "string" && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) && value.length <= 100 ? value : "";
+}
+export function helpHref(article = "", club = ""): string {
+  return `/help${article ? `/${article}` : ""}${safeClubSlug(club) ? `?club=${encodeURIComponent(club)}` : ""}`;
+}
+const STOP_WORDS = new Set("a an the i my me we our you your to how do does can is are it in on for of and with where what why not have has get please help want need im ive cant cannot".split(" "));
+const NORMALISATIONS: Record<string, string> = { bookings: "booking", booked: "booking", book: "booking", ratings: "rating", reminders: "reminder", results: "result", scores: "score", teams: "team", players: "player", divisions: "division", emails: "email", registering: "register", signup: "register", registration: "register", signing: "login", signin: "login", notifications: "notification" };
+function tokens(value: string): string[] {
+  return [...new Set(value.toLowerCase().replace(/[’']/g, "").replace(/[^a-z0-9/]+/g, " ").trim().split(/\s+/).filter(t => t && !STOP_WORDS.has(t)).map(t => NORMALISATIONS[t] ?? t))];
+}
+export function searchHelp(query: string, category?: HelpCategory): HelpArticle[] {
+  const pool = HELP_ARTICLES.filter(a => !category || a.category === category);
+  const terms = tokens(query);
+  if (!terms.length) return query.trim() ? [] : pool;
+  return pool.map(article => {
+    const title = new Set(tokens(article.title));
+    const keywords = new Set(tokens(article.keywords.join(" ")));
+    const body = new Set(tokens([article.summary, ...article.sections.flatMap(s => [s.title, ...s.steps, s.note ?? ""])].join(" ")));
+    const score = terms.reduce((total, term) => total + (title.has(term) ? 6 : keywords.has(term) ? 4 : body.has(term) ? 1 : 0), 0);
+    const matches = terms.filter(term => title.has(term) || keywords.has(term) || body.has(term)).length;
+    return { article, score, matches };
+  }).filter(r => r.score >= 4 && r.matches >= Math.ceil(terms.length / 2)).sort((a, b) => b.score - a.score).map(r => r.article);
+}
+export function suggestedHelp(path: string): string[] {
+  if (path.includes("/admin/integrations")) return ["connect-playtomic", "playtomic-booking-matching", "playtomic-without-api"];
+  if (path.includes("/admin/reminders")) return ["club-reminders", "emails-and-ratings", "arrange-a-match"];
+  if (path.includes("/admin/registrations")) return ["manage-teams-and-entries", "registration-status", "create-and-launch-competition"];
+  if (path.includes("/admin")) return ["create-and-launch-competition", "manage-teams-and-entries", "club-results"];
+  if (path.includes("/captain")) return ["arrange-a-match", "submit-and-confirm-results", "captain-access"];
+  if (/\/(register|join-team)(\/|$)/.test(path)) return ["join-a-league", "registration-status", "emails-and-ratings"];
+  if (/\/(login|account)(\/|$)/.test(path)) return ["emails-and-ratings", "captain-access", "registration-status"];
+  return ["join-a-league", "captain-access", "club-getting-started"];
+}
+
+/** Select a relevant section rather than always repeating the start of a guide. */
+export function helpAnswerSection(article: HelpArticle, query: string): HelpSection {
+  const terms = tokens(query);
+  const ranked = article.sections.map(section => {
+    const title = new Set(tokens(section.title));
+    const body = new Set(tokens([...section.steps, section.note ?? ""].join(" ")));
+    return { section, score: terms.reduce((total, term) => total + (title.has(term) ? 5 : body.has(term) ? 1 : 0), 0) };
+  }).sort((a, b) => b.score - a.score);
+  return ranked[0].section;
+}
