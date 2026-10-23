@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import BackLink from "@/app/components/back-link";
 import {useCallback,useEffect,useState} from "react";
 import {useParams} from "next/navigation";
@@ -50,7 +51,7 @@ export default function IntegrationsPage(){
   return <main className={styles.page}><div className={styles.shell}>
     <header className={styles.nav}><BackLink href={`/clubs/${slug}/admin`}>Back to club admin</BackLink></header>
     <section className={styles.hero}>
-      <span className={styles.eyebrow}>INTEGRATIONS</span><h1>Connect Playtomic</h1>
+      <span className={styles.eyebrow}>INTEGRATIONS</span><h1>Connect Playtomic</h1><Link href={`/help/connect-playtomic?club=${encodeURIComponent(slug)}`}>Read the Playtomic setup guide</Link>
       <p>For Champion and Master clubs. Rallora verifies the credentials server-side and never exposes the Client Secret back to the browser.</p>
     </section>
     {state&&<section className={styles.message}><p>{state}</p></section>}
