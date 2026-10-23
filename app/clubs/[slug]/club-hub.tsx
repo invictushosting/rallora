@@ -554,6 +554,11 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
             <h1>{club.name}</h1></div>
         </div>
         <p>{club.welcome_text || "Fixtures, results and league tables. All in one place."}</p>
+        {seasons.length > 1 && <div className={styles.heroLeagueChooser}>
+            <label htmlFor="hero-league-choice"><span aria-hidden="true">▦</span> Choose your league <small>{seasons.length} available</small></label>
+            <div className={styles.heroSelectWrap}><select id="hero-league-choice" value={seasonId} onChange={event => setSeasonId(event.target.value)}>{seasons.map(season => <option key={season.id} value={season.id}>{season.name}</option>)}</select><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></div>
+            <p>Select a league to see its registration, tables and fixtures.</p>
+          </div>}
         {registrationOpen && currentSeason && <div className={styles.registrationCallout}>
           <div><span className={styles.statusPill}>Registration open</span>
             <strong>{currentSeason.name}</strong>
@@ -566,11 +571,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
           <Link href="/notifications">League updates</Link>
         </div>
         <div className={`${styles.heroFooter} ${styles.heroLeagueNavigation}`}>
-          {seasons.length > 1 ? <div className={styles.heroLeagueChooser}>
-            <label htmlFor="hero-league-choice"><span aria-hidden="true">▦</span> Choose your league <small>{seasons.length} available</small></label>
-            <div className={styles.heroSelectWrap}><select id="hero-league-choice" value={seasonId} onChange={event => setSeasonId(event.target.value)}>{seasons.map(season => <option key={season.id} value={season.id}>{season.name}</option>)}</select><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></div>
-            <p>Select a league to see its registration, tables and fixtures.</p>
-          </div> : <span>{currentSeason?.name ?? club.welcome_title ?? "Club league"}</span>}
+          <span>{currentSeason?.name ?? club.welcome_title ?? "Club league"}</span>
           <a className={styles.scrollToLeague} href="#league-centre">View league centre <span aria-hidden="true">↓</span></a>
         </div>
       </section>
