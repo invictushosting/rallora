@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase";
 import styles from "./editor.module.css";
 import LeagueAutomation from "./league-automation";
 import BoxPlacement from "./box-placement";
+import CompetitionSchedule from "./competition-schedule";
+import { monthlyRounds, savedRoundWindows, validateRoundWindows, formatScheduleDate, type RoundWindow, type RoundCadence } from "@/lib/competition-schedule";
 
 export type EditableClub = {
   id: string; slug: string; name: string;
@@ -32,6 +34,7 @@ const COMMON_RULES: LeagueRule[] = [
 ];
 export type EditableSeason = {
   id: string; club_id: string; name: string; status: string;
+  round_windows?: RoundWindow[];
   competition_ends_on: string | null; starts_on: string | null; ends_on: string | null; previous_season_id: string | null; rolling_cycle_number: number;
   fixture_schedule_mode: "weekly" | "date_window";
   registration_opens_at: string | null;
@@ -166,19 +169,23 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [newSeason, setNewSeason] = useState("");
   const [editingSeasonId, setEditingSeasonId] = useState<string | null>(null);
   const [newFixtureScheduleMode, setNewFixtureScheduleMode] = useState<"weekly" | "date_window">("date_window");
+  const [competitionStart, setCompetitionStart] = useState("");
+  const [competitionFinish, setCompetitionFinish] = useState("");
+  const [roundCadence, setRoundCadence] = useState<RoundCadence>("monthly");
+  const [customRounds, setCustomRounds] = useState<RoundWindow[]>([]);
   const [registrationOpens, setRegistrationOpens] = useState("");
   const [registrationCloses, setRegistrationCloses] = useState("");
   const [leagueFormat, setLeagueFormat] = useState<"standard"|"promotion_relegation_cycles">("promotion_relegation_cycles");
   const [competitionPreset,setCompetitionPreset]=useState<"custom"|"box"|"seasonal">("box");
   const [showAdvancedCompetition,setShowAdvancedCompetition]=useState(false);
   const [builderStep,setBuilderStep]=useState(1);
-  const [teamsPerDivision, setTeamsPerDivision] = useState("5");
+  const [teamsPerDivision, setTeamsPerDivision] = useState("4");
   const [matchesPerCycle, setMatchesPerCycle] = useState("3");
   const [assignmentMode, setAssignmentMode] = useState<"manual"|"combined_rating">("combined_rating");
   const [maxDivisions, setMaxDivisions] = useState("6");
   const [allowOverflowWhenUneven, setAllowOverflowWhenUneven] = useState(true);
-  const [promotionPlaces, setPromotionPlaces] = useState("2");
-  const [relegationPlaces, setRelegationPlaces] = useState("2");
+  const [promotionPlaces, setPromotionPlaces] = useState("1");
+  const [relegationPlaces, setRelegationPlaces] = useState("1");
   const [cycleMatchMode, setCycleMatchMode] = useState<"single_round_robin"|"double_round_robin">("single_round_robin");
   const [requireCycleCompletion, setRequireCycleCompletion] = useState(true);
   const [leagueRules, setLeagueRules] = useState<LeagueRule[]>(COMMON_RULES);
@@ -191,6 +198,12 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       if (!season) return;
       setEditingSeasonId(season.id);
       setNewSeason(season.name);
+      const plan = savedRoundWindows(season.round_windows);
+      setCompetitionStart(plan[0]?.starts_on ?? season.starts_on ?? "");
+      setCompetitionFinish(season.competition_ends_on ?? plan.at(-1)?.ends_on ?? season.ends_on ?? "");
+      setCustomRounds(plan);
+      setRoundCadence(plan.length ? "custom" : "monthly");
+      setCompetitionPreset(season.league_format === "promotion_relegation_cycles" ? "box" : "seasonal");
       setNewFixtureScheduleMode(season.fixture_schedule_mode);
       setRegistrationOpens(season.registration_opens_at ? season.registration_opens_at.slice(0,16) : "");
       setRegistrationCloses(season.registration_closes_at ? season.registration_closes_at.slice(0,16) : "");
@@ -256,6 +269,11 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const selectedFixtureSeason = selectedDivision ? seasons.find((season)=>season.id===selectedDivision.season_id) : undefined;
   const fixtureScheduleMode = selectedFixtureSeason?.fixture_schedule_mode ?? "weekly";
   const editingSeason = editingSeasonId ? seasons.find((item)=>item.id===editingSeasonId) : null;
+  const scheduleLocked = Boolean(editingSeasonId && fixtures.some(f => f.season_id === editingSeasonId));
+  const plannedRounds = leagueFormat === "promotion_relegation_cycles"
+    ? roundCadence === "monthly" ? monthlyRounds(competitionStart, competitionFinish) : customRounds
+    : competitionStart && competitionFinish ? [{ starts_on: competitionStart, ends_on: competitionFinish }] : [];
+  const scheduleError = validateRoundWindows(plannedRounds, competitionStart, competitionFinish);
   const formatLocked = Boolean(editingSeason && editingSeason.registrations > 0);
   const archivedSeasonIds = new Set(seasons.map(season => season.previous_season_id).filter(Boolean));
   const recoveryOptions = fixtures.filter(fixture => fixture.status !== "cancelled" && !archivedSeasonIds.has(fixture.season_id));
@@ -392,12 +410,25 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
     finally { setTestEmailBusy(false); }
   }
 
+  function beginCompetition() {
+    setEditingSeasonId(null); setNewSeason(""); setCompetitionStart(""); setCompetitionFinish("");
+    setCustomRounds([]); setRoundCadence("monthly"); setRegistrationOpens(""); setRegistrationCloses("");
+    setLeagueFormat("promotion_relegation_cycles"); setCompetitionPreset("box"); setTeamsPerDivision("4");
+    setPromotionPlaces("1"); setRelegationPlaces("1"); setCycleMatchMode("single_round_robin");
+    setNewFixtureScheduleMode("date_window"); setShowAdvancedCompetition(false); setRequireCycleCompletion(true);
+    setAssignmentMode("combined_rating"); setMaxDivisions("6"); setAllowOverflowWhenUneven(true); setLeagueRules(COMMON_RULES);
+    setError(""); setMessage(""); setShowCompetitionBuilder(true); setBuilderStep(1);
+  }
+
   async function createSeason(event: React.FormEvent) {
     event.preventDefault();
     await submit(async () => {
       const title = newSeason.trim();
       if (!title || title.length > 100) throw new Error("Season name must be 1–100 characters.");
+      if (!scheduleLocked && scheduleError) throw new Error(scheduleError);
+      if (registrationOpens && registrationCloses && registrationCloses <= registrationOpens) throw new Error("Registration must close after it opens.");
       const payload = {
+        ...(!scheduleLocked ? { starts_on: plannedRounds[0].starts_on, ends_on: plannedRounds[0].ends_on, competition_ends_on: competitionFinish, round_windows: plannedRounds } : {}),
         name: title,
         fixture_schedule_mode: newFixtureScheduleMode,
         registration_opens_at: registrationOpens || null,
@@ -430,6 +461,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         if (mutationError) throw mutationError;
       }
       setNewSeason("");
+      setCompetitionStart(""); setCompetitionFinish(""); setCustomRounds([]); setRoundCadence("monthly");
       setEditingSeasonId(null);
       setShowCompetitionBuilder(false);
     }, editingSeasonId ? "Competition updated." : "Draft competition created. It will stay private until you activate it.");
@@ -627,8 +659,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
     </form>}
     {activeTab === "seasons" && <div className={styles.competitionWorkspace}>
       {!showCompetitionBuilder && !editingSeasonId && <section className={styles.competitionHub}>
-        <div className={styles.competitionHubHead}><div><span className={styles.eyebrow}>COMPETITIONS</span><h3>Run your club competitions</h3><p>Create, launch and manage every league from one place. Rallora will guide you through each step.</p></div><button type="button" onClick={()=>{setShowCompetitionBuilder(true);setBuilderStep(1)}}>+ Create competition</button></div>
-        {seasons.length===0 ? <div className={styles.competitionEmpty}><strong>No competitions yet</strong><p>Start with your first competition. It will stay private as a draft until you are ready to activate it.</p><button type="button" onClick={()=>{setShowCompetitionBuilder(true);setBuilderStep(1)}}>Create your first competition →</button></div> :
+        <div className={styles.competitionHubHead}><div><span className={styles.eyebrow}>COMPETITIONS</span><h3>Run your club competitions</h3><p>Create, launch and manage every league from one place. Rallora will guide you through each step.</p></div><button type="button" onClick={()=>{beginCompetition()}}>+ Create competition</button></div>
+        {seasons.length===0 ? <div className={styles.competitionEmpty}><strong>No competitions yet</strong><p>Start with your first competition. It will stay private as a draft until you are ready to activate it.</p><button type="button" onClick={()=>{beginCompetition()}}>Create your first competition →</button></div> :
         <div className={styles.competitionList}>{seasons.map(season=><article className={styles.competitionCard} key={season.id}><div><span className={styles.statusPill}>{season.status.toUpperCase()}</span><h4>{season.name}</h4><p>{season.league_format==="promotion_relegation_cycles"?"Rolling divisions with promotion & relegation":"Standard divisions"} · {season.registrations} registration{season.registrations===1?"":"s"} · {season.divisions.length} division{season.divisions.length===1?"":"s"}</p></div><div className={styles.competitionCardActions}><button type="button" onClick={()=>window.dispatchEvent(new CustomEvent("rallora:edit-season",{detail:{seasonId:season.id}}))}>{season.status==="draft"?"Continue setup":"Manage competition"} →</button></div></article>)}</div>}
       </section>}
       {(showCompetitionBuilder||editingSeasonId) && <div className={styles.builderShell}><div className={styles.builderTop}><button type="button" onClick={()=>{setShowCompetitionBuilder(false);setEditingSeasonId(null);setMessage("");setError("")}}>← All competitions</button><div><strong>{editingSeasonId?"Edit competition":"Guided competition builder"}</strong><span>{editingSeasonId?"Update the competition safely.":"Follow the steps below — your competition stays private until you activate it."}</span></div></div>
@@ -651,6 +683,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         <p className={styles.wide}>{newFixtureScheduleMode==="weekly"
           ? "Choose this when each round is tied to a week and completion deadline."
           : "Choose this when teams arrange their own match at any time inside the published window."}</p>
+        <CompetitionSchedule start={competitionStart} finish={competitionFinish} cadence={roundCadence} custom={customRounds} rolling={leagueFormat === "promotion_relegation_cycles"} locked={scheduleLocked} onStart={setCompetitionStart} onFinish={setCompetitionFinish} onCadence={setRoundCadence} onCustom={setCustomRounds} />
         </section>
         <section className={`${styles.seasonSection} ${builderStep===2?styles.wizardActive:styles.wizardCollapsed}`} onClick={()=>builderStep!==2&&setBuilderStep(2)}>
           <div className={styles.seasonSectionHead}><span>2</span><div><strong>Registration</strong><p>Control when players can enter this competition.</p></div></div>
@@ -660,11 +693,11 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         <section className={`${styles.seasonSection} ${builderStep===3?styles.wizardActive:styles.wizardCollapsed}`} onClick={()=>builderStep!==3&&setBuilderStep(3)}>
           <div className={styles.seasonSectionHead}><span>3</span><div><strong>Competition format</strong><p>Choose a ready-made padel format. You can customise it afterwards.</p></div></div>
         <div className={styles.wide}><span className={styles.choiceLabel}>How do you want this competition to run?</span><div className={styles.formatChoices}>
-          <button type="button" className={competitionPreset==="box"?styles.formatChoiceSelected:styles.formatChoice} disabled={formatLocked} onClick={()=>{setCompetitionPreset("box");setShowAdvancedCompetition(false);setLeagueFormat("promotion_relegation_cycles");setTeamsPerDivision("5");setPromotionPlaces("2");setRelegationPlaces("2");setCycleMatchMode("single_round_robin");setRequireCycleCompletion(true);setNewFixtureScheduleMode("date_window")}}><div className={styles.choiceTitle}><strong>Rolling box league</strong><em>Recommended</em></div><span>Great for an ongoing competitive club league. Teams play everyone in their division, then move up or down after each cycle.</span><small>5 teams · 4 matches each · 2 promoted · 2 relegated</small></button>
+          <button type="button" className={competitionPreset==="box"?styles.formatChoiceSelected:styles.formatChoice} disabled={formatLocked} onClick={()=>{setCompetitionPreset("box");setShowAdvancedCompetition(false);setLeagueFormat("promotion_relegation_cycles");setTeamsPerDivision("4");setPromotionPlaces("1");setRelegationPlaces("1");setCycleMatchMode("single_round_robin");setRequireCycleCompletion(true);setNewFixtureScheduleMode("date_window")}}><div className={styles.choiceTitle}><strong>Rolling box league</strong><em>Recommended</em></div><span>Great for an ongoing competitive club league. Teams play everyone in their division, then move up or down after each cycle.</span><small>4 pairs · 3 matches each · movement chosen below</small></button>
           <button type="button" className={competitionPreset==="seasonal"?styles.formatChoiceSelected:styles.formatChoice} disabled={formatLocked} onClick={()=>{setCompetitionPreset("seasonal");setShowAdvancedCompetition(false);setLeagueFormat("standard");setTeamsPerDivision("6");setNewFixtureScheduleMode("date_window")}}><div className={styles.choiceTitle}><strong>Seasonal divisions</strong></div><span>Fixed pairs play a round robin over a longer season, with movement handled between seasons.</span><small>6 teams per division · flexible date window</small></button>
           <button type="button" className={competitionPreset==="custom"?styles.formatChoiceSelected:styles.formatChoice} disabled={formatLocked} onClick={()=>{setCompetitionPreset("custom");setShowAdvancedCompetition(true)}}><div className={styles.choiceTitle}><strong>Custom competition</strong></div><span>Configure the division size, scheduling and movement rules yourself.</span><small>Best when your club already has its own established format.</small></button>
         </div>
-        {competitionPreset!=="custom" && <div className={styles.presetSummary}><strong>✓ Rallora has set this up for you</strong><span>{competitionPreset==="box" ? "5 teams per division · everyone plays once · 2 promoted · 2 relegated · flexible date window" : "6 teams per division · round robin · flexible date window"}</span><small>You can change these settings below if your club runs things differently.</small></div>}
+        {competitionPreset!=="custom" && <div className={styles.presetSummary}><strong>✓ Rallora has set this up for you</strong><span>{competitionPreset==="box" ? `${teamsPerDivision} pairs per box · ${(Number(teamsPerDivision)-1)*(cycleMatchMode==="double_round_robin"?2:1)} matches each · ${promotionPlaces} promoted · ${relegationPlaces} relegated` : "6 teams per division · round robin · flexible date window"}</span><small>You can change these settings below if your club runs things differently.</small></div>}
         </div>
         {competitionPreset!=="custom" && <div className={styles.advancedToggle}><button type="button" onClick={()=>setShowAdvancedCompetition(v=>!v)}>{showAdvancedCompetition?"Hide advanced competition settings ↑":"Advanced competition settings ↓"}</button><span>Change seeding, division limits and uneven-registration behaviour.</span></div>}
         {formatLocked && <p className={styles.lockWarning}>⚠ League format is locked because {editingSeason?.registrations} player/team registration{editingSeason?.registrations===1?" has":"s have"} already been received. You can still update non-structural details.</p>}
@@ -688,8 +721,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
         </label></div>}
         </section>
         {leagueFormat==="promotion_relegation_cycles" && <section className={`${styles.seasonSection} ${builderStep===4?styles.wizardActive:styles.wizardCollapsed}`} onClick={()=>builderStep!==4&&setBuilderStep(4)}>
-          <div className={styles.seasonSectionHead}><span>4</span><div><strong>Rolling cycle</strong><p>Choose what happens when each round of the box league finishes.</p></div></div>
-          <label>Teams per group<input type="number" min="2" max="100" value={teamsPerDivision} onChange={e=>setTeamsPerDivision(e.target.value)} /></label>
+          <div className={styles.seasonSectionHead}><span>4</span><div><strong>Playing rounds & movement</strong><p>Teams complete their fixtures in each playing window, then move boxes before the next round.</p></div></div>
+          <label>Pairs in each box<input type="number" min="2" max="100" value={teamsPerDivision} onChange={e=>setTeamsPerDivision(e.target.value)} /></label>
           <label>Promotion places<input type="number" min="0" max="20" value={promotionPlaces} onChange={e=>setPromotionPlaces(e.target.value)} /></label>
           <label>Relegation places<input type="number" min="0" max="20" value={relegationPlaces} onChange={e=>setRelegationPlaces(e.target.value)} /></label>
           <label>Match format<select value={cycleMatchMode} onChange={e=>setCycleMatchMode(e.target.value as "single_round_robin"|"double_round_robin")}>
@@ -699,7 +732,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
           <label className={styles.wide}><span>Rolling cycle control</span>
             <span className={styles.inlineCheck}><input type="checkbox" checked={requireCycleCompletion} onChange={e=>setRequireCycleCompletion(e.target.checked)} />
               Require every fixture in the current cycle to be completed before promotions/relegations are finalised and the next cycle can be generated.</span>
-            <small>Once the cycle is complete, the club chooses the next fixture window. Rallora then applies the configured movement rules and generates the next cycle.</small>
+            <small>After the round is complete, use Prepare next round. Your saved schedule supplies the dates, and Rallora applies promotion/relegation and prepares new fixtures. Review and activate the new round.</small>
           </label>
           <p className={styles.wide}>Fixtures are calculated from the actual group size. For example, a 4-team group playing everyone once gives 3 matches per team; a 5-team overflow group gives 4.</p>
         </section>}
@@ -727,8 +760,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
           </div>
         </div>
         </section>
-        <div className={styles.wizardNav}><button type="button" className={styles.secondaryButton} disabled={builderStep===1} onClick={()=>setBuilderStep(s=>Math.max(1,s-1))}>← Back</button><span>Step {builderStep} of {leagueFormat==="promotion_relegation_cycles"?6:5}</span><button type="button" onClick={()=>setBuilderStep(s=>Math.min(leagueFormat==="promotion_relegation_cycles"?6:5,s+1))}>{builderStep>=(leagueFormat==="promotion_relegation_cycles"?5:4)?"Review competition →":"Continue →"}</button></div>
-        {builderStep===(leagueFormat==="promotion_relegation_cycles"?6:5) && <section className={styles.reviewPanel}><span className={styles.eyebrow}>FINAL REVIEW</span><h3>{newSeason||"Untitled competition"}</h3><div className={styles.reviewGrid}><div><strong>Scheduling</strong><span>{newFixtureScheduleMode==="weekly"?"Weekly rounds":"Flexible date window"}</span></div><div><strong>Format</strong><span>{competitionPreset==="box"?"Rolling box league":competitionPreset==="seasonal"?"Seasonal divisions":"Custom competition"}</span></div><div><strong>Division size</strong><span>{teamsPerDivision} teams</span></div>{leagueFormat==="promotion_relegation_cycles"&&<div><strong>Movement</strong><span>{promotionPlaces} promoted · {relegationPlaces} relegated</span></div>}</div><p>Nothing goes live yet. Rallora will create this as a private draft so you can add teams, review divisions and generate fixtures before activation.</p></section>}
+        <div className={styles.wizardNav}><button type="button" className={styles.secondaryButton} disabled={builderStep===1} onClick={()=>setBuilderStep(s=>Math.max(1,s-1))}>← Back</button><span>Step {builderStep} of {leagueFormat==="promotion_relegation_cycles"?6:5}</span><button type="button" onClick={()=>{if(builderStep===1&&!scheduleLocked&&scheduleError){setError(scheduleError);return;}setError("");setBuilderStep(s=>Math.min(leagueFormat==="promotion_relegation_cycles"?6:5,s+1));}}>{builderStep>=(leagueFormat==="promotion_relegation_cycles"?5:4)?"Review competition →":"Continue →"}</button></div>
+        {builderStep===(leagueFormat==="promotion_relegation_cycles"?6:5) && <section className={styles.reviewPanel}><span className={styles.eyebrow}>FINAL REVIEW</span><h3>{newSeason||"Untitled competition"}</h3><div className={styles.reviewGrid}><div><strong>Scheduling</strong><span>{newFixtureScheduleMode==="weekly"?"Weekly rounds":"Flexible date window"}</span></div><div><strong>Format</strong><span>{competitionPreset==="box"?"Rolling box league":competitionPreset==="seasonal"?"Seasonal divisions":"Custom competition"}</span></div><div><strong>Division size</strong><span>{teamsPerDivision} teams</span></div>{leagueFormat==="promotion_relegation_cycles"&&<div><strong>Movement</strong><span>{promotionPlaces} promoted · {relegationPlaces} relegated</span></div>}</div><p><strong>Competition dates:</strong> {formatScheduleDate(competitionStart)} to {formatScheduleDate(competitionFinish)} · {plannedRounds.length} planned playing round{plannedRounds.length===1?"":"s"}.</p><p>After each round, review results and prepare the next round to apply promotion/relegation. Check and activate the new round before players continue.</p><p>Nothing goes live yet. Rallora will create this as a private draft so you can add teams, review divisions and generate fixtures before activation.</p></section>}
         <div className={styles.seasonFormActions}>
           {builderStep===(leagueFormat==="promotion_relegation_cycles"?6:5) && <button disabled={busy} type="submit">{editingSeasonId ? "Save competition changes" : "Create private draft competition →"}</button>}
           {editingSeasonId && <button type="button" className={styles.secondaryButton} onClick={()=>{
