@@ -565,16 +565,21 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
           <Link href={`/clubs/${encodeURIComponent(slug)}/events`}>Club events</Link>
           <Link href="/notifications">League updates</Link>
         </div>
-        <div className={styles.heroFooter}>
-          <span>{currentSeason?.name ?? club.welcome_title ?? "Club league"}</span>
+        <div className={`${styles.heroFooter} ${styles.heroLeagueNavigation}`}>
+          {seasons.length > 1 ? <div className={styles.heroLeagueChooser}>
+            <label htmlFor="hero-league-choice"><span aria-hidden="true">▦</span> Choose your league <small>{seasons.length} available</small></label>
+            <div className={styles.heroSelectWrap}><select id="hero-league-choice" value={seasonId} onChange={event => setSeasonId(event.target.value)}>{seasons.map(season => <option key={season.id} value={season.id}>{season.name}</option>)}</select><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></div>
+            <p>Select a league to see its registration, tables and fixtures.</p>
+          </div> : <span>{currentSeason?.name ?? club.welcome_title ?? "Club league"}</span>}
+          <a className={styles.scrollToLeague} href="#league-centre">View league centre <span aria-hidden="true">↓</span></a>
         </div>
       </section>
       <ClubSponsors sponsors={content.sponsors} context={{clubId:club.id,seasonId}} position="after-header" />
-      <div className={styles.toolbar}>
+      <div className={styles.toolbar} id="league-centre">
         <div><span className={styles.kicker}>YOUR CLUB. YOUR LEAGUE.</span>
           <h2>League centre</h2></div>
         {seasons.length > 0 && <label className={styles.seasonPicker}>
-          <span>Season</span>
+          <span>Choose league</span>
           <select value={seasonId} onChange={(event) => setSeasonId(event.target.value)}>
             {seasons.map((season) => <option key={season.id} value={season.id}>
               {season.name} · {season.status === "draft" && season.registration_published ? "Registration open" : season.status}</option>)}

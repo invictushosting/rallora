@@ -29,6 +29,7 @@ jobs:
       - run: node --experimental-strip-types --test tests/brand-colors.test.mjs
       - run: node --experimental-strip-types --test tests/communication.test.mjs
       - run: node --experimental-strip-types --test tests/help.test.mjs
+      - run: node --experimental-strip-types --test tests/competition-schedule.test.mjs
       - run: node scripts/check-legacy-demo-rpcs.mjs
       - run: node --experimental-strip-types --test tests/social-channels.test.mjs
       - run: node --experimental-strip-types --test tests/leagues-exports.test.mjs
@@ -143,3 +144,6 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_player_emails_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261022150402_duplicate_pairing_review.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_duplicate_pairing_assertions.sql
+
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261023084709_competition_round_windows.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_round_schedule_assertions.sql
