@@ -21,7 +21,7 @@
 .card p{color:#5f728b;line-height:1.7;font-size:13px}
 .callout{background:#fff;border-left:5px solid #00B0FE;padding:22px 25px;border-radius:0 16px 16px 0}
 .callout p{line-height:1.7;margin-bottom:0;color:#506782;font-size:13px}
-.footer{border-top:1px solid #d1e1ed;padding:23px 0;color:#65809a;font-size:12px}
+
 @media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.header{padding:17px 14px;align-items:flex-start;flex-direction:column}.header nav{gap:10px 17px}.shell{padding:4px 12px 30px}.hero{border-radius:20px;padding:39px 24px}.hero h1{letter-spacing:-1.5px}.grid{grid-template-columns:1fr}.card{min-height:unset}.features{padding:47px 0}}
 

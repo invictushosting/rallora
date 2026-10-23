@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import RalloraFooter from "@/app/components/rallora-footer";
 import RalloraLogo from "@/app/components/rallora-logo";
 import { createClient } from "@/lib/supabase";
 import styles from "./social.module.css";
@@ -500,8 +501,6 @@ export default function ClubSocialStudio() {
         {feedback && <p className={styles.feedback} role="status">{feedback}</p>}
       </section>
     </div>
-    <footer className={styles.footer}>Rallora Social · Create once. Share everywhere.
-      <span>Connected publishing is not enabled. Download and share approved content manually.</span>
-    </footer>
+    <RalloraFooter club={slug} note="Connected publishing is not enabled. Download and share approved content manually." />
   </div></main>;
 }

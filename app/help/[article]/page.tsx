@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import RalloraFooter from "@/app/components/rallora-footer";
 import RalloraLogo from "@/app/components/rallora-logo";
 import { HELP_ARTICLES, HELP_CATEGORIES, HELP_REVIEWED, helpHref, safeClubSlug } from "@/lib/help";
 import styles from "../help.module.css";
@@ -31,7 +32,7 @@ export default async function ArticlePage({ params, searchParams }: Props) {
         </article>
       </div>
       <section className={styles.related}><span className={styles.eyebrow}>KEEP GOING</span><h2>Related guides</h2><div className={styles.grid}>{related.map(a => <Link href={helpHref(a.slug, club)} key={a.slug} className={styles.card}><h3>{a.title}</h3><p>{a.summary}</p><strong>Read guide</strong></Link>)}</div></section>
-      <footer className={styles.footer}><span>Rallora · Padel, connected.</span><Link href={helpHref("", club)}>Browse all guides</Link></footer>
+      <RalloraFooter club={club} />
     </div>
   </main>;
 }

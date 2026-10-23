@@ -1,4 +1,5 @@
 import Link from "next/link";
+import RalloraFooter from "@/app/components/rallora-footer";
 import RalloraLogo from "@/app/components/rallora-logo";
 import styles from "./product.module.css";
 
@@ -95,7 +96,7 @@ export default function ProductLanding({ product }: { product: ProductKey }) {
           posts. Automated Facebook, Instagram, WhatsApp Business and email
           delivery is not enabled until the account and consent work is complete.</p>
       </aside>}
-      <footer className={styles.footer}>© Rallora · One club platform, connected products.</footer>
+      <RalloraFooter />
     </div>
   </main>;
 }
