@@ -1,4 +1,5 @@
 import Link from "next/link";
+import RalloraFooter from "@/app/components/rallora-footer";
 import RalloraLogo from "@/app/components/rallora-logo";
 import styles from "@/app/components/product.module.css";
 import type { Metadata } from "next";
@@ -51,7 +52,7 @@ export default function ProductsPage() {
         </div>
       </section>
 
-      <footer className={styles.footer}>Rallora · Padel, connected.</footer>
+      <RalloraFooter />
     </div>
   </main>;
 }

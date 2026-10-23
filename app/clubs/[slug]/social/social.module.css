@@ -36,12 +36,12 @@
 .channelPreview button,.channelPreview a{display:inline-block;border:1px solid #d4e5f2;background:#edf7ff;border-radius:9px;color:#0b4775;font-weight:850;font-size:11px;padding:10px 12px;text-decoration:none;margin:0 8px 5px 0;cursor:pointer}
 .notice{background:#edf7ff;border-radius:13px;padding:19px;line-height:1.7;color:#59748e;font-size:13px}
 .feedback{background:#dcf7ed;border:1px solid #bce7d2;color:#145e40;font-size:12px;padding:14px;border-radius:10px}
-.footer{margin-top:28px;display:flex;justify-content:space-between;gap:15px;color:#627c97;font-size:12px}
+
 .empty{max-width:560px;background:#fff;border:1px solid #dbe5ef;border-radius:22px;margin:12vh auto;padding:40px 30px}
 .empty h1{font-size:30px;letter-spacing:-1px;margin:28px 0 9px}
 .empty p{color:#55718e;line-height:1.75;font-size:14px}
 .empty>a{display:inline-block;margin:10px 20px 0 0;color:#0078b9;font-size:13px;font-weight:850}
-@media(max-width:900px){.grid{grid-template-columns:1fr}.footer{flex-direction:column}}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
 @media(max-width:530px){.shell{padding:16px 12px 38px}.hero{padding:30px 22px}.editor,.preview{padding:20px}.header{align-items:start;flex-direction:column}.phase{font-size:9px}}
 
 .draftControls{display:flex;justify-content:space-between;align-items:center;gap:13px;flex-wrap:wrap;padding:14px 15px;margin:9px 0 25px;border:1px solid #d4e5f1;border-radius:12px;background:#f4f9fd}

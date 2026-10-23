@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import RalloraFooter from "@/app/components/rallora-footer";
 import RalloraLogo from "@/app/components/rallora-logo";
 import { HELP_ARTICLES, HELP_CATEGORIES, HELP_REVIEWED, helpHref, searchHelp, type HelpCategory } from "@/lib/help";
 import styles from "./help.module.css";
@@ -19,7 +20,7 @@ export default function HelpCentre({ club }: { club: string }) {
       <p className={styles.resultCount} role="status">{articles.length} guide{articles.length === 1 ? "" : "s"}{query.trim() ? ` matching “${query}”` : category ? ` for ${HELP_CATEGORIES.find(c => c.id === category)?.title.toLowerCase()}` : " to get you moving"}</p>
       {articles.length ? <div className={styles.grid}>{articles.map(a => <Link className={styles.card} key={a.slug} href={helpHref(a.slug, club)}><span>{HELP_CATEGORIES.find(c => c.id === a.category)?.title}</span><h2>{a.title}</h2><p>{a.summary}</p><strong>Read guide</strong></Link>)}</div> : <section className={styles.empty}><h2>No matching guide yet</h2><p>Try a shorter search such as “booking” or “captain”, or browse all guides.</p><button type="button" onClick={() => { setQuery(""); setCategory(undefined); }}>Show all guides</button></section>}
       <section className={styles.support}><div><span className={styles.eyebrow}>STILL STUCK?</span><h2>We’ll help you find the next step.</h2><p>Your club organiser handles entries, pairing changes and result disputes. For a technical problem, email Rallora with your club name and what happened.</p></div><a href="mailto:support@rallora.app">Contact Rallora support</a></section>
-      <footer className={styles.footer}><span>Rallora · Padel, connected.</span>{club && <Link href={`/clubs/${club}/admin`}>Club administration</Link>}</footer>
+      <RalloraFooter club={club} />
     </div>
   </main>;
 }
