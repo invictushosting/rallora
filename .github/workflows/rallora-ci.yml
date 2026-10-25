@@ -147,3 +147,5 @@ jobs:
 
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261023084709_competition_round_windows.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_round_schedule_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261025093353_captain_draft_pairing_visibility.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_captain_draft_visibility_assertions.sql
