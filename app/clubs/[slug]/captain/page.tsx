@@ -18,6 +18,7 @@ export default function CaptainCentre() {
   const supabase=useMemo(()=>createClient(),[]);
   const [team,setTeam]=useState<Team|null>(null), [captainTeams,setCaptainTeams]=useState<Team[]>([]);
   const [selectedId,setSelectedId]=useState(""), [viewerId,setViewerId]=useState("");
+  const [pairingSearch,setPairingSearch]=useState("");
   const [platformAdmin,setPlatformAdmin]=useState(false), [loading,setLoading]=useState(true);
   const [labels,setLabels]=useState<Record<string,string>>({}), [fixtures,setFixtures]=useState<Fixture[]>([]);
   const [submissions,setSubmissions]=useState<CaptainSubmission[]>([]), [results,setResults]=useState<OfficialResult[]>([]);
@@ -146,6 +147,12 @@ export default function CaptainCentre() {
   const fixtureCards=(loading?[]:fixtures).map(fixture=>({fixture,...captainResultState(fixture,team?.id??"",viewerId,team?.season.status,submissions,results,platformAdmin)}))
     .sort((a,b)=>Number(b.action)-Number(a.action)||a.fixture.play_by.localeCompare(b.fixture.play_by));
   const actionCount=fixtureCards.filter(item=>item.action).length;
+  const searchWords=pairingSearch.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+  const matchingTeams=captainTeams.filter(item=>{
+    const text=[item.player_one_name,item.player_two_name,item.name,item.season.name].filter(Boolean).join(" ").toLocaleLowerCase();
+    return searchWords.every(word=>text.includes(word));
+  });
+  const selectedMatch=matchingTeams.some(item=>item.id===team?.id);
   return <main className={styles.page}><div className={styles.shell}>
     <header><BackLink href={`/clubs/${slug}`}>Back to club</BackLink><Link href={`/help/captain-access?club=${encodeURIComponent(slug)}`}>Captain guide</Link><strong>RALLORA · CAPTAIN</strong></header>
     <section className={styles.hero}><div className={styles.heroTop}><span>CAPTAIN CENTRE</span>{team&&<strong className={styles.actionBadge}>{actionCount} action{actionCount===1?"":"s"}</strong>}</div>
@@ -153,7 +160,19 @@ export default function CaptainCentre() {
       <p>Your match centre for fixtures, scores and result confirmation.</p>
       {team&&<div className={styles.ratingStrip}><span>PLAYTOMIC</span><strong>{team.player_one_name} {team.player_one_rating?.toFixed(2)??"–"}</strong><strong>{team.player_two_name} {team.player_two_rating?.toFixed(2)??"–"}</strong></div>}
       {platformAdmin&&<p className={styles.adminNotice}><strong>Super admin · View as captain</strong><br/>Choose any pairing to inspect its fixtures and captain actions. Saving bookings, submitting scores and reviewing results changes live club data under your admin account.</p>}
-      {(platformAdmin&&captainTeams.length>0||captainTeams.length>1)&&<label>{platformAdmin?"View as captain — pairing":"Captain pairing"}<select disabled={Boolean(busy)||loading} value={team?.id??""} onChange={event=>{setLoading(true);setSelectedId(event.target.value);setFixtures([]);setNotice("Loading captain access…");}}>{captainTeams.map(item=><option key={item.id} value={item.id}>{item.season.name} ({item.season.status}) · {[item.player_one_name,item.player_two_name].filter(Boolean).join(" / ")||item.name}</option>)}</select></label>}
+      {(platformAdmin&&captainTeams.length>0||captainTeams.length>1)&&<div className={styles.pairingPicker}>
+        <label htmlFor="captain-pairing-search">Search players or leagues</label>
+        <div className={styles.pairingSearch}>
+          <input id="captain-pairing-search" type="search" autoComplete="off" placeholder="Type either player’s name or a league" value={pairingSearch} disabled={Boolean(busy)||loading} onChange={event=>setPairingSearch(event.target.value)} aria-describedby="captain-pairing-count"/>
+          {pairingSearch&&<button type="button" disabled={Boolean(busy)||loading} onClick={()=>setPairingSearch("")}>Clear search</button>}
+        </div>
+        <p id="captain-pairing-count" className={styles.pairingCount} role="status">{matchingTeams.length?`${matchingTeams.length} of ${captainTeams.length} pairings shown. Choose a pairing below to view it.`:"No pairings match your search. Try another name or clear the search."}</p>
+        <label htmlFor="captain-pairing">{platformAdmin?"View as captain · pairing":"Captain pairing"}</label>
+        <select id="captain-pairing" disabled={Boolean(busy)||loading||matchingTeams.length===0} value={selectedMatch?team?.id??"":""} onChange={event=>{if(!event.target.value)return;setLoading(true);setSelectedId(event.target.value);setFixtures([]);setNotice("Loading captain access…");}}>
+          {!selectedMatch&&<option value="" disabled>{matchingTeams.length?"Choose a matching pairing":"No matching pairings"}</option>}
+          {matchingTeams.map(item=><option key={item.id} value={item.id}>{item.season.name} ({item.season.status}) · {[item.player_one_name,item.player_two_name].filter(Boolean).join(" / ")||item.name}</option>)}
+        </select>
+      </div>}
     </section>
     {notice&&<p className={styles.notice} role="status">{notice}</p>}
     {!loading&&!team&&<Link href={platformAdmin?`/clubs/${slug}/admin`:viewerId?`/account?club=${encodeURIComponent(slug)}&return=captain`:"/login"}>{platformAdmin?"Open club admin":viewerId?"Open your account":"Sign in to your captain account"} →</Link>}
