@@ -7,7 +7,7 @@ export type HelpArticle = {
   slug: string; category: HelpCategory; title: string; summary: string;
   keywords: string[]; sections: HelpSection[]; related: string[];
 };
-export const HELP_REVIEWED = "23 October 2026";
+export const HELP_REVIEWED = "25 October 2026";
 export const HELP_CATEGORIES: { id: HelpCategory; title: string; description: string }[] = [
   { id: "players", title: "Players", description: "Join a league, check your entry and get ready to play." },
   { id: "captains", title: "Captains", description: "Arrange matches, submit scores and review results." },
@@ -21,6 +21,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
     sections: [
       { id: "choose", title: "Choose how to enter", steps: ["Open your club’s league centre. If several leagues are available, use Choose your league above the registration box, then press Register now for the selected competition. Entry must be open for that competition.", "Choose Register a pair if you have a partner, Register as a single if you need one, or Join standby list if you can step in as a replacement.", "Check the selected competition before continuing."], note: "Single and standby entries go to the club’s player lists. They do not guarantee a pairing or a competition place." },
       { id: "details", title: "Complete your details", steps: ["Sign in to your existing Rallora account or create one. Enter the email used for your Playtomic profile where requested.", "If your Playtomic email is an Apple private relay address, supply a separate, working Rallora contact email when prompted.", "Add your player details and current rating when requested. For a pair, add your partner’s name, emails and rating too. Check spelling carefully." ] },
+      { id: "team-invite", title: "Accept a partner invitation", steps: ["Open the team invitation link sent to your email. Use the address your captain invited.", "If you are new to Rallora, choose Create account and create your own Rallora password. If you already have an account, choose Sign in. Your Playtomic password does not sign you in to Rallora.", "Complete email confirmation if requested, then return to the original invitation and sign in. Resend confirmation email is available when needed. Forgot password opens recovery in a new tab so you can return to your invitation afterwards.", "Press Claim team place to complete the invitation. If the invitation is unavailable, check your account email with your captain or club organiser."], note: "Your captain adding your details does not create a Rallora password for you. Accepting an invitation does not require another league application." },
       { id: "submit", title: "Submit the entry", steps: ["Complete any email verification requested, then return to the registration page.", "Review the final step and press the final submit button. Creating or verifying an account alone does not enter you into the league.", "Wait for the registration receipt or current status on screen. A pairing is reviewed by the organiser before going live."], note: "If you are unsure whether your entry arrived, check the existing status before submitting again. Ask the organiser to check it if necessary." },
     ], related: ["registration-status", "emails-and-ratings", "captain-access"],
   },
