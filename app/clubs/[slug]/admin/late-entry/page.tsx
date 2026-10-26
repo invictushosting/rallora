@@ -94,7 +94,7 @@ export default function LateEntryPage(){
       <h2>Team registered successfully</h2>
       <p>The captain now has a roster place. Send the partner this claim link so they can join the team:</p>
       <a href={`/clubs/${slug}/join-team?invite=${result.partner_invite_id}`}>Open partner invitation</a>
-      {result.fixtures_need_review?<p><strong>Fixture action required:</strong> This league already has fixtures. Review the division schedule and arrange the new pairing's matches manually. No published fixtures or results were deleted.</p>:<p>Generate the competition fixtures when all pairings have been assigned.</p>}
+      {result.fixtures_need_review?<p><strong>Fixture action required:</strong> This league already has fixtures. Review the division schedule and arrange the new pairing&apos;s matches manually. No published fixtures or results were deleted.</p>:<p>Generate the competition fixtures when all pairings have been assigned.</p>}
       <button type="button" onClick={()=>setResult(null)}>Add another team</button>
     </section>:null}
     {status?<p role="status" className={styles.notice}>{status}</p>:null}
@@ -112,7 +112,7 @@ export default function LateEntryPage(){
       <div className={styles.fields}>
         <label>Team name<input required minLength={2} maxLength={120} value={teamName} onChange={e=>setTeamName(e.target.value)}/></label>
         <label>Captain name<input required minLength={2} maxLength={120} value={captainName} onChange={e=>setCaptainName(e.target.value)}/></label>
-        <label>Captain's Rallora account email<input required type="email" value={captainEmail} onChange={e=>setCaptainEmail(e.target.value)}/><small>The captain must already have a Rallora login.</small></label>
+        <label>Captain&apos;s Rallora account email<input required type="email" value={captainEmail} onChange={e=>setCaptainEmail(e.target.value)}/><small>The captain must already have a Rallora login.</small></label>
         <label>Partner name<input required minLength={2} maxLength={120} value={partnerName} onChange={e=>setPartnerName(e.target.value)}/></label>
         <label>Partner email<input required type="email" value={partnerEmail} onChange={e=>setPartnerEmail(e.target.value)}/></label>
       </div>}
