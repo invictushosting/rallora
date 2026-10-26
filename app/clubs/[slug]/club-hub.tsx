@@ -1,5 +1,6 @@
 "use client";
 
+import {registrationWindowState} from "@/lib/registration-window";
 import {useRegistrationWindow} from "@/lib/hooks/use-registration-window";
 import BackLink from "@/app/components/back-link";
 import {brandColor, readableInk, readableAccent} from "@/lib/brand-colors";
@@ -587,7 +588,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
           <span>Choose league</span>
           <select value={seasonId} onChange={(event) => setSeasonId(event.target.value)}>
             {seasons.map((season) => <option key={season.id} value={season.id}>
-              {season.name} · {season.status === "draft" && season.registration_published ? "Registration open" : season.status}</option>)}
+              {season.name} · {season.status === "draft" && season.registration_published ? registrationWindowState(season)==="open"?"Registration open":registrationWindowState(season)==="upcoming"?"Registration opens soon":"Registration closed" : season.status}</option>)}
           </select>
         </label>}
       </div>
