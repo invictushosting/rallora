@@ -1,5 +1,6 @@
 "use client";
 
+import {useRegistrationWindow} from "@/lib/hooks/use-registration-window";
 import BackLink from "@/app/components/back-link";
 import {brandColor, readableInk, readableAccent} from "@/lib/brand-colors";
 import RalloraLogo from "@/app/components/rallora-logo";
@@ -328,6 +329,9 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
     return () => { alive = false; };
   }, [clubState, seasonId, supabase, previewSeasonId]);
 
+  const selectedRegistrationSeason=clubState.kind==="ready"?clubState.seasons.find(season=>season.id===seasonId):null;
+  const registrationState=useRegistrationWindow(selectedRegistrationSeason);
+
   if (clubState.kind === "loading") return <Loading />;
 
   if (clubState.kind !== "ready") {
@@ -344,7 +348,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
 
   const { club, seasons, content } = clubState;
   const currentSeason = seasons.find((season) => season.id === seasonId);
-  const registrationOpen = Boolean(currentSeason?.registration_published && currentSeason.status === "draft");
+  const registrationOpen = Boolean(currentSeason?.status === "draft" && registrationState === "open");
   const registrationDeadline = currentSeason?.registration_closes_at ? dateLabel(currentSeason.registration_closes_at) : null;
   const clubLogo = safeImage(club.logo_url);
   const clubCover = safeImage(club.cover_image_url);
@@ -541,7 +545,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
           <RalloraLogo variant="light" width={210} /></Link>
         <div className={styles.headerLinks}>
           <Link href="/" className={styles.adminLink}>Rallora home</Link>
-          <Link href={`/clubs/${encodeURIComponent(slug)}/register`} className={styles.registerLink}>{registrationOpen ? "Register" : "Competitions"}</Link>
+          {registrationOpen?<Link href={`/clubs/${encodeURIComponent(slug)}/register?season=${encodeURIComponent(currentSeason!.id)}`} className={styles.registerLink}>Register</Link>:<a href="#league-centre" className={styles.registerLink}>Competitions</a>}
           <Link href={`/clubs/${encodeURIComponent(slug)}/captain`} className={styles.adminLink}>Captain login</Link>
           <Link href={`/clubs/${encodeURIComponent(slug)}/admin`} className={styles.adminLink}>Club admin</Link>
         </div>
@@ -559,14 +563,14 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
             <div className={styles.heroSelectWrap}><select id="hero-league-choice" value={seasonId} onChange={event => setSeasonId(event.target.value)}>{seasons.map(season => <option key={season.id} value={season.id}>{season.name}</option>)}</select><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg></div>
             <p>Select a league to see its registration, tables and fixtures.</p>
           </div>}
-        {registrationOpen && currentSeason && <div className={styles.registrationCallout}>
-          <div><span className={styles.statusPill}>Registration open</span>
+        {currentSeason?.status==="draft" && currentSeason.registration_published && <div className={styles.registrationCallout}>
+          <div><span className={`${styles.statusPill} ${registrationOpen?"":styles.registrationUnavailable}`}>{registrationOpen?"Registration open":registrationState==="upcoming"?"Registration opens soon":"Registration closed"}</span>
             <strong>{currentSeason.name}</strong>
-            {registrationDeadline && <small>Entries close {registrationDeadline}</small>}</div>
-          <Link href={`/clubs/${encodeURIComponent(slug)}/register?season=${encodeURIComponent(currentSeason.id)}`}>Register now</Link>
+            {registrationState==="upcoming"&&currentSeason.registration_opens_at?<small>Entries open {dateLabel(currentSeason.registration_opens_at)}</small>:registrationDeadline&&<small>Entries {registrationOpen?"close":"closed"} {registrationDeadline}</small>}</div>
+          {registrationOpen?<Link href={`/clubs/${encodeURIComponent(slug)}/register?season=${encodeURIComponent(currentSeason.id)}`}>Register now</Link>:<small>{registrationState==="upcoming"?"Please return when registration opens.":"Entries are closed. Existing players can still claim their invitation and sign in."}</small>}
         </div>}
         <div className={styles.heroActions}>
-          {!registrationOpen && <Link href={`/clubs/${encodeURIComponent(slug)}/register`}>View competitions</Link>}
+          {!registrationOpen && <a href="#league-centre">View competition</a>}
           <Link href={`/clubs/${encodeURIComponent(slug)}/events`}>Club events</Link>
           <Link href="/notifications">League updates</Link>
         </div>
