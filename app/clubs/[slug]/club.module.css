@@ -47,7 +47,7 @@
 .headerLinks{display:flex;align-items:center;gap:8px}.adminLink,.registerLink{color:#244d96;background:#E8F2F9;border:1px solid #d1dff7;padding:11px 15px;border-radius:30px;text-decoration:none;font-size:12px;font-weight:850}.registerLink{background:#061a39;color:#fff;border-color:#061a39}
 .tabs{display:flex;align-items:center;gap:7px;overflow-x:auto;border-bottom:1px solid #dae4f2;margin:24px 0 28px;padding-bottom:8px;scrollbar-width:thin}
 .tabs button{white-space:nowrap;border:0;background:transparent;color:#6b819c;border-radius:11px;padding:13px 17px;font-size:13px;font-weight:800;cursor:pointer}
-.tabs button:hover{background:#e8effc;color:#234a85}
+.tabs button:where(:not(.selectedTab)):hover{background:#e8effc;color:#234a85}
 .tabs .selectedTab{background:#e5edff;color:#1644a8;box-shadow:inset 0 -3px var(--club-color)}
 .section{min-height:270px;margin-top:24px}
 .sectionHeading{display:flex;justify-content:space-between;align-items:end;gap:16px;margin:0 0 20px}
