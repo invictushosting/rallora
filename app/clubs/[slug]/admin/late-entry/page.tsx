@@ -6,7 +6,7 @@ import {useParams} from "next/navigation";
 import {createClient} from "@/lib/supabase";
 import styles from "./late-entry.module.css";
 
-type Season={id:string;name:string;status:string};
+type Season={id:string;name:string;status:string;division_assignment_mode:string};
 type Division={id:string;season_id:string;name:string};
 type Team={id:string;division_id:string;name:string;player_one_name:string|null;player_two_name:string|null};
 type Result={team_id:string;partner_invite_id:string;fixtures_need_review:boolean;season_status:string};
@@ -26,6 +26,8 @@ export default function LateEntryPage(){
   const [captainEmail,setCaptainEmail]=useState("");
   const [partnerName,setPartnerName]=useState("");
   const [partnerEmail,setPartnerEmail]=useState("");
+  const [captainRating,setCaptainRating]=useState("");
+  const [partnerRating,setPartnerRating]=useState("");
   const [reason,setReason]=useState("");
   const [status,setStatus]=useState("Loading…");
   const [busy,setBusy]=useState(false);
@@ -43,7 +45,7 @@ export default function LateEntryPage(){
     if(!platform.data&&(!member.data||member.data.status!=="active"||!["owner","admin","organiser"].includes(member.data.role))){
       setStatus("You do not have permission to add teams for this club.");return;
     }
-    const seasonReply=await supabase.from("seasons").select("id,name,status").eq("club_id",club.data.id);
+    const seasonReply=await supabase.from("seasons").select("id,name,status,division_assignment_mode").eq("club_id",club.data.id);
     if(seasonReply.error){setStatus(seasonReply.error.message);return;}
     const allSeasons=(seasonReply.data??[]) as Season[];
     const eligible=allSeasons.filter(s=>["draft","active"].includes(s.status));
@@ -70,15 +72,18 @@ export default function LateEntryPage(){
   async function submit(event:React.FormEvent<HTMLFormElement>){
     event.preventDefault();
     if(!seasonId||!divisionId||reason.trim().length<3)return;
+    if(season?.division_assignment_mode==="combined_rating" && (captainRating===""||partnerRating==="")){setStatus("Enter Playtomic ratings for both players before registering.");return;}
     setBusy(true);setStatus("");setResult(null);
-    const response=await supabase.rpc("rallora_admin_add_late_team",{
+    const response=await supabase.rpc("rallora_admin_add_late_team_with_ratings",{
       p_season_id:seasonId,p_division_id:divisionId,p_mode:mode,p_reason:reason.trim(),
       p_source_team_id:mode==="existing"?sourceTeamId:null,
       p_team_name:mode==="new"?teamName.trim():null,
       p_captain_name:mode==="new"?captainName.trim():null,
       p_captain_email:mode==="new"?captainEmail.trim().toLowerCase():null,
       p_partner_name:mode==="new"?partnerName.trim():null,
-      p_partner_email:mode==="new"?partnerEmail.trim().toLowerCase():null
+      p_partner_email:mode==="new"?partnerEmail.trim().toLowerCase():null,
+      p_captain_rating:captainRating===""?null:Number(captainRating),
+      p_partner_rating:partnerRating===""?null:Number(partnerRating)
     });
     setBusy(false);
     if(response.error){setStatus(response.error.message);return;}
@@ -116,9 +121,18 @@ export default function LateEntryPage(){
         <label>Partner name<input required minLength={2} maxLength={120} value={partnerName} onChange={e=>setPartnerName(e.target.value)}/></label>
         <label>Partner email<input required type="email" value={partnerEmail} onChange={e=>setPartnerEmail(e.target.value)}/></label>
       </div>}
+      <div className={styles.fields}>
+        <label>Captain Playtomic rating {season?.division_assignment_mode==="combined_rating"?"(required)":"(optional)"}
+          <input type="number" min="0" max="10" step="0.01" inputMode="decimal" required={season?.division_assignment_mode==="combined_rating"} value={captainRating} onChange={e=>setCaptainRating(e.target.value)} placeholder="0.00–10.00"/>
+        </label>
+        <label>Partner Playtomic rating {season?.division_assignment_mode==="combined_rating"?"(required)":"(optional)"}
+          <input type="number" min="0" max="10" step="0.01" inputMode="decimal" required={season?.division_assignment_mode==="combined_rating"} value={partnerRating} onChange={e=>setPartnerRating(e.target.value)} placeholder="0.00–10.00"/>
+        </label>
+        <small>{season?.division_assignment_mode==="combined_rating"?"Both ratings are required for this league’s combined-rating box placement.":"Ratings are optional for this league."}</small>
+      </div>
       <label>Reason for deadline override<textarea required minLength={3} maxLength={500} rows={3} placeholder="e.g. Captain contacted us after registration closed" value={reason} onChange={e=>setReason(e.target.value)}/></label>
       <p className={styles.warning}><strong>{season?.status==="active"?"Active competition:":"Draft competition:"}</strong> Adding a team never regenerates fixtures automatically. Existing match results remain untouched. Admin changes are recorded in an audit log.</p>
-      <button className={styles.submit} disabled={busy||!seasonId||!divisionId||reason.trim().length<3||(mode==="existing"?!sourceTeamId:!captainName.trim()||!captainEmail.trim()||!partnerName.trim()||!partnerEmail.trim())}>{busy?"Registering…":"Confirm late registration"}</button>
+      <button className={styles.submit} disabled={busy||!seasonId||!divisionId||reason.trim().length<3||(season?.division_assignment_mode==="combined_rating"&&(captainRating===""||partnerRating===""))||(mode==="existing"?!sourceTeamId:!captainName.trim()||!captainEmail.trim()||!partnerName.trim()||!partnerEmail.trim())}>{busy?"Registering…":"Confirm late registration"}</button>
     </form>
   </div></main>;
 }

@@ -151,6 +151,7 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_captain_draft_visibility_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261026193000_admin_late_team_entry.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261027111500_late_entry_default_pair_name.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261027113000_late_entry_with_ratings.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261027081500_player_profile_preferences.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_player_profile_preferences_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261027090500_social_player_discovery.sql
