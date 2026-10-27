@@ -22,7 +22,7 @@ begin
     select 1 from public.rallora_platform_admins a where a.user_id=auth.uid()
   ) then raise exception 'Not authorised' using errcode='42501'; end if;
   return query select p.id,p.user_id,p.request_type,p.details,p.status,p.internal_notes,p.created_at,p.updated_at,p.closed_at
-    from public.rallora_privacy_requests p order by p.created_at desc limit 200;
+    from public.rallora_privacy_requests p\n    order by case when p.status in ('completed','declined') then 1 else 0 end,\n      case when p.status in ('completed','declined') then null else p.created_at end asc nulls last,\n      p.created_at desc limit 200;
 end;
 $$;
 revoke all on function public.rallora_admin_list_privacy_requests() from public,anon;
