@@ -385,6 +385,7 @@ export default function PlatformControlCentre() {
         })}
         {!view.formatRequests.length&&<article className={styles.card}><h3>No format requests</h3><p>Requests submitted by club organisers will appear here.</p></article>}
       </section>
+      <section style={{padding:"16px 20px",margin:"24px 0",border:"1px solid #cbd5e1",borderRadius:12}}><h2>Data protection requests</h2><p>Review and record responses to player access, correction, export and deletion requests.</p><Link href="/platform/privacy">Open restricted privacy-request queue →</Link></section>
       <div className={styles.sectionHeading}><div><small>PLATFORM HEALTH</small><h2>Operational checks</h2></div><p>Activity totals and data-quality checks across Rallora, including demo and test clubs.</p></div>
       {readiness&&<section className={`${styles.metrics} ${styles.readinessMetrics}`} aria-label="Platform health">{Object.entries(readiness).map(([key,value])=>{
         const activity=activityMetrics.has(key);

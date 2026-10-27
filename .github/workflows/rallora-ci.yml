@@ -44,6 +44,7 @@ jobs:
       - run: node --experimental-strip-types --test tests/login-destinations.test.mjs
       - run: node --experimental-strip-types --test tests/result-workflow.test.mjs
       - run: node --experimental-strip-types --test tests/scores.test.mjs
+      - run: node --test tests/compliance-signup-ledger.test.mjs tests/privacy-rights-intake.test.mjs tests/admin-privacy-request-review.test.mjs tests/security-review-contract.test.mjs
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
@@ -157,3 +158,65 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261027090500_social_player_discovery.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_social_player_discovery_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_late_team_entry_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_privileged_fixture_scope_assertions.sql
+
+  privacy-migrations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: ci-only-test-password
+          POSTGRES_DB: rallora_privacy_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d rallora_privacy_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: localhost
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: ci-only-test-password
+      PGDATABASE: rallora_privacy_ci
+    steps:
+      - uses: actions/checkout@v4
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_privacy_fixture.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261027121500_signup_terms_acceptance_ledger.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261027130000_privacy_rights_request_intake.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261027134500_admin_privacy_request_review.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261027143000_privacy_notification_outbox.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_privacy_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_privacy_negative_roles.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_privacy_notifications_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_terms_acceptance_negative_cases.sql
+  public-event-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: ci-only-test-password
+          POSTGRES_DB: rallora_event_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d rallora_event_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: localhost
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: ci-only-test-password
+      PGDATABASE: rallora_event_ci
+    steps:
+      - uses: actions/checkout@v4
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_event_feature_boundary_fixture.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261027141000_public_events_feature_routine_boundary.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_event_feature_boundary_assertions.sql
