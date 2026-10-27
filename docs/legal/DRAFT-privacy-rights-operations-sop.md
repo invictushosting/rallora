@@ -1,13 +1,13 @@
 # Privacy-rights request operations — draft SOP (27 October 2026)
 
-**Status: DRAFT. Not an automated service and not yet live.** The Protego business owner has agreed to act as primary operational privacy contact, but the formal contact record, mailbox and admin access, deputy, coverage schedule and actual monitoring remain unverified. This is not a statutory DPO appointment.
+**Status: DRAFT. Not an automated service and not yet live.** The Protego business owner has agreed to act as **sole operational privacy contact**, with **no nominated backup**. The formal contact record, mailbox/admin access, owner absence cover, monitoring and continuity safeguards remain unverified. This is not a statutory DPO appointment.
 
 ## Intake and monitoring
 - An authorised Rallora platform staff member must check the restricted `/platform/privacy` queue **every business day**, including after weekends, holiday closures and deployments.
 - The queue prioritises the oldest unresolved requests and displays a **21-day internal review target**, intended to prompt action before the usual UK GDPR one-calendar-month deadline. This target does **not** calculate legal due dates, permissible extensions, pauses or exemptions.
 - The back-office list returns at most 200 records. If volumes approach the cap, staff must query the restricted backend with appropriate access controls and use a separate secure tracking register. Do not assume the displayed count is the entire backlog.
 - `support@rallora.app` and any other published contact channel must also be monitored for requests from people unable to sign in. Submission via email is a valid separate intake path.
-- **No automatic email or alert is deployed to production for newly submitted rights requests.** A transactional notification outbox and delivery integration exist only in the draft compliance branch and require operational testing and security approval. An accountable person and backup must own monitoring until an alerting service is independently tested.
+- **No automatic email or alert is deployed to production for newly submitted rights requests.** A transactional notification outbox and delivery integration exist only in the draft compliance branch and require operational testing and security approval. The owner must personally monitor the mailbox and request queue; there is no nominated deputy. Absence and account lockout contingencies are open release risks until independently reviewed.
 
 ## Workflow
 1. Log receipt date, originating channel, request type and case ID without copying unnecessary identity documents into unprotected notes.
@@ -23,12 +23,12 @@
 Keep date checked, operator, oldest open receipt date, count of open cases, imminent deadlines, overdue cases, escalations and action owner in a restricted organisational register. The app currently shows a live snapshot only when the page is opened.
 
 ## Release gates
-Do not enable the rights-request intake for players until a named lead/backup, staffed schedule (including absences), monitored support mailbox, agreed retention policy, secure fulfilment process, and tested alerts or manual control are in operation. Obtain legal review of deadlines and controller/processor arrangements.
+Do not enable the rights-request intake for players until the sole lead, legally reviewed owner-absence and loss-of-access contingency, monitored support mailbox, agreed retention policy, secure fulfilment process, and tested alerts or manual control are in operation. Obtain legal review of deadlines and controller/processor arrangements.
 
 ## Notification and monitoring implementation decision (no extra services)
 The current player browser writes `rallora_privacy_requests` through authenticated RLS. A client-side best-effort email after submission would be unreliable (the browser can close), could be spoofed, and must not be treated as a delivery guarantee. Do not use it as the sole alert.
 
-Before activating this intake, assign the platform privacy lead and backup, configure the already-published `support@rallora.app` mailbox to reach both responsible staff through the existing mail administration, and record daily queue reviews. Avoid sending request bodies, identity documents or other personal data in unprotected notification email. Draft notifications should carry only an opaque case identifier, with a restricted link to `/platform/privacy`.
+Before activating this intake, verify the sole owner can receive and reply via the published `support@rallora.app` mailbox, and record daily queue reviews. No forwarding or access should be granted to an unnamed backup. Obtain a reviewed absence/access-recovery procedure before release. Avoid sending request bodies, identity documents or other personal data in unprotected notification email. Draft notifications should carry only an opaque case identifier, with a restricted link to `/platform/privacy`.
 
 A future fully automated reminder needs a durable outbox transactionally tied to request creation, a worker with retries/idempotency and backoff, scoped least-privilege delivery credentials, monitoring for failed deliveries, and end-to-end verification. Existing `rallora_private.communication_tick` handles league reminders; do not silently add privacy data to that queue or alter its service configuration.
 
