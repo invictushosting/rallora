@@ -158,3 +158,33 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261027090500_social_player_discovery.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_social_player_discovery_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_late_team_entry_assertions.sql
+
+  privacy-migrations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: ci-only-test-password
+          POSTGRES_DB: rallora_privacy_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d rallora_privacy_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: localhost
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: ci-only-test-password
+      PGDATABASE: rallora_privacy_ci
+    steps:
+      - uses: actions/checkout@v4
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_privacy_fixture.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261027121500_signup_terms_acceptance_ledger.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261027130000_privacy_rights_request_intake.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261027134500_admin_privacy_request_review.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_privacy_assertions.sql
