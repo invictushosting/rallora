@@ -18,3 +18,9 @@ insert into auth.users(id,email,raw_user_meta_data) values
  ('00000000-0000-0000-0000-000000000902','player@example.test','{}');
 insert into public.rallora_platform_admins(user_id)
  values ('00000000-0000-0000-0000-000000000901');
+
+-- CI-only worker configuration. No production token or email credentials.
+create schema if not exists rallora_private;
+create table rallora_private.delivery_worker_config(singleton boolean primary key default true,token text);
+insert into rallora_private.delivery_worker_config(singleton,token)
+values (true,repeat('a',64));
