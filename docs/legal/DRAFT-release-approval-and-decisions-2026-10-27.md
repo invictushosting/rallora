@@ -3,7 +3,7 @@
 **Decision: NOT APPROVED FOR PUBLICATION, EXECUTION OR PRODUCTION DEPLOYMENT.** This register tracks unanswered questions and necessary evidence. It is not legal advice and no owner or sign-off is implied.
 
 ## External legal handoff
-The review brief and *partially assigned* operational responsibility matrix are in `docs/legal/DRAFT-solicitor-review-handoff-2026-10-27.md`. It identifies all source drafts, counsel questions, business inputs, and required acceptance evidence. The Protego business owner has volunteered as primary operational privacy contact; their access, availability and name for formal records still need verification. No deputy, statutory DPO or solicitor has been appointed.
+The review brief and *partially assigned* operational responsibility matrix are in `docs/legal/DRAFT-solicitor-review-handoff-2026-10-27.md`. It identifies all source drafts, counsel questions, business inputs, and required acceptance evidence. The Protego business owner explicitly confirmed they will serve as the **sole** operational privacy contact. No deputy will be nominated under the present arrangement. Formal identity/contact for records, mailbox/admin access, daily monitoring and owner-absence contingency remain unverified; this does not appoint a statutory DPO.
 
 ## Source drafts / release scope
 - Player notice: `app/privacy/page.tsx`
@@ -30,7 +30,7 @@ The review brief and *partially assigned* operational responsibility matrix are 
 | LEG-06 | Provider privacy lead + clubs + counsel | Set explicit active/inactive account, league, results, support, data subject rights, audit/event and backup retention + disposal periods; legal holds and club export/return on exit | Privacy notice + DPA + release |
 | LEG-07 | Club pilot owners + commercial lead + counsel | Complete plans, trial start/end, price/VAT, renewal, cancellation, SLA/support, liability/indemnities, governing law, logo publicity rights and signatories; zero-cost pilot cannot become charged without affirmative agreement | Club agreement |
 | LEG-08 | Product lead + safeguarding/privacy counsel | Approve minimum age, any juniors/safeguarding controls, user-generated content/moderation, player photos/social visibility, sporting disputes, appeals and Playtomic integration rights | Terms + notice |
-| LEG-09 | Privacy lead + backup (to nominate) | Verify access to support@rallora.app, staffed queue reviews and missed-mail escalation, identity procedure, service response timelines, secure exports/deletions and incident/breach process | Privacy requests |
+| LEG-09 | Protego business owner (sole nominated privacy contact) | Verify access to support@rallora.app, daily queue reviews, owner-only absence/loss-of-access contingency, missed-mail escalation, identity procedure, service response timelines, secure exports/deletions and incident/breach process. **No deputy assigned; continuity risk unresolved.** | Privacy requests |
 | LEG-10 | Engineering lead + security reviewer | Independently assess worker-token RPC execution grants, outbox failures, Resend idempotency, endpoint schedule and no sensitive data leaks; exercise real Auth and mail via isolated environment | Notification deploy |
 | LEG-11 | Product + privacy counsel | Finalise Terms publication version/hash and recorded acceptance wording, renewal process for existing accounts and version mismatch policies; distinguish contract acceptance from GDPR consent | Signup release |
 | LEG-12 | Release owner + DBA/security | Obtain restorable backup, non-production Auth test environment, migration rehearsal, rollback drill, production smoke checklist and explicit authorisation | Deploy |
@@ -48,7 +48,7 @@ The review brief and *partially assigned* operational responsibility matrix are 
 ## Release order after all approvals
 1. Finish privacy inventory, subprocessor and retention schedules and obtain signed legal review.
 2. Generate final immutable Terms version/hash and update all three registration paths, acceptance trigger and existing-user renewal design consistently. Run negative acceptance tests.
-3. Confirm privacy lead and backup with daily queue monitoring; complete delivery failure alert procedure.
+3. Confirm owner-only privacy monitoring and a proportionate, legally reviewed absence and access-recovery contingency; complete delivery failure alert procedure.
 4. Verify real Supabase Auth + Resend flows with synthetic users before any production change.
 5. Compare production schema, record backup + recovery evidence, update runbook migration order and obtain explicit release approval.
 6. Deploy in controlled sequence and record smoke-test outcomes; monitor failed outbox rows and response due dates.
