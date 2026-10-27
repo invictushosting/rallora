@@ -5,12 +5,16 @@ import {createClient} from "@/lib/supabase";
 
 type RequestRow={id:string;user_id:string|null;request_type:string;details:string;status:string;internal_notes:string|null;created_at:string;updated_at:string;closed_at:string|null};
 const statuses=["received","identity_check","in_review","completed","declined"] as const;
+const isClosed=(status:string)=>status==="completed"||status==="declined";
+const reviewTarget=(createdAt:string)=>new Date(new Date(createdAt).getTime()+21*86400000);
+const needsPriority=(row:RequestRow)=>!isClosed(row.status)&&reviewTarget(row.created_at).getTime()<=Date.now();
 export default function PlatformPrivacyRequests(){
  const db=useMemo(()=>createClient(),[]);
  const [rows,setRows]=useState<RequestRow[]>([]);
  const [state,setState]=useState<"loading"|"ready"|"forbidden"|"error">("loading");
  const [error,setError]=useState(""),[saving,setSaving]=useState("");
  const [edits,setEdits]=useState<Record<string,{status:string;notes:string}>>({});
+ const [filter,setFilter]=useState<"open"|"all"|"closed">("open");
  const reload=useCallback(async()=>{
    const {data:{user},error:authError}=await db.auth.getUser();
    if(authError||!user){setState("forbidden");return;}
@@ -24,6 +28,9 @@ export default function PlatformPrivacyRequests(){
    setState("ready");
  },[db]);
  useEffect(()=>{void reload();},[reload]);
+ const openRows=rows.filter(row=>!isClosed(row.status));
+ const priorityCount=openRows.filter(needsPriority).length;
+ const visibleRows=rows.filter(row=>filter==="all"||(filter==="closed"?isClosed(row.status):!isClosed(row.status)));
  async function update(row:RequestRow){
    const edit=edits[row.id];
    if(!edit||!statuses.some(s=>s===edit.status))return;
@@ -38,11 +45,16 @@ export default function PlatformPrivacyRequests(){
  <Link href="/platform">← Platform</Link><h1>Privacy request review</h1>
  <p>Restricted to Rallora platform administrators. Review identity, controller responsibilities, statutory deadlines and relevant legal exceptions before changing status. Completing a request here <strong>does not</strong> automatically export or delete information.</p>
  {state==="loading"?<p>Loading…</p>:state==="forbidden"?<p>Sign in as an authorised platform administrator to continue.</p>:state==="error"?<p role="alert">{error}</p>:<>
- <p>{rows.length} recent requests (up to 200). For requests older than this page, use the controlled back-office process.</p>
+ <p><strong>{openRows.length} open requests</strong> · {priorityCount} past the internal review target · {rows.length} retrieved (up to 200).</p>
+ <p><strong>21-day internal review target:</strong> This is a reminder to act early, not a statutory deadline. Check the normal one-calendar-month UK GDPR response period, identity verification, extensions and controller responsibilities separately. This page does not send email alerts or monitor itself.</p>
+ {priorityCount>0&&<p role="status" style={{color:"#9a3412",fontWeight:700}}>{priorityCount} unresolved request(s) need urgent review by the assigned privacy lead.</p>}
+ <label>Show requests <select value={filter} onChange={e=>setFilter(e.target.value as "open"|"all"|"closed")}><option value="open">Open</option><option value="all">All retrieved</option><option value="closed">Closed</option></select></label>
+ <p>Oldest unresolved requests are shown first. A designated staff member must still monitor the queue and any requests beyond the 200-row limit.</p>
  {error&&<p role="alert">{error}</p>}
- {rows.map(row=><section key={row.id} style={{border:"1px solid #cbd5e1",borderRadius:12,padding:20,marginBottom:16}}>
+ {visibleRows.map(row=><section key={row.id} style={{border:"1px solid #cbd5e1",borderRadius:12,padding:20,marginBottom:16}}>
    <h2 style={{fontSize:18}}>{row.request_type.replaceAll("_"," ")} · {row.status.replaceAll("_"," ")}</h2>
    <p>Received {new Date(row.created_at).toLocaleString("en-GB")} · Request {row.id}</p>
+   {!isClosed(row.status)&&<p style={{fontWeight:600,color:needsPriority(row)?"#9a3412":"inherit"}}>Internal review target: {reviewTarget(row.created_at).toLocaleDateString("en-GB")}{needsPriority(row)?" · Needs urgent review":""}</p>}
    <p>Account identifier: <code>{row.user_id??"Account removed"}</code></p>
    <p style={{whiteSpace:"pre-wrap"}}>{row.details||"No additional details supplied."}</p>
    <label style={{display:"block"}}>Review status
