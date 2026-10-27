@@ -16,6 +16,7 @@ declare
   v_rejected boolean;
 begin
   insert into auth.users(id,email) values
+   ('00000000-0000-0000-0000-000000000a01','club-a-owner@example.invalid'),
    (v_captain,'late-new-captain@example.invalid'),
    (v_existing_captain,'late-existing-captain@example.invalid');
   update public.teams set player_one_name='Existing captain',player_two_name='Existing partner',
