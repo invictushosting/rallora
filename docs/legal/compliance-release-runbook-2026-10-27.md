@@ -9,6 +9,9 @@
 - In particular, `draft-2026-10-27` in the registration UI, SQL trigger and published-page drafts is **not a lawful final document version**. No deployment until final documents and version identifiers are reviewed and harmonised.
 - Real production functions and RLS dependencies were reviewed read-only. `pg_net` must not be moved during this release because `rallora_private.communication_tick()` calls `net.http_post`.
 
+## Approval register
+All release evidence and accountable approvals must be completed in `docs/legal/DRAFT-release-approval-and-decisions-2026-10-27.md`; as of 27 October these are OPEN. The notification outbox and API worker are draft-only. The latest verified full GitHub Actions workflow was #1225 / 40528785682, successful for its commit; subsequent changes require a new successful CI run.
+
 ## Go/no-go checklist (all required)
 1. Signed-off UK privacy notice, player terms, cookie audit and club DPA; verified controller/processor activities, retention, subprocessors and cross-border transfers. Assign a named privacy rights request owner, monitored notification channel and response SLA.
 2. Replace all `draft-2026-10-27` account/sign-up strings with one approved immutable document version/hash; verify use throughout paths and database trigger, including existing accounts and later renewal.
@@ -22,6 +25,7 @@
 2. `20261027130000_privacy_rights_request_intake.sql`.
 3. `20261027134500_admin_privacy_request_review.sql` (depends on the private schema and rights requests table).
 4. `20261027141000_public_events_feature_routine_boundary.sql` (depends on existing club event policies and feature tables).
+5. `20261027143000_privacy_notification_outbox.sql` (depends on privacy intake and existing private delivery worker configuration). Confirm provider idempotency, destination inbox, security privileges and scheduled worker before activation.
 
 Migration application should use Supabase-managed migration tooling against the intended target; do not paste/run all four in production as a single blind batch.
 
@@ -32,6 +36,7 @@ Migration application should use Supabase-managed migration tooling against the 
 - Player creates a rights request and only sees their own; unauthorised users cannot read or mutate requests or notes.
 - Rallora platform admin sees and updates a rights request with an audit event. Club-only organiser cannot call those RPCs. Completing a request does not imply account deletion.
 - Existing fixture result entry, captain review, late team registration, club dashboards and scheduled reminders remain operational.
+- Privacy notification outbox claims reach provider acceptance, retries work, no personal request contents reach email, and exhausted retries are escalated by assigned staff. Provider acceptance is not proof of human receipt.
 - No rise in signup failures, 403s, 5xx errors or delivery job failures. Monitor service logs and triage any unexpected privacy requests.
 
 ## Rollback / recovery
