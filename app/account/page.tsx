@@ -11,6 +11,9 @@ type ClubAccess={club_id:string;role:string;clubs:{slug:string;name:string}|null
 export default function AccountPage(){
   const supabase=useMemo(()=>createClient(),[]);
   const [email,setEmail]=useState("");
+  const [displayName,setDisplayName]=useState("");
+  const [phone,setPhone]=useState("");
+  const [profileMessage,setProfileMessage]=useState("");
   const [password,setPassword]=useState("");
   const [confirmPassword,setConfirmPassword]=useState("");
   const [signedIn,setSignedIn]=useState(false);
@@ -30,6 +33,9 @@ export default function AccountPage(){
       if(error||!data.user){setSignedIn(false);return}
       setSignedIn(true);
       setEmail(data.user.email??"");
+      const profile=await supabase.from("rallora_player_profiles").select("display_name,phone").eq("user_id",data.user.id).maybeSingle();
+      if(!profile.error&&profile.data){setDisplayName(profile.data.display_name??"");setPhone(profile.data.phone??"");}
+      else setDisplayName(typeof data.user.user_metadata?.display_name==="string"?data.user.user_metadata.display_name:"");
        const platform=await supabase.from("rallora_platform_admins").select("user_id").eq("user_id",data.user.id).maybeSingle();
        setPlatformAdmin(Boolean(platform.data));
       const memberships=await supabase.from("rallora_club_memberships")
@@ -38,6 +44,17 @@ export default function AccountPage(){
       if(!memberships.error)setClubAccess((memberships.data??[]) as unknown as ClubAccess[]);
     })();
   },[supabase]);
+
+  async function saveProfile(e:React.FormEvent){
+    e.preventDefault();setProfileMessage("");
+    const name=displayName.trim();
+    if(name.length<2||name.length>120){setProfileMessage("Enter a name of 2–120 characters.");return;}
+    setBusy(true);
+    const {data:{user},error}=await supabase.auth.getUser();
+    if(error||!user){setBusy(false);setProfileMessage("Please sign in again.");return;}
+    const saved=await supabase.from("rallora_player_profiles").upsert({user_id:user.id,display_name:name,phone:phone.trim()||null,updated_at:new Date().toISOString()},{onConflict:"user_id"});
+    setProfileMessage(saved.error?.message??"Player profile saved.");setBusy(false);
+  }
 
   async function reset(e:React.FormEvent){
     e.preventDefault();setBusy(true);setMessage("");
@@ -79,6 +96,17 @@ export default function AccountPage(){
       </div>}
     </section>}
 
+    {signedIn&&<section className={styles.passwordSection} aria-labelledby="player-profile-heading">
+      <h2 id="player-profile-heading">Your player profile</h2>
+      <p>Your Rallora profile is independent of league registration. Update your details whenever you like.</p>
+      <form onSubmit={saveProfile}>
+        <label>Display name<input required minLength={2} maxLength={120} autoComplete="name" value={displayName} onChange={e=>setDisplayName(e.target.value)}/></label>
+        <label>Phone (optional)<input type="tel" maxLength={40} autoComplete="tel" value={phone} onChange={e=>setPhone(e.target.value)}/></label>
+        <button disabled={busy}>{busy?"Saving…":"Save player profile"}</button>
+      </form>
+      {profileMessage&&<p role="status" className={styles.message}>{profileMessage}</p>}
+      <p>Ready to play? <Link href="/register">Find a club and explore competitions</Link>.</p>
+    </section>}
     {signedIn&&<section className={styles.installSection} aria-labelledby="install-rallora-heading">
       <h2 id="install-rallora-heading">Rallora on your home screen</h2>
       <p>Add the Rallora icon for quick access to your leagues, fixtures and results.</p>
