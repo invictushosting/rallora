@@ -12,6 +12,9 @@
 - Operational rights requests: `docs/legal/DRAFT-privacy-rights-operations-sop.md`
 - Release runbook: `docs/legal/compliance-release-runbook-2026-10-27.md`
 
+## Working decision worksheet
+`docs/legal/DRAFT-retention-and-role-mapping-2026-10-27.md` contains proposed role allocations and possible retention review approaches, grounded in read-only schema evidence. **These are not approved policy or deletion timers.** LEG-02, LEG-06 and LEG-09 remain OPEN pending named business leads, club controller instructions and counsel review.
+
 ## Required decisions (all OPEN until evidence + responsible person's approval)
 
 | ID | Approval owner / accountable role (to nominate) | Question and evidence required | Blocks |
