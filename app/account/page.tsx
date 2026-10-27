@@ -148,7 +148,7 @@ export default function AccountPage(){
         <button disabled={busy||profileLoading}>{busy?"Saving…":profileLoading?"Loading profile…":"Save player profile"}</button>
       </form>
       {profileMessage&&<p role="status" className={styles.message}>{profileMessage}</p>}
-      <p>Ready to play? <Link href="/register">Find a club and explore competitions</Link>.</p>
+      <p>Ready to play? <Link href="/register">Find a club and explore competitions</Link>.</p><p>Looking for a padel partner? <Link href="/players/discover">Explore Rallora Social player discovery</Link> (optional and off by default).</p>
     </section>}
     {signedIn&&<section className={styles.installSection} aria-labelledby="install-rallora-heading">
       <h2 id="install-rallora-heading">Rallora on your home screen</h2>
