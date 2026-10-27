@@ -28,3 +28,12 @@ test("admin UI is linked and does not expose automatic deletion",()=>{
  assert.match(page,/does not/);
  assert.doesNotMatch(page,/auth\.admin\.deleteUser/);
 });
+
+test("unresolved privacy requests receive priority, human-monitored deadlines and clear escalation",()=>{
+ assert.match(sql,/order by case when p\.status in \('completed','declined'\) then 1 else 0 end/);
+ assert.match(sql,/p\.created_at desc limit 200/);
+ assert.match(page,/21-day internal review target/);
+ assert.match(page,/priorityCount/);
+ assert.match(page,/Oldest unresolved requests/);
+ assert.match(page,/does not send email alerts/);
+});
