@@ -28,16 +28,16 @@ Please review the linked drafts for UK GDPR, Data Protection Act 2018, PECR, UK 
 - What Article 28 controller instructions, exit/deletion assistance, subprocessor changes, international transfer safeguards and incident escalation arrangements are needed?
 - What consent/rejection/withdrawal mechanisms are required by the *actual* cookie and storage audit?
 
-## Proposed operational responsibility chart — **unassigned**
+## Proposed operational responsibility chart — primary privacy lead nominated, others unassigned
 | Role to nominate | Day-to-day duty | Backup requirement | Acceptance evidence |
 |---|---|---|---|
-| Protego privacy lead | Monitor `support@rallora.app` and authenticated privacy queue each business day; triage requests; set actual due dates; route club-controlled cases | Named deputy with mailbox access | Name, agreement, inbox read/reply verification, training and duty schedule |
+| Protego business owner — confirmed primary operational privacy contact in project conversation, 27 October 2026; identity and mailbox access to verify | Monitor `support@rallora.app` and authenticated privacy queue each business day; triage requests; set actual due dates; route club-controlled cases | Named deputy with mailbox access | Name, agreement, inbox read/reply verification, training and duty schedule |
 | Protego security/engineering lead | Review privacy notification outbox failures, worker logs, privileged access, backup/restore tests, incident response | Named technical backup | Test evidence and incident escalation |
 | Club controller contact | Approve league-related rights decisions, retention and sporting records; supply verified instructions | Club deputy | Contract schedule, named contact and escalation method |
 | Protego commercial contract owner | Approve plan/pilot fee, invoicing/VAT, cancellation, term and signatory | Contract delegate | Approved order form and contract version |
 | Independent UK legal reviewer | Assess counsel questions, return redlines and approve/dispute release wording | Alternative reviewer or agreed procedure | Formal documented sign-off |
 
-No person should be silently nominated, assigned privileged access, or treated as accepting these duties without explicit agreement.
+The business owner explicitly volunteered as primary operational privacy contact. No deputy, statutory DPO, solicitor or security role has been appointed. No privileged access, email forwarding or live workflow changes have been made.
 
 ## Day-one privacy operating controls to approve
 - Confirm support mailbox can receive external messages and that owner and backup can access it. No real player data should be used for test emails.
