@@ -2,6 +2,10 @@
 
 **Decision: NOT APPROVED FOR PUBLICATION, EXECUTION OR PRODUCTION DEPLOYMENT.** This register tracks unanswered questions and necessary evidence. It is not legal advice and no owner or sign-off is implied.
 
+
+## Owner-only control checklist and current mailbox status
+See `docs/legal/DRAFT-owner-only-privacy-monitoring-checklist-2026-10-27.md` for the owner-only daily checks, absence and account-recovery plan, and pre-release evidence. The connected personal Gmail account is **not** the Rallora support mailbox; mail receipt/send capability and owner access to `support@rallora.app` have **not** been verified. The owner must demonstrate the separate intended mailbox access; no Google Workspace settings or forwarding have been changed.
+
 ## External legal handoff
 The review brief and *partially assigned* operational responsibility matrix are in `docs/legal/DRAFT-solicitor-review-handoff-2026-10-27.md`. It identifies all source drafts, counsel questions, business inputs, and required acceptance evidence. The Protego business owner explicitly confirmed they will serve as the **sole** operational privacy contact. No deputy will be nominated under the present arrangement. Formal identity/contact for records, mailbox/admin access, daily monitoring and owner-absence contingency remain unverified; this does not appoint a statutory DPO.
 
