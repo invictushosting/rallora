@@ -28,20 +28,20 @@ Please review the linked drafts for UK GDPR, Data Protection Act 2018, PECR, UK 
 - What Article 28 controller instructions, exit/deletion assistance, subprocessor changes, international transfer safeguards and incident escalation arrangements are needed?
 - What consent/rejection/withdrawal mechanisms are required by the *actual* cookie and storage audit?
 
-## Proposed operational responsibility chart — primary privacy lead nominated, others unassigned
+## Operational responsibility chart — owner-only privacy contact, no backup nominated
 | Role to nominate | Day-to-day duty | Backup requirement | Acceptance evidence |
 |---|---|---|---|
-| Protego business owner — confirmed primary operational privacy contact in project conversation, 27 October 2026; identity and mailbox access to verify | Monitor `support@rallora.app` and authenticated privacy queue each business day; triage requests; set actual due dates; route club-controlled cases | Named deputy with mailbox access | Name, agreement, inbox read/reply verification, training and duty schedule |
+| Protego business owner — sole operational privacy contact explicitly confirmed 27 October 2026; formal identity and mailbox access to verify | Monitor `support@rallora.app` and authenticated privacy queue each business day; triage requests; set actual due dates; route club-controlled cases | **No backup nominated; continuity risk OPEN** | Verify name/contact, mailbox read/reply access, daily check controls, absence contingency and counsel review |
 | Protego security/engineering lead | Review privacy notification outbox failures, worker logs, privileged access, backup/restore tests, incident response | Named technical backup | Test evidence and incident escalation |
 | Club controller contact | Approve league-related rights decisions, retention and sporting records; supply verified instructions | Club deputy | Contract schedule, named contact and escalation method |
 | Protego commercial contract owner | Approve plan/pilot fee, invoicing/VAT, cancellation, term and signatory | Contract delegate | Approved order form and contract version |
 | Independent UK legal reviewer | Assess counsel questions, return redlines and approve/dispute release wording | Alternative reviewer or agreed procedure | Formal documented sign-off |
 
-The business owner explicitly volunteered as primary operational privacy contact. No deputy, statutory DPO, solicitor or security role has been appointed. No privileged access, email forwarding or live workflow changes have been made.
+The business owner explicitly confirmed they are the **only** operational privacy contact and do not want a backup nominated. This is an owner-only arrangement, not a statutory DPO appointment. Absence, illness, loss of account access and missed statutory deadlines are unresolved single-person continuity risks. No privileged access, email forwarding or live workflow changes have been made.
 
 ## Day-one privacy operating controls to approve
-- Confirm support mailbox can receive external messages and that owner and backup can access it. No real player data should be used for test emails.
-- Open and check both email requests and restricted platform queue **every business day**; retain a separate secure access-controlled case register for all channels. Weekend/public holiday receipt must be considered in computing dates.
+- Confirm support mailbox can receive external messages and that the owner can read and reply from it. Document what happens during owner absence or loss of access; no deputy has been nominated. No real player data should be used for test emails.
+- Owner to open and check both email requests and restricted platform queue **every business day**; retain a separate secure access-controlled case register for all channels. Weekend/public holiday receipt must be considered in computing dates.
 - Assign an actual response deadline case-by-case. A UI 21-day *internal review* marker is **not** the UK GDPR deadline. UK ICO right-of-access guidance describes a usual one-calendar-month limit, plus context-dependent identity, fees and extension rules.
 - Escalate missed checks, request backlogs, failed email notifications, potential breaches and disputes immediately according to the approved incident runbook.
 - Do not close a request merely because the dashboard status changed; record identity verification, actual actions, secure response and applicable legal exceptions.
