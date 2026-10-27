@@ -44,7 +44,7 @@ jobs:
       - run: node --experimental-strip-types --test tests/login-destinations.test.mjs
       - run: node --experimental-strip-types --test tests/result-workflow.test.mjs
       - run: node --experimental-strip-types --test tests/scores.test.mjs
-      - run: node --test tests/compliance-signup-ledger.test.mjs tests/privacy-rights-intake.test.mjs tests/admin-privacy-request-review.test.mjs
+      - run: node --test tests/compliance-signup-ledger.test.mjs tests/privacy-rights-intake.test.mjs tests/admin-privacy-request-review.test.mjs tests/security-review-contract.test.mjs
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
