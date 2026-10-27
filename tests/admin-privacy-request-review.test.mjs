@@ -14,7 +14,7 @@ test("admin privacy functions deny users without platform administrator membersh
 });
 test("rights review status changes generate server-side audit events",()=>{
  assert.match(sql,/insert into rallora_private\.privacy_request_events/);
- assert.match(sql,/actor_user_id uuid references auth\\.users\\(id\\) on delete set null/);
+ assert.ok(sql.includes('actor_user_id uuid references auth.users(id) on delete set null'));
  assert.match(sql,/previous_status text not null/);
  assert.match(sql,/next_status text not null/);
  assert.match(sql,/event_at timestamptz not null default transaction_timestamp\(\)/);
