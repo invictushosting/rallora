@@ -2,6 +2,9 @@
 
 **Decision: NOT APPROVED FOR PUBLICATION, EXECUTION OR PRODUCTION DEPLOYMENT.** This register tracks unanswered questions and necessary evidence. It is not legal advice and no owner or sign-off is implied.
 
+## External legal handoff
+The review brief and *unassigned* operational responsibility matrix are in `docs/legal/DRAFT-solicitor-review-handoff-2026-10-27.md`. It identifies all source drafts, counsel questions, business inputs, and required acceptance evidence. No privacy lead, deputy or solicitor has been appointed or approved through this document.
+
 ## Source drafts / release scope
 - Player notice: `app/privacy/page.tsx`
 - Player terms: `app/terms/page.tsx`
