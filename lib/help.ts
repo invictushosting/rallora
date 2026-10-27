@@ -7,7 +7,7 @@ export type HelpArticle = {
   slug: string; category: HelpCategory; title: string; summary: string;
   keywords: string[]; sections: HelpSection[]; related: string[];
 };
-export const HELP_REVIEWED = "26 October 2026";
+export const HELP_REVIEWED = "27 October 2026";
 export const HELP_CATEGORIES: { id: HelpCategory; title: string; description: string }[] = [
   { id: "players", title: "Players", description: "Join a league, check your entry and get ready to play." },
   { id: "captains", title: "Captains", description: "Arrange matches, submit scores and review results." },
@@ -89,13 +89,45 @@ export const HELP_ARTICLES: HelpArticle[] = [
     ], related: ["manage-teams-and-entries", "club-reminders", "club-results"],
   },
   {
+    slug: "add-late-team", category: "clubs", title: "Add a team after registration closes",
+    summary: "Use the club admin deadline override to add a missed pair to a draft or active competition.",
+    keywords: ["late", "missed deadline", "registration closed", "after deadline", "add team", "add players", "late entry", "late registration", "existing team", "create team", "override"],
+    sections: [
+      { id: "open", title: "Open the late registration tool", steps: [
+        "Sign in as a club owner, admin or organiser. Open the relevant club’s Admin Dashboard, then Registrations.",
+        "Choose Add a team after registration closes. Pick the correct league and division. The tool accepts the current draft or active competition; it is not for completed competitions.",
+        "Check that you are entering a full two-player pairing. For a player joining an existing pairing as a replacement, use Teams & players → Replace instead."
+      ], note: "Only club staff with permission can override the deadline. Ordinary players cannot reopen a closed public registration form." },
+      { id: "existing", title: "Add a pairing already registered at your club", steps: [
+        "Choose Existing team and select a pairing from another league at the same club. The existing team must have a registered captain and a partner email.",
+        "Enter a reason for the exception, such as a confirmed late request, and choose Confirm late registration.",
+        "Rallora creates a separate entry for the chosen competition. The original team and its previous competition results are preserved."
+      ], note: "Existing team means a pairing from another competition at the same club, not an existing team already in the selected league." },
+      { id: "new", title: "Create a new pairing after the deadline", steps: [
+        "The captain must have a Rallora account already. If necessary, ask them to use rallora.app/signup first, then verify their account email and sign in.",
+        "Choose Create new team. Enter the team name, captain name and Rallora account email, plus the partner’s name and email. Use different email addresses for the two players.",
+        "Enter the reason for the deadline override and press Confirm late registration. Share the resulting partner invitation link with the partner; they must claim their place using the invited email."
+      ], note: "This is a two-player pairing registration. Entering someone’s email does not create their password or automatically claim the partner’s place." },
+      { id: "fixtures", title: "If fixtures have already been generated", steps: [
+        "Read the confirmation carefully. If fixtures already exist, Rallora warns that the division schedule needs review.",
+        "The late-entry tool does not regenerate fixtures, create the new team’s missing matches, or delete existing results. Review Fixtures & playing rounds and organise the outstanding games through the club’s normal fixture workflow.",
+        "Check both players’ team access and the revised fixture plan before notifying other captains. Keep already played results intact."
+      ], note: "The late-entry confirmation is not proof that the new pairing has fixtures. An organiser must check and arrange them." },
+      { id: "problems", title: "If the team cannot be added", steps: [
+        "Check you selected the right club, league and division, and that the league is draft or active.",
+        "For a new team, confirm the captain has a Rallora account. For an existing team, check the source captain membership and partner email. Duplicate pairings or players already in the target competition may be rejected.",
+        "If the team consists of one replacement player rather than a new pair, use the replacement workflow instead. If an error persists, send support the club, league and error message without passwords."
+      ] }
+    ], related: ["manage-teams-and-entries", "join-a-league", "create-and-launch-competition", "captain-access"],
+  },
+  {
     slug: "manage-teams-and-entries", category: "clubs", title: "Manage entries, divisions and replacements", summary: "Review duplicate applications, adjust draft placement and replace a player.",
     keywords: ["teams", "players", "move", "division", "placement", "replace", "replacement", "drop out", "standby", "duplicate", "approve", "decline"],
     sections: [
       { id: "entries", title: "Review applications", steps: ["Open Registrations from club admin. Check the League name shown on each entry card, then review that pairing’s player names, emails and ratings. Singles and standby cards show their league too.", "Check duplicate warnings before approving. If the same pair was entered twice, establish which entry to retain and use the duplicate action to close the extra entry.", "Use a decline decision for an entry that should not proceed, and check that the intended pairing remains approved or pending as appropriate." ] },
       { id: "placement", title: "Adjust draft division placement", steps: ["Open the draft competition’s placement controls after registrations are reviewed.", "Use Starting boxes & manual adjustments to review the rating-based arrangement. Choose the Pairing to move and Destination box. If that box is full, select a pairing to swap with, then use Move pairing or Swap pairings.", "Check every pairing is in the right place. Changing boxes can clear untouched draft fixtures, so generate fixtures again after finalising placements and before launching." ] },
       { id: "replacement", title: "Replace a player who drops out", steps: ["Open Teams & players and find the correct competition pairing.", "Use Replace for the relevant player slot and select an eligible available player from the standby list.", "Check the updated pairing and captain access, then let the affected players know. Review any already-booked court details with them."], note: "If the required replacement is not available in the list, check the competition’s standby entries before making another pairing." },
-    ], related: ["create-and-launch-competition", "registration-status", "captain-access"],
+    ], related: ["add-late-team", "create-and-launch-competition", "registration-status", "captain-access"],
   },
   {
     slug: "club-reminders", category: "clubs", title: "Configure notifications and reminders", summary: "Choose what is sent, which channels are used and when messages can go out.",
@@ -169,7 +201,8 @@ export function searchHelp(query: string, category?: HelpCategory): HelpArticle[
 export function suggestedHelp(path: string): string[] {
   if (path.includes("/admin/integrations")) return ["connect-playtomic", "playtomic-booking-matching", "playtomic-without-api"];
   if (path.includes("/admin/reminders")) return ["club-reminders", "emails-and-ratings", "arrange-a-match"];
-  if (path.includes("/admin/registrations")) return ["manage-teams-and-entries", "registration-status", "create-and-launch-competition"];
+  if (path.includes("/admin/late-entry")) return ["add-late-team", "manage-teams-and-entries", "captain-access"];
+  if (path.includes("/admin/registrations")) return ["add-late-team", "manage-teams-and-entries", "registration-status"];
   if (path.includes("/admin")) return ["create-and-launch-competition", "manage-teams-and-entries", "club-results"];
   if (path.includes("/captain")) return ["arrange-a-match", "submit-and-confirm-results", "captain-access"];
   if (/\/(register|join-team)(\/|$)/.test(path)) return ["join-a-league", "registration-status", "emails-and-ratings"];
