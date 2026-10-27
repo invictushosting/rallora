@@ -112,7 +112,7 @@ begin
     club_id,season_id,division_id,requested_by,team_name,captain_name,partner_name,partner_email,
     status,organiser_note,reviewed_by,reviewed_at,created_team_id)
   values(v_season.club_id,p_season_id,p_division_id,v_captain_id,v_name,v_captain_name,v_partner_name,
-    lower(v_partner_email),'approved','Late admin entry: '||trim(p_reason),auth.uid(),now(),v_team)
+    lower(v_partner_email),'pending','Late admin entry: '||trim(p_reason),null,null,v_team)
   returning id into v_application;
 
   insert into public.rallora_team_registration_requests(
@@ -129,6 +129,10 @@ begin
   values(v_application,v_season.club_id,p_season_id,p_division_id,v_team,v_partner_name,lower(v_partner_email))
   returning id into v_invite;
   update public.rallora_team_applications set partner_invite_id=v_invite where id=v_application;
+  -- Honour the existing duplicate guard: applications must transition from pending to approved.
+  update public.rallora_team_applications
+    set status='approved',reviewed_by=auth.uid(),reviewed_at=now(),updated_at=now()
+    where id=v_application;
 
   insert into public.rallora_late_team_entries(
     club_id,season_id,division_id,team_id,source_team_id,entry_mode,reason,created_by,fixtures_present)
