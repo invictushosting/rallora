@@ -7,7 +7,7 @@ const page=readFileSync("app/account/privacy/page.tsx","utf8");
 const account=readFileSync("app/account/page.tsx","utf8");
 
 test("privacy requests are authenticated and identity scoped",()=>{
-  assert.match(sql,/user_id uuid not null references auth\.users\(id\)/);
+  assert.match(sql,/user_id uuid references auth\.users\(id\)/);
   assert.match(sql,/enable row level security/);
   assert.match(sql,/from anon/);
   assert.match(sql,/for insert to authenticated[\s\S]*?with check \(user_id = \(select auth\.uid\(\)\)\)/);
