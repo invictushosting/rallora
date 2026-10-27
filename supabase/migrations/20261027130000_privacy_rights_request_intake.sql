@@ -1,8 +1,9 @@
 -- Draft GDPR rights request intake; deploy only after testing and operational review.
 -- Requests require authenticated accounts; non-account holders may contact support@rallora.app.
+-- Null user_id upon account deletion prevents this intake table from blocking erasure.
 create table if not exists public.rallora_privacy_requests (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete restrict,
+  user_id uuid references auth.users(id) on delete set null,
   request_type text not null check (request_type in ('access','rectification','erasure','portability','restriction','objection','other')),
   details text not null default '' check (char_length(details) <= 2000),
   status text not null default 'received' check (status in ('received','identity_check','in_review','completed','declined')),
