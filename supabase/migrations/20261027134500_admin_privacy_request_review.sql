@@ -4,7 +4,7 @@ begin;
 create table if not exists rallora_private.privacy_request_events (
   id bigint generated always as identity primary key,
   request_id uuid not null references public.rallora_privacy_requests(id) on delete restrict,
-  actor_user_id uuid not null references auth.users(id) on delete restrict,
+  actor_user_id uuid references auth.users(id) on delete set null,
   previous_status text not null,
   next_status text not null,
   event_at timestamptz not null default transaction_timestamp()
@@ -42,6 +42,8 @@ begin
     raise exception 'Invalid status' using errcode='22023'; end if;
   if p_notes is not null and char_length(p_notes)>4000 then
     raise exception 'Notes too long' using errcode='22023'; end if;
+  if p_status in ('completed','declined') and char_length(trim(coalesce(p_notes,''))) < 20 then
+    raise exception 'Document the decision and verification steps in internal notes before closing' using errcode='22023'; end if;
   select status into old_status from public.rallora_privacy_requests where id=p_request_id for update;
   if not found then raise exception 'Request not found' using errcode='P0002'; end if;
   if old_status in ('completed','declined') and old_status <> p_status then
