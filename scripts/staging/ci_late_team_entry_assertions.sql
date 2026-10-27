@@ -62,8 +62,23 @@ begin
     and name='Optional captain / Optional partner')
   then raise exception 'Blank team name did not default to player names'; end if;
 
-  v_existing:=public.rallora_admin_add_late_team(v_season,v_division,'existing',
-    'Adding returning pair',v_source_team);
+  -- Verify rated registration works with the combined-rating trigger enabled.
+  update public.seasons set division_assignment_mode='combined_rating' where id=v_season;
+  v_rejected:=false;
+  begin
+    perform public.rallora_admin_add_late_team_with_ratings(
+      v_season,v_division,'new','Ratings missing',null,null,'Unrated Captain',
+      'optional-name-captain@example.invalid','Unrated Partner','unrated@example.invalid',null,null);
+  exception when others then v_rejected:=true; end;
+  if not v_rejected then raise exception 'Combined-rating competition accepted absent ratings'; end if;
+  -- Existing pair also needs ratings for a combined-rating league.
+  v_existing:=public.rallora_admin_add_late_team_with_ratings(v_season,v_division,'existing',
+    'Adding returning pair',v_source_team,null,null,null,null,null,4.25,4.75);
+  if v_existing->>'team_id' is null then raise exception 'Rated existing pairing failed'; end if;
+  if not exists(select 1 from public.rallora_team_applications where created_team_id=(v_existing->>'team_id')::uuid
+    and captain_playtomic_rating=4.25 and partner_playtomic_rating=4.75)
+  then raise exception 'Ratings not stored on approved application'; end if;
+  update public.seasons set division_assignment_mode='manual' where id=v_season;
   if v_existing->>'team_id' is null or v_existing->>'team_id'=v_source_team::text then
     raise exception 'Existing pair was not cloned'; end if;
   if not exists(select 1 from public.teams where id=v_source_team and division_id='00000000-0000-0000-0000-0000000002a1')
