@@ -7,7 +7,7 @@
 - The queue prioritises the oldest unresolved requests and displays a **21-day internal review target**, intended to prompt action before the usual UK GDPR one-calendar-month deadline. This target does **not** calculate legal due dates, permissible extensions, pauses or exemptions.
 - The back-office list returns at most 200 records. If volumes approach the cap, staff must query the restricted backend with appropriate access controls and use a separate secure tracking register. Do not assume the displayed count is the entire backlog.
 - `support@rallora.app` and any other published contact channel must also be monitored for requests from people unable to sign in. Submission via email is a valid separate intake path.
-- **No automatic email or alert is implemented for newly submitted rights requests.** An accountable person and backup must own monitoring until an alerting service is independently tested.
+- **No automatic email or alert is deployed to production for newly submitted rights requests.** A transactional notification outbox and delivery integration exist only in the draft compliance branch and require operational testing and security approval. An accountable person and backup must own monitoring until an alerting service is independently tested.
 
 ## Workflow
 1. Log receipt date, originating channel, request type and case ID without copying unnecessary identity documents into unprotected notes.
