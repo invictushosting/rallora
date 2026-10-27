@@ -56,7 +56,7 @@ begin
  cross join public.rallora_player_profiles me
  where me.user_id=auth.uid() and p.user_id<>auth.uid()
    and p.partner_preference in ('looking','open')
- order by match_score desc,p.display_name,p.user_id
+ order by 7 desc,p.display_name,p.user_id
  limit least(greatest(coalesce(p_limit,30),1),40);
 end $$;
 
