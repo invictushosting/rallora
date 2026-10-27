@@ -110,7 +110,7 @@ export default function LateEntryPage(){
         <option value="">Choose registered pairing</option>{sourceTeams.map(t=><option key={t.id} value={t.id}>{t.name} ({divisions.find(d=>d.id===t.division_id)?.name})</option>)}
       </select><small>This creates a new league entry and keeps the original competition history unchanged. The pairing needs an existing captain account and a partner email.</small></label>:
       <div className={styles.fields}>
-        <label>Team name<input required minLength={2} maxLength={120} value={teamName} onChange={e=>setTeamName(e.target.value)}/></label>
+        <label>Team name (optional)<input maxLength={120} placeholder="Automatically uses both player names" value={teamName} onChange={e=>setTeamName(e.target.value)}/><small>Leave blank to use the two players’ names automatically.</small></label>
         <label>Captain name<input required minLength={2} maxLength={120} value={captainName} onChange={e=>setCaptainName(e.target.value)}/></label>
         <label>Captain&apos;s Rallora account email<input required type="email" value={captainEmail} onChange={e=>setCaptainEmail(e.target.value)}/><small>The captain must already have a Rallora login.</small></label>
         <label>Partner name<input required minLength={2} maxLength={120} value={partnerName} onChange={e=>setPartnerName(e.target.value)}/></label>
@@ -118,7 +118,7 @@ export default function LateEntryPage(){
       </div>}
       <label>Reason for deadline override<textarea required minLength={3} maxLength={500} rows={3} placeholder="e.g. Captain contacted us after registration closed" value={reason} onChange={e=>setReason(e.target.value)}/></label>
       <p className={styles.warning}><strong>{season?.status==="active"?"Active competition:":"Draft competition:"}</strong> Adding a team never regenerates fixtures automatically. Existing match results remain untouched. Admin changes are recorded in an audit log.</p>
-      <button className={styles.submit} disabled={busy||!seasonId||!divisionId||reason.trim().length<3||(mode==="existing"?!sourceTeamId:!teamName.trim()||!captainName.trim()||!captainEmail.trim()||!partnerName.trim()||!partnerEmail.trim())}>{busy?"Registering…":"Confirm late registration"}</button>
+      <button className={styles.submit} disabled={busy||!seasonId||!divisionId||reason.trim().length<3||(mode==="existing"?!sourceTeamId:!captainName.trim()||!captainEmail.trim()||!partnerName.trim()||!partnerEmail.trim())}>{busy?"Registering…":"Confirm late registration"}</button>
     </form>
   </div></main>;
 }
