@@ -24,3 +24,12 @@ Keep date checked, operator, oldest open receipt date, count of open cases, immi
 
 ## Release gates
 Do not enable the rights-request intake for players until a named lead/backup, staffed schedule (including absences), monitored support mailbox, agreed retention policy, secure fulfilment process, and tested alerts or manual control are in operation. Obtain legal review of deadlines and controller/processor arrangements.
+
+## Notification and monitoring implementation decision (no extra services)
+The current player browser writes `rallora_privacy_requests` through authenticated RLS. A client-side best-effort email after submission would be unreliable (the browser can close), could be spoofed, and must not be treated as a delivery guarantee. Do not use it as the sole alert.
+
+Before activating this intake, assign the platform privacy lead and backup, configure the already-published `support@rallora.app` mailbox to reach both responsible staff through the existing mail administration, and record daily queue reviews. Avoid sending request bodies, identity documents or other personal data in unprotected notification email. Draft notifications should carry only an opaque case identifier, with a restricted link to `/platform/privacy`.
+
+A future fully automated reminder needs a durable outbox transactionally tied to request creation, a worker with retries/idempotency and backoff, scoped least-privilege delivery credentials, monitoring for failed deliveries, and end-to-end verification. Existing `rallora_private.communication_tick` handles league reminders; do not silently add privacy data to that queue or alter its service configuration.
+
+Staff cannot claim a privacy request has been received by the responsible person merely because the row exists. The initial queue review and mailbox monitoring remain explicitly manual until an end-to-end verified notification system is deployed.
