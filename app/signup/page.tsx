@@ -14,7 +14,6 @@ export default function PlayerSignup(){
   const [email,setEmail]=useState("");
   const [password,setPassword]=useState("");
   const [confirm,setConfirm]=useState("");
-  const [accepted,setAccepted]=useState(false);
   const [busy,setBusy]=useState(false);
   const [message,setMessage]=useState("");
   const [success,setSuccess]=useState(false);
@@ -26,7 +25,6 @@ export default function PlayerSignup(){
       if(displayName.length<2||displayName.length>120)throw new Error("Enter your name (2–120 characters).");
       if(password.length<8)throw new Error("Use a password of at least 8 characters.");
       if(password!==confirm)throw new Error("Passwords do not match.");
-      if(!accepted)throw new Error("Accept the terms and privacy notice to continue.");
       const cleanEmail=email.trim().toLowerCase();
       const {data,error}=await supabase.auth.signUp({
         email:cleanEmail,password,
@@ -60,7 +58,6 @@ export default function PlayerSignup(){
         <label>Email address<input required type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)}/></label>
         <label>Password<input required type="password" minLength={8} autoComplete="new-password" value={password} onChange={e=>setPassword(e.target.value)}/></label>
         <label>Confirm password<input required type="password" minLength={8} autoComplete="new-password" value={confirm} onChange={e=>setConfirm(e.target.value)}/></label>
-        <label className={styles.consent}><input type="checkbox" checked={accepted} onChange={e=>setAccepted(e.target.checked)} required/><span>I agree to the <Link href="/terms" target="_blank">Terms</Link> and acknowledge the <Link href="/privacy" target="_blank">Privacy Notice</Link>.</span></label>
         {message&&<p role="alert" className={styles.error}>{message}</p>}
         <button disabled={busy}>{busy?"Creating account…":"Create account"}</button>
       </form>
