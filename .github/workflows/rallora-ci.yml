@@ -189,6 +189,7 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261027130000_privacy_rights_request_intake.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261027134500_admin_privacy_request_review.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_privacy_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_privacy_negative_roles.sql
   public-event-security:
     runs-on: ubuntu-latest
     timeout-minutes: 10
