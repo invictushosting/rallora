@@ -185,6 +185,8 @@ export default function AccountPage(){
       <button disabled={busy}>{busy?"Sending…":"Send reset email"}</button>
     </form>}
 
+    {signedIn&&<section className={styles.passwordSection}><h2>Your data and privacy</h2><p>Request a copy, correction or deletion of your personal information. Requests are reviewed and are not processed automatically.</p><p><Link href="/account/privacy">Manage privacy requests →</Link></p></section>}
+
     {message&&<p className={styles.message} role="status">{message}</p>}
     {signedIn&&!platformAdmin&&<SupportForm clubId={clubAccess.length===1?clubAccess[0].club_id:undefined}/>}
   </section></main>
