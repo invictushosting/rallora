@@ -1,7 +1,7 @@
 -- Assertions run on ephemeral CI PostgreSQL after applying all three privacy migrations.
 do $$
 declare
-  actor uuid := '00000000-0000-0000-0000-000000000902';
+  actor uuid := '00000000-0000-0000-0000-000000000903';
   accepted_count integer;
 begin
   insert into auth.users(id,email,raw_user_meta_data) values
