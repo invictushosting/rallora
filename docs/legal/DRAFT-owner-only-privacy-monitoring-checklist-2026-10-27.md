@@ -6,6 +6,7 @@
 - Connected Gmail profile verified 27 October 2026: personal Gmail account, **not** `support@rallora.app`.
 - Search of connected account for messages `to:support@rallora.app` returned none. This cannot establish whether Rallora support mailbox exists, delivers mail, or is accessible in the owner's separate Workspace account.
 - No mailbox passwords, forwarded mail, aliases, admin permissions, delivery rules, or production settings were changed.
+- **Owner-reported mailbox test (27 October 2026):** test message to `support@rallora.app` **NOT RECEIVED**; reply from support address **NOT TESTED**. This is a failed/incomplete operational verification, not proof that DNS or mail routing is broken. Investigate recipient account, aliases/groups, spam, message trace and MX records without changing production configuration blindly.
 - Required verification: owner personally opens the mailbox using the intended Workspace account; demonstrates reading an independently sent non-sensitive test message and successfully replying. Record date, headers/address used, and whether it is a group, mailbox or alias. Avoid sharing passwords or real player details.
 
 ## Routine owner checklist
@@ -27,7 +28,7 @@
 ## Pre-release evidence and sign-off
 | Control | Owner's evidence | Status |
 |---|---|---|
-| Mailbox can receive and send from `support@rallora.app` | Non-sensitive test evidence via correct Workspace mailbox | UNVERIFIED |
+| Mailbox can receive and send from `support@rallora.app` | Owner reported receive test **NO** and reply **NOT TESTED**, 27 October; re-test after diagnosis | **BLOCKED — RECEIVE FAILED; SEND NOT TESTED** |
 | Sole operator has restricted admin access to privacy queue | Authenticated non-production test and production release validation | UNVERIFIED |
 | Daily check habit and secure request register | Owner acceptance of checklist and restricted location | OPEN |
 | Legal deadline determination and data fulfilment | Counsel-reviewed process and club controller contacts | OPEN |
