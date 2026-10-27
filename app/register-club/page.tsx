@@ -41,7 +41,7 @@ export default function RegisterClub(){
       if(!user){
         const signup=await supabase.auth.signUp({
           email:email.trim(),password,
-          options:{data:{name:managerName,phone:mobile,source:"club_application",terms_version:"draft-2026-10-27",terms_accepted:true,terms_accepted_at:new Date().toISOString()}},
+          options:{data:{name:managerName,phone:mobile,source:"club_application",terms_version:"draft-2026-10-27",terms_accepted:true}},
         });
         if(signup.error)throw signup.error;
         if(!signup.data.user||!signup.data.session){
