@@ -1,6 +1,7 @@
 "use client";
 
 import BackLink from "@/app/components/back-link";
+import Link from "next/link";
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {useParams} from "next/navigation";
 import {createClient} from "@/lib/supabase";
@@ -89,7 +90,7 @@ export default function LateEntryPage(){
   return <main className={styles.page}><div className={styles.shell}>
     <BackLink href={`/clubs/${slug}/admin/registrations`}>Back to registrations</BackLink>
     <header><span className={styles.eyebrow}>CLUB ADMIN · REGISTRATION OVERRIDE</span>
-      <h1>Add a late team</h1><p>Add an existing club pairing from another league or register a new pairing after the deadline. Existing fixtures and results will not be changed.</p><p><a href="/help/add-late-team">Read the step-by-step late registration guide</a></p></header>
+      <h1>Add a late team</h1><p>Add an existing club pairing from another league or register a new pairing after the deadline. Existing fixtures and results will not be changed.</p><p><Link href="/help/add-late-team">Read the step-by-step late registration guide</Link></p></header>
     {result?<section className={styles.success} role="status">
       <h2>Team registered successfully</h2>
       <p>The captain now has a roster place. Send the partner this claim link so they can join the team:</p>
