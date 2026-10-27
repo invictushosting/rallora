@@ -2,6 +2,10 @@
 
 **Status: DRAFT. Not an automated service and not yet live.** The Protego business owner has agreed to act as **sole operational privacy contact**, with **no nominated backup**. The formal contact record, mailbox/admin access, owner absence cover, monitoring and continuity safeguards remain unverified. This is not a statutory DPO appointment.
 
+
+## Owner-only control checklist and current mailbox status
+See `docs/legal/DRAFT-owner-only-privacy-monitoring-checklist-2026-10-27.md` for the owner-only daily checks, absence and account-recovery plan, and pre-release evidence. The connected personal Gmail account is **not** the Rallora support mailbox; mail receipt/send capability and owner access to `support@rallora.app` have **not** been verified. The owner must demonstrate the separate intended mailbox access; no Google Workspace settings or forwarding have been changed.
+
 ## Intake and monitoring
 - An authorised Rallora platform staff member must check the restricted `/platform/privacy` queue **every business day**, including after weekends, holiday closures and deployments.
 - The queue prioritises the oldest unresolved requests and displays a **21-day internal review target**, intended to prompt action before the usual UK GDPR one-calendar-month deadline. This target does **not** calculate legal due dates, permissible extensions, pauses or exemptions.
