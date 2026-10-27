@@ -7,6 +7,7 @@ import SupportForm from "@/app/components/support-form";
 import styles from "./account.module.css";
 
 type ClubAccess={club_id:string;role:string;clubs:{slug:string;name:string}|null};
+type ClubChoice={id:string;name:string;town:string|null};
 
 export default function AccountPage(){
   const supabase=useMemo(()=>createClient(),[]);
@@ -14,6 +15,12 @@ export default function AccountPage(){
   const [displayName,setDisplayName]=useState("");
   const [phone,setPhone]=useState("");
   const [profileMessage,setProfileMessage]=useState("");
+  const [playingLevel,setPlayingLevel]=useState("");
+  const [homeTown,setHomeTown]=useState("");
+  const [preferredClubs,setPreferredClubs]=useState<string[]>([]);
+  const [partnerPreference,setPartnerPreference]=useState("");
+  const [clubs,setClubs]=useState<ClubChoice[]>([]);
+  const [profileLoading,setProfileLoading]=useState(true);
   const [password,setPassword]=useState("");
   const [confirmPassword,setConfirmPassword]=useState("");
   const [signedIn,setSignedIn]=useState(false);
@@ -30,12 +37,23 @@ export default function AccountPage(){
     setReturnToCaptain(params.get("return")==="captain");
     void (async()=>{
       const {data,error}=await supabase.auth.getUser();
-      if(error||!data.user){setSignedIn(false);return}
+      if(error||!data.user){setSignedIn(false);setProfileLoading(false);return}
       setSignedIn(true);
       setEmail(data.user.email??"");
-      const profile=await supabase.from("rallora_player_profiles").select("display_name,phone").eq("user_id",data.user.id).maybeSingle();
-      if(!profile.error&&profile.data){setDisplayName(profile.data.display_name??"");setPhone(profile.data.phone??"");}
+      const [profile,clubsReply]=await Promise.all([
+        supabase.from("rallora_player_profiles").select("display_name,phone,playing_level,home_town,preferred_club_ids,partner_preference").eq("user_id",data.user.id).maybeSingle(),
+        supabase.from("clubs").select("id,name,town").eq("is_active",true).order("name")
+      ]);
+      if(!clubsReply.error)setClubs((clubsReply.data??[]) as ClubChoice[]);
+      if(!profile.error&&profile.data){
+        setDisplayName(profile.data.display_name??"");setPhone(profile.data.phone??"");
+        setPlayingLevel(profile.data.playing_level??"");
+        setHomeTown(profile.data.home_town??"");
+        setPreferredClubs(profile.data.preferred_club_ids??[]);
+        setPartnerPreference(profile.data.partner_preference??"");
+      }
       else setDisplayName(typeof data.user.user_metadata?.display_name==="string"?data.user.user_metadata.display_name:"");
+      setProfileLoading(false);
        const platform=await supabase.from("rallora_platform_admins").select("user_id").eq("user_id",data.user.id).maybeSingle();
        setPlatformAdmin(Boolean(platform.data));
       const memberships=await supabase.from("rallora_club_memberships")
@@ -52,7 +70,12 @@ export default function AccountPage(){
     setBusy(true);
     const {data:{user},error}=await supabase.auth.getUser();
     if(error||!user){setBusy(false);setProfileMessage("Please sign in again.");return;}
-    const saved=await supabase.from("rallora_player_profiles").upsert({user_id:user.id,display_name:name,phone:phone.trim()||null,updated_at:new Date().toISOString()},{onConflict:"user_id"});
+    const saved=await supabase.from("rallora_player_profiles").upsert({
+      user_id:user.id,display_name:name,phone:phone.trim()||null,
+      playing_level:playingLevel||null,home_town:homeTown.trim()||null,
+      preferred_club_ids:preferredClubs,partner_preference:partnerPreference||null,
+      updated_at:new Date().toISOString()
+    },{onConflict:"user_id"});
     setProfileMessage(saved.error?.message??"Player profile saved.");setBusy(false);
   }
 
@@ -102,7 +125,27 @@ export default function AccountPage(){
       <form onSubmit={saveProfile}>
         <label>Display name<input required minLength={2} maxLength={120} autoComplete="name" value={displayName} onChange={e=>setDisplayName(e.target.value)}/></label>
         <label>Phone (optional)<input type="tel" maxLength={40} autoComplete="tel" value={phone} onChange={e=>setPhone(e.target.value)}/></label>
-        <button disabled={busy}>{busy?"Saving…":"Save player profile"}</button>
+        <label>Playing level<select value={playingLevel} onChange={e=>setPlayingLevel(e.target.value)}>
+          <option value="">Not specified</option><option value="beginner">Beginner</option><option value="improver">Improver</option>
+          <option value="intermediate">Intermediate</option><option value="advanced">Advanced</option><option value="competitive">Competitive</option>
+        </select></label>
+        <label>Town or city (optional)<input type="text" maxLength={120} minLength={2} placeholder="e.g. Manchester" value={homeTown} onChange={e=>setHomeTown(e.target.value)}/></label>
+        <fieldset className={styles.preferencesFieldset}><legend>Preferred clubs (choose up to 10)</legend>
+          <p>These are your interests, not competition registrations.</p>
+          <div className={styles.clubChoices}>{clubs.map(club=><label key={club.id} className={styles.clubChoice}>
+            <input type="checkbox" checked={preferredClubs.includes(club.id)} disabled={!preferredClubs.includes(club.id)&&preferredClubs.length>=10}
+              onChange={e=>setPreferredClubs(current=>e.target.checked?[...current,club.id]:current.filter(id=>id!==club.id))}/>
+            <span>{club.name}{club.town?` · ${club.town}`:""}</span>
+          </label>)}</div>
+          {!clubs.length&&<p>No active clubs to select yet.</p>}
+        </fieldset>
+        <label>Partner preference<select value={partnerPreference} onChange={e=>setPartnerPreference(e.target.value)}>
+          <option value="">Not specified</option><option value="open">Open to playing with others</option>
+          <option value="looking">Looking for a partner</option><option value="have_partner">I have a partner</option>
+          <option value="not_looking">Not looking for a partner</option>
+        </select></label>
+        <p className={styles.privacyNote}>These preferences are private to your account. They do not make you publicly searchable or register you for a competition.</p>
+        <button disabled={busy||profileLoading}>{busy?"Saving…":profileLoading?"Loading profile…":"Save player profile"}</button>
       </form>
       {profileMessage&&<p role="status" className={styles.message}>{profileMessage}</p>}
       <p>Ready to play? <Link href="/register">Find a club and explore competitions</Link>.</p>
