@@ -17,10 +17,12 @@ export default function PlayerSignup(){
   const [busy,setBusy]=useState(false);
   const [message,setMessage]=useState("");
   const [success,setSuccess]=useState(false);
+  const [acceptedTerms,setAcceptedTerms]=useState(false);
 
   async function createAccount(event:React.FormEvent<HTMLFormElement>){
     event.preventDefault();setMessage("");setBusy(true);
     try{
+      if(!acceptedTerms)throw new Error("Please read and accept the player terms before creating an account.");
       const displayName=name.trim();
       if(displayName.length<2||displayName.length>120)throw new Error("Enter your name (2–120 characters).");
       if(password.length<8)throw new Error("Use a password of at least 8 characters.");
@@ -29,7 +31,7 @@ export default function PlayerSignup(){
       const {data,error}=await supabase.auth.signUp({
         email:cleanEmail,password,
         options:{
-          data:{display_name:displayName},
+          data:{display_name:displayName,terms_version:"draft-2026-10-27",terms_accepted_at:new Date().toISOString()},
           emailRedirectTo:`${window.location.origin}/account`
         }
       });
@@ -58,6 +60,7 @@ export default function PlayerSignup(){
         <label>Email address<input required type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)}/></label>
         <label>Password<input required type="password" minLength={8} autoComplete="new-password" value={password} onChange={e=>setPassword(e.target.value)}/></label>
         <label>Confirm password<input required type="password" minLength={8} autoComplete="new-password" value={confirm} onChange={e=>setConfirm(e.target.value)}/></label>
+        <label><input type="checkbox" required checked={acceptedTerms} onChange={e=>setAcceptedTerms(e.target.checked)}/> I have read and accept the <Link href="/terms" target="_blank">Player Terms</Link> and acknowledge the <Link href="/privacy" target="_blank">Privacy Information</Link>. This is not consent to marketing.</label>
         {message&&<p role="alert" className={styles.error}>{message}</p>}
         <button disabled={busy}>{busy?"Creating account…":"Create account"}</button>
       </form>
