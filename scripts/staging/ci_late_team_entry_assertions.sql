@@ -9,6 +9,7 @@ declare
   v_source_team uuid:='00000000-0000-0000-0000-0000000003a1';
   v_captain uuid:='33333333-3333-3333-3333-333333333333';
   v_existing_captain uuid:='44444444-4444-4444-4444-444444444444';
+  v_optional_captain uuid:='55555555-5555-5555-5555-555555555555';
   v_original_request uuid;
   v_first uuid; v_second uuid;
   v_result jsonb; v_existing jsonb;
@@ -18,6 +19,7 @@ begin
   insert into auth.users(id,email) values
    ('00000000-0000-0000-0000-000000000a01','club-a-owner@example.invalid'),
    (v_captain,'late-new-captain@example.invalid'),
+   (v_optional_captain,'optional-name-captain@example.invalid'),
    (v_existing_captain,'late-existing-captain@example.invalid');
   update public.teams set player_one_name='Existing captain',player_two_name='Existing partner',
     player_one_email='late-existing-captain@example.invalid',
@@ -53,6 +55,13 @@ begin
       where team_id=(v_result->>'team_id')::uuid and player_user_id=v_captain and role='captain')
   then raise exception 'New captain membership missing'; end if;
 
+  v_result:=public.rallora_admin_add_late_team(v_season,v_division,'new',
+    'Name auto-generation test',null,null,'Optional captain',
+    'optional-name-captain@example.invalid','Optional partner','optional-name-partner@example.invalid');
+  if not exists(select 1 from public.teams where id=(v_result->>'team_id')::uuid
+    and name='Optional captain / Optional partner')
+  then raise exception 'Blank team name did not default to player names'; end if;
+
   v_existing:=public.rallora_admin_add_late_team(v_season,v_division,'existing',
     'Adding returning pair',v_source_team);
   if v_existing->>'team_id' is null or v_existing->>'team_id'=v_source_team::text then
@@ -61,7 +70,7 @@ begin
   then raise exception 'Source team was modified'; end if;
   select count(*) into v_after from public.fixtures where season_id=v_season;
   if v_before<>v_after then raise exception 'Existing fixtures changed'; end if;
-  if (select count(*) from public.rallora_late_team_entries where season_id=v_season)<>2
+  if (select count(*) from public.rallora_late_team_entries where season_id=v_season)<>3
   then raise exception 'Late entry audit missing'; end if;
   v_rejected:=false;
   begin
