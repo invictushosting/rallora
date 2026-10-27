@@ -1,6 +1,6 @@
 # Privacy-rights request operations — draft SOP (27 October 2026)
 
-**Status: DRAFT. Not an automated service and not yet live. Assign a named operational owner before deployment.**
+**Status: DRAFT. Not an automated service and not yet live.** The Protego business owner has agreed to act as primary operational privacy contact, but the formal contact record, mailbox and admin access, deputy, coverage schedule and actual monitoring remain unverified. This is not a statutory DPO appointment.
 
 ## Intake and monitoring
 - An authorised Rallora platform staff member must check the restricted `/platform/privacy` queue **every business day**, including after weekends, holiday closures and deployments.
