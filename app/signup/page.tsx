@@ -31,7 +31,7 @@ export default function PlayerSignup(){
       const {data,error}=await supabase.auth.signUp({
         email:cleanEmail,password,
         options:{
-          data:{display_name:displayName,terms_version:"draft-2026-10-27",terms_accepted_at:new Date().toISOString()},
+          data:{display_name:displayName,terms_version:"draft-2026-10-27",terms_accepted:true,terms_accepted_at:new Date().toISOString()},
           emailRedirectTo:`${window.location.origin}/account`
         }
       });
