@@ -96,6 +96,7 @@ begin
  perform set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000999',true);
  if has_function_privilege('anon','public.rallora_manage_players(text,uuid,integer,bigint,uuid,integer,bigint,uuid)','execute')
  or has_function_privilege('authenticated','rallora_private.assign_roster_slot(uuid,integer,jsonb)','execute')
- or has_function_privilege('authenticated','public.rallora_replace_from_pool(uuid,integer,uuid)','execute') then raise exception 'Unsafe function permission'; end if;
+ or has_function_privilege('authenticated','public.rallora_replace_from_pool(uuid,integer,uuid)','execute')
+ or has_function_privilege('authenticated','public.rallora_replace_pairing_player(uuid,integer,uuid,text,text,numeric)','execute') then raise exception 'Unsafe function permission'; end if;
 end $$;
 rollback;

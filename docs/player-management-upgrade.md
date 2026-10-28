@@ -20,7 +20,7 @@ Player access and registration records move together. The role associated with a
 - Fixture name snapshots and triggers on result/submission creation.
 - An administrator-only, append-only-through-the-API movement audit with actor, timestamp, player IDs, affected slots and before/after rosters.
 - The checked transactional `rallora_manage_players` RPC. Private helpers use an empty search path, explicit tenant authorization and restricted execute grants. Anonymous execution and direct API writes to the audit are denied.
-- Retirement of both legacy replacement entry points for authenticated callers.
+- Retirement of legacy replacement entry points, including the optional older manual/waitlist RPC for authenticated callers.
 
 The operation uses the existing season advisory lock, season row lock, ordered team locks and invitation locks. Pool placement uses row locks and unique-key upserts. A late failure rolls back team, membership, pool and audit changes together.
 
@@ -40,6 +40,8 @@ The existing Manage entries, divisions and players article now covers each actio
 - Disposable PostgreSQL-compatible database: existing SQL CI sequence plus the new production-shaped schema, migration and movement assertions pass. Checks include swaps, vacant/full standby assignments, moving out, captain access, duplicate/competition/division rejection, permissions, historical scores/names, stale confirmations, audit isolation and rollback after an injected final audit failure.
 - Browser smoke tests at 1280px, 768px and 390px pass for all actions, confirmation gating, stale-error recovery, Escape and viewport fit. These use synthetic fixture props and mocked API responses; SQL behaviour is tested separately against the disposable database.
 - The real two-connection PostgreSQL race test passed in GitHub CI: concurrent confirmations produced exactly one successful movement, one standby record, one audit entry and one roster-version increment.
+
+- Additional integrated desktop/mobile verification passed with the actual component connected to the migrated SQL function in a disposable database through a test-only transport adapter. Swaps, occupied/vacant standby assignments, roster refresh, captain access, historical scores/names, stale errors and audit entries passed with no browser errors.
 
 ## Release order and remaining review
 

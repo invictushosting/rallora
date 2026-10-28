@@ -225,4 +225,11 @@ revoke all on function public.rallora_manage_players(text,uuid,integer,bigint,uu
 grant execute on function public.rallora_manage_players(text,uuid,integer,bigint,uuid,integer,bigint,uuid) to authenticated;
 -- Retire both legacy entry points so old clients cannot bypass the audit trail.
 revoke execute on function public.rallora_replace_from_pool(uuid,integer,uuid),rallora_private.replace_from_pool(uuid,integer,uuid) from authenticated;
+-- Some live installations also retain the earlier manual/waitlist RPC. It has
+-- no roster, eligibility or audit maintenance and must not bypass this workflow.
+do $$ begin
+ if to_regprocedure('public.rallora_replace_pairing_player(uuid,integer,uuid,text,text,numeric)') is not null then
+  execute 'revoke execute on function public.rallora_replace_pairing_player(uuid,integer,uuid,text,text,numeric) from public,anon,authenticated';
+ end if;
+end $$;
 commit;
