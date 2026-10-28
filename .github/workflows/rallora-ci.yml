@@ -162,3 +162,6 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261028091607_player_movements_and_match_rosters.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_player_movements_assertions.sql
       - run: python3 scripts/staging/ci_player_movements_concurrency.py
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261028101027_account_optional_player_movements.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_account_optional_movements_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_player_movements_assertions.sql

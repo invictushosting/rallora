@@ -8,7 +8,7 @@ The previous Replace handler set state correctly but rendered its selector after
 
 Swaps exchange two occupied slots in the same division. Adding standby fills the chosen vacancy or returns its current player to standby atomically. Moving out leaves an explicitly incomplete pairing. The current draft or active cycle is required; completed and superseded cycles are blocked. Available standby entries from earlier cycles of the same competition are accepted; unrelated competitions and singles are excluded.
 
-Moved players must have registered Rallora accounts. An unclaimed player receives a clear instruction to finish account registration. This follows the existing pool schema, whose user ID is mandatory. Rating-based entry requires an incoming rating; bespoke club rules must also be checked by the administrator in the confirmation dialog. Cross-division swaps are deliberately blocked rather than inferring eligibility from free-text league rules.
+Players can be swapped and moved to or from standby without creating or claiming a Rallora account. Independent roster identities preserve each league player, including name-only entries. Existing accounts remain linked where available; a movement does not create a login. Club administrators still need authorised sign-in access. Rating-based entry requires an incoming rating; bespoke club rules must also be checked by the administrator in the confirmation dialog. Cross-division swaps are deliberately blocked rather than inferring eligibility from free-text league rules.
 
 Player access and registration records move together. The role associated with an occupied destination slot is preserved; filling an empty slot uses the existing Player 1 captain / Player 2 player convention. Moving a captain out does not promote their partner. Pending invitations for departing players are cancelled; their invitation history remains. Replaced partner claim links are cleared.
 
@@ -25,6 +25,10 @@ Player access and registration records move together. The role associated with a
 The operation uses the existing season advisory lock, season row lock, ordered team locks and invitation locks. Pool placement uses row locks and unique-key upserts. A late failure rolls back team, membership, pool and audit changes together.
 
 Fixtures, scores, team IDs, league places and standings remain in place. Public results, captain fixtures, admin result views, search and exports use saved names for recorded matches. Upcoming fixtures use current rosters. Legacy snapshots can preserve only the roster available when introduced; earlier unrecorded substitutions cannot be reconstructed.
+
+The follow-up `supabase/migrations/20261028101027_account_optional_player_movements.sql` separates league identities from accounts, permits unlinked standby entries and preserves accountless players in audit records. Owner RLS continues to require the signed-in owner; only the checked admin RPC can create unlinked movement entries. Pending invitations for departing players are cancelled. Accountless entries do not receive account-registration notifications.
+
+Player actions and dialog buttons use explicit Rallora navy, cyan and outlined styles, consistent typography, rounded corners, focus states and mobile sizing.
 
 ## Help & Guides
 
@@ -43,10 +47,8 @@ The existing Manage entries, divisions and players article now covers each actio
 
 - Additional integrated desktop/mobile verification passed with the actual component connected to the migrated SQL function in a disposable database through a test-only transport adapter. Swaps, occupied/vacant standby assignments, roster refresh, captain access, historical scores/names, stale errors and audit entries passed with no browser errors.
 
-## Release order and remaining review
+## Release order
 
-This migration has **not** been applied to production. No live GSM player assignments were changed. The PR must remain unmerged until approved.
+Apply the reviewed migrations before releasing the matching frontend. The original upgrade retires legacy replacement RPCs, so coordinate the database/frontend release. The account-optional follow-up preserves all existing player assignments; its data updates initialise new roster identity metadata only.
 
-Review and apply the migration to an isolated staging database, then exercise the preview with synthetic registrations. Preview code requires the new columns/RPC; a preview connected to the unchanged live database cannot validate these workflows. Apply the reviewed migration before releasing the matching frontend. The legacy Replace RPC is revoked by this migration, so coordinate the database/frontend release and avoid a prolonged gap.
-
-Confirm the registered-account prerequisite and restriction to same-division swaps meet GSM's operational requirements. Verify that legacy snapshots reflect the roster currently known to Rallora. Production is not ready until staging verification and explicit release approval are complete.
+Verify live help content and public league views after deployment. Test movements against disposable synthetic data, keeping live GSM assignments untouched. Confirm that historical snapshot names reflect the roster known to Rallora; unrecorded earlier substitutions cannot be reconstructed.
