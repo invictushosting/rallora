@@ -3,8 +3,10 @@ import assert from 'node:assert/strict';
 import {canRespondToProposal, proposalIsCurrent, localDateTime} from '../lib/fixture-messaging.ts';
 const context={writable:true,viewer_team_id:'away',home_roster_version:2,away_roster_version:3};
 const proposal={kind:'proposal',sender_team_id:'home',sender_user_id:'home-captain',proposal_status:'pending',starts_at:'2099-01-01T10:00:00Z',home_roster_version:2,away_roster_version:3};
-test('only the opposing captain can respond to a current pending time proposal',()=>{
+test('only a player from the opposing pairing can respond to a current pending time proposal',()=>{
  assert.ok(canRespondToProposal(proposal,context,'away-captain'));
+ assert.ok(canRespondToProposal(proposal,context,'away-partner'));
+ assert.equal(canRespondToProposal(proposal,{...context,viewer_team_id:'home'},'home-partner'),false);
  for(const changed of [{viewer_team_id:'home'},{viewer_team_id:null},{writable:false},{home_roster_version:4},{away_roster_version:4}]) assert.equal(canRespondToProposal(proposal,{...context,...changed},'away-captain'),false);
  assert.equal(canRespondToProposal(proposal,context,'home-captain'),false);
  for(const status of ['accepted','declined','superseded']) assert.equal(canRespondToProposal({...proposal,proposal_status:status},context,'away-captain'),false);

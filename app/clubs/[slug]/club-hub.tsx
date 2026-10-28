@@ -1,5 +1,6 @@
 "use client";
 
+import {useFixtureChatAccess} from "@/lib/hooks/use-fixture-chat-access";
 import {fixturePlayerLabel} from "@/lib/fixture-rosters";
 import {fixtureMatchesQuery} from "@/lib/leagues/fixture-discovery";
 import {registrationWindowState} from "@/lib/registration-window";
@@ -132,6 +133,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
   const slug = slugOverride ?? (typeof params.slug === "string" ? params.slug : "");
   const supabase = useMemo(() => createClient(), []);
   const [clubState, setClubState] = useState<ClubState>({ kind: "loading" });
+  const chatAccess = useFixtureChatAccess(clubState.kind === "ready" ? clubState.club.id : null);
   const [seasonId, setSeasonId] = useState("");
   const [data, setData] = useState<LeagueData>(EMPTY);
   const [dataState, setDataState] = useState<"loading" | "ready" | "error">("loading");
@@ -462,6 +464,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
         <div className={styles.matchTeam}>{awayPlayers.length ? awayPlayers.map((name, index)=><strong key={index}>{name}</strong>) : <strong>Players to be confirmed</strong>}</div>
       </div>}
       {!resolved && arrangementPanel(fixture)}
+      {(chatAccess.manager || chatAccess.teamIds.has(fixture.home_team_id) || chatAccess.teamIds.has(fixture.away_team_id)) && <div className={styles.fixtureBottom}><Link className={styles.bookingAction} href={`/clubs/${slug}/matches/${fixture.id}`}>Match chat</Link></div>}
       {(resolved || fixture.status === "disputed") && <div className={styles.fixtureBottom}>
         <span>{resolved ? (fixture.booking_court || fixture.court || "Match complete") : "Result under review"}</span>
         <span className={resolved ? styles.confirmed : styles.fixtureStatus}>
