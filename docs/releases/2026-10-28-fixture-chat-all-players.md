@@ -14,7 +14,7 @@ Apply `20261028192040_fixture_chat_all_players.sql`, then deploy the app. This r
 
 - Lint and TypeScript checks; 106 Node tests.
 - Production build using synthetic CI Supabase settings.
-- Full 94-script synthetic PostgreSQL-compatible PGlite pipeline, including the existing captain suite and new partner assertions. GitHub CI runs the same SQL against PostgreSQL 17.
+- Full 96-script synthetic PostgreSQL-compatible PGlite pipeline, including the existing captain suite and new partner assertions. GitHub CI runs the same SQL against PostgreSQL 17.
 - Partner tests cover draft denial, read/write access, sender identity, proposing and responding, rejecting same-pairing acceptance, alerts, read cursors, removal, closed fixtures, and denial of booking/organiser powers.
 
 Production migration and deployment have not been applied by this change.
