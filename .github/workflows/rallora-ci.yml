@@ -28,6 +28,8 @@ jobs:
       - run: npm ci
       - run: node --experimental-strip-types --test tests/brand-colors.test.mjs
       - run: node --experimental-strip-types --test tests/communication.test.mjs
+      - run: node --experimental-strip-types --test tests/fixture-messaging.test.mjs
+      - run: node --experimental-strip-types --test tests/captain-contacts.test.mjs
       - run: node --experimental-strip-types --test tests/help.test.mjs
       - run: node --experimental-strip-types --test tests/competition-schedule.test.mjs
       - run: node scripts/check-legacy-demo-rpcs.mjs
@@ -166,3 +168,6 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261028101027_account_optional_player_movements.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_account_optional_movements_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_player_movements_assertions.sql
+
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261028143810_fixture_match_conversations.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_fixture_messaging_assertions.sql

@@ -402,6 +402,8 @@ export default function ClubAdministration() {
         <Link href={`/help/club-getting-started?club=${encodeURIComponent(view.club.slug)}`}>Help &amp; guides</Link>
         <a href="#club-leagues">Leagues</a>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/registrations`}>Registrations</Link>
+        <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/contacts`}>Captain contacts</Link>
+        <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/matches`}>Match inbox</Link>
         <a href="#club-management">Teams &amp; players</a>
         <a href="#club-sponsors">Sponsors</a>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/staff`}>Club staff</Link>
