@@ -30,6 +30,14 @@ The follow-up `supabase/migrations/20261028101027_account_optional_player_moveme
 
 Player actions and dialog buttons use explicit Rallora navy, cyan and outlined styles, consistent typography, rounded corners, focus states and mobile sizing.
 
+## Automatic pairing-name synchronisation
+
+`supabase/migrations/20261028153500_auto_sync_pairing_team_names.sql` adds a private before-update trigger on `teams` that keeps its saved `name` in sync when either player-name slot changes. A paired team becomes `Player A / Player B`; a vacant slot is shown as `Player to be confirmed`. An entirely vacant team gets a short unique identifier so the existing division/name uniqueness constraint cannot block roster changes. If an old custom team label already occupies the desired name, the updated pairing gets a short disambiguating suffix. A separate after-update trigger updates only the corresponding *approved* application summary (`team_name`). Both updates are part of the same database transaction as the player movement, including rollbacks.
+
+This applies to player swaps, swaps within a division, moving to/from standby, and other approved changes that update the two player name fields. It intentionally does not rename unrelated teams at migration time, alter team IDs, regenerate fixtures, overwrite historical match snapshots, or affect standings. Manual team names are preserved until the players actually change. For the 28 October GSM correction, update the two affected records separately after the migration and verify their approved application names match.
+
+The disposable SQL test `scripts/staging/ci_pairing_team_names_assertions.sql` covers both player slots, vacancies, refills, approved application synchronisation, collision handling, roster versions, unchanged manual labels and historical fixture snapshots.
+
 ## Help & Guides
 
 The existing Manage entries, divisions and players article now covers each action, full pairings, captain access, incomplete teams, future bookings, historical results, account requirements, eligibility, stale confirmations and common errors. Its existing replacement section anchor is retained for old help links.
