@@ -173,3 +173,5 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_fixture_messaging_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261028153500_auto_sync_pairing_team_names.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_pairing_team_names_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261028190842_admin_registration_ratings.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_entry_ratings_assertions.sql
