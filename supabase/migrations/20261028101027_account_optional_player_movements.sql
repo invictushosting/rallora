@@ -43,7 +43,7 @@ language sql security definer set search_path='' as $$
  'rating',case when p_slot=1 then t.player_one_rating else t.player_two_rating end,
  'rating_source',case when p_slot=1 then t.player_one_rating_source else t.player_two_rating_source end)
  from public.teams t left join public.rallora_team_applications a on a.created_team_id=t.id and a.status='approved'
- left join auth.users u on u.id=a.requested_by where t.id=p_team limit 1;
+ left join auth.users u on u.id=a.requested_by and exists(select 1 from public.rallora_team_roster_memberships r where r.team_id=t.id and r.player_user_id=u.id) where t.id=p_team limit 1;
 $$;
 
 create or replace function rallora_private.assign_roster_slot(p_team uuid,p_slot integer,p_player jsonb) returns void

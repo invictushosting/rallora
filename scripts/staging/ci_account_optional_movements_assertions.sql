@@ -12,6 +12,10 @@ begin
  insert into public.teams(id,division_id,name,player_one_name,player_two_name,player_one_email,player_two_email,player_one_rating,player_two_rating)
  values(a,d,'Optional A','Captain One','Unclaimed Alice','optional-cap-one@example.invalid','unclaimed-alice@example.invalid',3,3),
  (b,d,'Optional B','Captain Two','Name Only Bob','optional-cap-two@example.invalid',null,3,3);
+ insert into public.rallora_team_applications(club_id,season_id,division_id,requested_by,team_name,captain_name,partner_name,partner_email,status,created_team_id)
+ values(c,s,d,captain,'Optional A','Captain One','Unclaimed Alice','unclaimed-alice@example.invalid','pending',a),
+ (c,s,d,captain2,'Optional B','Captain Two','Name Only Bob',null,'pending',b);
+ update public.rallora_team_applications set status='approved' where created_team_id in(a,b);
  select player_two_roster_id into id_a from public.teams where id=a;
  select player_two_roster_id into id_b from public.teams where id=b;
  if id_a is null or id_b is null or id_a=id_b then raise exception 'Independent player identities missing'; end if;
@@ -47,6 +51,14 @@ begin
  if (select count(*) from auth.users)<>auth_count+2 then raise exception 'Movement created a login'; end if;
  if (select home_player_names from public.fixtures where id=f)<>array['Captain One','Unclaimed Alice']
  or (select home_score from public.results where fixture_id=f)<>'6-4' then raise exception 'Historical result changed'; end if;
+ -- A name-only captain must not inherit the historical application's owner.
+ select id into pool from public.rallora_player_pools where season_id=s and roster_player_id=id_b;
+ select roster_version into v from public.teams where id=b;
+ perform public.rallora_manage_players('add',b,1,v,p_pool_id=>pool);
+ select roster_version into v from public.teams where id=b;
+ perform public.rallora_manage_players('standby',b,1,v);
+ if not exists(select 1 from public.rallora_player_pools where season_id=s and roster_player_id=id_b and user_id is null and email is null and status='available') then raise exception 'Historical applicant linked to name-only captain'; end if;
+ if not exists(select 1 from public.rallora_team_roster_memberships where team_id=a and player_user_id=captain2) then raise exception 'Historical applicant lost unrelated access'; end if;
  -- A stale confirmation still fails after identities move.
  rejected:=false;begin perform public.rallora_manage_players('standby',a,2,0);exception when raise_exception then rejected:=true;end;
  if not rejected then raise exception 'Stale unlinked roster accepted'; end if;
