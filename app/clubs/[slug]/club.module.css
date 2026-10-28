@@ -441,3 +441,42 @@
 .heroLeagueNavigation{display:flex;align-items:center;justify-content:space-between;gap:24px}.heroLeagueChooser{min-width:0;max-width:740px;margin:24px 0}.heroLeagueChooser label{display:flex;align-items:center;flex-wrap:wrap;gap:10px;color:#fff;font-size:16px;font-weight:800;margin-bottom:12px}.heroLeagueChooser label>span{font-size:26px;line-height:1}.heroLeagueChooser label>small{font-size:12px;font-weight:650;border:1px solid #ffffff50;border-radius:20px;padding:4px 10px}.heroSelectWrap{position:relative}.heroSelectWrap select{appearance:none;width:100%;min-height:56px;padding:15px 48px 15px 16px;border:1px solid #ffffff80;border-radius:12px;background:#ffffff14;color:#fff;font:inherit;font-size:15px;font-weight:700;cursor:pointer;text-overflow:ellipsis}.heroSelectWrap select option{background:#fff;color:#061a39}.heroSelectWrap>svg{position:absolute;right:16px;top:50%;transform:translateY(-50%);pointer-events:none;color:#fff}.heroLeagueChooser>p{margin:10px 0 0;font-size:13px;color:#e0ebf5;line-height:1.6}.scrollToLeague{display:inline-flex;align-items:center;gap:12px;min-height:48px;border:1px solid #ffffff70;border-radius:12px;padding:12px 16px;color:#fff;text-decoration:none;font-size:14px;font-weight:750;white-space:nowrap}.scrollToLeague:hover{background:#ffffff20}#league-centre{scroll-margin-top:24px}@media(max-width:700px){.heroLeagueNavigation{flex-direction:column;align-items:stretch;gap:18px}.heroLeagueChooser{max-width:none}.heroSelectWrap select{font-size:16px}.scrollToLeague{align-self:flex-start}}
 
 .registrationUnavailable{background:#e8edf3;color:#294566}.registrationUnavailable::before{background:#6b8097}
+
+
+/* Public fixture discovery: division-first navigation on desktop and mobile. */
+.fixtureDiscovery{padding:20px;margin:0 0 20px;background:#f5f9fd;border:1px solid #d9e6f4;border-radius:18px}
+.fixtureDiscoveryHeading h3{margin:0 0 5px;font-size:19px;letter-spacing:-.4px;color:#102b4d}
+.fixtureDiscoveryHeading p{margin:0;color:#607792;font-size:12px;line-height:1.5}
+.fixtureDivisionHeading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 10px}
+.fixtureDivisionHeading strong{font-size:12px;color:#1f456a}
+.fixtureDivisionHeading span{font-size:11px;color:#6b829b}
+.fixtureDivisionGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:8px}
+.fixtureDivisionButton,.fixtureDivisionSelected{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:4px;min-width:0;min-height:57px;padding:9px 12px;text-align:left;border:1px solid #d7e4f1;border-radius:12px;background:#fff;color:#193a5f;font:inherit;cursor:pointer}
+.fixtureDivisionGrid button span{font-size:12px;font-weight:850;line-height:1.3;overflow-wrap:anywhere}
+.fixtureDivisionGrid button small{font-size:10px;color:#6b839f;font-weight:700}
+.fixtureDivisionGrid .fixtureDivisionSelected{border:2px solid var(--club-color);padding:8px 11px;background:color-mix(in srgb,var(--club-color) 10%,#fff);box-shadow:0 2px 9px rgba(17,54,95,.08)}
+.fixtureDivisionGrid .fixtureDivisionSelected small{color:#315b87}
+.fixtureDivisionGrid button:hover{border-color:var(--club-color)}
+.fixtureDivisionGrid button:focus-visible,.fixtureFilterStatus button:focus-visible,.fixtureNoMatches button:focus-visible{outline:3px solid var(--club-color);outline-offset:2px}
+.fixtureSearchLabel{display:flex;flex-direction:column;gap:8px;margin:18px 0 0;font-size:12px;font-weight:800;color:#294767}
+.fixtureSearchLabel input{width:100%;min-height:48px;padding:12px 14px;border-radius:12px;border:1px solid #ceddec;background:#fff;font:inherit;font-size:14px;color:#1e3c60;outline-color:var(--club-color)}
+.fixtureSearchLabel input::placeholder{color:#778ba2;font-weight:500}
+.fixtureFilterStatus{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:13px;font-size:12px;color:#315679}
+.fixtureFilterStatus button,.fixtureNoMatches button{border:0;background:transparent;color:#2159a6;font:inherit;font-weight:850;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:5px}
+.fixtureDivisionGroup+.fixtureDivisionGroup{margin-top:24px}
+.fixtureDivisionGroup h3{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 6px;padding:9px 12px;border-left:4px solid var(--club-color);border-radius:5px;background:#f3f7fc;color:#183a60;font-size:15px}
+.fixtureDivisionGroup h3 span{font-size:10px;font-weight:750;color:#6a809b;white-space:nowrap}
+.fixtureNoMatches{padding:28px 12px;text-align:center;color:#29496e}
+.fixtureNoMatches strong{font-size:15px}
+.fixtureNoMatches p{font-size:12px;color:#667f9a}
+@media(max-width:540px){
+ .fixtureDiscovery{padding:14px 12px;border-radius:15px}
+ .fixtureDiscoveryHeading h3{font-size:18px}
+ .fixtureDivisionGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+ .fixtureDivisionButton,.fixtureDivisionSelected{min-height:59px;padding:9px 7px;border-radius:10px}
+ .fixtureDivisionGrid .fixtureDivisionSelected{padding:8px 6px}
+ .fixtureDivisionGrid button span{font-size:11px}
+ .fixtureDivisionGrid button small{font-size:9px}
+ .fixtureSearchLabel input{font-size:16px}
+ .fixtureDivisionGroup h3{font-size:13px}
+}
