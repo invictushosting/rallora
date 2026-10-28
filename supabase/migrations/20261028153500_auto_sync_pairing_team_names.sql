@@ -51,10 +51,10 @@ create function rallora_private.sync_application_pairing_name() returns trigger
 language plpgsql security definer set search_path = '' as $fn$
 begin
   update public.rallora_team_applications a
-  set team_name = new.name, updated_at = now()
+  set team_name = left(new.name, 120), updated_at = now()
   where a.created_team_id = new.id
     and a.status = 'approved'
-    and a.team_name is distinct from new.name;
+    and a.team_name is distinct from left(new.name, 120);
   return new;
 end $fn$;
 revoke all on function rallora_private.sync_application_pairing_name()
