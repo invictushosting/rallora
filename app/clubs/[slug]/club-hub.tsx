@@ -357,6 +357,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
   const clubLogo = safeImage(club.logo_url);
   const clubCover = safeImage(club.cover_image_url);
   const teamNames = new Map(data.teams.map((team) => [team.id, playerPair(team)]));
+  const teamLabelsById = new Map(data.teams.map((team) => [team.id, team.name] as const));
   const results = new Map(data.results.map((result) => [result.fixture_id, result]));
   const standings = (id: string) => data.standings
     .filter((row) => row.division_id === id)
@@ -381,6 +382,8 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
       divisionNames.get(fixture.division_id),
       teamNames.get(fixture.home_team_id),
       teamNames.get(fixture.away_team_id),
+      teamLabelsById.get(fixture.home_team_id),
+      teamLabelsById.get(fixture.away_team_id),
       fixturePlayerLabel(fixture, fixture.home_team_id, teamNames.get(fixture.home_team_id) ?? "Players"),
       fixturePlayerLabel(fixture, fixture.away_team_id, teamNames.get(fixture.away_team_id) ?? "Players"),
       fixture.fixture_group_name, fixture.court, fixture.booking_court,
