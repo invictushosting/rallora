@@ -99,7 +99,7 @@ export default function PlayerManagement({clubId,seasons,onSaved}:{clubId:string
           {chosen?.availability&&<p>Availability: {chosen.availability}</p>}
           <p>{chosen?.player_name??"Selected standby player"} will fill Player {movement.slot}.{movement.team[movement.slot===1?'player_one_name':'player_two_name']&&` ${playerName(movement.team,movement.slot)} will move to standby as part of the same operation.`}</p></>}
         {movement.action==="standby"&&<p role="note">This leaves the pairing incomplete and may remove its captain access. Existing fixtures and bookings remain scheduled. Add a standby player before its next match.</p>}
-        <p>Scores and league places stay with their teams. Check the club’s rating and registration rules. Players being moved must have claimed their Rallora accounts.</p>
+        <p>Scores and league places stay with their teams. Check the club’s rating and registration rules. Players can be moved whether or not they have a Rallora account.</p>
         <label className={styles.movementReview}><input type="checkbox" checked={reviewed} onChange={e=>setReviewed(e.target.checked)} disabled={busy}/>I have reviewed the destinations, eligibility and any upcoming fixtures.</label>
         {error&&<p role="alert">{error}</p>}
         <div className={styles.pairingActions}><button type="submit" disabled={busy||loading||!reviewed||(movement.action==="swap"&&(!other||!other[otherSlot===1?'player_one_name':'player_two_name']))||(movement.action==="add"&&(!chosen||poolFailed))}>{busy?"Saving…":`Confirm ${titles[movement.action]}`}</button><button type="button" disabled={busy} className={styles.secondaryButton} onClick={close}>Cancel</button></div>

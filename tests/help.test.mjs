@@ -50,3 +50,11 @@ test('player movement help covers all actions, history and recovery', () => {
   assert.match(JSON.stringify(article),/same operation/);
   assert.match(JSON.stringify(article),/unrecorded substitutions/);
 });
+
+
+test('admin movement help does not require a claimed account',()=>{
+ const article=HELP_ARTICLES.find(a=>a.slug==='manage-teams-and-entries');
+ const content=JSON.stringify(article);
+ assert.match(content,/without creating or claiming a Rallora account/);
+ assert.doesNotMatch(content,/must have claimed|before moving them/);
+});
