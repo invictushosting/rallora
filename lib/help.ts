@@ -7,7 +7,7 @@ export type HelpArticle = {
   slug: string; category: HelpCategory; title: string; summary: string;
   keywords: string[]; sections: HelpSection[]; related: string[];
 };
-export const HELP_REVIEWED = "26 October 2026";
+export const HELP_REVIEWED = "28 October 2026";
 export const HELP_CATEGORIES: { id: HelpCategory; title: string; description: string }[] = [
   { id: "players", title: "Players", description: "Join a league, check your entry and get ready to play." },
   { id: "captains", title: "Captains", description: "Arrange matches, submit scores and review results." },
@@ -24,6 +24,29 @@ export const HELP_ARTICLES: HelpArticle[] = [
       { id: "team-invite", title: "Accept a partner invitation", steps: ["Open the team invitation link sent to your email. Use the address your captain invited.", "If you are new to Rallora, choose Create account and create your own Rallora password. If you already have an account, choose Sign in. Your Playtomic password does not sign you in to Rallora.", "Complete email confirmation if requested, then return to the original invitation and sign in. Resend confirmation email is available when needed. Forgot password opens recovery in a new tab so you can return to your invitation afterwards.", "Press Claim team place to complete the invitation. If the invitation is unavailable, check your account email with your captain or club organiser."], note: "Your captain adding your details does not create a Rallora password for you. Accepting an invitation does not require another league application." },
       { id: "submit", title: "Submit the entry", steps: ["Complete any email verification requested, then return to the registration page.", "Review the final step and press the final submit button. Creating or verifying an account alone does not enter you into the league.", "Wait for the registration receipt or current status on screen. A pairing is reviewed by the organiser before going live."], note: "If you are unsure whether your entry arrived, check the existing status before submitting again. Ask the organiser to check it if necessary." },
     ], related: ["registration-status", "emails-and-ratings", "captain-access"],
+  },
+  {
+    slug: "view-league-fixtures", category: "players", title: "Find fixtures by division",
+    summary: "Browse the public fixture list, search by division or player, and share filtered matches.",
+    keywords: ["fixtures", "fixture", "division", "division 1a", "browse", "filter", "search", "match", "find", "public league", "share"],
+    sections: [
+      { id: "choose", title: "Choose the right league and division", steps: [
+        "Open the club’s public League centre and choose the correct league from Choose league. Open Fixtures.",
+        "Under Browse by division, select your division to show only its matches. Each division button displays its number of upcoming fixtures. All divisions restores the complete list.",
+        "When viewing All divisions, fixtures appear under division headings rather than in one mixed list. Select Show all matches at the bottom if only the first page is shown.",
+      ] },
+      { id: "search", title: "Find your match quickly", steps: [
+        "Use Search player, team, division or round to enter either player’s name, a team name, a division such as Division 2A, or a round.",
+        "You can combine terms such as 2A Emma to narrow down matches. Search and division selection work together.",
+        "Read Play by as the deadline, not a reserved court time. Check the fixture for any separately recorded booking details.",
+      ] },
+      { id: "share", title: "Share the right view", steps: [
+        "Once you have selected your division or entered a search, choose Copy link to this view.",
+        "Send that link to another player. It opens the same league, tab and filters.",
+        "Use Clear filters to return to every division and all matches.",
+      ] },
+    ],
+    related: ["captain-access", "arrange-a-match", "submit-and-confirm-results"],
   },
   {
     slug: "registration-status", category: "players", title: "Check your registration status", summary: "Understand pending, approved and duplicate entries.",
@@ -177,7 +200,7 @@ export function suggestedHelp(path: string): string[] {
   if (path.includes("/captain")) return ["arrange-a-match", "submit-and-confirm-results", "captain-access"];
   if (/\/(register|join-team)(\/|$)/.test(path)) return ["join-a-league", "registration-status", "emails-and-ratings"];
   if (/\/(login|account)(\/|$)/.test(path)) return ["emails-and-ratings", "captain-access", "registration-status"];
-  return ["join-a-league", "captain-access", "club-getting-started"];
+  return ["view-league-fixtures", "join-a-league", "captain-access"];
 }
 
 /** Select a relevant section rather than always repeating the start of a guide. */

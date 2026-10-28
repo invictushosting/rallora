@@ -58,3 +58,13 @@ test('admin movement help does not require a claimed account',()=>{
  assert.match(content,/without creating or claiming a Rallora account/);
  assert.doesNotMatch(content,/must have claimed|before moving them/);
 });
+
+
+test('public fixture help explains division browsing, search and filtered sharing', () => {
+  const article = HELP_ARTICLES.find(a => a.slug === 'view-league-fixtures');
+  assert.ok(article);
+  assert.deepEqual(article.sections.map(s => s.id), ['choose', 'search', 'share']);
+  assert.equal(searchHelp('browse fixtures by division')[0]?.slug, 'view-league-fixtures');
+  assert.ok(suggestedHelp('/clubs/gsm-padel').includes('view-league-fixtures'));
+  assert.match(JSON.stringify(article), /Copy link to this view/);
+});

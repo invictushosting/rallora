@@ -45,6 +45,7 @@ jobs:
       - run: node --experimental-strip-types --test tests/result-workflow.test.mjs
       - run: node --experimental-strip-types --test tests/scores.test.mjs
       - run: node --experimental-strip-types --test tests/fixture-rosters.test.mjs
+      - run: node --experimental-strip-types --test tests/fixture-discovery.test.mjs
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
