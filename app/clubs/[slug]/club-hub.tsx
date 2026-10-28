@@ -1,5 +1,6 @@
 "use client";
 
+import {fixturePlayerLabel} from "@/lib/fixture-rosters";
 import {registrationWindowState} from "@/lib/registration-window";
 import {useRegistrationWindow} from "@/lib/hooks/use-registration-window";
 import BackLink from "@/app/components/back-link";
@@ -43,6 +44,7 @@ type Fixture = {
   id: string; season_id: string; division_id: string;
   home_team_id: string; away_team_id: string;
   play_by: string; week_number: number;
+  home_player_names:(string|null)[]|null;away_player_names:(string|null)[]|null;
   fixture_group_name: string | null; status: string; court: string | null;
   available_from: string | null;
   arrangement_status: "not_arranged" | "possible" | "arranged" | "in_progress" | "result_required" | "cancelled";
@@ -243,7 +245,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
       try {
         const today = new Date().toISOString().slice(0, 10);
         const fixtureQuery = supabase.from("fixtures")
-          .select("id,season_id,division_id,home_team_id,away_team_id,play_by,week_number,fixture_group_name,status,court,available_from,arrangement_status,booking_starts_at,booking_ends_at,booking_type,booking_court,booking_matched_players")
+          .select("id,season_id,division_id,home_team_id,away_team_id,play_by,week_number,home_player_names,away_player_names,fixture_group_name,status,court,available_from,arrangement_status,booking_starts_at,booking_ends_at,booking_type,booking_court,booking_matched_players")
           .eq("season_id", verifiedSeasonId);
         const [divisionReply, fixtureReply, standingReply, cupReply, manualReply] =
           await Promise.all([
@@ -366,8 +368,8 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
       fixture.division_id === divisionFilter)
     .filter((fixture) => {
       const term = search.trim().toLowerCase();
-      return !term || [teamNames.get(fixture.home_team_id),
-        teamNames.get(fixture.away_team_id), fixture.fixture_group_name,
+      return !term || [fixturePlayerLabel(fixture,fixture.home_team_id,teamNames.get(fixture.home_team_id)??"Players"),
+        fixturePlayerLabel(fixture,fixture.away_team_id,teamNames.get(fixture.away_team_id)??"Players"), fixture.fixture_group_name,
         fixture.court, String(fixture.week_number)].some((value) =>
         value?.toLowerCase().includes(term));
     });
@@ -421,8 +423,8 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
   function fixtureRow(fixture: Fixture) {
     const result = results.get(fixture.id);
     const resolved = isConfirmed(result);
-    const homePlayers = playerNames(data.teams.find(team => team.id === fixture.home_team_id));
-    const awayPlayers = playerNames(data.teams.find(team => team.id === fixture.away_team_id));
+    const homePlayers = fixture.home_player_names?.filter((name): name is string=>Boolean(name?.trim())) ?? playerNames(data.teams.find(team => team.id === fixture.home_team_id));
+    const awayPlayers = fixture.away_player_names?.filter((name): name is string=>Boolean(name?.trim())) ?? playerNames(data.teams.find(team => team.id === fixture.away_team_id));
     return <li key={fixture.id} className={styles.fixture}>
       <div className={styles.fixtureTop}>
         <span>{data.divisions.find((division) =>
@@ -432,13 +434,13 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
         <span>{dateLabel(fixture.play_by)}</span>
       </div>
       {resolved ? <div className={styles.resultCard}>
-        <div className={styles.resultPair}><span className={styles.pairSide}>HOME</span><strong>{teamLabel(fixture.home_team_id, teamNames)}</strong></div>
+        <div className={styles.resultPair}><span className={styles.pairSide}>HOME</span><strong>{fixturePlayerLabel(fixture,fixture.home_team_id,teamLabel(fixture.home_team_id, teamNames))}</strong></div>
         <div className={styles.setScore}>
           <div className={styles.setHeaders}>{scoreSets(result?.home_score).map((_, index)=><span key={index}>SET {index + 1}</span>)}</div>
           <div className={styles.setRow}>{scoreSets(result?.home_score).map((score,index)=>{const away=Number(scoreSets(result?.away_score)[index]);const home=Number(score);return <strong key={index} className={home>away?styles.setWon:""}>{score}</strong>;})}</div>
           <div className={styles.setRow}>{scoreSets(result?.away_score).map((score,index)=>{const home=Number(scoreSets(result?.home_score)[index]);const away=Number(score);return <strong key={index} className={away>home?styles.setWon:""}>{score}</strong>;})}</div>
         </div>
-        <div className={`${styles.resultPair} ${styles.resultPairAway}`}><span className={styles.pairSide}>AWAY</span><strong>{teamLabel(fixture.away_team_id, teamNames)}</strong></div>
+        <div className={`${styles.resultPair} ${styles.resultPairAway}`}><span className={styles.pairSide}>AWAY</span><strong>{fixturePlayerLabel(fixture,fixture.away_team_id,teamLabel(fixture.away_team_id, teamNames))}</strong></div>
       </div> : <div className={styles.match}>
         <div className={styles.matchTeam}>{homePlayers.length ? homePlayers.map((name, index)=><strong key={index}>{name}</strong>) : <strong>Players to be confirmed</strong>}</div>
         <span className={styles.score}>vs</span>
@@ -477,8 +479,8 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
     return {
       id: fixture.id,
       division: division?.name ?? "Division",
-      home: teamLabel(fixture.home_team_id, teamNames),
-      away: teamLabel(fixture.away_team_id, teamNames),
+      home: fixturePlayerLabel(fixture,fixture.home_team_id,teamLabel(fixture.home_team_id, teamNames)),
+      away: fixturePlayerLabel(fixture,fixture.away_team_id,teamLabel(fixture.away_team_id, teamNames)),
       playBy: fixture.play_by.slice(0, 10),
       week: fixture.week_number,
       court: fixture.court,

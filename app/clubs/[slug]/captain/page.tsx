@@ -1,5 +1,6 @@
 "use client";
 
+import {fixturePlayerLabel} from "@/lib/fixture-rosters";
 import FixtureBooking, {type FixtureArrangement} from "./fixture-booking";
 import BackLink from "@/app/components/back-link";
 import Link from "next/link";
@@ -11,7 +12,7 @@ import styles from "./captain.module.css";
 
 type Team = { id:string; name:string; player_one_name:string|null; player_two_name:string|null;
   player_one_rating:number|null; player_two_rating:number|null; season:{name:string;status:string;created_at:string} };
-type Fixture = { id:string; home_team_id:string; away_team_id:string; play_by:string; status:string };
+type Fixture = { id:string; home_team_id:string; away_team_id:string; play_by:string; status:string;home_player_names:(string|null)[]|null;away_player_names:(string|null)[]|null };
 
 export default function CaptainCentre() {
   const params=useParams(), slug=typeof params.slug==="string"?params.slug:"";
@@ -69,7 +70,7 @@ export default function CaptainCentre() {
       let booked:FixtureArrangement[]=[];
       let rows:Fixture[]=[], names:Record<string,string>={}, submitted:CaptainSubmission[]=[], official:OfficialResult[]=[];
       if(chosen&&(isAdmin||chosen.season.status!=="draft")) {
-        const reply=await supabase.from("fixtures").select("id,home_team_id,away_team_id,play_by,status")
+        const reply=await supabase.from("fixtures").select("id,home_team_id,away_team_id,play_by,status,home_player_names,away_player_names")
           .or(`home_team_id.eq.${chosen.id},away_team_id.eq.${chosen.id}`).order("play_by");
         if(reply.error) throw reply.error;
         rows=(reply.data??[]).filter(item=>isAdmin||item.status!=="cancelled");
@@ -113,7 +114,7 @@ export default function CaptainCentre() {
     event.preventDefault();if(busy||loading||!team)return;
     const fields=new FormData(event.currentTarget),home=String(fields.get("home")??"").trim(),away=String(fields.get("away")??"").trim(),winner=String(fields.get("winner")??"");
     if(!home||!away||!winner){setNotice("Enter both scores and choose the winning pairing.");return;}
-    if(!window.confirm(`Submit ${labels[fixture.home_team_id]} ${home} – ${away} ${labels[fixture.away_team_id]}? The opposing captain will be asked to confirm it.`))return;
+    if(!window.confirm(`Submit ${fixturePlayerLabel(fixture,fixture.home_team_id,labels[fixture.home_team_id]??"Players")} ${home} – ${away} ${fixturePlayerLabel(fixture,fixture.away_team_id,labels[fixture.away_team_id]??"Players")}? The opposing captain will be asked to confirm it.`))return;
     setBusy(fixture.id);
     try {
       const args={p_fixture_id:fixture.id,p_home_score:home,p_away_score:away,p_winner_team_id:winner,p_notes:String(fields.get("notes")??"")};
@@ -182,11 +183,11 @@ export default function CaptainCentre() {
       const score=official??submission;
       return <article className={`${styles.card} ${action?styles.actionCard:""}`} key={fixture.id}>
         <small>{label} · PLAY BY {new Date(`${fixture.play_by}T00:00:00`).toLocaleDateString("en-GB")}</small>
-        <h2>{labels[fixture.home_team_id]??"Home"} <span>vs</span> {labels[fixture.away_team_id]??"Away"}</h2>
+        <h2>{fixturePlayerLabel(fixture,fixture.home_team_id,labels[fixture.home_team_id]??"Players")} <span>vs</span> {fixturePlayerLabel(fixture,fixture.away_team_id,labels[fixture.away_team_id]??"Players")}</h2>
         {needsSubmit&&team?.season.status==="active"&&<FixtureBooking fixtureId={fixture.id} arrangement={arrangements.find(a=>a.fixture_id===fixture.id)} onSaved={()=>void load()}/>}
         {needsSubmit?<form onSubmit={event=>void submit(event,fixture)}>
           <div><label>Home score<input name="home" required maxLength={100} autoComplete="off" placeholder="e.g. 6, 6"/></label><label>Away score<input name="away" required maxLength={100} autoComplete="off" placeholder="e.g. 4, 3"/></label></div>
-          <label>Winner<select name="winner" required><option value="">Choose winner</option><option value={fixture.home_team_id}>{labels[fixture.home_team_id]}</option><option value={fixture.away_team_id}>{labels[fixture.away_team_id]}</option></select></label>
+          <label>Winner<select name="winner" required><option value="">Choose winner</option><option value={fixture.home_team_id}>{fixturePlayerLabel(fixture,fixture.home_team_id,labels[fixture.home_team_id]??"Players")}</option><option value={fixture.away_team_id}>{fixturePlayerLabel(fixture,fixture.away_team_id,labels[fixture.away_team_id]??"Players")}</option></select></label>
           <label>Notes<input name="notes" maxLength={1000}/></label><p className={styles.helper}>Enter each pairing’s games in set order, separated by commas: home 6, 6 and away 4, 3 means a 6–4, 6–3 win. Choose the winner, then submit for opponent confirmation.</p>
           <button disabled={Boolean(busy)}>{busy===fixture.id?"Submitting…":"Review & submit result"}</button>
         </form>:<div className={styles.result}>

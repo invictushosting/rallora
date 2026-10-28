@@ -9,6 +9,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import styles from "./admin.module.css";
+import {fixturePlayerLabel} from "@/lib/fixture-rosters";
 import ClubEditor, { type EditableClub, type EditableSeason } from "./club-editor";
 import PrizePlanner from "./prize-planner";
 import { OFFICIAL_RESULT_STATUSES } from "@/lib/leagues/result-workflow";
@@ -29,8 +30,8 @@ function registrationRating(name:string|null,application:ApplicationRatings|unde
 }
 type Membership = { club_id: string; user_id: string; role: string; status: string };
 type DivisionSummary = { id: string; name: string; sort_order: number;
-  teams: { id: string; name: string; player_one_name:string|null; player_two_name:string|null; player_one_email:string|null; player_two_email:string|null; player_one_rating:number|null; player_two_rating:number|null }[] };
-type AdminFixture = { id:string; season_id:string; division_id:string; home_team_id:string; away_team_id:string; week_number:number; play_by:string; status:string; home_label?:string; away_label?:string; result_id?:string|null; result_score?:string|null; submission_id?:string|null; home_score?:string|null; away_score?:string|null; winner_team_id?:string|null; submitted_home_score?:string|null; submitted_away_score?:string|null; dispute_note?:string|null };
+  teams: { id: string; name: string; player_one_name:string|null; player_two_name:string|null; player_one_email:string|null; player_two_email:string|null; player_one_rating:number|null; player_two_rating:number|null; roster_version:number }[] };
+type AdminFixture = { id:string; season_id:string; division_id:string; home_team_id:string; away_team_id:string; week_number:number; play_by:string; status:string; home_player_names:(string|null)[]|null;away_player_names:(string|null)[]|null; home_label?:string; away_label?:string; result_id?:string|null; result_score?:string|null; submission_id?:string|null; home_score?:string|null; away_score?:string|null; winner_team_id?:string|null; submitted_home_score?:string|null; submitted_away_score?:string|null; dispute_note?:string|null };
 type Summary = {
   season: Season;
   divisions: number;
@@ -169,7 +170,7 @@ export default function ClubAdministration() {
           const [divisionReply, fixtureReply, registrationReply] = await Promise.all([
             supabase.from("divisions").select("id,name,sort_order")
               .eq("season_id", season.id).order("sort_order", { ascending: true }),
-            supabase.from("fixtures").select("id,season_id,division_id,home_team_id,away_team_id,week_number,play_by,status")
+            supabase.from("fixtures").select("id,season_id,division_id,home_team_id,away_team_id,week_number,play_by,status,home_player_names,away_player_names")
               .eq("season_id", season.id),
             supabase.from("rallora_team_applications").select("id",{count:"exact",head:true})
               .eq("season_id", season.id).in("status",["pending","approved"]),
@@ -184,9 +185,9 @@ export default function ClubAdministration() {
           const fixtureIds = seasonFixtures.map((item) => item.id);
           const [teamsReply, resultsReply, submissionsReply, applicationRatingsReply] = await Promise.all([
             divisionIds.length
-              ? supabase.from("teams").select("id,division_id,name,player_one_name,player_two_name,player_one_email,player_two_email,player_one_rating,player_two_rating")
+              ? supabase.from("teams").select("id,division_id,name,player_one_name,player_two_name,player_one_email,player_two_email,player_one_rating,player_two_rating,roster_version")
                   .in("division_id", divisionIds).order("name", { ascending: true })
-              : Promise.resolve({ data: [] as { id: string; division_id: string; name: string; player_one_name:string|null; player_two_name:string|null; player_one_email:string|null; player_two_email:string|null; player_one_rating:number|null; player_two_rating:number|null }[], error: null }),
+              : Promise.resolve({ data: [] as { id: string; division_id: string; name: string; player_one_name:string|null; player_two_name:string|null; player_one_email:string|null; player_two_email:string|null; player_one_rating:number|null; player_two_rating:number|null; roster_version:number }[], error: null }),
             fixtureIds.length
               ? supabase.from("results").select("id,fixture_id,home_score,away_score,winner_team_id")
                   .in("fixture_id", fixtureIds).in("status", OFFICIAL_RESULT_STATUSES)
@@ -202,19 +203,19 @@ export default function ClubAdministration() {
           if (resultsReply.error) throw resultsReply.error;
           if (submissionsReply.error) throw submissionsReply.error;
           const knownFixtureIds = new Set(fixtureIds);
-          const roster = (teamsReply.data ?? []) as { id: string; division_id: string; name: string; player_one_name:string|null; player_two_name:string|null; player_one_email:string|null; player_two_email:string|null; player_one_rating:number|null; player_two_rating:number|null }[];
+          const roster = (teamsReply.data ?? []) as { id: string; division_id: string; name: string; player_one_name:string|null; player_two_name:string|null; player_one_email:string|null; player_two_email:string|null; player_one_rating:number|null; player_two_rating:number|null; roster_version:number }[];
           const labels = new Map(roster.map((team)=>[team.id,[team.player_one_name,team.player_two_name].filter(Boolean).join(" / ") || "Players to be confirmed"]));
           const resultByFixture = new Map((resultsReply.data ?? []).map((result)=>[result.fixture_id,{id:result.id as string,home_score:result.home_score,away_score:result.away_score,winner_team_id:result.winner_team_id,score:[result.home_score,result.away_score].filter(Boolean).join(" : ") || null}]));
           const submissionByFixture = new Map<string,{id:string;home_score:string|null;away_score:string|null;notes:string|null;dispute_note:string|null;status:string}>();
           for (const submission of (submissionsReply.data ?? [])) if (!submissionByFixture.has(submission.fixture_id)) submissionByFixture.set(submission.fixture_id,submission);
-          allFixtures.push(...seasonFixtures.map((fixture)=>({...fixture,home_label:labels.get(fixture.home_team_id),away_label:labels.get(fixture.away_team_id),result_id:resultByFixture.get(fixture.id)?.id ?? null,result_score:resultByFixture.get(fixture.id)?.score ?? null,home_score:resultByFixture.get(fixture.id)?.home_score ?? null,away_score:resultByFixture.get(fixture.id)?.away_score ?? null,winner_team_id:resultByFixture.get(fixture.id)?.winner_team_id ?? null,submission_id:submissionByFixture.get(fixture.id)?.id ?? null,submitted_home_score:submissionByFixture.get(fixture.id)?.home_score ?? null,submitted_away_score:submissionByFixture.get(fixture.id)?.away_score ?? null,dispute_note:submissionByFixture.get(fixture.id)?.status==="disputed"?(submissionByFixture.get(fixture.id)?.dispute_note ?? submissionByFixture.get(fixture.id)?.notes) ?? null:null})));
+          allFixtures.push(...seasonFixtures.map((fixture)=>({...fixture,home_label:fixturePlayerLabel(fixture,fixture.home_team_id,labels.get(fixture.home_team_id)??"Players"),away_label:fixturePlayerLabel(fixture,fixture.away_team_id,labels.get(fixture.away_team_id)??"Players"),result_id:resultByFixture.get(fixture.id)?.id ?? null,result_score:resultByFixture.get(fixture.id)?.score ?? null,home_score:resultByFixture.get(fixture.id)?.home_score ?? null,away_score:resultByFixture.get(fixture.id)?.away_score ?? null,winner_team_id:resultByFixture.get(fixture.id)?.winner_team_id ?? null,submission_id:submissionByFixture.get(fixture.id)?.id ?? null,submitted_home_score:submissionByFixture.get(fixture.id)?.home_score ?? null,submitted_away_score:submissionByFixture.get(fixture.id)?.away_score ?? null,dispute_note:submissionByFixture.get(fixture.id)?.status==="disputed"?(submissionByFixture.get(fixture.id)?.dispute_note ?? submissionByFixture.get(fixture.id)?.notes) ?? null:null})));
           const divisionSummaries: DivisionSummary[] = (divisionReply.data ?? [])
             .map((division) => ({
               id: division.id as string,
               name: division.name as string,
               sort_order: division.sort_order as number,
               teams: roster.filter((team) => team.division_id === division.id)
-                .map((team) => ({ id: team.id, name: team.name, player_one_name: team.player_one_name, player_two_name: team.player_two_name, player_one_email: team.player_one_email, player_two_email: team.player_two_email, player_one_rating: team.player_one_rating??registrationRating(team.player_one_name,applicationRatings.get(team.id)), player_two_rating: team.player_two_rating??registrationRating(team.player_two_name,applicationRatings.get(team.id)) })),
+                .map((team) => ({ id: team.id, name: team.name, roster_version: team.roster_version, player_one_name: team.player_one_name, player_two_name: team.player_two_name, player_one_email: team.player_one_email, player_two_email: team.player_two_email, player_one_rating: team.player_one_rating??registrationRating(team.player_one_name,applicationRatings.get(team.id)), player_two_rating: team.player_two_rating??registrationRating(team.player_two_name,applicationRatings.get(team.id)) })),
             }));
           return {
             season,
