@@ -1,7 +1,8 @@
 "use client";
 
 import {fixturePlayerLabel} from "@/lib/fixture-rosters";
-import FixtureBooking, {type FixtureArrangement} from "./fixture-booking";
+import type {FixtureArrangement} from "./fixture-booking";
+import { MessageCircle } from "lucide-react";
 import BackLink from "@/app/components/back-link";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
@@ -185,15 +186,19 @@ export default function CaptainCentre() {
     {!loading&&team&&fixtures.length>0&&<section className={styles.actionCentre}><div><span>NEXT UP</span><h2>{actionCount?`${actionCount} match${actionCount===1?"":"es"} need your attention`:"You’re all caught up"}</h2></div><p>{actionCount?"Submit scores or review an opponent result below.":"No captain actions are waiting right now."}</p></section>}
     <section className={styles.grid}>{fixtureCards.map(({fixture,official,submission,confirmed,needsReview,needsSubmit,action,label})=>{
       const score=official??submission;
+      const booking=arrangements.find(item=>item.fixture_id===fixture.id);
       return <article className={`${styles.card} ${action?styles.actionCard:""}`} key={fixture.id}>
         <small>{label} · PLAY BY {new Date(`${fixture.play_by}T00:00:00`).toLocaleDateString("en-GB")}</small>
         <h2>{fixturePlayerLabel(fixture,fixture.home_team_id,labels[fixture.home_team_id]??"Players")} <span>vs</span> {fixturePlayerLabel(fixture,fixture.away_team_id,labels[fixture.away_team_id]??"Players")}</h2>
-        <Link className={styles.matchLink} href={`/clubs/${slug}/matches/${fixture.id}`}>{needsSubmit?"Arrange match":"Match conversation"}{unread[fixture.id]>0&&<strong>{unread[fixture.id]} unread</strong>} →</Link>
-        {needsSubmit&&team?.season.status==="active"&&<FixtureBooking fixtureId={fixture.id} arrangement={arrangements.find(a=>a.fixture_id===fixture.id)} onSaved={()=>void load()}/>}
+        <div className={styles.matchActions}>
+          <Link className={styles.matchLink} href={`/clubs/${slug}/matches/${fixture.id}`}><MessageCircle size={17} aria-hidden="true"/>{needsSubmit?"Arrange match":"Match chat"}{unread[fixture.id]>0&&<strong>{unread[fixture.id]} unread</strong>}</Link>
+          <p className={styles.matchHint}>{booking?`Booked · ${new Date(booking.starts_at).toLocaleString("en-GB",{timeZone:"Europe/London",dateStyle:"medium",timeStyle:"short"})} UK time${booking.court?` · ${booking.court}`:""}`:needsSubmit?"Message opponents and agree a time.":"View messages and match arrangements."}</p>
+        </div>
         {needsSubmit?<form onSubmit={event=>void submit(event,fixture)}>
+          <h3 className={styles.resultHeading}>Submit result</h3>
           <div><label>Home score<input name="home" required maxLength={100} autoComplete="off" placeholder="e.g. 6, 6"/></label><label>Away score<input name="away" required maxLength={100} autoComplete="off" placeholder="e.g. 4, 3"/></label></div>
           <label>Winner<select name="winner" required><option value="">Choose winner</option><option value={fixture.home_team_id}>{fixturePlayerLabel(fixture,fixture.home_team_id,labels[fixture.home_team_id]??"Players")}</option><option value={fixture.away_team_id}>{fixturePlayerLabel(fixture,fixture.away_team_id,labels[fixture.away_team_id]??"Players")}</option></select></label>
-          <label>Notes<input name="notes" maxLength={1000}/></label><p className={styles.helper}>Enter each pairing’s games in set order, separated by commas: home 6, 6 and away 4, 3 means a 6–4, 6–3 win. Choose the winner, then submit for opponent confirmation.</p>
+          <label>Notes<input name="notes" maxLength={1000}/></label><p className={styles.helper}>Enter games in set order, e.g. home 6, 6 and away 4, 3. Your opponents will confirm the result.</p>
           <button disabled={Boolean(busy)}>{busy===fixture.id?"Submitting…":"Review & submit result"}</button>
         </form>:<div className={styles.result}>
           {score?<strong className={styles.finalResult}><small>{confirmed?"FINAL":"SUBMITTED"}</small>{score.home_score} <em>:</em> {score.away_score}</strong>:<strong>{label==="DRAFT"?"Cycle being prepared":label==="CANCELLED"?"Fixture cancelled":confirmed?"Result confirmed":"With your organiser"}</strong>}

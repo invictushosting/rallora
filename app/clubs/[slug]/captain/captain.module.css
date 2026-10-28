@@ -42,4 +42,11 @@
 
 .pairingPicker{margin-top:24px;min-width:0}.hero .pairingPicker label{margin:14px 0 7px;font-size:13px}.pairingSearch{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap}.pairingSearch input{flex:1 1 260px;min-width:0;width:100%;box-sizing:border-box;min-height:48px;padding:12px 14px;border:1px solid #a4bfdc;border-radius:10px;background:#fff;color:#061a39;font:inherit;font-size:16px}.pairingSearch input::placeholder{color:#536a80}.pairingSearch button{min-height:48px;padding:10px 14px;border:1px solid #a4bfdc;border-radius:10px;background:#123b66;color:#fff;font:inherit;font-size:14px;font-weight:700;cursor:pointer}.hero .pairingCount{margin:10px 0 16px;font-size:13px;line-height:1.5;color:#c9ddf3}.pairingPicker select{min-height:48px;font-size:16px}.pairingPicker input:focus-visible,.pairingPicker button:focus-visible,.pairingPicker select:focus-visible{outline:3px solid #5ecfff;outline-offset:3px}.pairingSearch button:disabled,.pairingSearch input:disabled,.pairingPicker select:disabled{opacity:.65}
 
-.matchLink{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:48px;padding:12px 14px;margin:16px 0;border:1px solid #acd7ef;border-radius:10px;background:#eaf7ff;color:#064c75;text-decoration:none;font-size:13px;font-weight:800}.matchLink strong{border-radius:999px;padding:5px 9px;background:#061a39;color:white;font-size:11px}.matchLink:focus-visible{outline:3px solid #00b0fe;outline-offset:3px}
+.matchActions{display:flex;align-items:center;gap:12px 16px;flex-wrap:wrap;margin:18px 0 20px;padding-bottom:20px;border-bottom:1px solid #dae5f0}
+.matchLink{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:var(--control-h);padding:11px 16px;border:1px solid #061a39;border-radius:var(--radius-control);background:#061a39;color:#fff;text-decoration:none;font-size:var(--control-font);font-weight:var(--control-weight);transition:transform .16s ease,box-shadow .16s ease}
+.matchLink:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(6,26,57,.12)}
+.matchLink strong{border-radius:999px;padding:4px 7px;background:#e4f7ff;color:#064c75;font-size:11px;white-space:nowrap}
+.matchLink:focus-visible{outline:3px solid #00b0fe;outline-offset:3px}
+.matchHint{margin:0;color:#56708b;font-size:12px;line-height:1.5}
+.resultHeading{font-size:16px;margin:0 0 2px}
+@media(max-width:600px){.matchActions{align-items:flex-start;flex-direction:column;gap:10px}.matchLink{min-height:48px;font-size:14px}}
