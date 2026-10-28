@@ -1,6 +1,7 @@
 "use client";
 
 import {fixturePlayerLabel} from "@/lib/fixture-rosters";
+import {fixtureMatchesQuery} from "@/lib/leagues/fixture-discovery";
 import {registrationWindowState} from "@/lib/registration-window";
 import {useRegistrationWindow} from "@/lib/hooks/use-registration-window";
 import BackLink from "@/app/components/back-link";
@@ -363,22 +364,33 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
       teamLabel(a.team_id, teamNames).localeCompare(teamLabel(b.team_id, teamNames)));
   const confirmed = data.fixtures.filter((fixture) =>
     isConfirmed(results.get(fixture.id))).length;
-  const matchingFixtures = data.fixtures
-    .filter((fixture) => divisionFilter === "all" ||
-      fixture.division_id === divisionFilter)
-    .filter((fixture) => {
-      const term = search.trim().toLowerCase();
-      return !term || [fixturePlayerLabel(fixture,fixture.home_team_id,teamNames.get(fixture.home_team_id)??"Players"),
-        fixturePlayerLabel(fixture,fixture.away_team_id,teamNames.get(fixture.away_team_id)??"Players"), fixture.fixture_group_name,
-        fixture.court, String(fixture.week_number)].some((value) =>
-        value?.toLowerCase().includes(term));
-    });
-  const fixturesForTab = matchingFixtures.filter((fixture) =>
+  const availableFixturesForTab = data.fixtures.filter((fixture) =>
     tab === "results" ? isConfirmed(results.get(fixture.id)) :
       !isConfirmed(results.get(fixture.id)));
+  const fixtureCountsByDivision = new Map(data.divisions.map((division) =>
+    [division.id, availableFixturesForTab.filter((fixture) =>
+      fixture.division_id === division.id).length] as const));
+  const divisionNames = new Map(data.divisions.map((division) =>
+    [division.id, division.name] as const));
+  const divisionOrder = new Map(data.divisions.map((division) =>
+    [division.id, division.sort_order] as const));
+  const fixturesForTab = availableFixturesForTab
+    .filter((fixture) => divisionFilter === "all" ||
+      fixture.division_id === divisionFilter)
+    .filter((fixture) => fixtureMatchesQuery(search, [
+      divisionNames.get(fixture.division_id),
+      teamNames.get(fixture.home_team_id),
+      teamNames.get(fixture.away_team_id),
+      fixturePlayerLabel(fixture, fixture.home_team_id, teamNames.get(fixture.home_team_id) ?? "Players"),
+      fixturePlayerLabel(fixture, fixture.away_team_id, teamNames.get(fixture.away_team_id) ?? "Players"),
+      fixture.fixture_group_name, fixture.court, fixture.booking_court,
+      `Round ${fixture.week_number}`, `Week ${fixture.week_number}`,
+    ]));
   const sortedFixtures = [...fixturesForTab].sort((a, b) =>
-    tab === "results" ? b.play_by.localeCompare(a.play_by) :
-      a.play_by.localeCompare(b.play_by));
+    (divisionFilter === "all" ?
+      (divisionOrder.get(a.division_id) ?? 999) - (divisionOrder.get(b.division_id) ?? 999) : 0) ||
+    (tab === "results" ? b.play_by.localeCompare(a.play_by) : a.play_by.localeCompare(b.play_by)) ||
+    a.id.localeCompare(b.id));
   const visibleFixtures = showAll ? sortedFixtures : sortedFixtures.slice(0, 18);
   const filteredDivisions = data.divisions.filter((division) =>
     divisionFilter === "all" || division.id === divisionFilter);
@@ -659,21 +671,62 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
                 tab === "results" ? confirmed :
                 tab === "teams" ? data.teams.length : data.divisions.length}
             </span></div>
-            <div className={styles.filterBar}>
-              <label>Division
-                <select value={divisionFilter}
-                  onChange={(event) => { setDivisionFilter(event.target.value); setShowAll(false); }}>
-                  <option value="all">All divisions</option>
-                  {data.divisions.map((division) => <option key={division.id}
-                    value={division.id}>{division.name}</option>)}
-                </select>
-              </label>
-              {(tab === "fixtures" || tab === "results" || tab === "teams") &&
-                <label>Search
-                  <input type="search" value={search} placeholder="Find players or a match…"
+            {(tab === "fixtures" || tab === "results") ? (
+              <div className={styles.fixtureDiscovery}>
+                <div className={styles.fixtureDiscoveryHeading}>
+                  <div><h3>Find your ${tab === "results" ? "results" : "fixtures"}</h3>
+                    <p>Choose a division below, or search for a player, team or round.</p></div>
+                </div>
+                <div className={styles.fixtureDivisionHeading}>
+                  <strong>Browse by division</strong><span>${data.divisions.length} divisions</span>
+                </div>
+                <div className={styles.fixtureDivisionGrid} role="group" aria-label="Filter matches by division">
+                  <button type="button" className={divisionFilter === "all" ? styles.fixtureDivisionSelected : styles.fixtureDivisionButton}
+                    aria-pressed={divisionFilter === "all"}
+                    onClick={() => { setDivisionFilter("all"); setShowAll(false); }}>
+                    <span>All divisions</span><small>${availableFixturesForTab.length} matches</small>
+                  </button>
+                  {data.divisions.map((division) => (
+                    <button key={division.id} type="button"
+                      className={divisionFilter === division.id ? styles.fixtureDivisionSelected : styles.fixtureDivisionButton}
+                      aria-pressed={divisionFilter === division.id}
+                      onClick={() => { setDivisionFilter(division.id); setShowAll(false); }}>
+                      <span>{division.name}</span>
+                      <small>{fixtureCountsByDivision.get(division.id) ?? 0} matches</small>
+                    </button>
+                  ))}
+                </div>
+                <label className={styles.fixtureSearchLabel}>
+                  Search player, team, division or round
+                  <input type="search" value={search} maxLength={80}
+                    placeholder="e.g. Division 2A or a player's name"
                     onChange={(event) => { setSearch(event.target.value); setShowAll(false); }} />
-                </label>}
-            </div>
+                </label>
+                <div className={styles.fixtureFilterStatus}>
+                  <strong role="status" aria-live="polite">
+                    {sortedFixtures.length} {tab === "results" ? "result" : "fixture"}{sortedFixtures.length === 1 ? "" : "s"} found
+                  </strong>
+                  {(divisionFilter !== "all" || search.trim()) &&
+                    <button type="button" onClick={() => { setDivisionFilter("all"); setSearch(""); setShowAll(false); }}>Clear filters</button>}
+                </div>
+              </div>
+            ) : (
+              <div className={styles.filterBar}>
+                <label>Division
+                  <select value={divisionFilter}
+                    onChange={(event) => { setDivisionFilter(event.target.value); setShowAll(false); }}>
+                    <option value="all">All divisions</option>
+                    {data.divisions.map((division) => <option key={division.id}
+                      value={division.id}>{division.name}</option>)}
+                  </select>
+                </label>
+                {tab === "teams" &&
+                  <label>Search
+                    <input type="search" value={search} placeholder="Find players or a team…"
+                      onChange={(event) => { setSearch(event.target.value); setShowAll(false); }} />
+                  </label>}
+              </div>
+            )}
             <ClubSponsors sponsors={content.sponsors} context={{clubId:club.id,seasonId,divisionId:divisionFilter === "all" ? undefined : divisionFilter}} position="beside-fixtures" />
             <div className={styles.viewShare}>
               <span>Help players find this section of the league.</span>
@@ -695,8 +748,18 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
                 </button>
               </div>
               {!sortedFixtures.length
-                ? <p className={styles.empty}>No matching {tab} for this season.</p>
-                : <ul className={styles.fixtures}>{visibleFixtures.map(fixtureRow)}</ul>}
+                ? <div className={styles.fixtureNoMatches}>
+                    <strong>No {tab === "results" ? "results" : "fixtures"} match these filters.</strong>
+                    <p>Try a different division or player name.</p>
+                    <button type="button" onClick={() => { setDivisionFilter("all"); setSearch(""); setShowAll(false); }}>Show all divisions</button>
+                  </div>
+                : divisionFilter === "all" ? data.divisions.filter((division) =>
+                    visibleFixtures.some((fixture) => fixture.division_id === division.id)).map((division) =>
+                    <section key={division.id} className={styles.fixtureDivisionGroup}>
+                      <h3>{division.name} <span>{fixtureCountsByDivision.get(division.id) ?? 0} matches</span></h3>
+                      <ul className={styles.fixtures}>{visibleFixtures.filter((fixture) => fixture.division_id === division.id).map(fixtureRow)}</ul>
+                    </section>)
+                  : <ul className={styles.fixtures}>{visibleFixtures.map(fixtureRow)}</ul>}
               {!showAll && sortedFixtures.length > visibleFixtures.length &&
                 <button type="button" className={styles.more}
                   onClick={() => setShowAll(true)}>
