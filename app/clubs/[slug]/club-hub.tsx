@@ -674,17 +674,17 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
             {(tab === "fixtures" || tab === "results") ? (
               <div className={styles.fixtureDiscovery}>
                 <div className={styles.fixtureDiscoveryHeading}>
-                  <div><h3>Find your ${tab === "results" ? "results" : "fixtures"}</h3>
+                  <div><h3>Find your {tab === "results" ? "results" : "fixtures"}</h3>
                     <p>Choose a division below, or search for a player, team or round.</p></div>
                 </div>
                 <div className={styles.fixtureDivisionHeading}>
-                  <strong>Browse by division</strong><span>${data.divisions.length} divisions</span>
+                  <strong>Browse by division</strong><span>{data.divisions.length} divisions</span>
                 </div>
                 <div className={styles.fixtureDivisionGrid} role="group" aria-label="Filter matches by division">
                   <button type="button" className={divisionFilter === "all" ? styles.fixtureDivisionSelected : styles.fixtureDivisionButton}
                     aria-pressed={divisionFilter === "all"}
                     onClick={() => { setDivisionFilter("all"); setShowAll(false); }}>
-                    <span>All divisions</span><small>${availableFixturesForTab.length} matches</small>
+                    <span>All divisions</span><small>{availableFixturesForTab.length} matches</small>
                   </button>
                   {data.divisions.map((division) => (
                     <button key={division.id} type="button"
