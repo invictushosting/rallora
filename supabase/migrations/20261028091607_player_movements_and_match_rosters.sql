@@ -10,9 +10,9 @@ create table public.rallora_player_movements (
  season_id uuid not null references public.seasons(id),
  administrator_id uuid not null references auth.users(id),
  movement_type text not null check(movement_type in ('swap','add','standby')),
- source_team_id uuid not null references public.teams(id),
+ source_team_id uuid references public.teams(id),
  destination_team_id uuid references public.teams(id),
- source_slot integer not null check(source_slot in(1,2)),
+ source_slot integer check(source_slot in(1,2)),
  destination_slot integer check(destination_slot in(1,2)),
  affected_player_ids uuid[] not null,
  before_rosters jsonb not null, after_rosters jsonb not null,
@@ -211,7 +211,7 @@ begin
  if p_action='add' then update public.rallora_player_pools set status='matched',updated_at=now() where id=pool.id; end if;
  select jsonb_agg(to_jsonb(x) order by x.id) into after_rows from public.teams x where id in(p_team_id,p_other_team_id);
  insert into public.rallora_player_movements(club_id,season_id,administrator_id,movement_type,source_team_id,destination_team_id,source_slot,destination_slot,affected_player_ids,before_rosters,after_rosters)
- values(s.club_id,s.id,auth.uid(),p_action,t.id,other.id,p_slot,case when p_action='swap' then p_other_slot end,array_remove(array[old_uid,incoming_uid],null),before_rows,after_rows) returning id into audit_id;
+ values(s.club_id,s.id,auth.uid(),p_action,case when p_action<>'add' then t.id end,case when p_action='swap' then other.id when p_action='add' then t.id end,case when p_action<>'add' then p_slot end,case when p_action='swap' then p_other_slot when p_action='add' then p_slot end,array_remove(array[old_uid,incoming_uid],null),before_rows,after_rows) returning id into audit_id;
  return jsonb_build_object('audit_id',audit_id,'incomplete',p_action='standby');
 end $$;
 revoke all on function rallora_private.manage_players(text,uuid,integer,bigint,uuid,integer,bigint,uuid) from public,anon;

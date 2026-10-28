@@ -35,10 +35,11 @@ The existing Manage entries, divisions and players article now covers each actio
 - JavaScript test suite: 93 passing tests, including fixture-name retention and movement help coverage.
 - TypeScript: passed.
 - ESLint: no errors; 17 pre-existing warnings.
-- Next.js production build: passed with synthetic Supabase configuration.
+- Next.js production build: passed locally with synthetic Supabase configuration and in GitHub CI.
+- GitHub quality gates passed for both build and tenant-safety jobs, including the real PostgreSQL concurrency test.
 - Disposable PostgreSQL-compatible database: existing SQL CI sequence plus the new production-shaped schema, migration and movement assertions pass. Checks include swaps, vacant/full standby assignments, moving out, captain access, duplicate/competition/division rejection, permissions, historical scores/names, stale confirmations, audit isolation and rollback after an injected final audit failure.
 - Browser smoke tests at 1280px, 768px and 390px pass for all actions, confirmation gating, stale-error recovery, Escape and viewport fit. These use synthetic fixture props and mocked API responses; SQL behaviour is tested separately against the disposable database.
-- A real two-connection PostgreSQL race test is included in GitHub CI. It requires exactly one successful movement, one standby record, one audit entry and one roster-version increment when both sessions confirm version zero.
+- The real two-connection PostgreSQL race test passed in GitHub CI: concurrent confirmations produced exactly one successful movement, one standby record, one audit entry and one roster-version increment.
 
 ## Release order and remaining review
 

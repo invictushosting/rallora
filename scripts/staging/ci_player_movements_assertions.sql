@@ -54,6 +54,7 @@ begin
  -- Full pairing: incoming standby and outgoing standby happen together.
  perform public.rallora_manage_players('add',a,2,3,p_pool_id=>pool);
  if (select player_two_name from public.teams where id=a)<>'Reserve Player' then raise exception 'Full pairing standby assignment failed'; end if;
+ if not exists(select 1 from public.rallora_player_movements where season_id=s and movement_type='add' and source_team_id is null and destination_team_id=a and destination_slot=2 and reserve=any(affected_player_ids)) then raise exception 'Standby destination audit missing'; end if;
  if not exists(select 1 from public.rallora_player_pools where season_id=s and user_id=u2 and status='available') then raise exception 'Outgoing player lost'; end if;
  rejected:=false;begin perform public.rallora_manage_players('add',b,1,1,p_pool_id=>pool);exception when raise_exception then rejected:=true;end;
  if not rejected then raise exception 'Used standby accepted'; end if;
