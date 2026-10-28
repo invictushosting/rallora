@@ -1,6 +1,7 @@
 /**
- * Read-only exports from public, already-published club fixtures and results.
- * These do not submit scores, sync external systems, or expose member contacts.
+ * Public fixture/result exports and CSV formatting.
+ * Captain contact CSV input must already be authorised by the club admin flow.
+ * These helpers never fetch data or submit scores.
  */
 export type ExportFixture = {
   id: string;
@@ -102,4 +103,10 @@ export function makeFixtureDeadlineIcs(
   }
   calendar.push("END:VCALENDAR");
   return calendar.map(fold).join("\r\n") + "\r\n";
+}
+
+export function captainContactsCsv(contacts: import("../captain-contacts").CaptainContact[]): string {
+  return "\ufeff" + [["Club", "League", "Division", "Team", "Captain", "Mobile number"],
+    ...contacts.map(c => [c.club, c.league, c.division, c.team, c.captain, c.phone])]
+    .map(row => row.map(safeCsvCell).join(",")).join("\r\n") + "\r\n";
 }

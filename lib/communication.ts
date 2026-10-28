@@ -6,6 +6,7 @@ export const COMMUNICATION_TYPES = [
   {key:'overdue',title:'Overdue fixture',description:'Chase unfinished fixtures. Stops when submitted, disputed or completed.',timing:'Hours after the deadline',hours:24},
   {key:'registration',title:'Registration updates & partner invitations',description:'Acknowledge entries, send decisions and invite approved partners.',hours:undefined},
   {key:'fixtures',title:'Fixtures published',description:'Notify captains when their competition is activated.',hours:undefined},
+  {key:'messages',title:'Match conversations',description:'Alert captains to messages and time proposals, and organisers when help is requested.',hours:undefined},
   {key:'results',title:'Result actions',description:'Notify captains about a result to review, a confirmation or a dispute.',hours:undefined},
 ] as const;
 export type CommunicationKey=typeof COMMUNICATION_TYPES[number]['key'];
@@ -17,6 +18,6 @@ export function defaultCommunicationSettings(clubId:string):CommunicationSetting
 export type DeliveryMessage={id:string;to:string;title:string;body:string;actionUrl:string;brand:{name:string;sender:string;logoUrl:string|null;primaryColour:string|null;replyTo:string}};
 // Fixed application origin: neither scheduler requests nor queued values choose an external action destination.
 export function communicationActionUrl(path:string) {
- if(!/^\/clubs\/[a-z0-9-]+\/(captain|join-team|admin|register)(\?[^#]*)?$/.test(path)) throw new Error('Invalid club action link');
+ if(!/^\/clubs\/[a-z0-9]+(?:-[a-z0-9]+)*\/(?:(captain|join-team|admin|register)(\?[^#]*)?|matches\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/.test(path)) throw new Error('Invalid club action link');
  return `https://www.rallora.app${path}`;
 }

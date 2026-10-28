@@ -25,6 +25,7 @@ export default function CaptainCentre() {
   const [submissions,setSubmissions]=useState<CaptainSubmission[]>([]), [results,setResults]=useState<OfficialResult[]>([]);
   const [notice,setNotice]=useState("Loading captain access…"), [busy,setBusy]=useState("");
   const loadVersion=useRef(0);
+  const [unread,setUnread]=useState<Record<string,number>>({});
   const [arrangements,setArrangements]=useState<FixtureArrangement[]>([]);
 
   const load=useCallback(async()=>{
@@ -93,6 +94,9 @@ export default function CaptainCentre() {
         }
       }
       if(version!==loadVersion.current) return;
+      const threadSummary=await supabase.rpc("rallora_fixture_conversation_summaries",{p_club_id:club.data.id});
+      if(version!==loadVersion.current)return;
+      setUnread(Object.fromEntries(((threadSummary.data??[]) as {fixture_id:string;unread_count:number}[]).map(row=>[row.fixture_id,Number(row.unread_count)])));
       setPlatformAdmin(isAdmin);setArrangements(booked);setViewerId(user.id);setCaptainTeams(available);setTeam(chosen??null);setFixtures(rows);setLabels(names);setSubmissions(submitted);setResults(official);
       setNotice(!chosen?(isAdmin?"This club has no pairings yet. Create or approve teams in club admin to inspect their captain view.":"Your account is not assigned as a captain for this club yet. If your team was just approved, refresh this page or contact the organiser.")
         :chosen.season.status==="draft"?"This cycle is being prepared. Fixtures become available when the organiser activates it."
@@ -184,6 +188,7 @@ export default function CaptainCentre() {
       return <article className={`${styles.card} ${action?styles.actionCard:""}`} key={fixture.id}>
         <small>{label} · PLAY BY {new Date(`${fixture.play_by}T00:00:00`).toLocaleDateString("en-GB")}</small>
         <h2>{fixturePlayerLabel(fixture,fixture.home_team_id,labels[fixture.home_team_id]??"Players")} <span>vs</span> {fixturePlayerLabel(fixture,fixture.away_team_id,labels[fixture.away_team_id]??"Players")}</h2>
+        <Link className={styles.matchLink} href={`/clubs/${slug}/matches/${fixture.id}`}>{needsSubmit?"Arrange match":"Match conversation"}{unread[fixture.id]>0&&<strong>{unread[fixture.id]} unread</strong>} →</Link>
         {needsSubmit&&team?.season.status==="active"&&<FixtureBooking fixtureId={fixture.id} arrangement={arrangements.find(a=>a.fixture_id===fixture.id)} onSaved={()=>void load()}/>}
         {needsSubmit?<form onSubmit={event=>void submit(event,fixture)}>
           <div><label>Home score<input name="home" required maxLength={100} autoComplete="off" placeholder="e.g. 6, 6"/></label><label>Away score<input name="away" required maxLength={100} autoComplete="off" placeholder="e.g. 4, 3"/></label></div>
