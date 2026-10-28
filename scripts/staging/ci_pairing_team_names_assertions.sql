@@ -35,7 +35,7 @@ begin
 
   insert into public.fixtures(season_id,division_id,home_team_id,away_team_id,
     week_number,play_by,status,home_player_names,away_player_names)
-    values(season_id,division_id,team_a,team_b,1,'2026-11-09','completed',
+    values(season_id,division_id,team_a,team_b,1,'2026-11-09','confirmed',
       array['Alpha','Beta'],array['Gamma','Delta']) returning id into match_id;
   select roster_version into version_before from public.teams where id=team_a;
 
@@ -73,7 +73,7 @@ begin
   end if;
   if (select home_player_names from public.fixtures where id=match_id)
        <> array['Alpha','Beta']
-    or (select status from public.fixtures where id=match_id) <> 'completed' then
+    or (select status from public.fixtures where id=match_id) <> 'confirmed' then
     raise exception 'Historical fixture snapshot changed on a player movement';
   end if;
 
