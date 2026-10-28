@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase";
 import styles from "./editor.module.css";
 import LeagueAutomation from "./league-automation";
 import BoxPlacement from "./box-placement";
+import PlayerManagement from "./player-management";
 import CompetitionSchedule from "./competition-schedule";
 import { monthlyRounds, savedRoundWindows, validateRoundWindows, formatScheduleDate, type RoundWindow, type RoundCadence } from "@/lib/competition-schedule";
 
@@ -19,7 +20,7 @@ export type EditableClub = {
 };
 export type EditableDivision = {
   id: string; name: string; sort_order: number;
-  teams: { id: string; name: string; player_one_name?: string | null; player_two_name?: string | null; player_one_email?: string | null; player_two_email?: string | null; player_one_rating?: number | null; player_two_rating?: number | null }[];
+  teams: { id: string; name: string; roster_version: number; player_one_name?: string | null; player_two_name?: string | null; player_one_email?: string | null; player_two_email?: string | null; player_one_rating?: number | null; player_two_rating?: number | null }[];
 };
 export type EditableFixture = { id:string; season_id:string; division_id:string; home_team_id:string; away_team_id:string; week_number:number; play_by:string; status:string; home_score?:string|null; away_score?:string|null; winner_team_id?:string|null };
 type LeagueRule = { key:string; label:string; text:string; enabled:boolean; custom?:boolean };
@@ -107,8 +108,6 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const [activeTab, setActiveTab] = useState<"branding" | "seasons" | "registration" | "teams" | "fixtures">("branding");
   const [showCompetitionBuilder,setShowCompetitionBuilder]=useState(false);
   const [message, setMessage] = useState("");
-  const [waitlist,setWaitlist]=useState<{id:string;season_id:string;player_name:string;email:string;playtomic_rating:number|null;preferred_level:string|null;availability:string|null;status:string}[]>([]);
-  const [replaceTarget,setReplaceTarget]=useState<{teamId:string;slot:1|2}|null>(null); const [replacementId,setReplacementId]=useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -146,8 +145,6 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       }
     }
   }, [searchParams]);
-  useEffect(()=>{if(activeTab!=="teams")return;void supabase.from("rallora_player_pools").select("id,season_id,player_name,email,playtomic_rating,preferred_level,availability,status").eq("club_id",club.id).eq("status","available").order("created_at").then(({data})=>setWaitlist((data??[]) as typeof waitlist));},[activeTab,club.id,supabase]);
-  async function replacePlayer(){if(!replaceTarget||!replacementId)return;setBusy(true);setError("");const r=await supabase.rpc("rallora_replace_from_pool",{p_team_id:replaceTarget.teamId,p_slot:replaceTarget.slot,p_pool_id:replacementId});setBusy(false);if(r.error){setError(r.error.message);return}setMessage("Replacement player added. Existing fixtures and results remain attached to the pairing.");setReplaceTarget(null);setWaitlist(current=>current.filter(p=>p.id!==replacementId));setReplacementId("");onSaved();}
   const [name, setName] = useState(club.name);
   const [shortName, setShortName] = useState(club.short_name ?? "");
   const [colour, setColour] = useState(club.primary_color || "#2458ff");
@@ -802,40 +799,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
     </section>}
     {activeTab === "teams" && <div className={styles.teamManagement}>
       <BoxPlacement seasons={seasons} onSaved={onSaved} />
-      <div className={styles.wide}>
-        <span className={styles.eyebrow}>PLAYERS &amp; PAIRINGS</span>
-        <h3>League pairings</h3>
-        <p>View each pairing by player and make replacements without breaking fixtures or results.</p>
-        {divisions.map((division) => <section key={division.id} className={styles.pairingGroup}>
-          <h4>{division.season_name} · {division.name}</h4>
-          {division.teams.map((team) => <article key={team.id} className={styles.pairingRow}>
-            <div>
-              <strong>{[team.player_one_name, team.player_two_name].filter(Boolean).join(" / ") || team.name}</strong>
-              <span>{team.player_one_rating!=null&&team.player_two_rating!=null?`Combined rating ${(Number(team.player_one_rating)+Number(team.player_two_rating)).toFixed(2)}`:"Player ratings below"}</span>
-            </div>
-            <div className={styles.pairingPlayers}>
-              <div><span>Player 1</span><strong>{team.player_one_name || "Player to be confirmed"}</strong><small>{team.player_one_rating!=null?`Playtomic rating ${Number(team.player_one_rating).toFixed(2)}`:"Rating not provided"}</small><button type="button" onClick={() => {setReplacementId("");setReplaceTarget({ teamId: team.id, slot: 1 });}}>Replace</button></div>
-              <span className={styles.pairingJoin}>+</span>
-              <div><span>Player 2</span><strong>{team.player_two_name || "Player to be confirmed"}</strong><small>{team.player_two_rating!=null?`Playtomic rating ${Number(team.player_two_rating).toFixed(2)}`:"Rating not provided"}</small><button type="button" onClick={() => {setReplacementId("");setReplaceTarget({ teamId: team.id, slot: 2 });}}>Replace</button></div>
-            </div>
-          </article>)}
-        </section>)}
-        {replaceTarget && <div className={styles.replacePanel}>
-          <h4>Select replacement from standby or singles</h4>
-          <select value={replacementId} onChange={(event) => setReplacementId(event.target.value)}>
-            <option value="">Choose available player</option>
-            {waitlist.filter(player => { const current=seasons.find(s=>s.divisions.some(d=>d.teams.some(t=>t.id===replaceTarget.teamId))); let cycle=current; const ids=new Set<string>(); while(cycle&&!ids.has(cycle.id)){ids.add(cycle.id);cycle=seasons.find(s=>s.id===cycle?.previous_season_id)} return ids.has(player.season_id); }).map((player) => <option key={player.id} value={player.id}>
-              {player.player_name}{player.playtomic_rating != null ? ` · Playtomic ${player.playtomic_rating}` : ""}{player.preferred_level ? ` · ${player.preferred_level}` : ""}
-            </option>)}
-          </select>
-          {waitlist.find((player) => player.id === replacementId)?.availability &&
-            <p>Availability: {waitlist.find((player) => player.id === replacementId)?.availability}</p>}
-          <div className={styles.pairingActions}>
-            <button type="button" disabled={busy || !replacementId} onClick={() => void replacePlayer()}>Replace player</button>
-            <button type="button" className={styles.secondaryButton} onClick={() => setReplaceTarget(null)}>Cancel</button>
-          </div>
-        </div>}
-      </div>
+      <PlayerManagement clubId={club.id} seasons={seasons} onSaved={onSaved} />
       <form className={styles.form} onSubmit={createTeam}>
       <h3>Add a player pairing manually</h3>
       <label>Division<select value={teamDivisionId}

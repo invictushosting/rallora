@@ -41,3 +41,12 @@ test('guide links and section anchors are complete and keep validated club conte
   assert.equal(helpHref('', '//evil.example'), '/help');
   assert.equal(safeClubSlug('gsm-padel?other=1'), '');
 });
+
+
+test('player movement help covers all actions, history and recovery', () => {
+  const article=HELP_ARTICLES.find(a=>a.slug==='manage-teams-and-entries');
+  for(const id of ['replacement','swap','standby','player-history'])assert.ok(article.sections.some(s=>s.id===id));
+  assert.equal(searchHelp('swap players')[0]?.slug,article.slug);
+  assert.match(JSON.stringify(article),/same operation/);
+  assert.match(JSON.stringify(article),/unrecorded substitutions/);
+});
