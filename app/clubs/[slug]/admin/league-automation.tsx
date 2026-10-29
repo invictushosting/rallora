@@ -47,7 +47,7 @@ export default function LeagueAutomation({ seasons, fixtures, slug, onSaved }: P
       if (error) throw error;
       const result = data as { season_id: string; fixture_count: number; teams_carried?: number; promoted?: number; relegated?: number };
       setMessage(nextCycle
-        ? `Next cycle prepared as a private draft: ${result.teams_carried} pairings, ${result.promoted} promoted, ${result.relegated} relegated and ${result.fixture_count} fixtures. Review it before activation.`
+        ? `Next cycle prepared as a private draft: ${result.teams_carried} pairings, ${result.promoted} promoted, ${result.relegated} relegated and ${result.fixture_count} fixtures. Review it before activation. Other leagues at your club stay active.`
         : `${result.fixture_count} fixtures generated. Review the schedule before activating the competition.`);
       setCreatedId(result.season_id);
       onSaved();
@@ -63,7 +63,7 @@ export default function LeagueAutomation({ seasons, fixtures, slug, onSaved }: P
     </select></label>
     {season && <div className={styles.wide}>
       <p>{season.cycle_match_mode === "double_round_robin" ? "Home and away" : "Single round-robin"} · {season.divisions.length} division{season.divisions.length === 1 ? "" : "s"} · {existing.length ? `${existing.length} existing fixtures` : `${expected} fixtures to generate`}.</p>
-      {nextCycle && <p>The final table decides movement: {season.promotion_places} up and {season.relegation_places} down, except at the top and bottom divisions. Ties use points, wins, score difference, then pairing name. Pairings and captain access carry into a new private draft. Previous fixtures and results are then locked as history.</p>}
+      {nextCycle && <p>The final table decides movement: {season.promotion_places} up and {season.relegation_places} down, except at the top and bottom divisions. Ties use points, wins, score difference, then pairing name. Pairings, both players’ existing access and captain roles carry into a new private draft. Previous fixtures and results are then locked as history.</p>}
       {nextCycle && !season.require_cycle_completion && <p>This competition allows an unfinished cycle to close. Unplayed fixtures will be left behind; submitted and disputed results must still be resolved first.</p>}
       {season.registration_published && <p>Close registration before generating fixtures.</p>}
       {successor && <p>The next cycle has already been prepared: {successor.name}.</p>}

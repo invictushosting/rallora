@@ -396,6 +396,11 @@
       "production_version": "20261029073441",
       "production_name": "allow_cancelled_fixture_status",
       "source": "supabase/migrations/20261029073441_allow_cancelled_fixture_status.sql"
+    },
+    {
+      "production_version": "20261029142212",
+      "production_name": "concurrent_competition_activation",
+      "source": "supabase/migrations/20261029134600_concurrent_competition_activation.sql"
     }
   ]
 }
