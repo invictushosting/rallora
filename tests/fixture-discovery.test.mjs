@@ -24,3 +24,9 @@ test('search safely handles empty metadata and numeric rounds', () => {
   assert.equal(fixtureMatchesQuery('round 3', [undefined, null, 'Round 3', 3]), true);
   assert.equal(fixtureMatchesQuery('someone', [undefined, null]), false);
 });
+
+test('retired fixtures are hidden while cancelled court bookings can be rearranged', async () => {
+ const {fixtureIsPublished}=await import('../lib/leagues/fixture-discovery.ts');
+ const fixtures=[{id:'retired',status:'cancelled',arrangement_status:'cancelled'},{id:'rebook',status:'open',arrangement_status:'cancelled'},{id:'upcoming',status:'open'},{id:'history',status:'confirmed'}];
+ assert.deepEqual(fixtures.filter(fixtureIsPublished).map(f=>f.id),['rebook','upcoming','history']);
+});

@@ -1,9 +1,18 @@
 "use client";
 import {useState} from "react";
+import {sendSupportRequest} from "@/lib/support-request";
 
 export default function SupportForm({clubId}:{clubId?:string}){
  const [category,setCategory]=useState("general_help"),[subject,setSubject]=useState(""),[message,setMessage]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false);
- async function submit(e:React.FormEvent){e.preventDefault();setBusy(true);setNotice("");const response=await fetch("/api/support",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({clubId,category,subject,message})});const body=await response.json().catch(()=>({})) as {error?:string};if(response.ok){setSubject("");setMessage("");setNotice("Support request sent. Rallora has received it.");}else setNotice(body.error||"Could not send your request.");setBusy(false)}
+ async function submit(e:React.FormEvent){
+  e.preventDefault();if(busy)return;setBusy(true);setNotice("");
+  try{
+   const result=await sendSupportRequest({clubId,category,subject,message});
+   setNotice(result.message);
+   if(result.ok){setSubject("");setMessage("");}
+  }finally{setBusy(false);}
+ }
+
  return <section style={{marginTop:28,padding:20,border:"1px solid #dce7f1",borderRadius:16,background:"#fff"}}>
   <small style={{fontWeight:900,letterSpacing:"1px",color:"#3975bd"}}>RALLORA SUPPORT</small><h2 style={{margin:"7px 0"}}>Help & support</h2><p style={{color:"#65758b"}}>Need help or spotted a problem? Send it directly to the Rallora support team.</p>
   <form onSubmit={submit} style={{display:"grid",gap:12}}>
