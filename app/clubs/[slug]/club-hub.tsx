@@ -2,7 +2,7 @@
 
 import {useFixtureChatAccess} from "@/lib/hooks/use-fixture-chat-access";
 import {fixturePlayerLabel} from "@/lib/fixture-rosters";
-import {fixtureMatchesQuery} from "@/lib/leagues/fixture-discovery";
+import {fixtureMatchesQuery, fixtureIsPublished} from "@/lib/leagues/fixture-discovery";
 import {registrationWindowState} from "@/lib/registration-window";
 import {useRegistrationWindow} from "@/lib/hooks/use-registration-window";
 import BackLink from "@/app/components/back-link";
@@ -299,7 +299,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
           .filter((team) => divisionIds.has(team.division_id));
         const teamIds = new Set(teams.map((team) => team.id));
         const publishedFixtures = fixtures.filter(
-          (fixture) => teamIds.has(fixture.home_team_id) &&
+          (fixture) => fixtureIsPublished(fixture) && teamIds.has(fixture.home_team_id) &&
             teamIds.has(fixture.away_team_id),
         );
         const publishedFixtureIds = new Set(publishedFixtures.map((fixture) => fixture.id));

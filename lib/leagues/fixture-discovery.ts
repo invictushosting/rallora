@@ -9,3 +9,8 @@ export function fixtureMatchesQuery(
     .join(" ").toLocaleLowerCase();
   return terms.every((term) => searchable.includes(term));
 }
+
+/** Cancelling a court booking keeps the fixture playable; cancelling the fixture retires it. */
+export function fixtureIsPublished(fixture: { status: string }): boolean {
+  return fixture.status !== "cancelled";
+}
