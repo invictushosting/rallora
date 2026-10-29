@@ -1,0 +1,401 @@
+{
+  "project_ref": "vfebhddnjhylicapckro",
+  "observed_at": "2026-10-29",
+  "entries": [
+    {
+      "production_version": "20260919210402",
+      "production_name": "rallora_phase1_reversible_authorization_hardening",
+      "source": "supabase/migrations/20260919210402_rallora_phase1_reversible_authorization_hardening.sql"
+    },
+    {
+      "production_version": "20260919210504",
+      "production_name": "rallora_platform_and_club_membership_foundation",
+      "source": "supabase/migrations/20260919210504_rallora_platform_and_club_membership_foundation.sql"
+    },
+    {
+      "production_version": "20260920200000",
+      "production_name": "rallora_safe_function_and_index_hardening",
+      "source": "supabase/migrations/20260920200000_rallora_safe_function_and_index_hardening.sql"
+    },
+    {
+      "production_version": "20260920211500",
+      "production_name": "rallora_core_tenant_authorization",
+      "source": "supabase/migrations/20260920211500_rallora_core_tenant_authorization.sql"
+    },
+    {
+      "production_version": "20260920213000",
+      "production_name": "harden_legacy_authorization",
+      "source": "supabase/migrations/20260920213000_harden_legacy_authorization.sql"
+    },
+    {
+      "production_version": "20260921131121",
+      "production_name": "tenant_scope_adjacent_club_tables",
+      "source": "supabase/migrations/20260921131121_tenant_scope_adjacent_club_tables.sql"
+    },
+    {
+      "production_version": "20260921140000",
+      "production_name": "rallora_player_registration_approval",
+      "source": "supabase/migrations/20260921140000_rallora_player_registration_approval.sql"
+    },
+    {
+      "production_version": "20260921145042",
+      "production_name": "rallora_club_application_and_entitlements",
+      "source": "supabase/migrations/20260921145042_rallora_club_application_and_entitlements.sql"
+    },
+    {
+      "production_version": "20260922071024",
+      "production_name": "rallora_authenticated_captain_access",
+      "source": "supabase/migrations/20260922071024_rallora_authenticated_captain_access.sql"
+    },
+    {
+      "production_version": "20260922072854",
+      "production_name": "rallora_captain_assignment_and_result_workflow",
+      "source": "supabase/migrations/20260922072854_rallora_captain_assignment_and_result_workflow.sql"
+    },
+    {
+      "production_version": "20260922080608",
+      "production_name": "platform_operations_and_club_profiles",
+      "source": "supabase/migrations/20260922080608_platform_operations_and_club_profiles.sql"
+    },
+    {
+      "production_version": "20260923090142",
+      "production_name": "club_events_and_feature_enforcement",
+      "source": "supabase/migrations/20260923090142_club_events_and_feature_enforcement.sql"
+    },
+    {
+      "production_version": "20260923091143",
+      "production_name": "organiser_membership_management",
+      "source": "supabase/migrations/20260923091143_organiser_membership_management.sql"
+    },
+    {
+      "production_version": "20260923123000",
+      "production_name": "climb_the_courts_format",
+      "source": "supabase/migrations/20260923123000_climb_the_courts_format.sql"
+    },
+    {
+      "production_version": "20260923231848",
+      "production_name": "harden_captain_result_confirmation",
+      "source": "supabase/migrations/20260923180000_harden_captain_result_confirmation.sql"
+    },
+    {
+      "production_version": "20260923231850",
+      "production_name": "atomic_registration_review",
+      "source": "supabase/migrations/20260923183000_atomic_registration_review.sql"
+    },
+    {
+      "production_version": "20260923231852",
+      "production_name": "organiser_result_recovery",
+      "source": "supabase/migrations/20260923190000_organiser_result_recovery.sql"
+    },
+    {
+      "production_version": "20260923231855",
+      "production_name": "season_fixture_lifecycle",
+      "source": "supabase/migrations/20260923193000_season_fixture_lifecycle.sql"
+    },
+    {
+      "production_version": "20260923231907",
+      "production_name": "pilot_notifications",
+      "source": "supabase/migrations/20260923200000_pilot_notifications.sql"
+    },
+    {
+      "production_version": "20260923231909",
+      "production_name": "fixture_reminders",
+      "source": "supabase/migrations/20260923203000_fixture_reminders.sql"
+    },
+    {
+      "production_version": "20260923231912",
+      "production_name": "security_trigger_execute_hardening",
+      "source": "supabase/migrations/20260924001000_security_trigger_execute_hardening.sql"
+    },
+    {
+      "production_version": "20260923231914",
+      "production_name": "legacy_player_table_lockdown",
+      "source": "supabase/migrations/20260924002500_legacy_player_table_lockdown.sql"
+    },
+    {
+      "production_version": "20260923231917",
+      "production_name": "modernise_platform_admin",
+      "source": "supabase/migrations/20260924004000_modernise_platform_admin.sql"
+    },
+    {
+      "production_version": "20260924065713",
+      "production_name": "pilot_readiness_report",
+      "source": "supabase/migrations/20260924010000_pilot_readiness_report.sql"
+    },
+    {
+      "production_version": "20260924070310",
+      "production_name": "registration_duplicate_guard",
+      "source": "supabase/migrations/20260924011500_registration_duplicate_guard.sql"
+    },
+    {
+      "production_version": "20260924072046",
+      "production_name": "team_registration_flow",
+      "source": "supabase/migrations/20260924013000_team_registration_flow.sql"
+    },
+    {
+      "production_version": "20260924072553",
+      "production_name": "partner_invite_claim",
+      "source": "supabase/migrations/20260924014500_partner_invite_claim.sql"
+    },
+    {
+      "production_version": "20260924153845",
+      "production_name": "playtomic_integration_framework",
+      "source": "supabase/migrations/20260924113000_playtomic_integration_framework.sql"
+    },
+    {
+      "production_version": "20260924171801",
+      "production_name": "club_cover_image",
+      "source": "supabase/migrations/20260924174500_club_cover_image.sql"
+    },
+    {
+      "production_version": "20260924172554",
+      "production_name": "internal_standings_recalculation",
+      "source": "supabase/migrations/20260924180000_internal_standings_recalculation.sql"
+    },
+    {
+      "production_version": "20260924182054",
+      "production_name": "club_application_contact_name",
+      "source": "supabase/migrations/20260924191500_club_application_contact_name.sql"
+    },
+    {
+      "production_version": "20260924213631",
+      "production_name": "playtomic_player_rating_sync",
+      "source": "supabase/migrations/20260924221500_playtomic_player_rating_sync.sql"
+    },
+    {
+      "production_version": "20260925075705",
+      "production_name": "club_application_contact_phone",
+      "source": "supabase/migrations/20260925083000_club_application_contact_phone.sql"
+    },
+    {
+      "production_version": "20260925090830",
+      "production_name": "platform_manual_club_creation",
+      "source": "supabase/migrations/20260925100500_platform_manual_club_creation.sql"
+    },
+    {
+      "production_version": "20260925091912",
+      "production_name": "manual_club_contact_details",
+      "source": "supabase/migrations/20260925102500_manual_club_contact_details.sql"
+    },
+    {
+      "production_version": "20260925161603",
+      "production_name": "add_club_booking_url",
+      "source": "supabase/migrations/20260925161603_add_club_booking_url.sql"
+    },
+    {
+      "production_version": "20260927123905",
+      "production_name": "club_email_sender_name",
+      "source": "supabase/migrations/20260927131500_club_email_sender_name.sql"
+    },
+    {
+      "production_version": "20260927131258",
+      "production_name": "support_requests",
+      "source": "supabase/migrations/20260927170000_support_requests.sql"
+    },
+    {
+      "production_version": "20260927132654",
+      "production_name": "pilot_enquiries_and_admin",
+      "source": "supabase/migrations/20260927132654_pilot_enquiries_and_admin.sql"
+    },
+    {
+      "production_version": "20260927135519",
+      "production_name": "platform_notification_reads",
+      "source": "supabase/migrations/20260927145500_platform_notification_reads.sql"
+    },
+    {
+      "production_version": "20260927185448",
+      "production_name": "enquiry_crm",
+      "source": "supabase/migrations/20260927193000_enquiry_crm.sql"
+    },
+    {
+      "production_version": "20260928075710",
+      "production_name": "align_manual_club_validation_v2",
+      "source": "supabase/migrations/20260928075710_align_manual_club_validation_v2.sql"
+    },
+    {
+      "production_version": "20260928154646",
+      "production_name": "registration_publication_lifecycle",
+      "source": "supabase/migrations/20260928154500_registration_publication_lifecycle.sql"
+    },
+    {
+      "production_version": "20260929203854",
+      "production_name": "allow_registration_published_draft_seasons_public_read",
+      "source": "supabase/migrations/20260929203854_allow_registration_published_draft_seasons_public_read.sql"
+    },
+    {
+      "production_version": "20260929213041",
+      "production_name": "player_entry_pathways",
+      "source": "supabase/migrations/20260929222500_player_entry_pathways.sql"
+    },
+    {
+      "production_version": "20260930153132",
+      "production_name": "registration_open_window_policy",
+      "source": "supabase/migrations/20260930153000_registration_open_window_policy.sql"
+    },
+    {
+      "production_version": "20261019074101",
+      "production_name": "standings_refresh_consistency",
+      "source": "supabase/migrations/20261019073035_standings_refresh_consistency.sql"
+    },
+    {
+      "production_version": "20261019083647",
+      "production_name": "automatic_fixtures_and_rolling_cycles",
+      "source": "supabase/migrations/20261019082325_automatic_fixtures_and_rolling_cycles.sql"
+    },
+    {
+      "production_version": "20261019085014",
+      "production_name": "rolling_cycle_pairing_reference_collisions",
+      "source": "supabase/migrations/20261019084951_rolling_cycle_pairing_reference_collisions.sql"
+    },
+    {
+      "production_version": "20261019094539",
+      "production_name": "result_review_audit_trail",
+      "source": "supabase/migrations/20261019094049_result_review_audit_trail.sql"
+    },
+    {
+      "production_version": "20261019104618",
+      "production_name": "enforce_competition_launch_readiness",
+      "source": "supabase/migrations/20261019104202_enforce_competition_launch_readiness.sql"
+    },
+    {
+      "production_version": "20261020073251",
+      "production_name": "paired_set_score_totals",
+      "source": "supabase/migrations/20261020073500_paired_set_score_totals.sql"
+    },
+    {
+      "production_version": "20261021113951",
+      "production_name": "draft_box_placement_and_standby_replacements",
+      "source": "supabase/migrations/20261021113012_draft_box_placement_and_standby_replacements.sql"
+    },
+    {
+      "production_version": "20261021124609",
+      "production_name": "configurable_notifications_and_competition_end",
+      "source": "supabase/migrations/20261021123430_configurable_notifications_and_competition_end.sql"
+    },
+    {
+      "production_version": "20261021125201",
+      "production_name": "precise_reminder_windows",
+      "source": "supabase/migrations/20261021125005_precise_reminder_windows.sql"
+    },
+    {
+      "production_version": "20261021125403",
+      "production_name": "communication_scheduler",
+      "source": "supabase/migrations/20261021124217_communication_scheduler.sql"
+    },
+    {
+      "production_version": "20261021170531",
+      "production_name": "sponsor_scopes_and_enquiries",
+      "source": "supabase/migrations/20261021170531_sponsor_scopes_and_enquiries.sql"
+    },
+    {
+      "production_version": "20261021175736",
+      "production_name": "playtomic_privacy_safeguards",
+      "source": "supabase/migrations/20261021175736_playtomic_privacy_safeguards.sql"
+    },
+    {
+      "production_version": "20261021180125",
+      "production_name": "playtomic_consent_and_disconnect_guards",
+      "source": "supabase/migrations/20261021180125_playtomic_consent_and_disconnect_guards.sql"
+    },
+    {
+      "production_version": "20261021180658",
+      "production_name": "require_playtomic_access_acknowledgement",
+      "source": "supabase/migrations/20261021180658_require_playtomic_access_acknowledgement.sql"
+    },
+    {
+      "production_version": "20261022094950",
+      "production_name": "platform_captain_support_access",
+      "source": "supabase/migrations/20261022094950_platform_captain_support_access.sql"
+    },
+    {
+      "production_version": "20261022135004",
+      "production_name": "separate_playtomic_contact_emails",
+      "source": "supabase/migrations/20261022134202_separate_playtomic_contact_emails.sql"
+    },
+    {
+      "production_version": "20261022151330",
+      "production_name": "duplicate_pairing_review",
+      "source": "supabase/migrations/20261022150402_duplicate_pairing_review.sql"
+    },
+    {
+      "production_version": "20261022194517",
+      "production_name": "fix_draft_box_fixture_activity_check",
+      "source": "supabase/migrations/20261022194517_fix_draft_box_fixture_activity_check.sql"
+    },
+    {
+      "production_version": "20261023084709",
+      "production_name": "competition_round_windows",
+      "source": "supabase/migrations/20261023084709_competition_round_windows.sql"
+    },
+    {
+      "production_version": "20261025093705",
+      "production_name": "captain_draft_pairing_visibility",
+      "source": "supabase/migrations/20261025093353_captain_draft_pairing_visibility.sql"
+    },
+    {
+      "production_version": "20261026092726",
+      "production_name": "copy_pair_ratings_on_approval",
+      "source": "supabase/migrations/20261026092726_copy_pair_ratings_on_approval.sql"
+    },
+    {
+      "production_version": "20261027072650",
+      "production_name": "admin_late_team_entry",
+      "source": "supabase/migrations/20261026193000_admin_late_team_entry.sql"
+    },
+    {
+      "production_version": "20261027074922",
+      "production_name": "player_profile_preferences",
+      "source": "supabase/migrations/20261027081500_player_profile_preferences.sql"
+    },
+    {
+      "production_version": "20261027080305",
+      "production_name": "social_player_discovery",
+      "source": "supabase/migrations/20261027090500_social_player_discovery.sql"
+    },
+    {
+      "production_version": "20261027111352",
+      "production_name": "late_entry_default_pair_name",
+      "source": "supabase/migrations/20261027111500_late_entry_default_pair_name.sql"
+    },
+    {
+      "production_version": "20261027112250",
+      "production_name": "late_entry_with_ratings",
+      "source": "supabase/migrations/20261027113000_late_entry_with_ratings.sql"
+    },
+    {
+      "production_version": "20261027113224",
+      "production_name": "add_admin_reconsider_declined_team_application",
+      "source": "supabase/migrations/20261027113224_add_admin_reconsider_declined_team_application.sql"
+    },
+    {
+      "production_version": "20261028100434",
+      "production_name": "player_movements_and_match_rosters",
+      "source": "supabase/migrations/20261028091607_player_movements_and_match_rosters.sql"
+    },
+    {
+      "production_version": "20261028102205",
+      "production_name": "account_optional_player_movements",
+      "source": "supabase/migrations/20261028101027_account_optional_player_movements.sql"
+    },
+    {
+      "production_version": "20261028150452",
+      "production_name": "fixture_match_conversations",
+      "source": "supabase/migrations/20261028143810_fixture_match_conversations.sql"
+    },
+    {
+      "production_version": "20261028154203",
+      "production_name": "auto_sync_pairing_team_names",
+      "source": "supabase/migrations/20261028153500_auto_sync_pairing_team_names.sql"
+    },
+    {
+      "production_version": "20261028192149",
+      "production_name": "admin_registration_ratings",
+      "source": "supabase/migrations/20261028190842_admin_registration_ratings.sql"
+    },
+    {
+      "production_version": "20261029073441",
+      "production_name": "allow_cancelled_fixture_status",
+      "source": "supabase/migrations/20261029073441_allow_cancelled_fixture_status.sql"
+    }
+  ]
+}

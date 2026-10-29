@@ -33,6 +33,7 @@ jobs:
       - run: node --experimental-strip-types --test tests/help.test.mjs
       - run: node --experimental-strip-types --test tests/competition-schedule.test.mjs
       - run: node scripts/check-legacy-demo-rpcs.mjs
+      - run: node scripts/check-migration-history.mjs
       - run: node --experimental-strip-types --test tests/social-channels.test.mjs
       - run: node --experimental-strip-types --test tests/leagues-exports.test.mjs
       - run: node --experimental-strip-types --test tests/leagues-prize-budget.test.mjs
@@ -137,6 +138,7 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_box_placement_schema.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260929222500_player_entry_pathways.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261021113012_draft_box_placement_and_standby_replacements.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261022194517_fix_draft_box_fixture_activity_check.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_box_placement_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_communication_schema.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261021123430_configurable_notifications_and_competition_end.sql
@@ -147,6 +149,7 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261022134202_separate_playtomic_contact_emails.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_player_emails_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261022150402_duplicate_pairing_review.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261026092726_copy_pair_ratings_on_approval.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_duplicate_pairing_assertions.sql
 
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261023084709_competition_round_windows.sql
@@ -175,3 +178,7 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_pairing_team_names_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261028190842_admin_registration_ratings.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_entry_ratings_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261028192040_fixture_chat_all_players.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261029081850_fixture_playing_window.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_fixture_messaging_all_players_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_approval_ratings_assertions.sql

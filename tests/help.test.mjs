@@ -68,3 +68,14 @@ test('public fixture help explains division browsing, search and filtered sharin
   assert.ok(suggestedHelp('/clubs/gsm-padel').includes('view-league-fixtures'));
   assert.match(JSON.stringify(article), /Copy link to this view/);
 });
+
+test('late registration help explains admin permissions and fixtures', () => {
+  const article=HELP_ARTICLES.find(a=>a.slug==='add-late-team');
+  assert.ok(article);
+  assert.ok(article.sections.some(s=>s.id==='existing'));
+  assert.ok(article.sections.some(s=>s.id==='new'));
+  assert.ok(article.sections.some(s=>s.id==='fixtures'));
+  assert.match(article.sections.find(s=>s.id==='fixtures').steps.join(' '),/does not regenerate fixtures/);
+  assert.equal(suggestedHelp('/clubs/gsm-padel/admin/late-entry')[0],'add-late-team');
+  assert.equal(suggestedHelp('/clubs/gsm-padel/admin/registrations')[0],'add-late-team');
+});

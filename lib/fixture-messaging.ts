@@ -11,7 +11,7 @@ export type FixtureConversation = {
   home: string; away: string; home_team_id: string; away_team_id: string;
   home_roster_version: number; away_roster_version: number;
   play_by: string; available_from: string | null; status: string; timezone: string;
-  manager: boolean; viewer_team_id: string | null; writable: boolean;
+  manager: boolean; can_record_booking: boolean; viewer_team_id: string | null; writable: boolean;
   help_requested: boolean; alerts_enabled: boolean; email_enabled: boolean;
 };
 export function proposalIsCurrent(message: FixtureMessage, context: FixtureConversation, now = Date.now()): boolean {
