@@ -482,3 +482,10 @@
 }
 
 .playerRatings .awaitingRating{font-size:10px;line-height:1.2;max-width:58px;flex-shrink:0}
+
+/* Keep both login roles visible beside competition access on phones. */
+@media(max-width:700px){
+ .header{flex-wrap:wrap}
+ .headerLinks{width:100%!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));margin-left:0}
+ .headerLinks .loginLink{display:flex!important}
+}

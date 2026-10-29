@@ -567,7 +567,8 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
         <div className={styles.headerLinks}>
           <Link href="/" className={styles.adminLink}>Rallora home</Link>
           {registrationOpen?<Link href={`/clubs/${encodeURIComponent(slug)}/register?season=${encodeURIComponent(currentSeason!.id)}`} className={styles.registerLink}>Register</Link>:<a href="#league-centre" className={styles.registerLink}>Competitions</a>}
-          <Link href="/login" className={styles.adminLink}>Player login</Link>
+          <Link href="/login" className={`${styles.adminLink} ${styles.loginLink}`}>Player login</Link>
+          <Link href={`/clubs/${encodeURIComponent(slug)}/captain`} className={`${styles.adminLink} ${styles.loginLink}`}>Captain login</Link>
           <Link href={`/clubs/${encodeURIComponent(slug)}/admin`} className={styles.adminLink}>Club admin</Link>
         </div>
       </header>
