@@ -51,3 +51,50 @@ function render(content: EmailContent, club?: ClubEmailBrand) {
 
 export function renderClubEmail(club: ClubEmailBrand, content: EmailContent) { return render(content,club); }
 export function renderRalloraEmail(content: EmailContent) { return render(content); }
+
+// Supabase's account emails use the platform identity. Club registration and
+// league messages continue to use renderClubEmail and the club's own branding.
+export const AUTH_EMAIL_DEFINITIONS = {
+  confirmation: { subject: "Confirm your Rallora email", title: "Welcome to Rallora.", body: "Confirm your email address to finish setting up your Rallora account.", action: "Confirm email address" },
+  invite: { subject: "You’re invited to Rallora", title: "Your place starts here.", body: "You have been invited to create a Rallora account. Follow the secure link to accept your account invitation.", action: "Accept account invitation" },
+  magic_link: { subject: "Your secure Rallora sign-in link", title: "Back on court.", body: "Use the secure link below to sign in to your Rallora account.", action: "Sign in to Rallora" },
+  recovery: { subject: "Reset your Rallora password", title: "A fresh start.", body: "We received a request to reset your Rallora password. Use the secure link below to choose a new one.", action: "Reset my password" },
+  email_change: { subject: "Confirm your Rallora email change", title: "Confirm your email change.", body: "A change to the email address on your Rallora account has been requested. Use the secure link below to confirm this change.", action: "Confirm email change" },
+  reauthentication: { subject: "Your Rallora verification code", title: "One quick security check.", body: "Enter the verification code below in Rallora to confirm it is you.", action: null },
+  password_changed_notification: { subject: "Your Rallora password was changed", title: "Your password was changed.", body: "The password for your Rallora account has been changed.", action: "Review your account" },
+  email_changed_notification: { subject: "Your Rallora email address was changed", title: "Your email address was changed.", body: "The email address for your Rallora account has been changed.", action: "Review your account" },
+  phone_changed_notification: { subject: "Your Rallora phone number was changed", title: "Your phone number was changed.", body: "The phone number for your Rallora account has been changed.", action: "Review your account" },
+  identity_linked_notification: { subject: "A sign-in method was added to your Rallora account", title: "A sign-in method was added.", body: "An additional sign-in method has been linked to your Rallora account.", action: "Review your account" },
+  identity_unlinked_notification: { subject: "A sign-in method was removed from your Rallora account", title: "A sign-in method was removed.", body: "A sign-in method has been removed from your Rallora account.", action: "Review your account" },
+  mfa_factor_enrolled_notification: { subject: "A verification method was added to your Rallora account", title: "A verification method was added.", body: "An additional sign-in verification method has been added to your Rallora account.", action: "Review your account" },
+  mfa_factor_unenrolled_notification: { subject: "A verification method was removed from your Rallora account", title: "A verification method was removed.", body: "A sign-in verification method has been removed from your Rallora account.", action: "Review your account" },
+} as const;
+
+export type AuthEmailType = keyof typeof AUTH_EMAIL_DEFINITIONS;
+const AUTH_CONFIRMATION_PLACEHOLDER = "https://rallora.invalid/auth-confirmation-link";
+
+export function renderAuthEmail(type: AuthEmailType) {
+  const definition = AUTH_EMAIL_DEFINITIONS[type];
+  const notification = type.endsWith("_notification");
+  const code = type === "reauthentication";
+  const detail = code
+    ? '<p style="padding:18px;background:#eaf2f8;border:1px solid #cbd9e7;border-radius:8px;text-align:center;font-size:30px;font-weight:700;letter-spacing:6px;color:#061a39">{{ .Token }}</p><p>This code expires shortly. Never share it with anyone.</p>'
+    : notification
+      ? '<p>If you did not make this change, reset your password and contact <a href="mailto:support@rallora.app">support@rallora.app</a> immediately.</p>'
+      : '<p>This link expires and can only be used once. If you did not request this email, you can ignore it. Your account will not change unless you complete the action.</p>';
+  const html = renderRalloraEmail({
+    preview: definition.subject, eyebrow: notification ? "ACCOUNT SECURITY" : "YOUR RALLORA ACCOUNT",
+    title: definition.title, contentHtml: `<p>Hi there,</p><p>${escape(definition.body)}</p>${detail}`,
+    action: definition.action ? { label: definition.action, url: notification ? "https://www.rallora.app/account" : AUTH_CONFIRMATION_PLACEHOLDER } : undefined,
+    helpText: "For account help, contact support@rallora.app. Never share your password or verification code.",
+  }).replaceAll(AUTH_CONFIRMATION_PLACEHOLDER, "{{ .ConfirmationURL }}");
+  return { subject: definition.subject, html };
+}
+
+/** A narrow Management API payload: content only, never auth/SMTP/security settings. */
+export function authEmailTemplateConfig(): Record<string, string> {
+  return Object.fromEntries((Object.keys(AUTH_EMAIL_DEFINITIONS) as AuthEmailType[]).flatMap(type => {
+    const email = renderAuthEmail(type);
+    return [[`mailer_subjects_${type}`, email.subject], [`mailer_templates_${type}_content`, email.html]];
+  }));
+}
