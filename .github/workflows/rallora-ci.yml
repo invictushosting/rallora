@@ -41,7 +41,7 @@ jobs:
       - run: node --experimental-strip-types --test tests/club-event-scheduler.test.mjs
       - run: node --experimental-strip-types --test tests/account-recovery.test.mjs tests/support-request.test.mjs
       - run: node --experimental-strip-types --test tests/email.test.mjs
-      - run: node --experimental-strip-types --test tests/email-templates.test.mjs
+      - run: node --experimental-strip-types --test tests/email-templates.test.mjs tests/auth-email-templates.test.mjs
       - run: node --experimental-strip-types --test tests/registration-status.test.mjs
       - run: node --experimental-strip-types --test tests/registration-account.test.mjs
       - run: node --experimental-strip-types --test tests/player-emails.test.mjs
