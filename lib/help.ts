@@ -7,7 +7,7 @@ export type HelpArticle = {
   slug: string; category: HelpCategory; title: string; summary: string;
   keywords: string[]; sections: HelpSection[]; related: string[];
 };
-export const HELP_REVIEWED = "28 October 2026";
+export const HELP_REVIEWED = "29 October 2026";
 export const HELP_CATEGORIES: { id: HelpCategory; title: string; description: string }[] = [
   { id: "players", title: "Players", description: "Join a league, check your entry and get ready to play." },
   { id: "captains", title: "Captains", description: "Arrange matches, submit scores and review results." },
@@ -61,7 +61,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
     keywords: ["email", "relay", "apple", "hotmail", "rating", "ratings", "profile", "password", "login", "sign in", "not receiving"],
     sections: [
       { id: "emails", title: "Know which email to use", steps: ["Your Rallora account email is the one you use to sign in and receive Rallora account messages.", "Your Playtomic email identifies your Playtomic profile. Keep the actual Playtomic email here, including an Apple relay address if that is what Playtomic uses.", "When a separate Rallora contact email is requested, use an address you can receive messages at. Enter the equivalent details for your partner."], note: "Rallora and Playtomic are separate accounts. Signing in with Playtomic credentials is not a substitute for a Rallora account." },
-      { id: "ratings", title: "Enter and check ratings", steps: ["Provide your current Playtomic rating when the registration form asks for it. Repeat for your partner.", "The club may use the combined ratings for initial division placement, then make manual adjustments before activation.", "An automatic rating lookup depends on the club’s connection and available player data. If a lookup is unavailable, use the manual rating entry and ask the club about corrections." ] },
+      { id: "ratings", title: "Enter and check ratings", steps: ["Provide your current Playtomic rating when the registration form asks for it. Repeat for your partner.", "The club may use the combined ratings for initial division placement, then make manual adjustments before activation.", "An automatic rating lookup depends on the club’s connection and available player data. If a lookup is unavailable, use the manual rating entry and ask the club about corrections. Awaiting rating means no rating has been supplied; it is not a zero rating." ] },
       { id: "missing-email", title: "If an email does not arrive", steps: ["Check spam or junk and confirm you are checking your Rallora contact inbox.", "For sign-in problems, use the password recovery option on the sign-in page.", "For a registration decision or captain permission, contact your club organiser. For a technical account problem, contact support@rallora.app with your club and a description of the issue."], note: "Never send your password or Playtomic Client Secret in a support message." },
     ], related: ["join-a-league", "playtomic-without-api", "captain-access"],
   },
@@ -74,12 +74,12 @@ export const HELP_ARTICLES: HelpArticle[] = [
     ], related: ["arrange-a-match", "submit-and-confirm-results", "registration-status"],
   },
   {
-    slug: "arrange-a-match", category: "captains", title: "Arrange and record a match booking", summary: "Message the opposing captain, agree a time, then book with your club and record the booking.",
+    slug: "arrange-a-match", category: "players", title: "Arrange and record a match booking", summary: "Chat with the fixture’s players, agree a time, then ask a captain to record the court booking.",
     keywords: ["book", "booking", "court", "arrange", "arranged", "time", "date", "cancel", "reschedule", "4/4", "message", "chat", "proposal", "help"],
     sections: [
-      { id: "conversation", title: "Message your opponents", steps: ["Open your Captain centre, find the fixture and choose Arrange match. The conversation is private to the current captains and club organisers.", "Send a message or choose Propose a time. Only the opposing captain can accept or decline a proposal. A new proposal replaces the previous pending proposal.", "Unread counts appear on your fixtures. Email alerts follow the club’s communication settings and sending hours; check the match for replies if alerts are paused.", "Choose Ask organiser for help and explain what you need. The match is flagged in the club’s Match inbox."], note: "Agreeing a time does not reserve a court. If the pairing changes, propose a new time." },
+      { id: "conversation", title: "Message your opponents", steps: ["Open Fixtures on your club hub and choose Match chat on your fixture. Captains can also use Arrange match in the Captain centre. Sign in with the account linked to your current place in the pairing. The conversation is private to the current players of both pairings and club organisers.", "Send a message or choose Propose a time. Either player from the opposing pairing can accept or decline a proposal. Your own partner cannot accept it. A new proposal replaces the previous pending proposal.", "Unread counts appear on your fixtures. Email alerts follow the club’s communication settings and sending hours; check the match for replies if alerts are paused.", "Choose Ask organiser for help and explain what you need. The match is flagged in the club’s Match inbox."], note: "Agreeing a time does not reserve a court. Fixtures and chat can open before the league starts so players can arrange games; proposed times and recorded bookings must fall within the playing window shown in the match. If the pairing changes, propose a new time." },
       { id: "book", title: "Agree a time and book the court", steps: ["Check the fixture deadline and agree a time in the match conversation.", "Reserve the court through the club’s normal booking provider, such as Playtomic.", "If Playtomic is connected, use the correct four player profiles so the booking can be matched to the fixture. A full automatic match requires all four players."], note: "Recording a match in Rallora does not reserve or pay for a court." },
-      { id: "record", title: "Record an agreed booking manually", steps: ["Open Arrange match from the fixture and find Agreed court booking under Match arrangements. An accepted proposal pre-fills the booking form.", "Choose Record agreed booking. Enter the start time in your device’s local time, choose the duration and optionally add the court.", "Press Save agreed booking. Both captains can see the recorded arrangement, and it informs reminders." ] },
+      { id: "record", title: "Record an agreed booking manually", steps: ["Open Arrange match from the fixture and find Agreed court booking under Match arrangements. An accepted proposal pre-fills the booking form.", "A captain or organiser can choose Record agreed booking. Enter the start time in your device’s local time, choose the duration and optionally add the court.", "Press Save agreed booking. Both captains can see the recorded arrangement, and it informs reminders." ] },
       { id: "change", title: "Change or cancel the arrangement", steps: ["Make any change or cancellation with the booking provider first and agree it with your opponents.", "Use Update recorded booking or Remove recorded booking in Rallora so the fixture information stays correct.", "If an automatic Playtomic match looks wrong or stays pending, ask the organiser to review it."], note: "Removing a recorded booking in Rallora does not cancel the actual court reservation." },
     ], related: ["submit-and-confirm-results", "playtomic-booking-matching", "playtomic-without-api"],
   },
@@ -113,10 +113,43 @@ export const HELP_ARTICLES: HelpArticle[] = [
     ], related: ["manage-teams-and-entries", "club-reminders", "club-results"],
   },
   {
+    slug: "add-late-team", category: "clubs", title: "Add a team after registration closes",
+    summary: "Use the club admin deadline override to add a missed pair to a draft or active competition.",
+    keywords: ["late", "missed deadline", "registration closed", "after deadline", "add team", "add players", "late entry", "late registration", "existing team", "create team", "override"],
+    sections: [
+      { id: "open", title: "Open the late registration tool", steps: [
+        "Sign in as a club owner, admin or organiser. Open the relevant club’s Admin Dashboard, then Registrations.",
+        "Choose Add a team after registration closes. Pick the correct league and division. The tool accepts the current draft or active competition; it is not for completed competitions.",
+        "Check that you are entering a full two-player pairing. For a player joining an existing pairing as a replacement, use Teams & players → Add from Standby instead."
+      ], note: "Only club staff with permission can override the deadline. Ordinary players cannot reopen a closed public registration form." },
+      { id: "existing", title: "Add a pairing already registered at your club", steps: [
+        "Choose Existing team and select a pairing from another league at the same club. The existing team must have a registered captain and a partner email.",
+        "Enter a reason for the exception, such as a confirmed late request, and choose Confirm late registration.",
+        "Rallora creates a separate entry for the chosen competition. The original team and its previous competition results are preserved."
+      ], note: "Existing team means a pairing from another competition at the same club, not an existing team already in the selected league." },
+      { id: "new", title: "Create a new pairing after the deadline", steps: [
+        "The captain must have a Rallora account already. If necessary, ask them to use rallora.app/signup first, then verify their account email and sign in.",
+        "Choose Create new team. Enter the captain name and Rallora account email, plus the partner’s name and email. The team name is optional and defaults to the player names. Supply both ratings when requested. Use different email addresses for the two players.",
+        "Enter the reason for the deadline override and press Confirm late registration. Share the resulting partner invitation link with the partner; they must claim their place using the invited email."
+      ], note: "This is a two-player pairing registration. Entering someone’s email does not create their password or automatically claim the partner’s place." },
+      { id: "fixtures", title: "If fixtures have already been generated", steps: [
+        "Read the confirmation carefully. If fixtures already exist, Rallora warns that the division schedule needs review.",
+        "The late-entry tool does not regenerate fixtures, create the new team’s missing matches, or delete existing results. Review Fixtures & playing rounds and organise the outstanding games through the club’s normal fixture workflow.",
+        "Check both players’ team access and the revised fixture plan before notifying other captains. Keep already played results intact."
+      ], note: "The late-entry confirmation is not proof that the new pairing has fixtures. An organiser must check and arrange them." },
+      { id: "problems", title: "If the team cannot be added", steps: [
+        "Check you selected the right club, league and division, and that the league is draft or active.",
+        "For a new team, confirm the captain has a Rallora account. For an existing team, check the source captain membership and partner email. Duplicate pairings or players already in the target competition may be rejected.",
+        "If the team consists of one replacement player rather than a new pair, use the replacement workflow instead. If an error persists, send support the club, league and error message without passwords."
+      ] }
+    ], related: ["manage-teams-and-entries", "join-a-league", "create-and-launch-competition", "captain-access"],
+  },
+  {
     slug: "manage-teams-and-entries", category: "clubs", title: "Manage entries, divisions and players", summary: "Review entries, adjust draft placement, swap players and manage standby places.",
     keywords: ["teams", "players", "move", "division", "placement", "replace", "replacement", "swap", "exchange", "drop out", "standby", "duplicate", "approve", "decline"],
     sections: [
       { id: "entries", title: "Review applications", steps: ["Open Registrations from club admin. Check the League name shown on each entry card, then review that pairing’s player names, emails and ratings. Singles and standby cards show their league too.", "Check duplicate warnings before approving. If the same pair was entered twice, establish which entry to retain and use the duplicate action to close the extra entry.", "Use a decline decision for an entry that should not proceed, and check that the intended pairing remains approved or pending as appropriate." ] },
+      { id: "ratings", title: "Correct league ratings", steps: ["Open Registrations and find the correct league and pairing. Choose Edit ratings on a pending or approved entry.", "Enter both confirmed player ratings and save. Approved pairings and unclaimed partner invitations update together; division placements and fixtures stay in place.", "Awaiting rating means the value has not been supplied. Obtain it from the player or club before editing; do not use zero as a placeholder."], note: "These are Rallora league entry ratings. Editing them does not change a player’s external Playtomic profile." },
       { id: "placement", title: "Adjust draft division placement", steps: ["Open the draft competition’s placement controls after registrations are reviewed.", "Use Starting boxes & manual adjustments to review the rating-based arrangement. Choose the Pairing to move and Destination box. If that box is full, select a pairing to swap with, then use Move pairing or Swap pairings.", "Check every pairing is in the right place. Changing boxes can clear untouched draft fixtures, so generate fixtures again after finalising placements and before launching." ] },
       { id: "replacement", title: "Add from Standby", steps: ["Open Teams & players and find the correct competition, division and pairing. Use Add from Standby under the player slot you want to fill.", "Choose an available standby player from this competition or an earlier cycle of the same league. Singles are managed separately under Registrations. If both places are occupied, the selected slot’s current player moves to standby in the same operation.", "Review the player names, destinations, eligibility and upcoming fixtures. Tick the review box and confirm. Both roster and standby status update together."], note: "Players can be swapped or moved to and from standby without creating or claiming a Rallora account. Existing league registration windows do not prevent an administrator from managing the current draft or active cycle." },
       { id: "swap", title: "Swap Players", steps: ["Under the first player, choose Swap Players. Select another pairing in the same division and the player to exchange.", "Review both destination pairings, check the club’s rating and registration rules, tick the review box and confirm.", "Both players move together or neither moves. The team names and approved entry summaries automatically change to match the new pairings. Refresh if either pairing has changed since you opened the dialog. Cross-division swaps are blocked; review division placement separately." ] },
@@ -194,6 +227,8 @@ export function searchHelp(query: string, category?: HelpCategory): HelpArticle[
   }).filter(r => r.score >= 4 && r.matches >= Math.ceil(terms.length / 2)).sort((a, b) => b.score - a.score).map(r => r.article);
 }
 export function suggestedHelp(path: string): string[] {
+  if (path.includes("/admin/late-entry") || path.includes("/admin/registrations")) return ["add-late-team", "manage-teams-and-entries", "registration-status"];
+
   if (path.includes("/admin/integrations")) return ["connect-playtomic", "playtomic-booking-matching", "playtomic-without-api"];
   if (path.includes("/admin/reminders")) return ["club-reminders", "emails-and-ratings", "arrange-a-match"];
   if (path.includes("/admin/registrations")) return ["manage-teams-and-entries", "registration-status", "create-and-launch-competition"];

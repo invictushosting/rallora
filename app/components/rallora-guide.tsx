@@ -1,12 +1,13 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { HELP_ARTICLES, helpAnswerSection, helpHref, safeClubSlug, searchHelp, suggestedHelp } from "@/lib/help";
 import styles from "./rallora-guide.module.css";
 type Item = { question: string; articles: string[] };
 export default function RalloraGuide() {
   const path = usePathname() ?? "";
+  const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [history, setHistory] = useState<Item[]>([]);
@@ -14,7 +15,7 @@ export default function RalloraGuide() {
   const inputRef = useRef<HTMLInputElement>(null);
   const launchRef = useRef<HTMLButtonElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const slug = safeClubSlug(/^\/clubs\/([^/]+)/.exec(path)?.[1]);
+  const slug = safeClubSlug(/^\/clubs\/([^/]+)/.exec(path)?.[1] ?? searchParams.get("club"));
   const suggestions = suggestedHelp(path).map(id => HELP_ARTICLES.find(a => a.slug === id)).filter(a => a !== undefined);
   useEffect(() => { if (open) inputRef.current?.focus(); }, [open]);
   useEffect(() => {

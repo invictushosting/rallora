@@ -31,6 +31,21 @@ begin
  values('00000000-0000-0000-0000-0000000000a1',s,a,ids[4],captain,'Old captain','approved',auth.uid(),now()) returning id into req;
  insert into public.rallora_team_roster_memberships(registration_request_id,club_id,season_id,division_id,team_id,player_user_id,role,approved_by) values(req,'00000000-0000-0000-0000-0000000000a1',s,a,ids[4],captain,'captain',auth.uid());
  perform public.rallora_generate_round_robin(s,'2026-11-01','2026-11-30');
+ -- Activity protection must work against production-shaped tables without fixture scores.
+ select id into played_fixture from public.fixtures where season_id=s limit 1;
+ update public.fixtures set status='submitted' where id=played_fixture;
+ rejected:=false;begin perform public.rallora_place_draft_boxes(s,false,ids[4],b,ids[1]);exception when raise_exception then
+  if sqlerrm<>'This draft has match activity; its divisions cannot be changed' then raise; end if;
+  rejected:=true;end;
+ if not rejected then raise exception 'Submitted fixture allowed box movement'; end if;
+ update public.fixtures set status='open' where id=played_fixture;
+ insert into public.results(fixture_id,home_score,away_score,winner_team_id,status)
+ select id,'6-4','4-6',home_team_id,'confirmed' from public.fixtures where id=played_fixture;
+ rejected:=false;begin perform public.rallora_place_draft_boxes(s,true);exception when raise_exception then
+  if sqlerrm<>'This draft has match activity; its divisions cannot be changed' then raise; end if;
+  rejected:=true;end;
+ if not rejected then raise exception 'Recorded result allowed rating seeding'; end if;
+ delete from public.results where fixture_id=played_fixture;
  output:=public.rallora_place_draft_boxes(s,false,ids[4],b,ids[1]);
  if (output->>'fixtures_cleared')::int<>2 then raise exception 'Draft fixtures not invalidated'; end if;
  if not exists(select 1 from public.rallora_team_roster_memberships where team_id=ids[4] and division_id=b and player_user_id=captain) then raise exception 'Roster lost or division out of sync'; end if;

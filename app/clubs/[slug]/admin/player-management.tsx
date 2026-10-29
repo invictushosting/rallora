@@ -78,7 +78,7 @@ export default function PlayerManagement({clubId,seasons,onSaved}:{clubId:string
         <div><strong>{[t.player_one_name,t.player_two_name].filter(Boolean).join(" / ")||t.name}</strong><span>{s.status}{(!t.player_one_name||!t.player_two_name)&&" · Incomplete pairing"}</span></div>
         <div className={`${styles.pairingPlayers} ${styles.movementPlayers}`}>{([1,2] as const).map(slot=><div key={slot}>
           <span>Player {slot}</span><strong>{playerName(t,slot)}</strong>
-          <small>Playtomic rating {(slot===1?t.player_one_rating:t.player_two_rating)?.toFixed(2)??"not provided"}</small>
+          <small>Playtomic rating {(slot===1?t.player_one_rating:t.player_two_rating)?.toFixed(2)??"Awaiting rating"}</small>
           {['draft','active'].includes(s.status)&&!seasons.some(child=>child.previous_season_id===s.id)&&<div className={styles.movementActions}>
             {t[slot===1?'player_one_name':'player_two_name']&&<button type="button" onClick={()=>open({action:"swap",season:s,divisionId:d.id,team:t,slot})}>Swap Players</button>}
             <button type="button" onClick={()=>open({action:"add",season:s,divisionId:d.id,team:t,slot})}>Add from Standby</button>
