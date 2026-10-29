@@ -647,7 +647,6 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
                   a.play_by.localeCompare(b.play_by)).slice(0, 4);
               return <section className={styles.division} key={division.id}>
                 <div className={styles.divisionHeader}>
-                  <span className={styles.kicker}>DIVISION {division.sort_order}</span>
                   <h3>{division.name}</h3>
                 </div>
                 <ClubSponsors sponsors={content.sponsors.filter(item => item.scope_type === "division")} context={{clubId:club.id,seasonId,divisionId:division.id}} position="after-header" />
@@ -771,8 +770,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
             </div>}
             {tab === "tables" && filteredDivisions.map((division) =>
               <section className={styles.cardSection} key={division.id}>
-                <div className={styles.divisionHeader}><span className={styles.kicker}>
-                  DIVISION {division.sort_order}</span><h3>{division.name}</h3></div>
+                <div className={styles.divisionHeader}><h3>{division.name}</h3></div>
                 <div className={styles.card}>{tableFor(division)}</div>
               </section>)}
             {tab === "teams" && <div className={styles.teamGrid}>
