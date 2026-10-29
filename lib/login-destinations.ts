@@ -15,7 +15,7 @@ export function loginDestinations(platformAdmin:boolean,memberships:ClubRole[],r
   const captainClubs=new Set(roster.filter(row=>row.role==='captain').map(row=>row.clubs?.slug));
   for(const row of roster){
     if(row.role==='captain')add(row,'/captain','Captain centre');
-    else if(row.role==='player'&&!captainClubs.has(row.clubs?.slug))add(row,'','Fixtures & league tables');
+    else if(row.role==='player'&&!captainClubs.has(row.clubs?.slug))add(row,'?view=fixtures','Fixtures & match chat');
   }
   return [...links.values()];
 }
