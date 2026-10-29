@@ -182,3 +182,5 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261029081850_fixture_playing_window.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_fixture_messaging_all_players_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_approval_ratings_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261029094156_reissue_cancelled_partner_invitations.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_reissued_partner_invites_assertions.sql
