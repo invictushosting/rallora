@@ -46,3 +46,8 @@ Keep external provider setup instructions qualified when account menus or plan
 entitlements may differ. Do not publish credentials, claim a court is booked by
 Rallora, promise a pairing from a waiting list, or label an unconfirmed result as
 official.
+# Player accounts — 29 October 2026
+
+Both members of a pairing use separate Rallora accounts. The club hub's Player login opens role-aware navigation: partners go directly to Fixtures & match chat; captains retain their centre. Joining via the original invitation links an existing or new account to the pairing. Creating an account alone does not claim a team place or submit another league registration.
+
+Registration receipts explain that partners join after club approval. Partner invitation emails use Create your account or sign in and preserve the original invitation URL. The invitation page explains player access and links claimed members directly to fixtures. The join-a-league guide answers the two-player login question and gives recovery steps for an unclaimed invitation.

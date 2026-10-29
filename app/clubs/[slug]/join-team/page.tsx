@@ -83,9 +83,10 @@ export default function JoinTeamPage(){
    }catch{setError("We could not resend the confirmation email. Please wait a moment and try again.")}
    finally{setBusy(false)}
  }
- async function claim(){if(!inviteId)return;setBusy(true);setError("");const r=await supabase.rpc("rallora_claim_team_invite",{p_invite_id:inviteId});setBusy(false);if(r.error){setError(r.error.message);return}setMessage("Team place claimed. Your Rallora membership is now active.");await load()}
+ async function claim(){if(!inviteId)return;setBusy(true);setError("");const r=await supabase.rpc("rallora_claim_team_invite",{p_invite_id:inviteId});setBusy(false);if(r.error){setError(r.error.message);return}setMessage("You’ve joined your team. Use your own login to view fixtures and join match chat.");await load()}
 
- return <main className={styles.page}><section className={styles.card}><BackLink href={slug?`/clubs/${slug}`:"/"}>Back to club</BackLink><span className={styles.eyebrow}>TEAM INVITE</span><h1>Join your Rallora team</h1><p>Use the email address your captain invited. New to Rallora? Create your own account first, then claim your team place. Your Playtomic password will not sign you in to Rallora.</p>
+ return <main className={styles.page}><section className={styles.card}><BackLink href={slug?`/clubs/${slug}`:"/"}>Back to club</BackLink><span className={styles.eyebrow}>TEAM INVITE</span><h1>Join your Rallora team</h1><p>Both team members can have their own Rallora login. Use the email address that received this invitation to create your account or sign in, then claim your team place.</p>
+ <aside className={styles.terms}><strong>Your player access</strong><p>View fixtures, message the other players and propose match times. Captains manage results and recorded court bookings.</p></aside>
  {!validInviteId&&<p className={styles.error} role="alert">This invite link is incomplete or invalid. Ask your captain for the full invitation link.</p>}
  {!loading&&!signedIn&&validInviteId&&<>
  <div className={styles.modeSwitch} role="group" aria-label="Rallora account">
@@ -100,7 +101,7 @@ export default function JoinTeamPage(){
  </form>
  {needsVerification&&<p><button type="button" disabled={busy} onClick={()=>void resendConfirmation()}>Resend confirmation email</button></p>}
  </>}
- {!loading&&signedIn&&invite&&<div className={styles.player}><strong>{invite.teams?.name??"Your team"}</strong><p>Invite for {invite.invited_name} · {invite.invited_email}</p>{invite.status==="pending"?<button disabled={busy} onClick={()=>void claim()}>{busy?"Claiming…":"Claim team place"}</button>:invite.status==="claimed"?<><p className={styles.success}>This invite has already been claimed.</p><Link href={`/clubs/${encodeURIComponent(slug)}`}>View club fixtures and tables</Link></>:<p className={styles.error}>This invite has been cancelled. Contact your captain or club organiser for help.</p>}</div>}
+ {!loading&&signedIn&&invite&&<div className={styles.player}><strong>{invite.teams?.name??"Your team"}</strong><p>Invite for {invite.invited_name} · {invite.invited_email}</p>{invite.status==="pending"?<button disabled={busy} onClick={()=>void claim()}>{busy?"Claiming…":"Claim team place"}</button>:invite.status==="claimed"?<><p className={styles.success}>Your team place is connected to your account.</p><Link className={styles.primaryLink} href={`/clubs/${encodeURIComponent(slug)}?view=fixtures`}>View fixtures & match chat</Link></>:<p className={styles.error}>This invite has been cancelled. Contact your captain or club organiser for help.</p>}</div>}
  {loading&&validInviteId&&<p role="status">Checking your invite…</p>}
  {!loading&&signedIn&&!invite&&validInviteId&&!error&&<p className={styles.error} role="alert">This invite is unavailable for this account and club. Check the link and sign in with the email address your captain invited.</p>}
  {!loading&&signedIn&&validInviteId&&<p>Signed in as {email}. <button type="button" disabled={busy} onClick={()=>void switchAccount()}>Use a different account</button></p>}

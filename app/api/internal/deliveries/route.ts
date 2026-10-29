@@ -2,7 +2,7 @@ import {createClient} from '@supabase/supabase-js';
 import {NextRequest,NextResponse} from 'next/server';
 import {sendRalloraEmail,escapeEmailHtml} from '@/lib/email';
 import {renderClubEmail} from '@/lib/email-templates';
-import {communicationActionUrl,type DeliveryMessage} from '@/lib/communication';
+import {deliveryPresentation,type DeliveryMessage} from '@/lib/communication';
 export const maxDuration=300;
 export const dynamic='force-dynamic';
 const headers={'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'};
@@ -20,10 +20,10 @@ export async function POST(request:NextRequest) {
  for(const job of jobs) {
   let providerId:string|null=null,failure:string|null=null;
   try {
-   const action=communicationActionUrl(job.actionUrl);
+   const presentation=deliveryPresentation(job);
    const reply=await sendRalloraEmail({to:job.to,subject:job.title,clubName:job.brand.sender,replyTo:job.brand.replyTo,
-    idempotencyKey:`rallora-delivery-${job.id}`,text:`${job.title}\n\n${job.body}\n\nOpen your club: ${action}`,
-    html:renderClubEmail(job.brand,{preview:job.body,eyebrow:'YOUR LEAGUE UPDATE',title:job.title,contentHtml:`<p>${escapeEmailHtml(job.body)}</p>`,action:{label:'Open your club',url:action}})});
+    idempotencyKey:`rallora-delivery-${job.id}`,text:`${job.title}\n\n${presentation.body}\n\n${presentation.label}: ${presentation.url}`,
+    html:renderClubEmail(job.brand,{preview:presentation.body,eyebrow:'YOUR LEAGUE UPDATE',title:job.title,contentHtml:`<p>${escapeEmailHtml(presentation.body)}</p>`,action:{label:presentation.label,url:presentation.url}})});
    providerId=reply.id;accepted++;
   } catch {failure='Email provider could not accept this message. An automatic retry is scheduled.';failed++;}
   const finished=await db.rpc('rallora_finish_delivery',{p_token:token,p_id:job.id,p_provider_id:providerId,p_error:failure});
