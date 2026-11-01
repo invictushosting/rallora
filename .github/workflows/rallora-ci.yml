@@ -189,3 +189,6 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261029134600_concurrent_competition_activation.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_parallel_leagues_assertions.sql
       - run: python3 scripts/staging/ci_parallel_leagues_concurrency.py
+
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261101120906_standings_division_integrity.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_standings_division_assertions.sql
