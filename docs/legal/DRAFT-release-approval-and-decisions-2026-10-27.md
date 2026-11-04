@@ -3,6 +3,9 @@
 **Decision: NOT APPROVED FOR PUBLICATION, EXECUTION OR PRODUCTION DEPLOYMENT.** This register tracks unanswered questions and necessary evidence. It is not legal advice and no owner or sign-off is implied.
 
 
+## Resumption checkpoint — 4 November 2026
+See `docs/legal/compliance-resumption-2026-11-04.md` for verified PR/CI state, integration work and ordered next actions. October mailbox and production-schema observations remain historical evidence, not fresh verification. All legal approvals remain open.
+
 ## Owner-only control checklist and current mailbox status
 See `docs/legal/DRAFT-owner-only-privacy-monitoring-checklist-2026-10-27.md` for the owner-only daily checks, absence and account-recovery plan, and pre-release evidence. The connected personal Gmail account is **not** the Rallora support mailbox; owner reported **no receipt** of a test message to `support@rallora.app` on 27 October, and **did not test sending** from that address. Mailbox function remains a **release blocker**; owner access to the correct mailbox still requires verification. The owner must demonstrate the separate intended mailbox access; no Google Workspace settings or forwarding have been changed.
 

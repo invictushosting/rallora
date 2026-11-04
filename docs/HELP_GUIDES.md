@@ -28,6 +28,12 @@ in React memory and disappear when the page is reloaded or the user clears them.
 - Floating helper: page-specific suggestions and a link to all guides, including
   on the GSM club hub.
 
+## Late registration guide
+
+The club admin deadline override is explained in `/help/add-late-team` and linked from `/clubs/<slug>/admin/late-entry`. Both routes need to remain accurate when team registration or fixtures change.
+
+The override adds a **pairing**, not a single replacement player. The captain must have an account. An existing pairing must originate in another competition at the same club. New partner invitations require claiming, and fixtures already generated are not automatically rebuilt. Recommend checking fixtures and preserving existing results.
+
 ## Validation
 
 Run `node --experimental-strip-types --test tests/help.test.mjs`, typecheck and
@@ -40,3 +46,8 @@ Keep external provider setup instructions qualified when account menus or plan
 entitlements may differ. Do not publish credentials, claim a court is booked by
 Rallora, promise a pairing from a waiting list, or label an unconfirmed result as
 official.
+# Player accounts — 29 October 2026
+
+Both members of a pairing use separate Rallora accounts. The club hub keeps separate Player login and Captain login links. Player login opens role-aware navigation: partners go directly to Fixtures & match chat; captains retain their centre. Joining via the original invitation links an existing or new account to the pairing. Creating an account alone does not claim a team place or submit another league registration.
+
+Registration receipts explain that partners join after club approval. Partner invitation emails use Create your account or sign in and preserve the original invitation URL. The invitation page explains player access and links claimed members directly to fixtures. The join-a-league guide answers the two-player login question and gives recovery steps for an unclaimed invitation.

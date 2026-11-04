@@ -1,5 +1,8 @@
 "use client";
 
+import {useFixtureChatAccess} from "@/lib/hooks/use-fixture-chat-access";
+import {fixturePlayerLabel} from "@/lib/fixture-rosters";
+import {fixtureMatchesQuery, fixtureIsPublished} from "@/lib/leagues/fixture-discovery";
 import {registrationWindowState} from "@/lib/registration-window";
 import {useRegistrationWindow} from "@/lib/hooks/use-registration-window";
 import BackLink from "@/app/components/back-link";
@@ -43,6 +46,7 @@ type Fixture = {
   id: string; season_id: string; division_id: string;
   home_team_id: string; away_team_id: string;
   play_by: string; week_number: number;
+  home_player_names:(string|null)[]|null;away_player_names:(string|null)[]|null;
   fixture_group_name: string | null; status: string; court: string | null;
   available_from: string | null;
   arrangement_status: "not_arranged" | "possible" | "arranged" | "in_progress" | "result_required" | "cancelled";
@@ -129,6 +133,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
   const slug = slugOverride ?? (typeof params.slug === "string" ? params.slug : "");
   const supabase = useMemo(() => createClient(), []);
   const [clubState, setClubState] = useState<ClubState>({ kind: "loading" });
+  const chatAccess = useFixtureChatAccess(clubState.kind === "ready" ? clubState.club.id : null);
   const [seasonId, setSeasonId] = useState("");
   const [data, setData] = useState<LeagueData>(EMPTY);
   const [dataState, setDataState] = useState<"loading" | "ready" | "error">("loading");
@@ -243,7 +248,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
       try {
         const today = new Date().toISOString().slice(0, 10);
         const fixtureQuery = supabase.from("fixtures")
-          .select("id,season_id,division_id,home_team_id,away_team_id,play_by,week_number,fixture_group_name,status,court,available_from,arrangement_status,booking_starts_at,booking_ends_at,booking_type,booking_court,booking_matched_players")
+          .select("id,season_id,division_id,home_team_id,away_team_id,play_by,week_number,home_player_names,away_player_names,fixture_group_name,status,court,available_from,arrangement_status,booking_starts_at,booking_ends_at,booking_type,booking_court,booking_matched_players")
           .eq("season_id", verifiedSeasonId);
         const [divisionReply, fixtureReply, standingReply, cupReply, manualReply] =
           await Promise.all([
@@ -294,7 +299,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
           .filter((team) => divisionIds.has(team.division_id));
         const teamIds = new Set(teams.map((team) => team.id));
         const publishedFixtures = fixtures.filter(
-          (fixture) => teamIds.has(fixture.home_team_id) &&
+          (fixture) => fixtureIsPublished(fixture) && teamIds.has(fixture.home_team_id) &&
             teamIds.has(fixture.away_team_id),
         );
         const publishedFixtureIds = new Set(publishedFixtures.map((fixture) => fixture.id));
@@ -354,6 +359,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
   const clubLogo = safeImage(club.logo_url);
   const clubCover = safeImage(club.cover_image_url);
   const teamNames = new Map(data.teams.map((team) => [team.id, playerPair(team)]));
+  const teamLabelsById = new Map(data.teams.map((team) => [team.id, team.name] as const));
   const results = new Map(data.results.map((result) => [result.fixture_id, result]));
   const standings = (id: string) => data.standings
     .filter((row) => row.division_id === id)
@@ -361,22 +367,35 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
       teamLabel(a.team_id, teamNames).localeCompare(teamLabel(b.team_id, teamNames)));
   const confirmed = data.fixtures.filter((fixture) =>
     isConfirmed(results.get(fixture.id))).length;
-  const matchingFixtures = data.fixtures
-    .filter((fixture) => divisionFilter === "all" ||
-      fixture.division_id === divisionFilter)
-    .filter((fixture) => {
-      const term = search.trim().toLowerCase();
-      return !term || [teamNames.get(fixture.home_team_id),
-        teamNames.get(fixture.away_team_id), fixture.fixture_group_name,
-        fixture.court, String(fixture.week_number)].some((value) =>
-        value?.toLowerCase().includes(term));
-    });
-  const fixturesForTab = matchingFixtures.filter((fixture) =>
+  const availableFixturesForTab = data.fixtures.filter((fixture) =>
     tab === "results" ? isConfirmed(results.get(fixture.id)) :
       !isConfirmed(results.get(fixture.id)));
+  const fixtureCountsByDivision = new Map(data.divisions.map((division) =>
+    [division.id, availableFixturesForTab.filter((fixture) =>
+      fixture.division_id === division.id).length] as const));
+  const divisionNames = new Map(data.divisions.map((division) =>
+    [division.id, division.name] as const));
+  const divisionOrder = new Map(data.divisions.map((division) =>
+    [division.id, division.sort_order] as const));
+  const fixturesForTab = availableFixturesForTab
+    .filter((fixture) => divisionFilter === "all" ||
+      fixture.division_id === divisionFilter)
+    .filter((fixture) => fixtureMatchesQuery(search, [
+      divisionNames.get(fixture.division_id),
+      teamNames.get(fixture.home_team_id),
+      teamNames.get(fixture.away_team_id),
+      teamLabelsById.get(fixture.home_team_id),
+      teamLabelsById.get(fixture.away_team_id),
+      fixturePlayerLabel(fixture, fixture.home_team_id, teamNames.get(fixture.home_team_id) ?? "Players"),
+      fixturePlayerLabel(fixture, fixture.away_team_id, teamNames.get(fixture.away_team_id) ?? "Players"),
+      fixture.fixture_group_name, fixture.court, fixture.booking_court,
+      `Round ${fixture.week_number}`, `Week ${fixture.week_number}`,
+    ]));
   const sortedFixtures = [...fixturesForTab].sort((a, b) =>
-    tab === "results" ? b.play_by.localeCompare(a.play_by) :
-      a.play_by.localeCompare(b.play_by));
+    (divisionFilter === "all" ?
+      (divisionOrder.get(a.division_id) ?? 999) - (divisionOrder.get(b.division_id) ?? 999) : 0) ||
+    (tab === "results" ? b.play_by.localeCompare(a.play_by) : a.play_by.localeCompare(b.play_by)) ||
+    a.id.localeCompare(b.id));
   const visibleFixtures = showAll ? sortedFixtures : sortedFixtures.slice(0, 18);
   const filteredDivisions = data.divisions.filter((division) =>
     divisionFilter === "all" || division.id === divisionFilter);
@@ -421,8 +440,8 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
   function fixtureRow(fixture: Fixture) {
     const result = results.get(fixture.id);
     const resolved = isConfirmed(result);
-    const homePlayers = playerNames(data.teams.find(team => team.id === fixture.home_team_id));
-    const awayPlayers = playerNames(data.teams.find(team => team.id === fixture.away_team_id));
+    const homePlayers = fixture.home_player_names?.filter((name): name is string=>Boolean(name?.trim())) ?? playerNames(data.teams.find(team => team.id === fixture.home_team_id));
+    const awayPlayers = fixture.away_player_names?.filter((name): name is string=>Boolean(name?.trim())) ?? playerNames(data.teams.find(team => team.id === fixture.away_team_id));
     return <li key={fixture.id} className={styles.fixture}>
       <div className={styles.fixtureTop}>
         <span>{data.divisions.find((division) =>
@@ -432,19 +451,20 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
         <span>{dateLabel(fixture.play_by)}</span>
       </div>
       {resolved ? <div className={styles.resultCard}>
-        <div className={styles.resultPair}><span className={styles.pairSide}>HOME</span><strong>{teamLabel(fixture.home_team_id, teamNames)}</strong></div>
+        <div className={styles.resultPair}><span className={styles.pairSide}>HOME</span><strong>{fixturePlayerLabel(fixture,fixture.home_team_id,teamLabel(fixture.home_team_id, teamNames))}</strong></div>
         <div className={styles.setScore}>
           <div className={styles.setHeaders}>{scoreSets(result?.home_score).map((_, index)=><span key={index}>SET {index + 1}</span>)}</div>
           <div className={styles.setRow}>{scoreSets(result?.home_score).map((score,index)=>{const away=Number(scoreSets(result?.away_score)[index]);const home=Number(score);return <strong key={index} className={home>away?styles.setWon:""}>{score}</strong>;})}</div>
           <div className={styles.setRow}>{scoreSets(result?.away_score).map((score,index)=>{const home=Number(scoreSets(result?.home_score)[index]);const away=Number(score);return <strong key={index} className={away>home?styles.setWon:""}>{score}</strong>;})}</div>
         </div>
-        <div className={`${styles.resultPair} ${styles.resultPairAway}`}><span className={styles.pairSide}>AWAY</span><strong>{teamLabel(fixture.away_team_id, teamNames)}</strong></div>
+        <div className={`${styles.resultPair} ${styles.resultPairAway}`}><span className={styles.pairSide}>AWAY</span><strong>{fixturePlayerLabel(fixture,fixture.away_team_id,teamLabel(fixture.away_team_id, teamNames))}</strong></div>
       </div> : <div className={styles.match}>
         <div className={styles.matchTeam}>{homePlayers.length ? homePlayers.map((name, index)=><strong key={index}>{name}</strong>) : <strong>Players to be confirmed</strong>}</div>
         <span className={styles.score}>vs</span>
         <div className={styles.matchTeam}>{awayPlayers.length ? awayPlayers.map((name, index)=><strong key={index}>{name}</strong>) : <strong>Players to be confirmed</strong>}</div>
       </div>}
       {!resolved && arrangementPanel(fixture)}
+      {(chatAccess.manager || chatAccess.teamIds.has(fixture.home_team_id) || chatAccess.teamIds.has(fixture.away_team_id)) && <div className={styles.fixtureBottom}><Link className={styles.bookingAction} href={`/clubs/${slug}/matches/${fixture.id}`}>Match chat</Link></div>}
       {(resolved || fixture.status === "disputed") && <div className={styles.fixtureBottom}>
         <span>{resolved ? (fixture.booking_court || fixture.court || "Match complete") : "Result under review"}</span>
         <span className={resolved ? styles.confirmed : styles.fixtureStatus}>
@@ -477,8 +497,8 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
     return {
       id: fixture.id,
       division: division?.name ?? "Division",
-      home: teamLabel(fixture.home_team_id, teamNames),
-      away: teamLabel(fixture.away_team_id, teamNames),
+      home: fixturePlayerLabel(fixture,fixture.home_team_id,teamLabel(fixture.home_team_id, teamNames)),
+      away: fixturePlayerLabel(fixture,fixture.away_team_id,teamLabel(fixture.away_team_id, teamNames)),
       playBy: fixture.play_by.slice(0, 10),
       week: fixture.week_number,
       court: fixture.court,
@@ -547,7 +567,8 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
         <div className={styles.headerLinks}>
           <Link href="/" className={styles.adminLink}>Rallora home</Link>
           {registrationOpen?<Link href={`/clubs/${encodeURIComponent(slug)}/register?season=${encodeURIComponent(currentSeason!.id)}`} className={styles.registerLink}>Register</Link>:<a href="#league-centre" className={styles.registerLink}>Competitions</a>}
-          <Link href={`/clubs/${encodeURIComponent(slug)}/captain`} className={styles.adminLink}>Captain login</Link>
+          <Link href="/login" className={`${styles.adminLink} ${styles.loginLink}`}>Player login</Link>
+          <Link href={`/clubs/${encodeURIComponent(slug)}/captain`} className={`${styles.adminLink} ${styles.loginLink}`}>Captain login</Link>
           <Link href={`/clubs/${encodeURIComponent(slug)}/admin`} className={styles.adminLink}>Club admin</Link>
         </div>
       </header>
@@ -630,7 +651,6 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
                   a.play_by.localeCompare(b.play_by)).slice(0, 4);
               return <section className={styles.division} key={division.id}>
                 <div className={styles.divisionHeader}>
-                  <span className={styles.kicker}>DIVISION {division.sort_order}</span>
                   <h3>{division.name}</h3>
                 </div>
                 <ClubSponsors sponsors={content.sponsors.filter(item => item.scope_type === "division")} context={{clubId:club.id,seasonId,divisionId:division.id}} position="after-header" />
@@ -657,21 +677,62 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
                 tab === "results" ? confirmed :
                 tab === "teams" ? data.teams.length : data.divisions.length}
             </span></div>
-            <div className={styles.filterBar}>
-              <label>Division
-                <select value={divisionFilter}
-                  onChange={(event) => { setDivisionFilter(event.target.value); setShowAll(false); }}>
-                  <option value="all">All divisions</option>
-                  {data.divisions.map((division) => <option key={division.id}
-                    value={division.id}>{division.name}</option>)}
-                </select>
-              </label>
-              {(tab === "fixtures" || tab === "results" || tab === "teams") &&
-                <label>Search
-                  <input type="search" value={search} placeholder="Find players or a match…"
+            {(tab === "fixtures" || tab === "results") ? (
+              <div className={styles.fixtureDiscovery}>
+                <div className={styles.fixtureDiscoveryHeading}>
+                  <div><h3>Find your {tab === "results" ? "results" : "fixtures"}</h3>
+                    <p>Choose a division below, or search for a player, team or round.</p></div>
+                </div>
+                <div className={styles.fixtureDivisionHeading}>
+                  <strong>Browse by division</strong><span>{data.divisions.length} divisions</span>
+                </div>
+                <div className={styles.fixtureDivisionGrid} role="group" aria-label="Filter matches by division">
+                  <button type="button" className={divisionFilter === "all" ? styles.fixtureDivisionSelected : styles.fixtureDivisionButton}
+                    aria-pressed={divisionFilter === "all"}
+                    onClick={() => { setDivisionFilter("all"); setShowAll(false); }}>
+                    <span>All divisions</span><small>{availableFixturesForTab.length} matches</small>
+                  </button>
+                  {data.divisions.map((division) => (
+                    <button key={division.id} type="button"
+                      className={divisionFilter === division.id ? styles.fixtureDivisionSelected : styles.fixtureDivisionButton}
+                      aria-pressed={divisionFilter === division.id}
+                      onClick={() => { setDivisionFilter(division.id); setShowAll(false); }}>
+                      <span>{division.name}</span>
+                      <small>{fixtureCountsByDivision.get(division.id) ?? 0} matches</small>
+                    </button>
+                  ))}
+                </div>
+                <label className={styles.fixtureSearchLabel}>
+                  Search player, team, division or round
+                  <input type="search" value={search} maxLength={80}
+                    placeholder="e.g. Division 2A or a player's name"
                     onChange={(event) => { setSearch(event.target.value); setShowAll(false); }} />
-                </label>}
-            </div>
+                </label>
+                <div className={styles.fixtureFilterStatus}>
+                  <strong role="status" aria-live="polite">
+                    {sortedFixtures.length} {tab === "results" ? "result" : "fixture"}{sortedFixtures.length === 1 ? "" : "s"} found
+                  </strong>
+                  {(divisionFilter !== "all" || search.trim()) &&
+                    <button type="button" onClick={() => { setDivisionFilter("all"); setSearch(""); setShowAll(false); }}>Clear filters</button>}
+                </div>
+              </div>
+            ) : (
+              <div className={styles.filterBar}>
+                <label>Division
+                  <select value={divisionFilter}
+                    onChange={(event) => { setDivisionFilter(event.target.value); setShowAll(false); }}>
+                    <option value="all">All divisions</option>
+                    {data.divisions.map((division) => <option key={division.id}
+                      value={division.id}>{division.name}</option>)}
+                  </select>
+                </label>
+                {tab === "teams" &&
+                  <label>Search
+                    <input type="search" value={search} placeholder="Find players or a team…"
+                      onChange={(event) => { setSearch(event.target.value); setShowAll(false); }} />
+                  </label>}
+              </div>
+            )}
             <ClubSponsors sponsors={content.sponsors} context={{clubId:club.id,seasonId,divisionId:divisionFilter === "all" ? undefined : divisionFilter}} position="beside-fixtures" />
             <div className={styles.viewShare}>
               <span>Help players find this section of the league.</span>
@@ -693,8 +754,18 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
                 </button>
               </div>
               {!sortedFixtures.length
-                ? <p className={styles.empty}>No matching {tab} for this season.</p>
-                : <ul className={styles.fixtures}>{visibleFixtures.map(fixtureRow)}</ul>}
+                ? <div className={styles.fixtureNoMatches}>
+                    <strong>No {tab === "results" ? "results" : "fixtures"} match these filters.</strong>
+                    <p>Try a different division or player name.</p>
+                    <button type="button" onClick={() => { setDivisionFilter("all"); setSearch(""); setShowAll(false); }}>Show all divisions</button>
+                  </div>
+                : divisionFilter === "all" ? data.divisions.filter((division) =>
+                    visibleFixtures.some((fixture) => fixture.division_id === division.id)).map((division) =>
+                    <section key={division.id} className={styles.fixtureDivisionGroup}>
+                      <h3>{division.name} <span>{fixtureCountsByDivision.get(division.id) ?? 0} matches</span></h3>
+                      <ul className={styles.fixtures}>{visibleFixtures.filter((fixture) => fixture.division_id === division.id).map(fixtureRow)}</ul>
+                    </section>)
+                  : <ul className={styles.fixtures}>{visibleFixtures.map(fixtureRow)}</ul>}
               {!showAll && sortedFixtures.length > visibleFixtures.length &&
                 <button type="button" className={styles.more}
                   onClick={() => setShowAll(true)}>
@@ -703,8 +774,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
             </div>}
             {tab === "tables" && filteredDivisions.map((division) =>
               <section className={styles.cardSection} key={division.id}>
-                <div className={styles.divisionHeader}><span className={styles.kicker}>
-                  DIVISION {division.sort_order}</span><h3>{division.name}</h3></div>
+                <div className={styles.divisionHeader}><h3>{division.name}</h3></div>
                 <div className={styles.card}>{tableFor(division)}</div>
               </section>)}
             {tab === "teams" && <div className={styles.teamGrid}>
@@ -718,8 +788,8 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
                     <span>{data.divisions.find((division) =>
                       division.id === team.division_id)?.name}</span>
                     <div className={styles.playerRatings}>
-                      <span><b>{team.player_one_name || "Player 1"}</b><strong>{team.player_one_rating?.toFixed(2) ?? "–"}</strong></span>
-                      <span><b>{team.player_two_name || "Player 2"}</b><strong>{team.player_two_rating?.toFixed(2) ?? "–"}</strong></span>
+                      <span><b>{team.player_one_name || "Player 1"}</b><strong className={team.player_one_rating == null ? styles.awaitingRating : undefined}>{team.player_one_rating?.toFixed(2) ?? "Awaiting rating"}</strong></span>
+                      <span><b>{team.player_two_name || "Player 2"}</b><strong className={team.player_two_rating == null ? styles.awaitingRating : undefined}>{team.player_two_rating?.toFixed(2) ?? "Awaiting rating"}</strong></span>
                     </div>
                     {(team.player_one_rating_source === "playtomic" || team.player_two_rating_source === "playtomic") && <small className={styles.ratingSource}>Playtomic ratings</small>}
                   </div>

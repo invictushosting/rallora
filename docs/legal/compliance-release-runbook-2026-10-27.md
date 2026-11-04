@@ -27,7 +27,7 @@ All release evidence and accountable approvals must be completed in `docs/legal/
 4. `20261027141000_public_events_feature_routine_boundary.sql` (depends on existing club event policies and feature tables).
 5. `20261027143000_privacy_notification_outbox.sql` (depends on privacy intake and existing private delivery worker configuration). Confirm provider idempotency, destination inbox, security privileges and scheduled worker before activation.
 
-Migration application should use Supabase-managed migration tooling against the intended target; do not paste/run all four in production as a single blind batch.
+Migration application should use Supabase-managed migration tooling against the intended target; do not paste/run all five in production as a single blind batch.
 
 ## Post-deployment smoke tests / observability
 - Anonymous user can browse published, entitled events, but not draft/cancelled or disabled/paused club events.

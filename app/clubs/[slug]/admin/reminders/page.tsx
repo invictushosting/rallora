@@ -18,7 +18,7 @@ export default function ClubReminders(){
   if(rights.error||!rights.data){setNotice('Only this club’s organisers can manage reminders.');return;}
   const [s,h]=await Promise.all([db.from('rallora_communication_settings').select('*').eq('club_id',c.data.id).maybeSingle(),db.from('rallora_delivery_queue').select('id,recipient_email,title,status,attempts,created_at,last_error,provider_id,email_enabled').eq('club_id',c.data.id).order('created_at',{ascending:false}).limit(50)]);
   if(s.error||h.error){setNotice('Could not load reminder settings. Please refresh and try again.');return;}
-  setSettings((s.data as CommunicationSettings|null)??defaultCommunicationSettings(c.data.id));setHistory(h.data??[]);setAllowed(true);setNotice('');
+  const defaults=defaultCommunicationSettings(c.data.id); const saved=s.data as CommunicationSettings|null; setSettings(saved?{...saved,rules:{...defaults.rules,...saved.rules}}:defaults);setHistory(h.data??[]);setAllowed(true);setNotice('');
  },[db,slug]);
  useEffect(()=>{void load();let timer:ReturnType<typeof setTimeout>|undefined;const {data}=db.auth.onAuthStateChange(()=>{if(timer)clearTimeout(timer);timer=setTimeout(()=>void load(),0)});return()=>{if(timer)clearTimeout(timer);data.subscription.unsubscribe()}},[load,db]);
  async function save(e:FormEvent){e.preventDefault();if(!settings||busy)return;setBusy(true);setNotice('');const {error}=await db.from('rallora_communication_settings').upsert(settings,{onConflict:'club_id'});setNotice(error?error.message:settings.enabled?'Saved. Future league updates and reminders will follow these settings.':'Saved. Outgoing communication is paused.');setBusy(false);}

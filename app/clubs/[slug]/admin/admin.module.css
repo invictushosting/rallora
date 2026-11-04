@@ -283,3 +283,9 @@
 .divisionAssignment select:hover:not(:disabled){border-color:#7eb7d8}
 .divisionAssignment select:focus-visible{outline:3px solid #00b0fe;outline-offset:3px;border-color:#0876a7}
 .divisionAssignment select:disabled{background-color:#e7edf3;color:#63758a;cursor:not-allowed;box-shadow:none}
+
+.ratingEditor{display:grid;gap:12px;margin:16px 0;padding:16px;border:1px solid #b8d0e2;border-radius:12px;background:#f4faff}
+.ratingEditor p{margin:0}
+.ratingEditor label{display:grid;gap:6px;font-size:14px;font-weight:700}
+.ratingEditor input{box-sizing:border-box;width:100%;min-width:0;min-height:46px;padding:10px 12px;border:1px solid #b8d0e2;border-radius:8px;background:#fff;color:#061a39;font:inherit;font-size:16px;color-scheme:light}
+.ratingEditor input:focus-visible{outline:3px solid #00b0fe;outline-offset:3px}

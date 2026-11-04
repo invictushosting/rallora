@@ -1,0 +1,117 @@
+-- Synthetic captains and fixture; never uses a real user or sends an email.
+begin;
+do $$
+declare
+ club uuid:=gen_random_uuid();
+ admin_id uuid:='00000000-0000-0000-0000-000000000999';
+ home_cap uuid:=gen_random_uuid(); away_cap uuid:=gen_random_uuid(); outsider uuid:=gen_random_uuid();
+ s uuid:=gen_random_uuid(); d uuid:=gen_random_uuid(); h uuid:=gen_random_uuid(); a uuid:=gen_random_uuid(); f uuid:=gen_random_uuid();
+ req uuid; msg uuid:=gen_random_uuid(); proposal uuid:=gen_random_uuid(); next_proposal uuid:=gen_random_uuid();
+ rejected boolean; sequence_value bigint; start_at timestamptz:=((current_date+2)::timestamp+interval '14 hours') at time zone 'Europe/London';
+ worker text; payload jsonb; old_count integer; last_seq bigint;
+begin
+ perform set_config('request.jwt.claim.sub',admin_id::text,true);
+ insert into public.clubs(id,slug,name) values(club,'chat-test-club','Chat Test Club');
+ insert into public.rallora_club_memberships(club_id,user_id,role,status) values(club,admin_id,'organiser','active');
+ update auth.users set email='chat-organiser@example.invalid' where id=admin_id;
+ insert into auth.users(id,email) values(home_cap,'chat-home@example.invalid'),(away_cap,'chat-away@example.invalid'),(outsider,'chat-outsider@example.invalid');
+ insert into public.seasons(id,club_id,name,status,starts_on,ends_on) values(s,club,'Chat league','draft',current_date,current_date+14);
+ insert into public.divisions(id,season_id,name) values(d,s,'Chat division');
+ insert into public.teams(id,division_id,name,player_one_name,player_two_name) values(h,d,'Home pair','Home captain','Partner H'),(a,d,'Away pair','Away captain','Partner A');
+ insert into public.fixtures(id,season_id,division_id,home_team_id,away_team_id,play_by,available_from,status) values(f,s,d,h,a,current_date+7,current_date,'open');
+ insert into public.rallora_team_registration_requests(club_id,season_id,division_id,team_id,player_user_id,player_name,status) values(club,s,d,h,home_cap,'Home captain','approved') returning id into req;
+ insert into public.rallora_team_roster_memberships(registration_request_id,club_id,season_id,division_id,team_id,player_user_id,role) values(req,club,s,d,h,home_cap,'captain');
+ insert into public.rallora_team_registration_requests(club_id,season_id,division_id,team_id,player_user_id,player_name,status) values(club,s,d,a,away_cap,'Away captain','approved') returning id into req;
+ insert into public.rallora_team_roster_memberships(registration_request_id,club_id,season_id,division_id,team_id,player_user_id,role) values(req,club,s,d,a,away_cap,'captain');
+ update public.seasons set status='active' where id=s;
+ insert into public.rallora_communication_settings(club_id,enabled,send_hour,quiet_end_hour) values(club,true,0,23)
+ on conflict(club_id) do update set enabled=true,send_hour=0,quiet_end_hour=23;
+ if not exists(select 1 from public.rallora_communication_settings where club_id=club and rules ? 'messages') then raise exception 'Messaging category missing'; end if;
+ perform set_config('request.jwt.claim.sub',home_cap::text,true);
+ set local role authenticated;
+ rejected:=false;begin perform public.rallora_post_fixture_message(f,gen_random_uuid(),'accepted','Spoofed agreement');exception when raise_exception then rejected:=true;end;
+ if not rejected then raise exception 'Spoofed system event accepted'; end if;
+ rejected:=false;begin perform public.rallora_post_fixture_message(f,gen_random_uuid(),'proposal','Invalid window',start_at+interval '20 days',start_at+interval '20 days 1 hour','');exception when raise_exception then rejected:=true;end;
+ if not rejected then raise exception 'Out-of-window proposal accepted'; end if;
+ rejected:=false;begin perform public.rallora_post_fixture_message(f,gen_random_uuid(),'message',repeat('x',2001));exception when raise_exception then rejected:=true;end;
+ if not rejected then raise exception 'Oversized message accepted'; end if;
+ perform public.rallora_post_fixture_message(f,msg,'message','Can you play Thursday?');
+ perform public.rallora_post_fixture_message(f,msg,'message','Can you play Thursday?');
+ if (select count(*) from public.rallora_fixture_messages where id=msg)<>1 then raise exception 'Retry duplicated message'; end if;
+ perform public.rallora_post_fixture_message(f,gen_random_uuid(),'message','Another message');
+ perform public.rallora_post_fixture_message(f,proposal,'proposal','How about 2pm?',start_at,start_at+interval '90 minutes','Court 1');
+ rejected:=false;begin perform public.rallora_respond_fixture_proposal(proposal,'accepted');exception when raise_exception then rejected:=true;end;
+ if not rejected then raise exception 'Sender accepted own proposal'; end if;
+ reset role;
+ if (select count(*) from public.rallora_delivery_queue where fixture_id=f and recipient_user_id=away_cap and category='messages')<>1 then raise exception 'Unread conversation alerts not coalesced'; end if;
+ if not exists(select 1 from public.rallora_notifications where recipient_user_id=away_cap and notification_type='fixture_message') then raise exception 'In-app message alert missing'; end if;
+ perform set_config('request.jwt.claim.sub',away_cap::text,true);
+ set local role authenticated;
+ if (select unread_count from public.rallora_fixture_conversation_summaries(club) where fixture_id=f)<>3 then raise exception 'Wrong unread count'; end if;
+ perform public.rallora_respond_fixture_proposal(proposal,'accepted');
+ if not exists(select 1 from public.rallora_fixture_messages where id=proposal and proposal_status='accepted') then raise exception 'Proposal not accepted'; end if;
+ if exists(select 1 from public.rallora_fixture_arrangements where fixture_id=f) then raise exception 'Agreement incorrectly recorded a court booking'; end if;
+ select max(sequence) into last_seq from public.rallora_fixture_messages where fixture_id=f;
+ perform public.rallora_read_fixture_messages(f,last_seq);
+ perform public.rallora_read_fixture_messages(f,last_seq-1);
+ if (select unread_count from public.rallora_fixture_conversation_summaries(club) where fixture_id=f)<>0 then raise exception 'Read cursor went backwards'; end if;
+ rejected:=false;begin perform public.rallora_read_fixture_messages(f,9999999999);exception when raise_exception then rejected:=true;end;
+ if not rejected then raise exception 'Future read cursor accepted'; end if;
+ rejected:=false;begin perform public.rallora_respond_fixture_proposal(proposal,'declined');exception when raise_exception then rejected:=true;end;
+ if not rejected then raise exception 'Proposal answered twice'; end if;
+ reset role;
+ if rallora_private.reminder_relevant(f,'messages',away_cap) then raise exception 'Read thread still sends email'; end if;
+ -- A different signed-in user, even from another club, gets neither rows nor RPC access.
+ perform set_config('request.jwt.claim.sub',outsider::text,true);
+ set local role authenticated;
+ if exists(select 1 from public.rallora_fixture_messages where fixture_id=f) or exists(select 1 from public.rallora_fixture_help where fixture_id=f) then raise exception 'Private thread leaked to outsider'; end if;
+ rejected:=false;begin perform public.rallora_fixture_conversation(f);exception when raise_exception then rejected:=true;end;
+ if not rejected then raise exception 'Outsider read thread metadata'; end if;
+ rejected:=false;begin perform public.rallora_post_fixture_message(f,gen_random_uuid(),'message','Intruder');exception when raise_exception then rejected:=true;end;
+ if not rejected then raise exception 'Outsider posted message'; end if;
+ reset role;
+ -- Real authenticated role cannot bypass RPC validation by writing tables directly.
+ perform set_config('request.jwt.claim.sub',home_cap::text,true);
+ set local role authenticated;
+ rejected:=false;begin insert into public.rallora_fixture_messages(fixture_id,sender_user_id,sender_name,kind,body) values(f,outsider,'Spoof','message','Spoof');exception when insufficient_privilege then rejected:=true;end;
+ if not rejected then raise exception 'Direct spoofed message accepted'; end if;
+ perform public.rallora_post_fixture_message(f,next_proposal,'proposal','New time',start_at+interval '1 hour',start_at+interval '2 hours','');
+ perform public.rallora_post_fixture_message(f,gen_random_uuid(),'help','Opponent needs help finding a court');
+ reset role;
+ if not exists(select 1 from public.rallora_fixture_help where fixture_id=f and resolved_at is null) then raise exception 'Help not flagged'; end if;
+ if not exists(select 1 from public.rallora_delivery_queue where fixture_id=f and recipient_user_id=admin_id and category='messages') then raise exception 'Organiser not alerted'; end if;
+ perform set_config('request.jwt.claim.sub',admin_id::text,true);
+ set local role authenticated;
+ if not exists(select 1 from public.rallora_club_conversations(club) where fixture_id=f and help_requested) then raise exception 'Help missing from admin inbox'; end if;
+ perform public.rallora_post_fixture_message(f,gen_random_uuid(),'resolved','Resolved by organiser');
+ reset role;
+ -- Roster version changes invalidate outstanding proposals.
+ update public.teams set player_two_name='New partner' where id=h;
+ perform set_config('request.jwt.claim.sub',away_cap::text,true);
+ set local role authenticated;
+ rejected:=false;begin perform public.rallora_respond_fixture_proposal(next_proposal,'accepted');exception when raise_exception then rejected:=true;end;
+ if not rejected then raise exception 'Stale roster proposal accepted'; end if;
+ reset role;
+ delete from public.rallora_team_roster_memberships where player_user_id=home_cap and team_id=h;
+ if rallora_private.reminder_relevant(f,'messages',home_cap) then raise exception 'Removed captain still receives email'; end if;
+ perform set_config('request.jwt.claim.sub',home_cap::text,true);
+ set local role authenticated;
+ if exists(select 1 from public.rallora_fixture_messages where fixture_id=f) then raise exception 'Removed captain still reads conversation'; end if;
+ reset role;
+ -- Cancelled fixtures retain history but reject writes; anonymous users have no table/RPC grants.
+ update public.fixtures set status='cancelled' where id=f;
+ perform set_config('request.jwt.claim.sub',away_cap::text,true);
+ set local role authenticated;
+ rejected:=false;begin perform public.rallora_post_fixture_message(f,gen_random_uuid(),'message','Too late');exception when raise_exception then rejected:=true;end;
+ if not rejected then raise exception 'Cancelled fixture accepted message'; end if;
+ reset role;
+ if has_table_privilege('anon','public.rallora_fixture_messages','SELECT') or has_function_privilege('anon','public.rallora_post_fixture_message(uuid,uuid,text,text,timestamptz,timestamptz,text)','EXECUTE') then raise exception 'Anonymous thread access granted'; end if;
+ -- Pausing communication does not prevent messaging; alerts remain paused.
+ update public.fixtures set status='open' where id=f;
+ update public.rallora_communication_settings set enabled=false where club_id=club;
+ select count(*) into old_count from public.rallora_delivery_queue where fixture_id=f;
+ perform set_config('request.jwt.claim.sub',away_cap::text,true);
+ perform public.rallora_post_fixture_message(f,gen_random_uuid(),'message','Visible in app without sending alerts');
+ if (select count(*) from public.rallora_delivery_queue where fixture_id=f)<>old_count then raise exception 'Paused club queued email'; end if;
+end $$;
+rollback;

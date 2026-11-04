@@ -2,6 +2,7 @@
 import Link from "next/link";
 import {useEffect,useMemo,useState} from "react";
 import {createClient} from "@/lib/supabase";
+import {accountRecoveryNotice} from "@/lib/account-recovery";
 import RalloraLogo from "@/app/components/rallora-logo";
 import SupportForm from "@/app/components/support-form";
 import styles from "./account.module.css";
@@ -33,6 +34,7 @@ export default function AccountPage(){
 
   useEffect(()=>{
     const params=new URL(window.location.href).searchParams;
+    setMessage(accountRecoveryNotice(window.location.search,window.location.hash));
     setReturnClub(params.get("club")||"");
     setReturnToCaptain(params.get("return")==="captain");
     void (async()=>{

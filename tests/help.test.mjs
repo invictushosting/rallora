@@ -41,3 +41,41 @@ test('guide links and section anchors are complete and keep validated club conte
   assert.equal(helpHref('', '//evil.example'), '/help');
   assert.equal(safeClubSlug('gsm-padel?other=1'), '');
 });
+
+
+test('player movement help covers all actions, history and recovery', () => {
+  const article=HELP_ARTICLES.find(a=>a.slug==='manage-teams-and-entries');
+  for(const id of ['replacement','swap','standby','player-history'])assert.ok(article.sections.some(s=>s.id===id));
+  assert.equal(searchHelp('swap players')[0]?.slug,article.slug);
+  assert.match(JSON.stringify(article),/same operation/);
+  assert.match(JSON.stringify(article),/unrecorded substitutions/);
+});
+
+
+test('admin movement help does not require a claimed account',()=>{
+ const article=HELP_ARTICLES.find(a=>a.slug==='manage-teams-and-entries');
+ const content=JSON.stringify(article);
+ assert.match(content,/without creating or claiming a Rallora account/);
+ assert.doesNotMatch(content,/must have claimed|before moving them/);
+});
+
+
+test('public fixture help explains division browsing, search and filtered sharing', () => {
+  const article = HELP_ARTICLES.find(a => a.slug === 'view-league-fixtures');
+  assert.ok(article);
+  assert.deepEqual(article.sections.map(s => s.id), ['choose', 'search', 'share']);
+  assert.equal(searchHelp('browse fixtures by division')[0]?.slug, 'view-league-fixtures');
+  assert.ok(suggestedHelp('/clubs/gsm-padel').includes('view-league-fixtures'));
+  assert.match(JSON.stringify(article), /Copy link to this view/);
+});
+
+test('late registration help explains admin permissions and fixtures', () => {
+  const article=HELP_ARTICLES.find(a=>a.slug==='add-late-team');
+  assert.ok(article);
+  assert.ok(article.sections.some(s=>s.id==='existing'));
+  assert.ok(article.sections.some(s=>s.id==='new'));
+  assert.ok(article.sections.some(s=>s.id==='fixtures'));
+  assert.match(article.sections.find(s=>s.id==='fixtures').steps.join(' '),/does not regenerate fixtures/);
+  assert.equal(suggestedHelp('/clubs/gsm-padel/admin/late-entry')[0],'add-late-team');
+  assert.equal(suggestedHelp('/clubs/gsm-padel/admin/registrations')[0],'add-late-team');
+});

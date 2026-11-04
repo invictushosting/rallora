@@ -59,10 +59,10 @@ export default function LoginPage(){
     <h1>{signedIn?"Welcome back":"Sign in to Rallora"}</h1>
     {loading?<p role="status">Finding your club…</p>:signedIn?<>
       <p className={styles.email}>Signed in as {email}</p>
-      {destinations.length>0?<><p>Choose where you’d like to go.</p><nav className={styles.destinations} aria-label="Your club areas">{destinations.map(item=><Link key={item.href} href={item.href}><strong>{item.club}</strong><span>{item.label}</span></Link>)}</nav></>:!error&&<p>Your Rallora account is ready. You can <Link href="/account">complete your player profile</Link> or <Link href="/register">explore clubs and competitions</Link> whenever you like.</p>}
+      {destinations.length>0?<><p>Choose where you’d like to go.</p><nav className={styles.destinations} aria-label="Your club areas">{destinations.map(item=><Link key={item.href} href={item.href}><strong>{item.club}</strong><span>{item.label}</span></Link>)}</nav></>:!error&&<p>Your Rallora account is ready. You can <Link href="/account">complete your player profile</Link> or <Link href="/register">explore clubs and competitions</Link>. If your partner registered you, return to your team invitation and claim your place to connect this account to your pairing.</p>}
       {error&&<button type="button" disabled={busy} onClick={()=>void load()}>Try again</button>}
       <div className={styles.accountLinks}><Link href="/account">Profile & security</Link><button type="button" disabled={busy} onClick={()=>void signOut()}>Use a different account</button></div>
-    </>:<><p>Use the email address you registered with to access your club, fixtures and results.</p>
+    </>:<><p>Both team members can sign in with their own Rallora account. Use your Rallora email and password to access fixtures and match chat.</p>
       <form onSubmit={signIn}><label>Email<input type="email" autoComplete="username" required value={email} onChange={event=>setEmail(event.target.value)}/></label><label>Password<input type="password" autoComplete="current-password" required value={password} onChange={event=>setPassword(event.target.value)}/></label><button disabled={busy}>{busy?"Signing in…":"Sign in"}</button></form>
       <Link className={styles.forgot} href="/account">Forgot your password?</Link><p>New to Rallora? <Link href="/signup">Create a free player account</Link> — no competition required.</p>
     </>}

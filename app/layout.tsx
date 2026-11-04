@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 import "./onboarding.css";
 import RalloraGuide from "./components/rallora-guide";
@@ -55,7 +56,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body><ScrollToTop /><NavigationLoader /><SuperAdminNavigation />{children}<RalloraGuide /></body>
+      <body><ScrollToTop /><NavigationLoader /><SuperAdminNavigation />{children}<Suspense fallback={null}><RalloraGuide /></Suspense></body>
     </html>
   );
 }

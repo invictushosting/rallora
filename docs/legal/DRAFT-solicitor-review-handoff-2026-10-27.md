@@ -50,7 +50,7 @@ The business owner explicitly confirmed they are the **only** operational privac
 
 ## Required business inputs before counsel engagement
 - Confirmed legal entity and actual business/controller contact.
-- Signatory/decision maker and primary + deputy privacy leads (names/roles to be supplied).
+- Signatory/decision maker and formal identity of the sole operational privacy contact; no deputy nominated. Document and review owner-only absence and access-recovery arrangements.
 - Club legal names, pilot start/end dates, agreed fee or free pilot, applicable renewal and cancellation terms.
 - Reviewed list of vendors, DPAs, data regions and transfers, retention schedules and signed club instructions.
 - Decisions on junior players, social/discovery visibility, marketing and Playtomic use.
