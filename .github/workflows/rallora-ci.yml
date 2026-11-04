@@ -221,3 +221,5 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260927170000_support_requests.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261104134524_support_player_workspace.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_support_workspace_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261104184547_restore_authenticated_private_schema_usage.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_private_schema_usage_assertions.sql
