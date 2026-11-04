@@ -2,7 +2,7 @@ import {createClient} from '@supabase/supabase-js';
 import {supportResponse as reply} from '@/lib/support-server';
 import {verifySupportWebhook,supportReplyToken,supportSender,supportEmailText} from '@/lib/support-inbound';
 export async function POST(request:Request){
- const secret=process.env.RESEND_WEBHOOK_SECRET,domain=process.env.SUPPORT_REPLY_DOMAIN,key=process.env.RESEND_API_KEY,url=process.env.NEXT_PUBLIC_SUPABASE_URL,service=process.env.SUPABASE_SERVICE_ROLE_KEY;
+ const secret=process.env.RESEND_WEBHOOK_SECRET,domain=process.env.SUPPORT_REPLY_DOMAIN,key=process.env.RESEND_RECEIVING_API_KEY,url=process.env.NEXT_PUBLIC_SUPABASE_URL,service=process.env.SUPABASE_SERVICE_ROLE_KEY;
  if(!secret||!domain||!key||!url||!service)return reply({error:'Inbound support is not configured.'},503);
  if(Number(request.headers.get('content-length')||0)>256000)return reply({error:'Payload too large.'},413);
  const raw=await request.text();if(raw.length>256000)return reply({error:'Payload too large.'},413);

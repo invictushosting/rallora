@@ -17,7 +17,7 @@ export async function GET(_request:Request,context:Context){
  if(messages.error||activities.error||players.error)return reply({error:'Support workspace is unavailable. Check the support migration.'},503);
  let screenshotUrl:string|null=null;
  if(ticket.data.screenshot_path){const result=await db.storage.from('support-screenshots').createSignedUrl(ticket.data.screenshot_path,300);screenshotUrl=result.data?.signedUrl??null;}
- return reply({players:players.data??[],messages:messages.data,activities:activities.data,diagnostics:ticket.data.diagnostics,screenshotUrl,threadingEnabled:Boolean(process.env.SUPPORT_REPLY_DOMAIN&&process.env.RESEND_WEBHOOK_SECRET&&process.env.SUPABASE_SERVICE_ROLE_KEY),emailEnabled:Boolean(process.env.RESEND_API_KEY)});
+ return reply({players:players.data??[],messages:messages.data,activities:activities.data,diagnostics:ticket.data.diagnostics,screenshotUrl,threadingEnabled:Boolean(process.env.SUPPORT_REPLY_DOMAIN&&process.env.RESEND_WEBHOOK_SECRET&&process.env.SUPABASE_SERVICE_ROLE_KEY&&process.env.RESEND_RECEIVING_API_KEY),emailEnabled:Boolean(process.env.RESEND_API_KEY)});
 }
 export async function POST(request:Request,context:Context){
  const {db,user}=await supportSession(true);if(!user)return reply({error:'Platform admin access required.'},403);
@@ -51,7 +51,7 @@ export async function POST(request:Request,context:Context){
  // Resend retains idempotency keys for 24 hours; never retry an old uncertain send.
  if(Date.now()-Date.parse(saved.created_at)>23*3600000)return reply({error:'This send attempt is too old to retry safely. Check email delivery before starting a new message.'},409);
  try{
-  const replyDomain=process.env.RESEND_WEBHOOK_SECRET&&process.env.SUPABASE_SERVICE_ROLE_KEY?process.env.SUPPORT_REPLY_DOMAIN:undefined;
+  const replyDomain=process.env.RESEND_WEBHOOK_SECRET&&process.env.SUPABASE_SERVICE_ROLE_KEY&&process.env.RESEND_RECEIVING_API_KEY?process.env.SUPPORT_REPLY_DOMAIN:undefined;
   const replyTo=replyDomain&&/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(replyDomain)?`support+${ticket.reply_token}@${replyDomain}`:'support@rallora.app';
   const result=await sendRalloraEmail({to:recipient,subject:`Re: ${ticket.subject} [Rallora ${id.slice(0,8)}]`,replyTo,idempotencyKey:`support-${messageId}`,
    text:body,html:renderRalloraEmail({preview:'A reply from Rallora support',eyebrow:'RALLORA SUPPORT',title:action==='reply'?'Your support update':'Claim your team place',action:invitationLink?{label:'Claim your team place',url:invitationLink}:undefined,contentHtml:`<p style="white-space:pre-wrap">${escapeEmailHtml(body)}</p>`})});
