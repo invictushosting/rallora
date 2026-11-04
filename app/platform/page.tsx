@@ -1,6 +1,8 @@
 "use client";
 
 import OwnerAccess from "./owner-access";
+import SupportWorkspace, {SupportPlayerSearch} from "./support-workspace";
+import {matchesSupportSearch} from "@/lib/support-workspace";
 import RalloraLogo from "@/app/components/rallora-logo";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -49,6 +51,17 @@ export default function PlatformControlCentre() {
   const [readiness,setReadiness]=useState<Readiness|null>(null);
   const [showAddClub,setShowAddClub]=useState(false);
   const [crmConvertLead,setCrmConvertLead]=useState<PilotEnquiry|null>(null);
+  const [supportSearch,setSupportSearch]=useState("");
+  const [supportHistoryMatches,setSupportHistoryMatches]=useState<string[]>([]);
+  const [supportSearchNotice,setSupportSearchNotice]=useState("");
+  useEffect(()=>{
+    const controller=new AbortController();
+    const timer=setTimeout(()=>{
+      if(supportSearch.trim().length<3){setSupportHistoryMatches([]);setSupportSearchNotice("");return;}
+      fetch(`/api/platform/support/search?q=${encodeURIComponent(supportSearch.trim())}`,{cache:"no-store",signal:controller.signal}).then(async r=>{const data=await r.json();if(!r.ok)throw Error(data.error);setSupportHistoryMatches(data.ticketIds);setSupportSearchNotice(data.limited?"Activity results are limited; narrow your search.":"");}).catch(e=>{if(!controller.signal.aborted){setSupportHistoryMatches([]);setSupportSearchNotice(e.message);}});
+    },300);
+    return()=>{clearTimeout(timer);controller.abort();};
+  },[supportSearch]);
   const [supportFilter,setSupportFilter]=useState("open");
   const [supportCategory,setSupportCategory]=useState("all");
   const [crmFilter,setCrmFilter]=useState("active");
@@ -311,17 +324,20 @@ export default function PlatformControlCentre() {
       <section className={styles.metrics} aria-label="Support summary">
         {([["New",view.supportRequests.filter(r=>r.status==="new").length],["Open",view.supportRequests.filter(r=>["new","in_progress"].includes(r.status)).length],["Urgent",view.supportRequests.filter(r=>r.priority==="urgent"&&!["resolved","closed"].includes(r.status)).length],["Waiting",view.supportRequests.filter(r=>r.status==="waiting").length]] as [string,number][]).map(([label,count])=><div className={styles.metric} key={label}><span>{label}</span><strong>{count}</strong></div>)}
       </section>
+      <SupportPlayerSearch/>
       <div className={styles.supportToolbar}>
+        <label>Search tickets & history<input value={supportSearch} onChange={e=>{setSupportSearch(e.target.value);setSupportHistoryMatches([]);}} placeholder="Name, email, subject, admin action or ticket ID…"/></label>
         <div>{["open","new","waiting","resolved","all"].map(filter=><button key={filter} className={supportFilter===filter?styles.filterActive:""} onClick={()=>setSupportFilter(filter)}>{filter==="waiting"?"Waiting":filter.charAt(0).toUpperCase()+filter.slice(1)}</button>)}</div>
-        <select value={supportCategory} onChange={e=>setSupportCategory(e.target.value)} aria-label="Filter support category"><option value="all">All categories</option><option value="bug">Bugs</option><option value="general_help">General help</option><option value="registration">Registration</option><option value="billing">Billing</option><option value="feature_request">Feature requests</option><option value="other">Other</option></select>
+        <select value={supportCategory} onChange={e=>setSupportCategory(e.target.value)} aria-label="Filter support category"><option value="all">All categories</option><option value="login">Login / account access</option><option value="match_chat">Match Chat</option><option value="results">Fixtures / results</option><option value="bug">Bugs</option><option value="general_help">General help</option><option value="registration">Registration</option><option value="billing">Billing</option><option value="feature_request">Feature requests</option><option value="other">Other</option></select>
       </div>
       <section className={styles.supportList} aria-label="Support requests">
-        {view.supportRequests.filter(r=>(supportCategory==="all"||r.category===supportCategory)&&(supportFilter==="all"||(supportFilter==="open"?["new","in_progress"].includes(r.status):r.status===supportFilter))).map(request=><article className={`${styles.supportTicket} ${request.priority==="urgent"?styles.ticketUrgent:""}`} key={request.id}>
-          <button className={styles.ticketSummary} onClick={()=>setSupportSelected(supportSelected===request.id?null:request.id)}>
+        {supportSearchNotice&&<p role="status">{supportSearchNotice}</p>}
+        {view.supportRequests.filter(r=>(matchesSupportSearch(r,supportSearch)||supportHistoryMatches.includes(r.id))&&(supportCategory==="all"||r.category===supportCategory)&&(supportFilter==="all"||(supportFilter==="open"?["new","in_progress"].includes(r.status):r.status===supportFilter))).map(request=><article className={`${styles.supportTicket} ${request.priority==="urgent"?styles.ticketUrgent:""}`} key={request.id}>
+          <button className={styles.ticketSummary} aria-expanded={supportSelected===request.id} onClick={()=>setSupportSelected(supportSelected===request.id?null:request.id)}>
             <span className={`${styles.priorityDot} ${styles[`priority_${request.priority}`]}`} aria-hidden="true"/><span><strong>{request.subject}</strong><small>{request.category.replaceAll("_"," ")} · {summaries.find(item=>item.club.id===request.club_id)?.club.name||request.requester_email}</small></span><em>{request.status.replaceAll("_"," ")}</em><time>{new Date(request.created_at).toLocaleDateString("en-GB")}</time>
           </button>
           {supportSelected===request.id&&<div className={styles.ticketDetail}>
-            <div><h3>{request.subject}</h3><p>{request.message}</p><dl className={styles.applicationDetails}><div><dt>Requester</dt><dd>{request.requester_name||"Not supplied"}</dd></div><div><dt>Email</dt><dd><a href={`mailto:${request.requester_email}`}>{request.requester_email}</a></dd></div><div><dt>Club</dt><dd>{summaries.find(item=>item.club.id===request.club_id)?.club.name||"Platform / not linked"}</dd></div><div><dt>Received</dt><dd>{new Date(request.created_at).toLocaleString("en-GB")}</dd></div></dl></div>
+            <div><h3>{request.subject}</h3><p>{request.message}</p><dl className={styles.applicationDetails}><div><dt>Requester</dt><dd>{request.requester_name||"Not supplied"}</dd></div><div><dt>Email</dt><dd><a href={`mailto:${request.requester_email}`}>{request.requester_email}</a></dd></div><div><dt>Club</dt><dd>{summaries.find(item=>item.club.id===request.club_id)?.club.name||"Club not captured on this ticket"}</dd></div><div><dt>Received</dt><dd>{new Date(request.created_at).toLocaleString("en-GB")}</dd></div></dl></div>
             <div className={styles.ticketControls}>
               <label>Status<select value={request.status} onChange={e=>void updateSupportRequest(request.id,e.target.value)} disabled={busy===`support-${request.id}`}><option value="new">New</option><option value="in_progress">In progress</option><option value="waiting">Waiting on customer</option><option value="resolved">Resolved</option><option value="closed">Closed</option></select></label>
               <label>Priority<select id={`support-priority-${request.id}`} defaultValue={request.priority}><option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></label>
@@ -329,8 +345,10 @@ export default function PlatformControlCentre() {
               <label>Internal notes<textarea id={`support-notes-${request.id}`} defaultValue={request.internal_notes??""} rows={4} placeholder="Private notes for the Rallora team."/></label>
               <button disabled={busy===`support-${request.id}`} onClick={()=>void saveSupportDetails(request.id)}>{busy===`support-${request.id}`?"Saving…":"Save ticket"}</button>
             </div>
+            <div style={{gridColumn:"1 / -1",minWidth:0}}><SupportWorkspace ticketId={request.id} recipient={request.requester_email} onChanged={()=>void load()}/></div>
           </div>}
         </article>)}
+        {view.supportRequests.length>0&&!view.supportRequests.some(r=>(matchesSupportSearch(r,supportSearch)||supportHistoryMatches.includes(r.id))&&(supportCategory==="all"||r.category===supportCategory)&&(supportFilter==="all"||(supportFilter==="open"?["new","in_progress"].includes(r.status):r.status===supportFilter)))&&<p>No tickets match these filters. Select All to include resolved and closed tickets.</p>}
         {!view.supportRequests.length&&<article className={styles.card}><h3>Support inbox clear</h3><p>Bug reports, general help and registration support requests will appear here.</p></article>}
       </section>
       <div id="platform-inbox" className={styles.sectionHeading}><div><small>ENQUIRIES / CRM</small><h2>Club enquiries</h2></div><p>Manage club leads from first enquiry through to onboarding.</p></div>
