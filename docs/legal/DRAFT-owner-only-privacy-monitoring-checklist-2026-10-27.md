@@ -2,6 +2,14 @@
 
 **Operational model:** Protego business owner is the sole nominated Rallora privacy contact. No deputy is nominated or implied. This is not a statutory DPO appointment. **Not active until mailbox, access and coverage controls are verified.**
 
+## Mailbox status update — 4 November 2026
+The owner approved recording this high-level status in draft PR #245:
+- Correct business inbox access verified.
+- Historical external mail receipt at the support address confirmed.
+- Fresh external receipt and a reply from the support address remain unverified.
+- LEG-09 remains BLOCKED pending that test and the separate monitoring/continuity controls.
+No message details or headers are included. No email, mail-setting or permission changes were made. The 27 October failed-test report below is historical and does not establish a current routing fault.
+
 ## Current access evidence
 - Connected Gmail profile verified 27 October 2026: personal Gmail account, **not** `support@rallora.app`.
 - Search of connected account for messages `to:support@rallora.app` returned none. This cannot establish whether Rallora support mailbox exists, delivers mail, or is accessible in the owner's separate Workspace account.
@@ -28,7 +36,7 @@
 ## Pre-release evidence and sign-off
 | Control | Owner's evidence | Status |
 |---|---|---|
-| Mailbox can receive and send from `support@rallora.app` | Owner reported receive test **NO** and reply **NOT TESTED**, 27 October; re-test after diagnosis | **BLOCKED — RECEIVE FAILED; SEND NOT TESTED** |
+| Mailbox can receive and send from `support@rallora.app` | Business inbox access and historical external receipt confirmed 4 November; fresh receive/reply outstanding | **BLOCKED — FRESH RECEIVE/REPLY UNVERIFIED** |
 | Sole operator has restricted admin access to privacy queue | Authenticated non-production test and production release validation | UNVERIFIED |
 | Daily check habit and secure request register | Owner acceptance of checklist and restricted location | OPEN |
 | Legal deadline determination and data fulfilment | Counsel-reviewed process and club controller contacts | OPEN |
