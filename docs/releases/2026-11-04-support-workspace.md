@@ -49,7 +49,8 @@ text on failure and confirms only after the ticket is saved.
 - Replies work with the existing support mailbox while inbound threading is off.
 - To thread customer email replies automatically, configure a dedicated receiving
   subdomain (for example replies.rallora.app) or the existing Resend-managed
-  receiving domain, set `SUPPORT_REPLY_DOMAIN`, `RESEND_WEBHOOK_SECRET` and the
+  receiving domain, set `SUPPORT_REPLY_DOMAIN`, `RESEND_WEBHOOK_SECRET`, a separate server-only
+  `RESEND_RECEIVING_API_KEY` permitted to retrieve received emails, and the
   existing server-only `SUPABASE_SERVICE_ROLE_KEY`, and subscribe an authenticated
   Resend `email.received` webhook to `https://www.rallora.app/api/support/inbound`.
   Do not replace the main domain's existing mail routing.
@@ -58,6 +59,10 @@ text on failure and confirms only after the ticket is saved.
   ticket, then atomically saves/reopens once. Wrong sender/domain/token events are
   ignored. HTML is displayed only as escaped text. Incoming attachments stay in
   the receiving mailbox and are not downloaded by this release.
+- Keep the existing sending-only `RESEND_API_KEY` unchanged. Incoming content
+  retrieval uses `RESEND_RECEIVING_API_KEY`; a sending-only key is rejected by the
+  provider. Until receiving access is authorized and tested, keep
+  `SUPPORT_REPLY_DOMAIN` empty so player replies reach the existing support inbox.
 - Outbound replies use the threading address only when all inbound environment
   settings exist. Until configured, the UI explicitly says replies return to the
   support mailbox. Environment presence alone is not a verified mailbox test.
