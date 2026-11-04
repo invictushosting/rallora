@@ -68,7 +68,8 @@ export default function CaptainCentre() {
           .map(row=>({...row.teams as unknown as Omit<Team,"season">,season:row.seasons as unknown as Team["season"]}));
       }
       available.sort((a,b)=>Number(b.season.status==="active")-Number(a.season.status==="active")||b.season.created_at.localeCompare(a.season.created_at)||a.id.localeCompare(b.id));
-      const chosen=available.find(item=>item.id===selectedId)??available[0];
+      const linkedTeam=new URLSearchParams(window.location.search).get("team");
+      const chosen=available.find(item=>item.id===(selectedId||linkedTeam))??available[0];
       let booked:FixtureArrangement[]=[];
       let rows:Fixture[]=[], names:Record<string,string>={}, submitted:CaptainSubmission[]=[], official:OfficialResult[]=[];
       if(chosen&&(isAdmin||chosen.season.status!=="draft")) {

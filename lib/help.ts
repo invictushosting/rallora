@@ -7,7 +7,7 @@ export type HelpArticle = {
   slug: string; category: HelpCategory; title: string; summary: string;
   keywords: string[]; sections: HelpSection[]; related: string[];
 };
-export const HELP_REVIEWED = "29 October 2026";
+export const HELP_REVIEWED = "4 November 2026";
 export const HELP_CATEGORIES: { id: HelpCategory; title: string; description: string }[] = [
   { id: "players", title: "Players", description: "Join a league, check your entry and get ready to play." },
   { id: "captains", title: "Captains", description: "Arrange matches, submit scores and review results." },
@@ -15,6 +15,14 @@ export const HELP_CATEGORIES: { id: HelpCategory; title: string; description: st
   { id: "playtomic", title: "Playtomic", description: "Connect your club or run your league without an integration." },
 ];
 export const HELP_ARTICLES: HelpArticle[] = [
+  {
+    slug:"contact-rallora-support",category:"players",title:"Contact Rallora support",summary:"Send the details we need to investigate your account or league issue.",
+    keywords:["support","help","ticket","match chat","screenshot","contact"],
+    sections:[
+      {id:"send",title:"Send a support request",steps:["Sign in and open Help & support. Check your name and the email shown: replies go to your signed-in Rallora account email.","Select the club and league when known, or choose Not sure. Choose the issue type, add a short subject and explain what happened.","Optionally attach a PNG, JPEG or WebP screenshot under 3 MB. Your current page, browser and app version are attached automatically.","Press Send to Rallora support and wait for the received confirmation. If sending cannot be confirmed, keep your message and check before submitting it again."],note:"Never include passwords, payment details or Playtomic Client Secrets. Registration approval and claiming a team invitation are separate steps."},
+      {id:"reply",title:"Follow up on a ticket",steps:["Check your Rallora email inbox and junk folder for a reply from support@rallora.app.","Reply to that email to continue the conversation. If support sends a team invitation, open it while signed into the invited email and press Claim team place. You do not need to register again."]}
+    ],related:["join-a-league","registration-status","emails-and-ratings"]
+  },
   {
     slug: "join-a-league", category: "players", title: "Join a league", summary: "Register a pair, find a partner or join the standby list.",
     keywords: ["register", "registration", "join", "pair", "single", "partner", "standby", "waiting list", "sign up", "enter", "both players", "both team members", "partner login", "two logins"],
