@@ -58,7 +58,7 @@ const DEFAULT_RULE_TEXT = {
   forfeitRules:
     "If one team fails to respond, arrange or attend, the organiser may award a forfeit win. If both teams fail to arrange, both teams may receive 0 points.",
   resultSubmissionRules:
-    "One captain submits the score. The opposing captain or organiser can confirm, dispute or correct the result.",
+    "Either player submits the score. Either opposing player can confirm or dispute it; the organiser resolves disputes and corrects results.",
   captainConfirmationRules:
     "Captains are responsible for arranging fixtures, submitting results and raising disputes quickly.",
   leagueCupRules:

@@ -100,7 +100,7 @@ export default function AccountPage(){
 
   const canManageReturnClub=platformAdmin||clubAccess.some(item=>item.clubs?.slug===returnClub&&["owner","admin","organiser"].includes(item.role));
   const returnHref=returnClub?`/clubs/${encodeURIComponent(returnClub)}${returnToCaptain?"/captain":canManageReturnClub?"/admin":""}`:platformAdmin?"/platform":"/";
-  const returnLabel=returnClub?(returnToCaptain?"← Back to Captain Centre":canManageReturnClub?"← Back to club admin":"← Back to club"):platformAdmin?"← Back to Platform":"← Back to Rallora";
+  const returnLabel=returnClub?(returnToCaptain?"← Back to Match centre":canManageReturnClub?"← Back to club admin":"← Back to club"):platformAdmin?"← Back to Platform":"← Back to Rallora";
 
   return <main className={styles.page}><section className={styles.card}>
     <div className={styles.topbar}>

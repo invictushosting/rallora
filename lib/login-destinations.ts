@@ -12,10 +12,6 @@ export function loginDestinations(platformAdmin:boolean,memberships:ClubRole[],r
     links.set(href,{href,club:row.clubs.name,label});
   };
   for(const row of memberships)if(['owner','admin','organiser'].includes(row.role))add(row,'/admin','Club dashboard');
-  const captainClubs=new Set(roster.filter(row=>row.role==='captain').map(row=>row.clubs?.slug));
-  for(const row of roster){
-    if(row.role==='captain')add(row,'/captain','Captain centre');
-    else if(row.role==='player'&&!captainClubs.has(row.clubs?.slug))add(row,'?view=fixtures','Fixtures & match chat');
-  }
+  for(const row of roster)if(['captain','player'].includes(row.role))add(row,'/captain','Match centre');
   return [...links.values()];
 }

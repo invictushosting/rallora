@@ -38,3 +38,9 @@ test('only a new open fixture without submissions needs a score',()=>{
  assert.equal(captainResultState({...fixture,status:'cancelled'},'home','captain-a','active',[],[]).action,false);
  assert.equal(captainResultState({...fixture,status:'confirmed'},'home','captain-a','active',[],[]).confirmed,true);
 });
+
+test('either opposing player can review while neither submitting teammate can',()=>{
+ for(const user of ['opponent-captain','opponent-partner'])assert.equal(captainResultState(fixture,'home',user,'active',[pending],[]).needsReview,true);
+ for(const user of ['submitting-captain','submitting-partner'])assert.equal(captainResultState(fixture,'away',user,'active',[pending],[]).needsReview,false);
+ for(const status of ['forfeit','double_forfeit','cancelled'])assert.equal(captainResultState({...fixture,status},'home','opponent-partner','active',[pending],[]).action,false);
+});
