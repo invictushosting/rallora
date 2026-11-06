@@ -195,6 +195,8 @@ jobs:
 
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261104185453_restore_delivery_worker_schema_usage.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_delivery_worker_schema_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261106081243_all_player_match_actions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_all_player_match_actions_assertions.sql
 
   support-safety:
     runs-on: ubuntu-latest

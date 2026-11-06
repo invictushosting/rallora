@@ -41,7 +41,7 @@ const FALLBACK_RULES: ClubRules = {
   fixture_rules: "Teams arrange their own fixture time and should play before the listed deadline.",
   deadline_rules: "Results should be submitted before the next fixture release or fixture pack deadline.",
   forfeit_rules: "If one team fails to respond, arrange or attend, the organiser may award a forfeit win. Double forfeits may result in 0 points for both teams.",
-  result_submission_rules: "One captain submits the score. The opposing captain or organiser can confirm, dispute or correct it.",
+  result_submission_rules: "Either player submits the score. Either opposing player can confirm or dispute it; the organiser resolves disputes and corrects results.",
   captain_confirmation_rules: "Captains are responsible for arranging fixtures, submitting results and raising disputes quickly.",
   league_cup_rules: "Cup qualification may be automatic based on league position or manually selected by the organiser.",
   custom_rules: "",

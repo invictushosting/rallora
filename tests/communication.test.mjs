@@ -26,7 +26,7 @@ test('partner email opens the same invitation and explains independent account a
  assert.equal(result.label,'Create your account or sign in');
  assert.match(result.body,/email address that received this invitation/);
  assert.match(result.body,/then claim your team place/);
- assert.match(result.body,/captains manage results/);
+ assert.match(result.body,/Both players can arrange matches, record bookings, submit scores/);
  for(const actionUrl of ['/clubs/gsm-padel/captain','/clubs/gsm-padel/captain?next=/join-team']) {
   const other=deliveryPresentation({actionUrl,body:'Existing reminder'});
   assert.equal(other.label,'Open your club');

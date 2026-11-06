@@ -15,7 +15,7 @@ export function captainResultState(fixture: { id: string; status: string }, team
   const submission = submissions.filter(item => item.fixture_id === fixture.id)
     .sort((a, b) => b.updated_at.localeCompare(a.updated_at) || a.id.localeCompare(b.id))[0];
   const confirmed = Boolean(official) || fixture.status === "confirmed";
-  const playable = seasonStatus === "active" && !confirmed && fixture.status !== "cancelled";
+  const playable = seasonStatus === "active" && !confirmed && ["open", "submitted", "disputed"].includes(fixture.status);
   const needsReview = Boolean(playable && submission?.status === "pending_opponent" && submission.submitting_team_id !== teamId && (platformAdmin || submission.submitted_by_user_id !== viewerId));
   const needsSubmit = playable && fixture.status === "open" && !submission;
   return { official, submission, confirmed, needsReview, needsSubmit,

@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import {loginDestinations} from '../lib/login-destinations.ts';
 const club={slug:'club-a',name:'Club A',is_active:true};
 test('player and captain accounts go to their own club areas',()=>{
- assert.deepEqual(loginDestinations(false,[],[{role:'player',clubs:club}]),[{href:'/clubs/club-a?view=fixtures',club:'Club A',label:'Fixtures & match chat'}]);
+ assert.deepEqual(loginDestinations(false,[],[{role:'player',clubs:club}]),[{href:'/clubs/club-a/captain',club:'Club A',label:'Match centre'}]);
  const links=loginDestinations(false,[],[{role:'player',clubs:club},{role:'captain',clubs:club},{role:'captain',clubs:club}]);
- assert.deepEqual(links,[{href:'/clubs/club-a/captain',club:'Club A',label:'Captain centre'}]);
+ assert.deepEqual(links,[{href:'/clubs/club-a/captain',club:'Club A',label:'Match centre'}]);
 });
 test('club organisers and platform admins retain separate destinations',()=>{
  const links=loginDestinations(true,[{role:'owner',clubs:club},{role:'admin',clubs:club}],[{role:'captain',clubs:{...club,slug:'club-b',name:'Club B'}}]);

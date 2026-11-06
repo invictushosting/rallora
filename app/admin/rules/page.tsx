@@ -33,7 +33,7 @@ const DEFAULT_RULES: RulesForm = {
   fixture_rules: "Teams arrange their own fixture time. Matches should be played before the listed deadline unless agreed by the organiser.",
   deadline_rules: "Results should be submitted before the next fixture release or before the fixture pack deadline.",
   forfeit_rules: "If one team fails to respond, arrange or attend, the organiser may award a forfeit win. If both teams fail to arrange, both teams may receive 0 points.",
-  result_submission_rules: "One captain submits the score. The opposing captain or organiser can confirm, dispute or correct the result.",
+  result_submission_rules: "Either player submits the score. Either opposing player can confirm or dispute it; the organiser resolves disputes and corrects results.",
   captain_confirmation_rules: "Captains are responsible for arranging fixtures, submitting results and raising disputes quickly.",
   league_cup_rules: "Cup qualification can be automatic based on league position or manually selected by the organiser.",
   custom_rules: "",
