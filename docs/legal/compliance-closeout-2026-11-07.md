@@ -34,7 +34,7 @@ Status: implementation and evidence advanced; NOT legally signed off or released
 | LEG-04 cookies | Source/dependency inventory complete | Deployed signed-in/network verification, purpose/exception decisions and any required consent controls |
 | LEG-05 suppliers | Public primary terms located | Account plan/acceptance/location/retention and transfer evidence |
 | LEG-06 retention | Owner approved six proposals for club/legal review on 7 November; decision recorded in the dated retention schedule | Club/controller + counsel approval, remaining categories, lawful holds and tested implementation/exit approach |
-| LEG-07 contracts | Free-pilot/no automatic paid conversion preserved | Actual GSM/Carbon entities, scope/dates, commercial terms, service commitments and reviewed signatures |
+| LEG-07 contracts | Owner selected three months free then review; payment/product decisions reviewed internally for Leagues and future Socials | Actual GSM/Carbon entities, agreed start/end dates, included features, post-review/unfinished-competition treatment, commercial/service terms and reviewed signatures |
 | LEG-08 age/visibility | Owner selected include under-18s and keep public pages | Approved minimum age 16; age assurance, teen safeguarding/contractual capacity, child DPIA/default visibility implementation, public fields/basis, moderation/appeals and Playtomic authority |
 | LEG-09 operations | External receive/reply COMPLETE | Daily private register/queue monitoring, fulfilment procedure and achievable owner-only continuity |
 | LEG-10 notifications | Isolated SQL access/idempotency tests pass; shared-schema defect fixed | Actual managed Auth/mail/worker/failure handling in safe environment and security review |
@@ -59,3 +59,6 @@ GitHub validation evidence: https://github.com/invictushosting/rallora/actions/r
 On 7 November 2026, Ste approved the six retention proposals below for incorporation into the compliance drafts and review by clubs/legal counsel. This records business approval of the proposals only: it is not club/controller approval, legal sign-off, permission to delete data or authorisation to publish/deploy.
 
 Updated the owner decision sheet, retention/role worksheet, release register, draft DPA and draft privacy notice consistently. See `retention-schedule-owner-approved-for-review-2026-11-07.md`. This is draft-content work; no retention timer, purge, migration, live data change or production release is included. Unrelated business decisions and other compliance gates remain open.
+
+## Owner commercial direction — 7 November 2026
+Ste selected **three months free, followed by a review**, superseding the proposed first-full-season offer. Payment/pricing must be reviewed internally by Rallora, taking account of Rallora Leagues and the future Rallora Socials product, which is not yet built. No price, automatic payment, bundle or Socials delivery date is approved. See `pilot-and-product-commercial-decisions-2026-11-07.md`. Exact pilot dates, club acceptance and final contract/legal review remain open.
