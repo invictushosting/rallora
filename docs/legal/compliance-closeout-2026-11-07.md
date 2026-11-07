@@ -15,7 +15,7 @@ Status: implementation and evidence advanced; NOT legally signed off or released
 - Added current DUAA complaint handling to the SOP and draft player/admin privacy wording: acknowledge within 30 days, investigate/keep informed/respond without undue delay; keep rights-request deadlines separate.
 - Refreshed draft player privacy/terms/cookie text to cover current features and visibility questions without inventing final legal bases, consent, age rules or retention policy.
 - Rechecked company identity; recorded the public confirmation-statement overdue flag for owner/accountant review. ICO reference ZC281332 was verified from the ICO confirmation email in the business inbox; live register certificate/expiry remain unverified.
-- Prepared `owner-decisions-for-review-2026-11-07.md` with specific factual questions, retention candidates and owner-only operating controls. The owner selected under-18 participation and public league pages on 7 November; those product decisions are recorded, with junior safeguards/youngest age still unresolved. See the junior design and DPIA screening.
+- Prepared `owner-decisions-for-review-2026-11-07.md` with specific factual questions, retention candidates and owner-only operating controls. The owner selected under-18 participation and public league pages on 7 November; those product decisions are recorded, and subsequently fixed the minimum age at 16; junior safeguards/age assurance remain unresolved. See the junior design and DPIA screening.
 
 ## Validation
 - 132 Node tests pass, including existing support/player workflows and compliance tests.
@@ -35,7 +35,7 @@ Status: implementation and evidence advanced; NOT legally signed off or released
 | LEG-05 suppliers | Public primary terms located | Account plan/acceptance/location/retention and transfer evidence |
 | LEG-06 retention | Concrete candidate schedule prepared | Owner + club/controller + counsel approval, lawful holds and tested implementation/exit approach |
 | LEG-07 contracts | Free-pilot/no automatic paid conversion preserved | Actual GSM/Carbon entities, scope/dates, commercial terms, service commitments and reviewed signatures |
-| LEG-08 age/visibility | Owner selected include under-18s and keep public pages | Youngest age, guardian/age assurance, child DPIA/default visibility implementation, public fields/basis, moderation/appeals and Playtomic authority |
+| LEG-08 age/visibility | Owner selected include under-18s and keep public pages | Approved minimum age 16; age assurance, teen safeguarding/contractual capacity, child DPIA/default visibility implementation, public fields/basis, moderation/appeals and Playtomic authority |
 | LEG-09 operations | External receive/reply COMPLETE | Daily private register/queue monitoring, fulfilment procedure and achievable owner-only continuity |
 | LEG-10 notifications | Isolated SQL access/idempotency tests pass; shared-schema defect fixed | Actual managed Auth/mail/worker/failure handling in safe environment and security review |
 | LEG-11 acceptance | Draft signup declaration only | Approved immutable terms/hash, existing-account/renewal journey and negative tests; never treat draft metadata as final contract acceptance |

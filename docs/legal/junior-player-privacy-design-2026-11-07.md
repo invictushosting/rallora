@@ -3,7 +3,7 @@
 7 November 2026. DRAFT implementation requirements; not a completed DPIA or legal sign-off.
 
 ## Confirmed product decisions
-Ste selected **Include under-18s** and **Keep public** league pages. Do not implement the superseded adult-only proposal or restrict all league pages to signed-in users. These decisions establish product scope; they do not choose the youngest age, verify parental responsibility, authorise unrestricted public disclosure of children's identities/location or settle the lawful basis.
+Ste selected **Include under-18s** and **Keep public** league pages. Do not implement the superseded adult-only proposal or restrict all league pages to signed-in users. The owner subsequently selected **youngest age 16**. Initial participation is 16–17-year-olds and adults; do not implement under-16 registration or a younger-child guardian flow in this release. This establishes scope but does not settle age assurance, contractual capacity, safeguarding, public disclosure or lawful basis.
 
 ## Current implementation evidence
 The reviewed application/migration source has no observed structured age-band, date-of-birth, guardian or parental-authority flow (keyword review 7 November). Existing partner/captain invitations are membership links, not proof of age or parental responsibility. No age is inferred from names, ratings, email addresses or existing team data. No child records were identified/read in production for this review.
@@ -16,8 +16,8 @@ Treat junior access as intended and plan against the ICO Children's Code unless 
 ## Design requirements and decisions
 | Requirement | Proposed implementation direction for review | Evidence needed before completion |
 |---|---|---|
-| Youngest age / accounts | Ask youngest intended participant and whether each band has own login or guardian-managed participation; use proportionate age assurance, collect an age band if sufficient rather than full DOB | Owner/club scope, legal/safeguarding review and verified account design |
-| Guardian authority | Keep guardian identity/relationship/permissions separate from team captain role; verify authority proportionately where required | Lawful basis by purpose; where relying on consent for an ISS offered directly to an under-13, verified parental authorisation requirements apply |
+| Youngest age / accounts | Implement the approved 16+ minimum with proportionate assurance and a 16–17/adult distinction where needed; assess whether an age band is sufficient rather than collecting full DOB | Owner/club scope, legal/safeguarding review and verified account design |
+| Guardian authority | Review teen contractual capacity and any safeguarding/authority requirements separately from captain status; do not build under-16 guardian registration in this initial scope | Lawful basis by purpose; do not assume all 16–17-year-old processing requires parental consent; under-13 consent rules are not a justification for the approved 16+ design |
 | Public league pages | Preserve public league access; assess limited junior display names/identifiers and permitted sporting fields with high-privacy defaults and a documented child-best-interests assessment for any different default | Club controller decision, approved notice, lawful basis, withdrawal/objection process where applicable; no automatic public full-name profile from a captain invitation |
 | Fixture location/time | Review whether public schedules or arranged bookings reveal a child's whereabouts; show only justified public sporting details and keep detailed arrangements restricted as appropriate | Actual public data/API inventory plus negative-role/browser tests |
 | Match chat and contact export | Retain fixture scoping, reporting/organiser help and removal controls; define safeguarding supervision and guardian access without sharing credentials | Club safeguarding lead, escalation, export restrictions and role tests |

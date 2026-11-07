@@ -4,7 +4,7 @@ Status: concrete proposals for Ste's review, not adopted policy, legal sign-off 
 
 ## Factual inputs
 1. ICO reference **ZC281332** for Protego Solutions Ltd is verified from the ICO confirmation email dated 22 October 2026. No need to resupply the reference. Obtain/check the live register certificate and expiry when accessible.
-2. **Owner decision, 7 November: include under-18s.** The adult-only proposal is superseded. Youngest supported age, independent versus guardian-managed accounts, authority checks and club safeguarding process remain to be specified. See `junior-player-privacy-design-2026-11-07.md`.
+2. **Owner decision, 7 November: include under-18s.** The adult-only proposal is superseded. The owner subsequently selected **minimum age 16**: support 16–17-year-olds and adults; under-16 participation is outside this launch scope. Age assurance, teen account/authority checks and club safeguarding still need reviewed implementation. See `junior-player-privacy-design-2026-11-07.md`.
 3. **Owner decision, 7 November: keep public league pages.** Player names, sporting ratings, fixtures and results are intended public sporting information; contact details, chat and support records stay restricted. Assess junior-specific identity, precise time/location and high-privacy defaults before implementing this policy for children. General public-page approval does not establish a lawful basis, guardian authority or a reviewed exception to child privacy defaults.
 4. For GSM and Carbon: actual club legal entities, authorised signatories, competition/feature scope and free-pilot start/end or number of included leagues. No automatic paid conversion. No paid pricing, SLA, liability cap or logo publicity permission is assumed.
 
