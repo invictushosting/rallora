@@ -31,3 +31,8 @@ Adviser references:
 - https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable
 - https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable
 - https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection
+
+## Platform maintenance observations
+The connected project reports PostgreSQL 17.6.1.127. Supabase's 25 September 2026 changelog describes security fixes and compatibility checks for the 17.11 upgrade. Review the actual project upgrade path, extension/index detection queries, maintenance window and backup/recovery evidence with the release owner; no database upgrade or reindex was performed. This is an open maintenance assessment, not a claim that each listed upstream vulnerability is exploitable in Rallora. https://supabase.com/changelog/postgres-15-19-17-11-breaking-changes
+
+The 12 October changelog also announces withdrawal of legacy CBC TLS ciphers from HTTP APIs no earlier than 10 November. Current application build/SQL tests do not establish the supported device matrix; verify supported client connections during managed Auth/browser checks. No TLS or client setting was changed. https://supabase.com/changelog/cbc-tls-ciphers-deprecated

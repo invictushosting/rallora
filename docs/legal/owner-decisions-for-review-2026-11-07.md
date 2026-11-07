@@ -3,9 +3,9 @@
 Status: concrete proposals for Ste's review, not adopted policy, legal sign-off or permission to delete records. Existing owner-only privacy responsibility and completed support-mailbox test are retained. No deputy, paid resource, new supplier or email recipient is selected by this document.
 
 ## Factual inputs
-1. ICO registration reference/certificate or renewal record for the actual registered controller.
-2. Confirm whether player accounts/competitions are adults only or include under-18s. Proposed initial scope: 18+ accounts and adult competitions until a specific junior/safeguarding design is reviewed. This is a proposal, not an existing eligibility restriction.
-3. Confirm public league visibility. Proposed: player names, sporting ratings, fixtures, tables and results may be public where the club has an approved purpose/notice; email/phone, match chat, support records and screenshots remain restricted. Do not infer consent or a lawful basis from entering a competition.
+1. ICO reference **ZC281332** for Protego Solutions Ltd is verified from the ICO confirmation email dated 22 October 2026. No need to resupply the reference. Obtain/check the live register certificate and expiry when accessible.
+2. **Owner decision, 7 November: include under-18s.** The adult-only proposal is superseded. Youngest supported age, independent versus guardian-managed accounts, authority checks and club safeguarding process remain to be specified. See `junior-player-privacy-design-2026-11-07.md`.
+3. **Owner decision, 7 November: keep public league pages.** Player names, sporting ratings, fixtures and results are intended public sporting information; contact details, chat and support records stay restricted. Assess junior-specific identity, precise time/location and high-privacy defaults before implementing this policy for children. General public-page approval does not establish a lawful basis, guardian authority or a reviewed exception to child privacy defaults.
 4. For GSM and Carbon: actual club legal entities, authorised signatories, competition/feature scope and free-pilot start/end or number of included leagues. No automatic paid conversion. No paid pricing, SLA, liability cap or logo publicity permission is assumed.
 
 ## Proposed retention schedule to review

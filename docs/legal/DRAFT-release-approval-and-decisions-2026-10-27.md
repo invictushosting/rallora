@@ -7,7 +7,7 @@
 The owner confirmed completion of the independent external receive-and-reply test and explicitly approved recording it in PR #245. See https://github.com/invictushosting/rallora/pull/245#issuecomment-6633360007 . This supersedes earlier incomplete/failed observations. No private message details are retained here. LEG-09 remains OPEN for daily monitoring, case handling and owner-only continuity evidence; the mailbox test itself is COMPLETE.
 
 ## Current completion evidence — 7 November 2026
-See `compliance-closeout-2026-11-07.md`, `production-security-evidence-2026-11-07.md`, `storage-and-cookie-audit-2026-11-07.md` and `supplier-evidence-register-2026-11-07.md`. Current main is integrated, including support replies and all-player match actions. These records close evidence tasks only, not legal or business approvals.
+See `compliance-closeout-2026-11-07.md`, `production-security-evidence-2026-11-07.md`, `storage-and-cookie-audit-2026-11-07.md` and `supplier-evidence-register-2026-11-07.md`. Current main is integrated, including support replies and all-player match actions. Owner decisions on 7 November: include under-18s and keep public league pages; junior-specific controls and minimum age remain open. ICO reference ZC281332 for Protego Solutions Ltd is verified from the ICO confirmation email of 22 October 2026; current register certificate/expiry remains to be checked. These records close evidence tasks only, not legal or business approvals.
 
 ## Resumption checkpoint — 4 November 2026
 See `docs/legal/compliance-resumption-2026-11-04.md` for verified PR/CI state, integration work and ordered next actions. October mailbox and production-schema observations remain historical evidence, not fresh verification. All legal approvals remain open.
