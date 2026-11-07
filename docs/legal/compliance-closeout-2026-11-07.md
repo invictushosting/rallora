@@ -33,7 +33,7 @@ Status: implementation and evidence advanced; NOT legally signed off or released
 | LEG-03 bases | Proposed basis analysis in existing drafts; not approved | Purpose-specific legal assessment, necessary contract purposes and legitimate-interest balancing/consent where appropriate |
 | LEG-04 cookies | Source/dependency inventory complete | Deployed signed-in/network verification, purpose/exception decisions and any required consent controls |
 | LEG-05 suppliers | Public primary terms located | Account plan/acceptance/location/retention and transfer evidence |
-| LEG-06 retention | Concrete candidate schedule prepared | Owner + club/controller + counsel approval, lawful holds and tested implementation/exit approach |
+| LEG-06 retention | Owner approved six proposals for club/legal review on 7 November; decision recorded in the dated retention schedule | Club/controller + counsel approval, remaining categories, lawful holds and tested implementation/exit approach |
 | LEG-07 contracts | Free-pilot/no automatic paid conversion preserved | Actual GSM/Carbon entities, scope/dates, commercial terms, service commitments and reviewed signatures |
 | LEG-08 age/visibility | Owner selected include under-18s and keep public pages | Approved minimum age 16; age assurance, teen safeguarding/contractual capacity, child DPIA/default visibility implementation, public fields/basis, moderation/appeals and Playtomic authority |
 | LEG-09 operations | External receive/reply COMPLETE | Daily private register/queue monitoring, fulfilment procedure and achievable owner-only continuity |
@@ -54,3 +54,8 @@ Status: implementation and evidence advanced; NOT legally signed off or released
 No production migration, public legal release, destructive retention job, paid resource or external email was performed. The existing zero-additional-cost constraint remains in place; no new Supabase project or plan was created. Do not mark unresolved gates approved merely because this checkpoint or the automated tests are complete.
 
 GitHub validation evidence: https://github.com/invictushosting/rallora/actions/runs/42420433203 .
+
+## Retention decision recorded — 7 November 2026
+On 7 November 2026, Ste approved the six retention proposals below for incorporation into the compliance drafts and review by clubs/legal counsel. This records business approval of the proposals only: it is not club/controller approval, legal sign-off, permission to delete data or authorisation to publish/deploy.
+
+Updated the owner decision sheet, retention/role worksheet, release register, draft DPA and draft privacy notice consistently. See `retention-schedule-owner-approved-for-review-2026-11-07.md`. This is draft-content work; no retention timer, purge, migration, live data change or production release is included. Unrelated business decisions and other compliance gates remain open.

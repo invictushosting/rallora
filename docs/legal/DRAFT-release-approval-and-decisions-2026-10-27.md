@@ -29,7 +29,7 @@ The review brief and *partially assigned* operational responsibility matrix are 
 - Release runbook: `docs/legal/compliance-release-runbook-2026-10-27.md`
 
 ## Working decision worksheet
-`docs/legal/DRAFT-retention-and-role-mapping-2026-10-27.md` contains proposed role allocations and possible retention review approaches, grounded in read-only schema evidence. **These are not approved policy or deletion timers.** LEG-02, LEG-06 and LEG-09 remain OPEN pending named business leads, club controller instructions and counsel review.
+`docs/legal/DRAFT-retention-and-role-mapping-2026-10-27.md` contains proposed role allocations and possible retention review approaches, grounded in read-only schema evidence. **Six retention proposals are owner-approved for club/legal review on 7 November; final policy and deletion timers remain unapproved.** LEG-02, LEG-06 and LEG-09 remain OPEN pending named business leads, club controller instructions and counsel review.
 
 ## Required decisions (all OPEN until evidence + responsible person's approval)
 
@@ -40,7 +40,7 @@ The review brief and *partially assigned* operational responsibility matrix are 
 | LEG-03 | Provider privacy counsel | For each controller processing purpose establish and document correct lawful basis; distinguish necessary service terms from optional marketing consent | Privacy notice |
 | LEG-04 | Engineering + privacy counsel | Inventory actual cookies, local storage, third-party scripts and analytics across unauthenticated and signed-in journeys, purposes and expiry; define consent/cookie-reject controls where required | Cookies |
 | LEG-05 | Engineering + procurement + privacy counsel | Verify actual suppliers (Supabase, Vercel, Resend, Google Workspace, any logging/analytics/payment/integration provider), contracts, region, onward transfers and UK transfer mechanisms; not assumed from hosting alone | Privacy notice + DPA |
-| LEG-06 | Provider privacy lead + clubs + counsel | Set explicit active/inactive account, league, results, support, data subject rights, audit/event and backup retention + disposal periods; legal holds and club export/return on exit | Privacy notice + DPA + release |
+| LEG-06 | Provider privacy lead + clubs + counsel | **PARTIAL: owner approved six proposals for club/legal review on 7 November; see retention-schedule-owner-approved-for-review-2026-11-07.md.** Complete remaining categories and club/legal review; set explicit active/inactive account, league, results, support, data subject rights, audit/event and backup retention + disposal periods; legal holds and club export/return on exit | Privacy notice + DPA + release |
 | LEG-07 | Club pilot owners + commercial lead + counsel | Complete plans, trial start/end, price/VAT, renewal, cancellation, SLA/support, liability/indemnities, governing law, logo publicity rights and signatories; zero-cost pilot cannot become charged without affirmative agreement | Club agreement |
 | LEG-08 | Product lead + safeguarding/privacy counsel | Approve minimum age, any juniors/safeguarding controls, user-generated content/moderation, player photos/social visibility, sporting disputes, appeals and Playtomic integration rights | Terms + notice |
 | LEG-09 | Protego business owner (sole nominated privacy contact) | **Mailbox receive/reply COMPLETE, confirmed by owner on 4 November.** Confirm daily queue reviews, owner-only absence/loss-of-access contingency, missed-mail escalation, identity procedure, service response timelines, secure exports/deletions and incident/breach process. **No deputy assigned; continuity risk unresolved.** | Privacy requests |
@@ -74,3 +74,8 @@ The review brief and *partially assigned* operational responsibility matrix are 
 **Deadline caution:** the dashboard's internal 21-day marker is not the UK GDPR statutory deadline. ICO guidance describes the usual SAR response requirement as without undue delay and at the latest one calendar month from the relevant receipt event, subject to specific rules on identity, fee and permitted extensions. Human review is required; never calculate the legal deadline solely from the dashboard marker.
 
 **No publication, legal sign-off, product billing decision, or live deployment is authorised by this document.**
+
+## Retention proposal approval — 7 November 2026
+On 7 November 2026, Ste approved the six retention proposals below for incorporation into the compliance drafts and review by clubs/legal counsel. This records business approval of the proposals only: it is not club/controller approval, legal sign-off, permission to delete data or authorisation to publish/deploy.
+
+The six proposals, original approval scope, exceptions and outstanding categories are recorded in `retention-schedule-owner-approved-for-review-2026-11-07.md`. LEG-06 remains open overall. No automatic deletion, production release, general operating-control acceptance or approval of pilot terms is inferred.

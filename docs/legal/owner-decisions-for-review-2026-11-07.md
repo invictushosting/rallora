@@ -1,6 +1,6 @@
 # Owner decisions for review — 7 November 2026
 
-Status: concrete proposals for Ste's review, not adopted policy, legal sign-off or permission to delete records. Existing owner-only privacy responsibility and completed support-mailbox test are retained. No deputy, paid resource, new supplier or email recipient is selected by this document.
+Status: Ste approved the six stated retention proposals for club/legal review on 7 November 2026. They are not final adopted policy, legal sign-off or permission to delete records; the remaining categories and operational controls remain open. Existing owner-only privacy responsibility and completed support-mailbox test are retained. No deputy, paid resource, new supplier or email recipient is selected by this document.
 
 ## Factual inputs
 1. ICO reference **ZC281332** for Protego Solutions Ltd is verified from the ICO confirmation email dated 22 October 2026. No need to resupply the reference. Obtain/check the live register certificate and expiry when accessible.
@@ -8,12 +8,14 @@ Status: concrete proposals for Ste's review, not adopted policy, legal sign-off 
 3. **Owner decision, 7 November: keep public league pages.** Player names, sporting ratings, fixtures and results are intended public sporting information; contact details, chat and support records stay restricted. Assess junior-specific identity, precise time/location and high-privacy defaults before implementing this policy for children. General public-page approval does not establish a lawful basis, guardian authority or a reviewed exception to child privacy defaults.
 4. For GSM and Carbon: actual club legal entities, authorised signatories, competition/feature scope and free-pilot start/end or number of included leagues. No automatic paid conversion. No paid pricing, SLA, liability cap or logo publicity permission is assumed.
 
-## Proposed retention schedule to review
-These are operational candidates, not prescribed legal periods. Clubs and counsel must confirm purposes, controller instructions, legal holds and implementation feasibility before adoption.
+## Owner-approved retention proposals for club/legal review
+On 7 November 2026, Ste approved the six retention proposals below for incorporation into the compliance drafts and review by clubs/legal counsel. This records business approval of the proposals only: it is not club/controller approval, legal sign-off, permission to delete data or authorisation to publish/deploy.
+
+The authoritative decision record is `retention-schedule-owner-approved-for-review-2026-11-07.md`. Accounts, ordinary support, screenshots, successful delivery records, chat/proposals and identifiable sporting records are approved as proposals. Other rows below remain undecided. Clubs and counsel must confirm purposes, controller instructions, holds and implementation feasibility before final adoption.
 
 | Data class | Proposed measurable approach | Release condition / safeguard |
 |---|---|---|
-| Account/profile | Review after 12 months of inactivity; if no live competition, pending request, obligation or hold, issue notice and propose 90-day response period before any deletion | Verify last activity and identity links; separate account removal from sporting history |
+| Account/profile | Review after 12 months of inactivity; if no live competition, pending request, obligation or hold, give 90 days' notice before considering deletion before any deletion | Verify last activity and identity links; separate account removal from sporting history |
 | Ordinary support tickets | Closure + 12 months | Review incidents, disputes or legal claims individually; do not erase unresolved cases |
 | Support screenshots | Review on closure; remove within 90 days if no longer needed | Minimise sooner where possible; retain necessary evidence under a recorded hold |
 | Operational delivery metadata | Up to 90 days after successful completion | Do not purge unresolved failures; legally significant notice evidence uses its separate schedule |

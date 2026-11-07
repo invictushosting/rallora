@@ -26,9 +26,12 @@ Applies **only** to the processing activities where Club is controller and Prote
 - Controller obligations and rights: [to specify]
 - Processor security controls: [confirmed technical appendix pending]
 - Subprocessors and location: Supabase, Vercel and applicable email/analytics/integration providers — **verify contracts, locations and actual transfers before listing as final**
-- Deletion/retention periods: [to approve]
+- Deletion/retention periods: six proposals owner-approved for club/legal review on 7 November 2026, recorded in `retention-schedule-owner-approved-for-review-2026-11-07.md`. Club instructions, legal review, remaining categories, exit/return timing and implementation remain open.
 
 ## Separate controller uses to assess
 Rallora user accounts outside club leagues; service billing and platform protection; platform-wide player discovery, Rallora Social, support and direct marketing. These must not be shoehorned into the processor schedule merely because a club subscribes.
 
 **No execution until role map, subprocessor register, transfer analysis and retention schedule are completed.**
+
+## Retention schedule for review — not agreed controller instructions
+The provider's approved proposals are: account review after 12 inactive months with 90 days' notice before considering deletion; ordinary support 12 months after closure; unnecessary screenshots removed within 90 days after closure; successful operational delivery records up to 90 days; chat/time proposals reviewed 6 months after competition end; identifiable sporting records reviewed 24 months after season end. These review points are not automatic erasure deadlines. A club must justify a longer identifiable sporting archive. Pending disputes, safeguarding, claims, rights requests and legal obligations need separate recorded handling. No universal period for privacy/acceptance/security evidence, finance, vendor logs or backups is agreed by these proposals. The completed DPA must identify controller instructions, final justified periods, secure return/deletion and actual backup rotation.
