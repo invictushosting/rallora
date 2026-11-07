@@ -3,8 +3,8 @@
 **Status: DRAFT. Not an automated service and not yet live.** The Protego business owner has agreed to act as **sole operational privacy contact**, with **no nominated backup**. The formal contact record, mailbox/admin access, owner absence cover, monitoring and continuity safeguards remain unverified. This is not a statutory DPO appointment.
 
 
-## Owner-only control checklist and current mailbox status
-See `docs/legal/DRAFT-owner-only-privacy-monitoring-checklist-2026-10-27.md` for the owner-only daily checks, absence and account-recovery plan, and pre-release evidence. The connected personal Gmail account is **not** the Rallora support mailbox; mail receipt/send capability and owner access to `support@rallora.app` have **not** been verified. The owner must demonstrate the separate intended mailbox access; no Google Workspace settings or forwarding have been changed.
+## Verified support channel
+The owner confirmed the external receive-and-reply test on 4 November 2026; the approved outcome is recorded in PR #245. The mailbox test is complete. Daily monitoring, restricted case tracking and owner-only absence/access recovery still need operational acceptance. The in-app privacy queue and its notifications remain draft-only.
 
 ## Intake and monitoring
 - An authorised Rallora platform staff member must check the restricted `/platform/privacy` queue **every business day**, including after weekends, holiday closures and deployments.
@@ -42,3 +42,8 @@ Staff cannot claim a privacy request has been received by the responsible person
 The proposed `20261027143000_privacy_notification_outbox.sql` migration adds one private outbox record in the same transaction as each rights-request insert. The existing scheduled `/api/internal/deliveries` endpoint claims up to five notices per invocation, sends through the existing Resend service to `support@rallora.app`, and records provider acceptance. Leases, six-attempt retry cap, exponential backoff and a stable provider idempotency key minimise duplicate notifications after timeouts. The email carries only an opaque case UUID; request contents and account identifiers are never inserted in the email body. Only acceptance by the provider is recorded, **not actual inbox delivery or human acknowledgement**.
 
 Before launch, verify the service account's access to the new RPCs, its schedule, the sender domain and `support@rallora.app` monitored distribution, and build monitoring for outbox rows with `status='failed'` or stale `sending` leases. Existing club delivery processing must continue independently even when the privacy queue fails. Manual daily inbox/queue monitoring by the sole nominated owner and reviewed absence/access-recovery arrangements remain required; no deputy is nominated. Do not enable these migrations while the signup/legal documents remain drafts.
+
+## Data protection complaints — separate from rights requests
+A complaint about handling personal information can arrive through support@rallora.app, an in-app request or another contact channel; do not require sign-in or a particular form. Log the first receipt date and any accompanying rights request separately. Acknowledge the complaint within 30 days, take appropriate steps to investigate, keep the complainant informed and respond without undue delay. A complaint does not stop or replace the clock for an access, erasure or other rights request. Provide the outcome, reasoning and ICO escalation route. Preserve relevant evidence securely and apply the approved case-retention schedule.
+
+Current ICO DUAA guidance checked 7 November 2026: https://ico.org.uk/about-the-ico/what-we-do/legislation-we-cover/data-use-and-access-act-2025/the-data-use-and-access-act-2025-what-does-it-mean-for-organisations/ . Counsel should review the complete procedure before operational sign-off.

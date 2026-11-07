@@ -49,3 +49,6 @@ Migration application should use Supabase-managed migration tooling against the 
 
 ## Deployment blockers currently still open
 Legal approval, real Supabase Auth/staging negative tests, final versioned acceptance controls for existing users, monitored rights-request handling, subprocessor review, actual user-browser acceptance journey, and production restoration rehearsal. A passing isolated PostgreSQL CI run is necessary, not sufficient.
+
+## Current preflight — 7 November 2026
+Read `compliance-closeout-2026-11-07.md` and its linked evidence before using the historical checks above. Current production has 88 migration entries; privacy objects remain absent. Mailbox receive/reply is owner-confirmed complete. The draft is integrated with main `4e5a849`, preserving tenant, support, privacy and event-security suites. The uninstalled acceptance migration now preserves existing private-schema USAGE; replay neither historical migrations nor schema-wide revokes. Validate all five forward migrations on the intended production-like synthetic environment, including existing chat and email-worker access. Main has advanced beyond the previous resumption checkpoint; record a fresh last-known-good production commit and actual restore evidence before release.

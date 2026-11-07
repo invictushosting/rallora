@@ -33,7 +33,7 @@ Appropriate warranties, indemnities, caps, exclusions, consumer rights (where re
 Upon termination, provide an agreed, secure export of club-controlled data and delete or return processor-held data subject to lawful retention, backups and DPA terms, within agreed timeframes.
 
 ## Pilot addendum — where selected
-- Club: [Carbon Padel or named pilot club] ; pilot start/end: [dates]
+- Club: [Named pilot club — GSM Padel or Carbon Padel; separate completed schedule for each] ; pilot start/end: [dates]
 - Pilot features, limitations, competition configuration, service availability and support: [schedule]
 - Pilot fee: [zero or discounted amount stated expressly]; expiry alone does not authorise new paid charges
 - Feedback may be used to improve the service without disclosing personal information beyond lawful purposes

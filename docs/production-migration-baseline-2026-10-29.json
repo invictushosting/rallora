@@ -1,6 +1,6 @@
 {
   "project_ref": "vfebhddnjhylicapckro",
-  "observed_at": "2026-10-29",
+  "observed_at": "2026-11-07",
   "entries": [
     {
       "production_version": "20260919210402",
@@ -398,9 +398,49 @@
       "source": "supabase/migrations/20261029073441_allow_cancelled_fixture_status.sql"
     },
     {
+      "production_version": "20261029082851",
+      "production_name": "fixture_chat_all_players",
+      "source": "supabase/migrations/20261028192040_fixture_chat_all_players.sql"
+    },
+    {
+      "production_version": "20261029082903",
+      "production_name": "fixture_playing_window",
+      "source": "supabase/migrations/20261029081850_fixture_playing_window.sql"
+    },
+    {
+      "production_version": "20261029094336",
+      "production_name": "reissue_cancelled_partner_invitations",
+      "source": "supabase/migrations/20261029094156_reissue_cancelled_partner_invitations.sql"
+    },
+    {
       "production_version": "20261029142212",
       "production_name": "concurrent_competition_activation",
       "source": "supabase/migrations/20261029134600_concurrent_competition_activation.sql"
+    },
+    {
+      "production_version": "20261101122011",
+      "production_name": "standings_division_integrity",
+      "source": "supabase/migrations/20261101120906_standings_division_integrity.sql"
+    },
+    {
+      "production_version": "20261104134524",
+      "production_name": "support_player_workspace",
+      "source": "supabase/migrations/20261104134524_support_player_workspace.sql"
+    },
+    {
+      "production_version": "20261104185253",
+      "production_name": "restore_authenticated_private_schema_usage",
+      "source": "supabase/migrations/20261104184547_restore_authenticated_private_schema_usage.sql"
+    },
+    {
+      "production_version": "20261104190655",
+      "production_name": "restore_delivery_worker_schema_usage",
+      "source": "supabase/migrations/20261104185453_restore_delivery_worker_schema_usage.sql"
+    },
+    {
+      "production_version": "20261106082618",
+      "production_name": "all_player_match_actions",
+      "source": "supabase/migrations/20261106081243_all_player_match_actions.sql"
     }
   ]
 }

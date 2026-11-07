@@ -12,7 +12,7 @@ import { captainResultState, OFFICIAL_RESULT_STATUSES, type CaptainSubmission, t
 import styles from "./captain.module.css";
 
 type Team = { id:string; name:string; player_one_name:string|null; player_two_name:string|null;
-  player_one_rating:number|null; player_two_rating:number|null; season:{name:string;status:string;created_at:string} };
+  player_one_rating:number|null; player_two_rating:number|null; role?:string; season:{name:string;status:string;created_at:string} };
 type Fixture = { id:string; home_team_id:string; away_team_id:string; play_by:string; status:string;home_player_names:(string|null)[]|null;away_player_names:(string|null)[]|null };
 
 export default function CaptainCentre() {
@@ -24,7 +24,7 @@ export default function CaptainCentre() {
   const [platformAdmin,setPlatformAdmin]=useState(false), [loading,setLoading]=useState(true);
   const [labels,setLabels]=useState<Record<string,string>>({}), [fixtures,setFixtures]=useState<Fixture[]>([]);
   const [submissions,setSubmissions]=useState<CaptainSubmission[]>([]), [results,setResults]=useState<OfficialResult[]>([]);
-  const [notice,setNotice]=useState("Loading captain access…"), [busy,setBusy]=useState("");
+  const [notice,setNotice]=useState("Loading match access…"), [busy,setBusy]=useState("");
   const loadVersion=useRef(0);
   const [unread,setUnread]=useState<Record<string,number>>({});
   const [arrangements,setArrangements]=useState<FixtureArrangement[]>([]);
@@ -37,7 +37,7 @@ export default function CaptainCentre() {
       if(auth.error && auth.error.name!=="AuthSessionMissingError") throw auth.error;
       const user=auth.data.user;
       if(version!==loadVersion.current)return;
-      if(!user){setPlatformAdmin(false);setViewerId("");setTeam(null);setCaptainTeams([]);setFixtures([]);setSubmissions([]);setResults([]);setNotice("Sign in with your captain account to view your pairing and fixtures.");return;}
+      if(!user){setPlatformAdmin(false);setViewerId("");setTeam(null);setCaptainTeams([]);setFixtures([]);setSubmissions([]);setResults([]);setNotice("Sign in with your Rallora account to view your pairing and fixtures.");return;}
       const club=await supabase.from("clubs").select("id").eq("slug",slug).maybeSingle();
       if(club.error) throw club.error;
       if(!club.data) throw new Error("Club not found.");
@@ -61,14 +61,15 @@ export default function CaptainCentre() {
         }
       }else{
         const roster=await supabase.from("rallora_team_roster_memberships")
-        .select("team_id,teams(id,name,player_one_name,player_two_name,player_one_rating,player_two_rating),seasons(name,status,created_at)")
-        .eq("club_id",club.data.id).eq("player_user_id",user.id).eq("role","captain");
+        .select("team_id,role,teams(id,name,player_one_name,player_two_name,player_one_rating,player_two_rating),seasons(name,status,created_at)")
+        .eq("club_id",club.data.id).eq("player_user_id",user.id);
       if(roster.error) throw roster.error;
         available=(roster.data??[]).filter(row=>row.teams&&row.seasons)
-          .map(row=>({...row.teams as unknown as Omit<Team,"season">,season:row.seasons as unknown as Team["season"]}));
+          .map(row=>({...row.teams as unknown as Omit<Team,"season">,role:row.role,season:row.seasons as unknown as Team["season"]}));
       }
       available.sort((a,b)=>Number(b.season.status==="active")-Number(a.season.status==="active")||b.season.created_at.localeCompare(a.season.created_at)||a.id.localeCompare(b.id));
-      const chosen=available.find(item=>item.id===selectedId)??available[0];
+      const linkedTeam=new URLSearchParams(window.location.search).get("team");
+      const chosen=available.find(item=>item.id===(selectedId||linkedTeam))??available[0];
       let booked:FixtureArrangement[]=[];
       let rows:Fixture[]=[], names:Record<string,string>={}, submitted:CaptainSubmission[]=[], official:OfficialResult[]=[];
       if(chosen&&(isAdmin||chosen.season.status!=="draft")) {
@@ -99,7 +100,7 @@ export default function CaptainCentre() {
       if(version!==loadVersion.current)return;
       setUnread(Object.fromEntries(((threadSummary.data??[]) as {fixture_id:string;unread_count:number}[]).map(row=>[row.fixture_id,Number(row.unread_count)])));
       setPlatformAdmin(isAdmin);setArrangements(booked);setViewerId(user.id);setCaptainTeams(available);setTeam(chosen??null);setFixtures(rows);setLabels(names);setSubmissions(submitted);setResults(official);
-      setNotice(!chosen?(isAdmin?"This club has no pairings yet. Create or approve teams in club admin to inspect their captain view.":"Your account is not assigned as a captain for this club yet. If your team was just approved, refresh this page or contact the organiser.")
+      setNotice(!chosen?(isAdmin?"This club has no pairings yet. Create or approve teams in club admin to inspect their captain view.":"Your account is not linked to a pairing for this club yet. Claim your partner invitation or ask the organiser to check your place. If your team was just approved, refresh this page or contact the organiser.")
         :chosen.season.status==="draft"?"This cycle is being prepared. Fixtures become available when the organiser activates it."
         :chosen.season.status==="completed"?"This cycle is complete. Its results are shown for reference.":"");
     } catch(error) {
@@ -119,7 +120,7 @@ export default function CaptainCentre() {
     event.preventDefault();if(busy||loading||!team)return;
     const fields=new FormData(event.currentTarget),home=String(fields.get("home")??"").trim(),away=String(fields.get("away")??"").trim(),winner=String(fields.get("winner")??"");
     if(!home||!away||!winner){setNotice("Enter both scores and choose the winning pairing.");return;}
-    if(!window.confirm(`Submit ${fixturePlayerLabel(fixture,fixture.home_team_id,labels[fixture.home_team_id]??"Players")} ${home} – ${away} ${fixturePlayerLabel(fixture,fixture.away_team_id,labels[fixture.away_team_id]??"Players")}? The opposing captain will be asked to confirm it.`))return;
+    if(!window.confirm(`Submit ${fixturePlayerLabel(fixture,fixture.home_team_id,labels[fixture.home_team_id]??"Players")} ${home} – ${away} ${fixturePlayerLabel(fixture,fixture.away_team_id,labels[fixture.away_team_id]??"Players")}? Either opposing player will be asked to confirm it.`))return;
     setBusy(fixture.id);
     try {
       const args={p_fixture_id:fixture.id,p_home_score:home,p_away_score:away,p_winner_team_id:winner,p_notes:String(fields.get("notes")??"")};
@@ -160,10 +161,10 @@ export default function CaptainCentre() {
   });
   const selectedMatch=matchingTeams.some(item=>item.id===team?.id);
   return <main className={styles.page}><div className={styles.shell}>
-    <header><BackLink href={`/clubs/${slug}`}>Back to club</BackLink><Link href={`/help/captain-access?club=${encodeURIComponent(slug)}`}>Captain guide</Link><strong>RALLORA · CAPTAIN</strong></header>
-    <section className={styles.hero}><div className={styles.heroTop}><span>CAPTAIN CENTRE</span>{team&&<strong className={styles.actionBadge}>{actionCount} action{actionCount===1?"":"s"}</strong>}</div>
+    <header><BackLink href={`/clubs/${slug}`}>Back to club</BackLink><Link href={`/help/captain-access?club=${encodeURIComponent(slug)}`}>Player guide</Link><strong>RALLORA · MATCHES</strong></header>
+    <section className={styles.hero}><div className={styles.heroTop}><span>MATCH CENTRE</span>{team&&<strong className={styles.actionBadge}>{actionCount} action{actionCount===1?"":"s"}</strong>}</div>
       <h1>{team?[team.player_one_name,team.player_two_name].filter(Boolean).join(" / ")||team.name:"Your pairing"}</h1>
-      <p>Your match centre for fixtures, scores and result confirmation.</p>
+      <p>Both players can arrange matches, record bookings and submit results. Either opponent can confirm or dispute.</p>{team?.role&&<p><strong>Your role: {team.role==="captain"?"Captain · main contact":"Player"}</strong></p>}
       {team&&<div className={styles.ratingStrip}><span>PLAYTOMIC</span><strong>{team.player_one_name} {team.player_one_rating?.toFixed(2)??"–"}</strong><strong>{team.player_two_name} {team.player_two_rating?.toFixed(2)??"–"}</strong></div>}
       {platformAdmin&&<p className={styles.adminNotice}><strong>Super admin · View as captain</strong><br/>Choose any pairing to inspect its fixtures and captain actions. Saving bookings, submitting scores and reviewing results changes live club data under your admin account.</p>}
       {(platformAdmin&&captainTeams.length>0||captainTeams.length>1)&&<div className={styles.pairingPicker}>
@@ -173,17 +174,17 @@ export default function CaptainCentre() {
           {pairingSearch&&<button type="button" disabled={Boolean(busy)||loading} onClick={()=>setPairingSearch("")}>Clear search</button>}
         </div>
         <p id="captain-pairing-count" className={styles.pairingCount} role="status">{matchingTeams.length?`${matchingTeams.length} of ${captainTeams.length} pairings shown. Choose a pairing below to view it.`:"No pairings match your search. Try another name or clear the search."}</p>
-        <label htmlFor="captain-pairing">{platformAdmin?"View as captain · pairing":"Captain pairing"}</label>
-        <select id="captain-pairing" disabled={Boolean(busy)||loading||matchingTeams.length===0} value={selectedMatch?team?.id??"":""} onChange={event=>{if(!event.target.value)return;setLoading(true);setSelectedId(event.target.value);setFixtures([]);setNotice("Loading captain access…");}}>
+        <label htmlFor="captain-pairing">{platformAdmin?"View as captain · pairing":"Your pairing"}</label>
+        <select id="captain-pairing" disabled={Boolean(busy)||loading||matchingTeams.length===0} value={selectedMatch?team?.id??"":""} onChange={event=>{if(!event.target.value)return;setLoading(true);setSelectedId(event.target.value);setFixtures([]);setNotice("Loading match access…");}}>
           {!selectedMatch&&<option value="" disabled>{matchingTeams.length?"Choose a matching pairing":"No matching pairings"}</option>}
           {matchingTeams.map(item=><option key={item.id} value={item.id}>{item.season.name} ({item.season.status}) · {[item.player_one_name,item.player_two_name].filter(Boolean).join(" / ")||item.name}</option>)}
         </select>
       </div>}
     </section>
     {notice&&<p className={styles.notice} role="status">{notice}</p>}
-    {!loading&&!team&&<Link href={platformAdmin?`/clubs/${slug}/admin`:viewerId?`/account?club=${encodeURIComponent(slug)}&return=captain`:"/login"}>{platformAdmin?"Open club admin":viewerId?"Open your account":"Sign in to your captain account"} →</Link>}
+    {!loading&&!team&&<Link href={platformAdmin?`/clubs/${slug}/admin`:viewerId?`/account?club=${encodeURIComponent(slug)}&return=captain`:"/login"}>{platformAdmin?"Open club admin":viewerId?"Open your account":"Sign in to your Rallora account"} →</Link>}
     {!loading&&team&&!notice&&fixtures.length===0&&<p className={styles.notice}>There are no fixtures available for this pairing yet.</p>}
-    {!loading&&team&&fixtures.length>0&&<section className={styles.actionCentre}><div><span>NEXT UP</span><h2>{actionCount?`${actionCount} match${actionCount===1?"":"es"} need your attention`:"You’re all caught up"}</h2></div><p>{actionCount?"Submit scores or review an opponent result below.":"No captain actions are waiting right now."}</p></section>}
+    {!loading&&team&&fixtures.length>0&&<section className={styles.actionCentre}><div><span>NEXT UP</span><h2>{actionCount?`${actionCount} match${actionCount===1?"":"es"} need your attention`:"You’re all caught up"}</h2></div><p>{actionCount?"Submit scores or review an opponent result below.":"No match actions are waiting right now."}</p></section>}
     <section className={styles.grid}>{fixtureCards.map(({fixture,official,submission,confirmed,needsReview,needsSubmit,action,label})=>{
       const score=official??submission;
       const booking=arrangements.find(item=>item.fixture_id===fixture.id);

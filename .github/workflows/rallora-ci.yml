@@ -39,7 +39,7 @@ jobs:
       - run: node --experimental-strip-types --test tests/leagues-prize-budget.test.mjs
       - run: node --experimental-strip-types --test tests/leagues-payments.test.mjs
       - run: node --experimental-strip-types --test tests/club-event-scheduler.test.mjs
-      - run: node --experimental-strip-types --test tests/account-recovery.test.mjs tests/support-request.test.mjs
+      - run: node --experimental-strip-types --test tests/account-recovery.test.mjs tests/support-request.test.mjs tests/support-workspace.test.mjs
       - run: node --experimental-strip-types --test tests/email.test.mjs
       - run: node --experimental-strip-types --test tests/email-templates.test.mjs
       - run: node --experimental-strip-types --test tests/registration-status.test.mjs
@@ -48,9 +48,9 @@ jobs:
       - run: node --experimental-strip-types --test tests/login-destinations.test.mjs
       - run: node --experimental-strip-types --test tests/result-workflow.test.mjs
       - run: node --experimental-strip-types --test tests/scores.test.mjs
-      - run: node --test tests/compliance-signup-ledger.test.mjs tests/privacy-rights-intake.test.mjs tests/admin-privacy-request-review.test.mjs tests/security-review-contract.test.mjs
       - run: node --experimental-strip-types --test tests/fixture-rosters.test.mjs
       - run: node --experimental-strip-types --test tests/fixture-discovery.test.mjs
+      - run: npm test
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
@@ -195,6 +195,42 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261101120906_standings_division_integrity.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_standings_division_assertions.sql
 
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261104185453_restore_delivery_worker_schema_usage.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_delivery_worker_schema_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261106081243_all_player_match_actions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_all_player_match_actions_assertions.sql
+
+  support-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: ci-only-support-password
+          POSTGRES_DB: support_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d support_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: localhost
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: ci-only-support-password
+      PGDATABASE: support_ci
+    steps:
+      - uses: actions/checkout@v4
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_support_workspace_schema.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260927170000_support_requests.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261104134524_support_player_workspace.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_support_workspace_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261104184547_restore_authenticated_private_schema_usage.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_private_schema_usage_assertions.sql
+
   privacy-migrations:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -228,6 +264,7 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_privacy_negative_roles.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_privacy_notifications_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_terms_acceptance_negative_cases.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_privacy_shared_schema_assertions.sql
   public-event-security:
     runs-on: ubuntu-latest
     timeout-minutes: 10

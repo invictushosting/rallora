@@ -6,7 +6,10 @@
 begin;
 
 create schema if not exists rallora_private;
-revoke all on schema rallora_private from public, anon, authenticated;
+-- This schema is shared with existing invoker RPCs, fixture-chat policies and
+-- the token-authenticated delivery worker. Preserve their USAGE privileges.
+-- New privacy tables/functions are locked down individually below.
+revoke create on schema rallora_private from public, anon, authenticated;
 grant usage on schema rallora_private to postgres, service_role;
 
 create table if not exists rallora_private.player_terms_acceptance_events (

@@ -17,3 +17,13 @@ test('sign-in and validation errors keep the server recovery instruction',async 
  t.mock.method(globalThis,'fetch',async()=>Response.json({error:'Sign in first.'},{status:401}));
  assert.deepEqual(await sendSupportRequest(request),{ok:false,message:'Sign in first.'});
 });
+test('optional screenshots use multipart without forcing a JSON content type',async t=>{
+ const screenshot=new File(['synthetic-image'],'example.png',{type:'image/png'});
+ t.mock.method(globalThis,'fetch',async(url,options)=>{
+  assert.equal(options.headers,undefined);assert.ok(options.body instanceof FormData);
+  assert.deepEqual(JSON.parse(options.body.get('request')),request);
+  assert.equal(options.body.get('screenshot').name,'example.png');
+  return Response.json({ok:true});
+ });
+ assert.equal((await sendSupportRequest(request,screenshot)).ok,true);
+});

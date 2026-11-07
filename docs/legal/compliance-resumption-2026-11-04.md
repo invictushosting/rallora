@@ -35,3 +35,6 @@ No production database, deployment, mailbox, user permissions or legal approval 
 7. Record restorable backup, rehearsal and rollback evidence; seek explicit production release approval only after the concrete release is ready.
 
 None of the twelve legal decision records is closed by this checkpoint. Automated tests are technical evidence, not legal sign-off.
+
+## Superseding checkpoint — 7 November 2026
+The owner-confirmed mailbox receive/reply test was completed and recorded in PR #245 on 4 November. Earlier pending-test instructions in this dated checkpoint are superseded. See `compliance-closeout-2026-11-07.md` for the current branch integration, security/storage/supplier evidence and remaining decisions.

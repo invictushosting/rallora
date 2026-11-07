@@ -11,7 +11,7 @@ const options=[
  ["portability","Request portable data"],
  ["restriction","Restrict processing"],
  ["objection","Object to processing"],
- ["other","Another privacy request"]
+ ["other","Privacy complaint or another privacy request"]
 ] as const;
 
 export default function PrivacyRequests(){
@@ -53,7 +53,7 @@ export default function PrivacyRequests(){
  }
  return <main style={{maxWidth:740,margin:"0 auto",padding:"48px 24px",lineHeight:1.6}}>
    <Link href="/account">← Back to account</Link><h1>Privacy and your information</h1>
-   <p>Ask to access, correct, export or delete personal information associated with Rallora. Read our <Link href="/privacy">privacy information</Link>.</p>
+   <p>Ask to access, correct, export or delete personal information associated with Rallora, or raise a privacy complaint. Read our <Link href="/privacy">privacy information</Link>.</p>
    <p>Requests are reviewed by a person. Account deletion is <strong>not automatic</strong>: we may need to verify identity, consult relevant clubs and retain records required by law.</p>
    {signedIn===false?<p>To use your account request history, <Link href="/login">sign in</Link>. You can also contact <a href="mailto:support@rallora.app">support@rallora.app</a> without a Rallora account.</p>:signedIn===null?<p>Checking your session…</p>:<>
    <form onSubmit={submit} style={{display:"grid",gap:12}}>

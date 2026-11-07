@@ -1,0 +1,26 @@
+-- Standalone synthetic database for the support-safety CI job. No production data.
+create role anon nologin;
+create role authenticated nologin;
+create role service_role nologin bypassrls;
+create schema auth;
+create schema storage;
+create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz,last_sign_in_at timestamptz);
+create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+grant usage on schema public,auth,storage to anon,authenticated,service_role;
+grant execute on function auth.uid() to anon,authenticated,service_role;
+create table public.clubs(id uuid primary key,name text,slug text);
+create table public.seasons(id uuid primary key,club_id uuid,name text);
+create table public.divisions(id uuid primary key,season_id uuid,name text);
+create table public.teams(id uuid primary key,division_id uuid,is_active boolean,player_one_name text,player_two_name text,player_one_email text,player_two_email text);
+create table public.fixtures(id uuid primary key,home_team_id uuid,away_team_id uuid,status text,available_from date);
+create table public.rallora_platform_admins(user_id uuid primary key);
+create table public.rallora_player_profiles(user_id uuid primary key,display_name text,playtomic_email text);
+create table public.rallora_team_roster_memberships(team_id uuid,player_user_id uuid);
+create table public.rallora_team_member_invites(id uuid primary key,invited_email text,invited_name text,status text,claimed_at timestamptz,team_id uuid,club_id uuid,season_id uuid,created_at timestamptz default now());
+create table public.rallora_team_applications(requested_by uuid,partner_email text,created_team_id uuid,status text,captain_name text,partner_name text,club_id uuid,season_id uuid);
+create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
+create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text,name text);
+alter table storage.objects enable row level security;
+create function storage.foldername(text) returns text[] language sql immutable as $$select string_to_array($1,'/')$$;
+grant select on public.rallora_platform_admins to authenticated;
+grant select,insert,delete on storage.objects to authenticated;

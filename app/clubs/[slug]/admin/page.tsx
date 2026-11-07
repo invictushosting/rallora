@@ -408,7 +408,7 @@ export default function ClubAdministration() {
         <a href="#club-sponsors">Sponsors</a>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/staff`}>Club staff</Link>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/reminders`}>Notifications & reminders</Link>
-        <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/captain`}>Captain centre</Link>
+        <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/captain`}>Match centre</Link>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/events`}>Events</Link>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/social`}>Social Studio</Link>
         <Link href={`/clubs/${encodeURIComponent(view.club.slug)}/admin/integrations`}>Integrations {view.playtomicConnected ? "✓" : ""}</Link>

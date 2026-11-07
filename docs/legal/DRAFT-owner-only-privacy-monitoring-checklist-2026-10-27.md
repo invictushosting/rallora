@@ -2,20 +2,10 @@
 
 **Operational model:** Protego business owner is the sole nominated Rallora privacy contact. No deputy is nominated or implied. This is not a statutory DPO appointment. **Not active until mailbox, access and coverage controls are verified.**
 
-## Mailbox status update — 4 November 2026
-The owner approved recording this high-level status in draft PR #245:
-- Correct business inbox access verified.
-- Historical external mail receipt at the support address confirmed.
-- Fresh external receipt and a reply from the support address remain unverified.
-- LEG-09 remains BLOCKED pending that test and the separate monitoring/continuity controls.
-No message details or headers are included. No email, mail-setting or permission changes were made. The 27 October failed-test report below is historical and does not establish a current routing fault.
+## Verified mailbox checkpoint — 4 November 2026
+The owner confirmed the external receive-and-reply test was completed and approved recording it in PR #245. Evidence: https://github.com/invictushosting/rallora/pull/245#issuecomment-6633360007 . Earlier failed/incomplete observations are superseded. Do not repeat the mailbox test as an outstanding requirement. No credentials, message bodies or headers are recorded here.
 
-## Current access evidence
-- Connected Gmail profile verified 27 October 2026: personal Gmail account, **not** `support@rallora.app`.
-- Search of connected account for messages `to:support@rallora.app` returned none. This cannot establish whether Rallora support mailbox exists, delivers mail, or is accessible in the owner's separate Workspace account.
-- No mailbox passwords, forwarded mail, aliases, admin permissions, delivery rules, or production settings were changed.
-- **Owner-reported mailbox test (27 October 2026):** test message to `support@rallora.app` **NOT RECEIVED**; reply from support address **NOT TESTED**. This is a failed/incomplete operational verification, not proof that DNS or mail routing is broken. Investigate recipient account, aliases/groups, spam, message trace and MX records without changing production configuration blindly.
-- Required verification: owner personally opens the mailbox using the intended Workspace account; demonstrates reading an independently sent non-sensitive test message and successfully replying. Record date, headers/address used, and whether it is a group, mailbox or alias. Avoid sharing passwords or real player details.
+Queue access, daily review logs, failure escalation and owner-only continuity remain unverified. Receiving a test message does not demonstrate those separate operating controls.
 
 ## Routine owner checklist
 - [ ] Every business day, open `support@rallora.app`, including requests received during weekends or holidays.
@@ -36,7 +26,7 @@ No message details or headers are included. No email, mail-setting or permission
 ## Pre-release evidence and sign-off
 | Control | Owner's evidence | Status |
 |---|---|---|
-| Mailbox can receive and send from `support@rallora.app` | Business inbox access and historical external receipt confirmed 4 November; fresh receive/reply outstanding | **BLOCKED — FRESH RECEIVE/REPLY UNVERIFIED** |
+| Mailbox can receive and send from `support@rallora.app` | Owner-confirmed external receive/reply, recorded in PR #245 on 4 November | **COMPLETE — owner-confirmed test** |
 | Sole operator has restricted admin access to privacy queue | Authenticated non-production test and production release validation | UNVERIFIED |
 | Daily check habit and secure request register | Owner acceptance of checklist and restricted location | OPEN |
 | Legal deadline determination and data fulfilment | Counsel-reviewed process and club controller contacts | OPEN |

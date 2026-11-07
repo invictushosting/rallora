@@ -5,7 +5,7 @@ Date: 27 October 2026. **NOT FOR SIGNATURE OR PUBLICATION.**
 Request an independent UK solicitor review of Rallora's SaaS player and club operating model before any new legal text is shown to live users. Protego Solutions Ltd is identified in existing drafts as the operator; company identity, registered details, scope and signatory must be verified by the client. No legal opinion, policy approval or assignment of staff responsibility is recorded here.
 
 ## Proposed counsel instruction
-Please review the linked drafts for UK GDPR, Data Protection Act 2018, PECR, UK consumer/e-commerce terms where relevant and the commercial pilot arrangement. Return redlines, a purpose-by-purpose controller/processor matrix, obligations and responsibilities, lawful-basis analysis, a defensible retention schedule, UK transfer analysis, a list of missing vendor DPA evidence, account/child/safeguarding terms, and precise changes needed to make them ready for publication and signature.
+Please review the linked drafts for UK GDPR, Data Protection Act 2018 and PECR as amended by the Data (Use and Access) Act 2025, UK consumer/e-commerce terms where relevant and the commercial pilot arrangement. Return redlines, a purpose-by-purpose controller/processor matrix, obligations and responsibilities, lawful-basis analysis, a defensible retention schedule, UK transfer analysis, a list of missing vendor DPA evidence, account/child/safeguarding terms, and precise changes needed to make them ready for publication and signature.
 
 ## Files for legal reviewer
 1. `app/privacy/page.tsx` — public privacy notice, **not publishable**: roles, purposes/bases, recipients/transfers and retention incomplete.
@@ -31,7 +31,7 @@ Please review the linked drafts for UK GDPR, Data Protection Act 2018, PECR, UK 
 ## Operational responsibility chart — owner-only privacy contact, no backup nominated
 | Role to nominate | Day-to-day duty | Backup requirement | Acceptance evidence |
 |---|---|---|---|
-| Protego business owner — sole operational privacy contact explicitly confirmed 27 October 2026; formal identity and mailbox access to verify | Monitor `support@rallora.app` and authenticated privacy queue each business day; triage requests; set actual due dates; route club-controlled cases | **No backup nominated; continuity risk OPEN** | Verify name/contact, mailbox read/reply access, daily check controls, absence contingency and counsel review |
+| Protego business owner — sole operational privacy contact explicitly confirmed 27 October 2026; formal identity and mailbox access to verify | Monitor `support@rallora.app` and authenticated privacy queue each business day; triage requests; set actual due dates; route club-controlled cases | **No backup nominated; continuity risk OPEN** | Verify name/contact, owner-confirmed mailbox test completed 4 November; verify daily check controls, absence contingency and counsel review |
 | Protego security/engineering lead | Review privacy notification outbox failures, worker logs, privileged access, backup/restore tests, incident response | Named technical backup | Test evidence and incident escalation |
 | Club controller contact | Approve league-related rights decisions, retention and sporting records; supply verified instructions | Club deputy | Contract schedule, named contact and escalation method |
 | Protego commercial contract owner | Approve plan/pilot fee, invoicing/VAT, cancellation, term and signatory | Contract delegate | Approved order form and contract version |
@@ -63,3 +63,6 @@ The business owner explicitly confirmed they are the **only** operational privac
 
 ## Release conclusion
 **NO-GO.** This brief solicits decisions; it does not constitute legal sign-off. Final approved terms version and existing-user journey, monitored case handling, real managed Auth / email tests and explicit release authorisation remain prerequisites.
+
+## Updated evidence — 7 November 2026
+Owner-confirmed mailbox receive/reply is complete; do not treat earlier failed observations as current. GSM and Carbon are confirmed pilot clubs; legal entity/signatory and individual pilot schedules still need verification. Review the new closeout, supplier, browser-storage and production-security evidence records. The branch now includes all-player booking/result actions, current match chat, support screenshots and incoming email threading. Evaluate complaints handling under the DUAA and distinguish its acknowledgement deadline from rights-request response deadlines.

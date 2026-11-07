@@ -3,19 +3,17 @@
 **Decision: NOT APPROVED FOR PUBLICATION, EXECUTION OR PRODUCTION DEPLOYMENT.** This register tracks unanswered questions and necessary evidence. It is not legal advice and no owner or sign-off is implied.
 
 
-## Mailbox status update — 4 November 2026
-The owner approved recording this high-level status in draft PR #245:
-- Correct business inbox access verified.
-- Historical external mail receipt at the support address confirmed.
-- Fresh external receipt and a reply from the support address remain unverified.
-- LEG-09 remains BLOCKED pending that test and the separate monitoring/continuity controls.
-No message details or headers are included. No email, mail-setting or permission changes were made. The 27 October failed-test report below is historical and does not establish a current routing fault.
+## Mailbox verification — completed 4 November 2026
+The owner confirmed completion of the independent external receive-and-reply test and explicitly approved recording it in PR #245. See https://github.com/invictushosting/rallora/pull/245#issuecomment-6633360007 . This supersedes earlier incomplete/failed observations. No private message details are retained here. LEG-09 remains OPEN for daily monitoring, case handling and owner-only continuity evidence; the mailbox test itself is COMPLETE.
+
+## Current completion evidence — 7 November 2026
+See `compliance-closeout-2026-11-07.md`, `production-security-evidence-2026-11-07.md`, `storage-and-cookie-audit-2026-11-07.md` and `supplier-evidence-register-2026-11-07.md`. Current main is integrated, including support replies and all-player match actions. These records close evidence tasks only, not legal or business approvals.
 
 ## Resumption checkpoint — 4 November 2026
 See `docs/legal/compliance-resumption-2026-11-04.md` for verified PR/CI state, integration work and ordered next actions. October mailbox and production-schema observations remain historical evidence, not fresh verification. All legal approvals remain open.
 
-## Owner-only control checklist and current mailbox status
-See `docs/legal/DRAFT-owner-only-privacy-monitoring-checklist-2026-10-27.md` for the owner-only daily checks, absence and account-recovery plan, and pre-release evidence. The connected personal Gmail account is **not** the Rallora support mailbox; owner reported **no receipt** of a test message to `support@rallora.app` on 27 October, and **did not test sending** from that address. Mailbox function remains a **release blocker**; owner access to the correct mailbox still requires verification. The owner must demonstrate the separate intended mailbox access; no Google Workspace settings or forwarding have been changed.
+## Owner-only control checklist
+The owner remains the sole nominated operational privacy contact. Mailbox receive/reply verification is complete. Daily review, secure case tracking and absence/account-recovery arrangements remain open in `DRAFT-owner-only-privacy-monitoring-checklist-2026-10-27.md`. No deputy or new access grant is implied.
 
 ## External legal handoff
 The review brief and *partially assigned* operational responsibility matrix are in `docs/legal/DRAFT-solicitor-review-handoff-2026-10-27.md`. It identifies all source drafts, counsel questions, business inputs, and required acceptance evidence. The Protego business owner explicitly confirmed they will serve as the **sole** operational privacy contact. No deputy will be nominated under the present arrangement. Formal identity/contact for records, mailbox/admin access, daily monitoring and owner-absence contingency remain unverified; this does not appoint a statutory DPO.
@@ -45,7 +43,7 @@ The review brief and *partially assigned* operational responsibility matrix are 
 | LEG-06 | Provider privacy lead + clubs + counsel | Set explicit active/inactive account, league, results, support, data subject rights, audit/event and backup retention + disposal periods; legal holds and club export/return on exit | Privacy notice + DPA + release |
 | LEG-07 | Club pilot owners + commercial lead + counsel | Complete plans, trial start/end, price/VAT, renewal, cancellation, SLA/support, liability/indemnities, governing law, logo publicity rights and signatories; zero-cost pilot cannot become charged without affirmative agreement | Club agreement |
 | LEG-08 | Product lead + safeguarding/privacy counsel | Approve minimum age, any juniors/safeguarding controls, user-generated content/moderation, player photos/social visibility, sporting disputes, appeals and Playtomic integration rights | Terms + notice |
-| LEG-09 | Protego business owner (sole nominated privacy contact) | **BLOCKED: business inbox access and historical external receipt confirmed; fresh receive/reply remains unverified.** Verify support@rallora.app recipient setup, message tracing and successful receive/reply test; then confirm daily queue reviews, owner-only absence/loss-of-access contingency, missed-mail escalation, identity procedure, service response timelines, secure exports/deletions and incident/breach process. **No deputy assigned; continuity risk unresolved.** | Privacy requests |
+| LEG-09 | Protego business owner (sole nominated privacy contact) | **Mailbox receive/reply COMPLETE, confirmed by owner on 4 November.** Confirm daily queue reviews, owner-only absence/loss-of-access contingency, missed-mail escalation, identity procedure, service response timelines, secure exports/deletions and incident/breach process. **No deputy assigned; continuity risk unresolved.** | Privacy requests |
 | LEG-10 | Engineering lead + security reviewer | Independently assess worker-token RPC execution grants, outbox failures, Resend idempotency, endpoint schedule and no sensitive data leaks; exercise real Auth and mail via isolated environment | Notification deploy |
 | LEG-11 | Product + privacy counsel | Finalise Terms publication version/hash and recorded acceptance wording, renewal process for existing accounts and version mismatch policies; distinguish contract acceptance from GDPR consent | Signup release |
 | LEG-12 | Release owner + DBA/security | Obtain restorable backup, non-production Auth test environment, migration rehearsal, rollback drill, production smoke checklist and explicit authorisation | Deploy |

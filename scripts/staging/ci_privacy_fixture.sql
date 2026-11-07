@@ -24,3 +24,10 @@ create schema if not exists rallora_private;
 create table rallora_private.delivery_worker_config(singleton boolean primary key default true,token text);
 insert into rallora_private.delivery_worker_config(singleton,token)
 values (true,repeat('a',64));
+
+-- Model pre-existing invoker/RLS schema dependencies used by chat and workers.
+grant usage on schema rallora_private to anon, authenticated;
+create function rallora_private.ci_existing_access_probe() returns boolean
+language sql security invoker set search_path='' as $$ select true $$;
+revoke all on function rallora_private.ci_existing_access_probe() from public;
+grant execute on function rallora_private.ci_existing_access_probe() to anon, authenticated;
