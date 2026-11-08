@@ -47,11 +47,10 @@ type Fixture = {
   home_team_id: string; away_team_id: string;
   play_by: string; week_number: number;
   home_player_names:(string|null)[]|null;away_player_names:(string|null)[]|null;
-  fixture_group_name: string | null; status: string; court: string | null;
+  fixture_group_name: string | null; status: string;
   available_from: string | null;
   arrangement_status: "not_arranged" | "possible" | "arranged" | "in_progress" | "result_required" | "cancelled";
-  booking_starts_at: string | null; booking_ends_at: string | null;
-  booking_type: string | null; booking_court: string | null; booking_matched_players: number | null;
+  booking_type: string | null; booking_matched_players: number | null;
 };
 type Result = {
   fixture_id: string; home_score: string | null;
@@ -248,7 +247,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
       try {
         const today = new Date().toISOString().slice(0, 10);
         const fixtureQuery = supabase.from("fixtures")
-          .select("id,season_id,division_id,home_team_id,away_team_id,play_by,week_number,home_player_names,away_player_names,fixture_group_name,status,court,available_from,arrangement_status,booking_starts_at,booking_ends_at,booking_type,booking_court,booking_matched_players")
+          .select("id,season_id,division_id,home_team_id,away_team_id,play_by,week_number,home_player_names,away_player_names,fixture_group_name,status,available_from,arrangement_status,booking_type,booking_matched_players")
           .eq("season_id", verifiedSeasonId);
         const [divisionReply, fixtureReply, standingReply, cupReply, manualReply] =
           await Promise.all([
@@ -388,7 +387,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
       teamLabelsById.get(fixture.away_team_id),
       fixturePlayerLabel(fixture, fixture.home_team_id, teamNames.get(fixture.home_team_id) ?? "Players"),
       fixturePlayerLabel(fixture, fixture.away_team_id, teamNames.get(fixture.away_team_id) ?? "Players"),
-      fixture.fixture_group_name, fixture.court, fixture.booking_court,
+      fixture.fixture_group_name,
       `Round ${fixture.week_number}`, `Week ${fixture.week_number}`,
     ]));
   const sortedFixtures = [...fixturesForTab].sort((a, b) =>
@@ -400,30 +399,17 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
   const filteredDivisions = data.divisions.filter((division) =>
     divisionFilter === "all" || division.id === divisionFilter);
 
-  function bookingLabel(value: string | null) {
-    if (!value) return "";
-    const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? "" : new Intl.DateTimeFormat("en-GB", {
-      weekday:"short", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit",
-    }).format(date);
-  }
-  function bookingDuration(start: string | null, end: string | null) {
-    if (!start || !end) return "";
-    const minutes = Math.round((new Date(end).getTime()-new Date(start).getTime())/60000);
-    return minutes > 0 ? `${minutes} mins` : "";
-  }
   function arrangementPanel(fixture: Fixture) {
-    const status = fixture.booking_type==="MANUAL" && fixture.booking_ends_at && new Date(fixture.booking_ends_at)<new Date() ? "result_required"
-      : fixture.booking_type==="MANUAL" && fixture.booking_starts_at && new Date(fixture.booking_starts_at)<new Date() ? "in_progress" : fixture.arrangement_status || "not_arranged";
+    const status = fixture.arrangement_status || "not_arranged";
     const arranged = ["arranged","in_progress","result_required"].includes(status);
     const title = status==="possible" ? "Possible booking found" : status==="cancelled" ? "Booking cancelled" :
       status==="result_required" ? "Match played · result required" : status==="in_progress" ? "Match in progress" :
       arranged ? "Match arranged" : "Match not arranged";
     const detail = arranged || status==="possible"
-      ? [bookingLabel(fixture.booking_starts_at), fixture.booking_court, bookingDuration(fixture.booking_starts_at,fixture.booking_ends_at)].filter(Boolean).join(" · ")
+      ? "Players and organisers can view booking details in Match chat."
       : status==="cancelled" ? "This fixture needs rearranging" : `No matching Playtomic booking detected · Play by ${dateLabel(fixture.play_by)}`;
     const meta = status==="possible" ? `${fixture.booking_matched_players ?? 0}/4 players matched · Club review required` :
-      arranged && fixture.booking_type==="MANUAL" ? "Agreed booking recorded by a captain" :
+      arranged && fixture.booking_type==="MANUAL" ? "Agreed booking recorded" :
       arranged ? `${fixture.booking_type==="OPEN_MATCH" ? "Open Match" : "Playtomic booking"} · ${fixture.booking_matched_players ?? 4}/4 players matched` :
       status==="cancelled" ? "Arrange another match in Playtomic" : "Arrange your match in Playtomic";
     const bookingUrl = safeLink(club.booking_url);
@@ -466,7 +452,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
       {!resolved && arrangementPanel(fixture)}
       {(chatAccess.manager || chatAccess.teamIds.has(fixture.home_team_id) || chatAccess.teamIds.has(fixture.away_team_id)) && <div className={styles.fixtureBottom}><Link className={styles.bookingAction} href={`/clubs/${slug}/matches/${fixture.id}`}>Match chat</Link></div>}
       {(resolved || fixture.status === "disputed") && <div className={styles.fixtureBottom}>
-        <span>{resolved ? (fixture.booking_court || fixture.court || "Match complete") : "Result under review"}</span>
+        <span>{resolved ? "Match complete" : "Result under review"}</span>
         <span className={resolved ? styles.confirmed : styles.fixtureStatus}>
           {resolved ? "Final" : "Under review"}
         </span>
@@ -501,7 +487,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
       away: fixturePlayerLabel(fixture,fixture.away_team_id,teamLabel(fixture.away_team_id, teamNames)),
       playBy: fixture.play_by.slice(0, 10),
       week: fixture.week_number,
-      court: fixture.court,
+      court: null,
       ...(isConfirmed(result)
         ? { score: `${result?.home_score ?? "–"} : ${result?.away_score ?? "–"}` }
         : {}),

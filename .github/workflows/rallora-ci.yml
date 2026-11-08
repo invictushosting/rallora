@@ -197,6 +197,11 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_delivery_worker_schema_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261106081243_all_player_match_actions.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_all_player_match_actions_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_public_field_privacy_schema.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261107235702_protect_team_contacts_and_fixture_locations.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261108000143_restrict_public_team_and_fixture_columns.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_public_field_privacy_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_all_player_match_actions_assertions.sql
 
   support-safety:
     runs-on: ubuntu-latest
