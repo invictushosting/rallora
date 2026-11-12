@@ -584,8 +584,8 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
     const notes = String(fields.get("recovery_notes") ?? "").trim();
     await submit(async () => {
       if (!recoveredFixture) throw new Error("Choose an editable fixture to resolve.");
-      if (!home || !away || !winner) throw new Error("Enter both scores and choose the winning pairing.");
-      const { error: mutationError } = await supabase.rpc("rallora_admin_resolve_result", { p_fixture_id: recoveryFixture.trim(), p_home_score: home, p_away_score: away, p_winner_team_id: winner, p_notes: notes || null });
+      if (!home || !away || !winner) throw new Error("Enter both scores and choose the winning pairing or Draw.");
+      const { error: mutationError } = await supabase.rpc("rallora_admin_resolve_result", { p_fixture_id: recoveryFixture.trim(), p_home_score: home, p_away_score: away, p_winner_team_id: winner === "draw" ? null : winner, p_notes: notes || null });
       if (mutationError) throw mutationError;
       setRecoveryHome(""); setRecoveryAway(""); setRecoveryWinner(""); setRecoveryNotes("");
     }, "Official result saved and standings recalculated.");
@@ -895,7 +895,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       <label className={styles.wide}>Result fixture<select value={recoveryFixture} onChange={event => {
         const fixture = recoveryOptions.find(item => item.id === event.target.value);
         setRecoveryFixture(event.target.value); setRecoveryHome(fixture?.home_score ?? ""); setRecoveryAway(fixture?.away_score ?? "");
-        setRecoveryWinner(fixture?.winner_team_id ?? ""); setRecoveryNotes("");
+        setRecoveryWinner(fixture?.winner_team_id ?? (fixture?.home_score && fixture?.away_score ? "draw" : "")); setRecoveryNotes("");
       }}><option value="">Choose fixture</option>{recoveryOptions.map(fixture => {
         const division = divisions.find(item => item.id === fixture.division_id);
         const label = (id: string) => { const team = division?.teams.find(item => item.id === id); return [team?.player_one_name,team?.player_two_name].filter(Boolean).join(" / ") || team?.name || "Players"; };
@@ -903,7 +903,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       })}</select></label>
       <label>Official home score<input name="recovery_home" required maxLength={100} value={recoveryHome} onChange={event=>setRecoveryHome(event.target.value)} /></label>
       <label>Official away score<input name="recovery_away" required maxLength={100} value={recoveryAway} onChange={event=>setRecoveryAway(event.target.value)} /></label>
-      <label>Official winner<select name="recovery_winner" required value={recoveryWinner} onChange={event=>setRecoveryWinner(event.target.value)}><option value="">Choose winner</option>{recoveryTeams.filter(team=>team.id===recoveredFixture?.home_team_id||team.id===recoveredFixture?.away_team_id).map(team=><option key={team.id} value={team.id}>{[team.player_one_name,team.player_two_name].filter(Boolean).join(" / ")||team.name}</option>)}</select></label>
+      <label>Official outcome<select name="recovery_winner" required value={recoveryWinner} onChange={event=>setRecoveryWinner(event.target.value)}><option value="">Choose outcome</option><option value="draw">Draw</option>{recoveryTeams.filter(team=>team.id===recoveredFixture?.home_team_id||team.id===recoveredFixture?.away_team_id).map(team=><option key={team.id} value={team.id}>{[team.player_one_name,team.player_two_name].filter(Boolean).join(" / ")||team.name}</option>)}</select></label>
       <label>Recovery note<input name="recovery_notes" maxLength={1000} value={recoveryNotes} onChange={event=>setRecoveryNotes(event.target.value)} /></label>
       <button type="submit" disabled={busy||!recoveredFixture}>Save official result</button>
       <button type="button" className={styles.danger} disabled={busy||recoveredFixture?.status!=="confirmed"} onClick={()=>void reopenFixture()}>Reopen official result</button>

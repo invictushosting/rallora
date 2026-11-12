@@ -2,11 +2,11 @@ export const OFFICIAL_RESULT_STATUSES = ["confirmed", "admin_override"];
 
 export type CaptainSubmission = {
   id: string; fixture_id: string; submitting_team_id: string; submitted_by_user_id: string;
-  home_score: string | null; away_score: string | null; notes: string | null;
+  home_score: string | null; away_score: string | null; winner_team_id: string | null; notes: string | null;
   dispute_note: string | null; status: string; updated_at: string;
 };
 export type OfficialResult = {
-  fixture_id: string; home_score: string | null; away_score: string | null; status: string;
+  fixture_id: string; home_score: string | null; away_score: string | null; winner_team_id: string | null; status: string;
 };
 
 export function captainResultState(fixture: { id: string; status: string }, teamId: string,
