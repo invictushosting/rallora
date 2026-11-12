@@ -353,9 +353,9 @@ export default function ClubSocialStudio() {
       await new Promise<void>((resolve, reject) => {
         logo.onload = () => resolve();
         logo.onerror = () => reject(new Error("Could not load Rallora artwork."));
-        logo.src = "/brand/rallora-horizontal-dark.svg";
+        logo.src = "/brand/rallora-logo-dark.svg";
       });
-      ctx.drawImage(logo, 75, height - 152, 290, 83);
+      ctx.drawImage(logo, 75, height - 152, 290, Math.round(290 * 230 / 980));
       ctx.fillStyle = "#b9d3e9"; ctx.font = "24px Arial";
       ctx.textAlign = "right"; ctx.fillText("YOUR CLUB. YOUR GAME.", 1005, height - 105);
       const href = canvas.toDataURL("image/png");
