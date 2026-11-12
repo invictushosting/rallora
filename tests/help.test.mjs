@@ -79,3 +79,15 @@ test('late registration help explains admin permissions and fixtures', () => {
   assert.equal(suggestedHelp('/clubs/gsm-padel/admin/late-entry')[0],'add-late-team');
   assert.equal(suggestedHelp('/clubs/gsm-padel/admin/registrations')[0],'add-late-team');
 });
+
+
+test('draw questions find player instructions and explain confirmation and points', () => {
+ const article=searchHelp('draw')[0];
+ assert.equal(article.slug,'submit-and-confirm-results');
+ assert.equal(helpAnswerSection(article,'draw').id,'draw');
+ const text=JSON.stringify(article.sections.find(s=>s.id==='draw'));
+ assert.match(text,/Match outcome/);
+ assert.match(text,/opposing player must confirm/);
+ assert.match(text,/configured draw points/);
+ assert.match(JSON.stringify(HELP_ARTICLES.find(a=>a.slug==='club-results')),/Official outcome/);
+});

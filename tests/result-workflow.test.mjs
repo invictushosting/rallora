@@ -44,3 +44,18 @@ test('either opposing player can review while neither submitting teammate can',(
  for(const user of ['submitting-captain','submitting-partner'])assert.equal(captainResultState(fixture,'away',user,'active',[pending],[]).needsReview,false);
  for(const status of ['forfeit','double_forfeit','cancelled'])assert.equal(captainResultState({...fixture,status},'home','opponent-partner','active',[pending],[]).action,false);
 });
+
+
+test('a drawn submission requires an opponent and remains actionable until confirmed',()=>{
+ const draw={...pending,winner_team_id:null,home_score:'6, 4',away_score:'4, 6'};
+ const review=state([draw]);
+ assert.equal(review.needsReview,true);
+ assert.equal(review.confirmed,false);
+ assert.equal(review.submission.winner_team_id,null);
+ assert.equal(captainResultState(fixture,'away','partner-b','active',[draw],[]).needsReview,false);
+ const official={fixture_id:'match',home_score:'6, 4',away_score:'4, 6',winner_team_id:null,status:'confirmed'};
+ const confirmed=state([draw],[official]);
+ assert.equal(confirmed.confirmed,true);
+ assert.equal(confirmed.needsReview,false);
+ assert.equal(confirmed.official.winner_team_id,null);
+});

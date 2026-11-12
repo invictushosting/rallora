@@ -80,6 +80,38 @@ begin
  if (select count(distinct recipient_user_id) from public.rallora_notifications where source_submission_id=submission and notification_type='result_confirmed_by_opponent')<>4 then raise exception 'Result update not sent to all four'; end if;
  if not exists(select 1 from public.rallora_fixture_player_actions where fixture_id=f and actor_user_id=home_partner and action='booking_recorded')
   or not exists(select 1 from public.rallora_fixture_player_actions where fixture_id=f and actor_user_id=away_partner and action='result_confirmed_by_opponent') then raise exception 'Action audit history missing'; end if;
+ -- Draws follow the same opposing-player confirmation flow and configured points.
+ insert into public.club_rules(id,club_id,season_id,draw_points) values(gen_random_uuid(),club,s,2);
+ insert into public.fixtures(season_id,division_id,home_team_id,away_team_id,week_number,play_by,available_from,status) values(s,d,h,a,3,current_date+7,current_date,'open') returning id into f;
+ perform set_config('request.jwt.claim.sub',home_partner::text,true);
+ set local role authenticated;
+ submission:=public.rallora_submit_captain_result(f,'6, 4','4, 6',null,'Draw');
+ if not exists(select 1 from public.result_submissions where id=submission and winner_team_id is null and status='pending_opponent') then raise exception 'Draw submission missing'; end if;
+ reset role;
+ if exists(select 1 from public.results where fixture_id=f) then raise exception 'Draw official before opponent confirmation'; end if;
+ if exists(select 1 from public.standings where season_id=s and drawn<>0) then raise exception 'Pending draw awarded points'; end if;
+ perform set_config('request.jwt.claim.sub',away_partner::text,true);
+ set local role authenticated;
+ perform public.rallora_review_captain_result(submission,'confirm');
+ reset role;
+ if not exists(select 1 from public.results where fixture_id=f and winner_team_id is null and status='confirmed') then raise exception 'Confirmed draw missing'; end if;
+ if (select count(*) from public.standings where season_id=s and team_id in(h,a) and played=2 and drawn=1)<>2 then raise exception 'Draw not counted once for both teams'; end if;
+ if not exists(select 1 from public.standings where season_id=s and team_id=h and points=5 and won=1 and lost=0)
+  or not exists(select 1 from public.standings where season_id=s and team_id=a and points=2 and won=0 and lost=1) then raise exception 'Configured draw points incorrect'; end if;
+ -- Organisers can correct a draw to a win and a win back to a draw.
+ perform set_config('request.jwt.claim.sub',admin_id::text,true);
+ set local role authenticated;
+ perform public.rallora_admin_resolve_result(f,'6, 6','4, 4',h,'Corrected to win');
+ reset role;
+ if exists(select 1 from public.standings where season_id=s and drawn<>0) then raise exception 'Draw retained after correction to win'; end if;
+ if not exists(select 1 from public.standings where season_id=s and team_id=h and won=2 and points=6) then raise exception 'Win points not restored'; end if;
+ set local role authenticated;
+ perform public.rallora_admin_resolve_result(f,'6, 4','4, 6',null,'Corrected to draw');
+ reset role;
+ if not exists(select 1 from public.results where fixture_id=f and winner_team_id is null and status='admin_override') then raise exception 'Admin draw missing'; end if;
+ if (select count(*) from public.standings where season_id=s and team_id in(h,a) and played=2 and drawn=1)<>2
+  or not exists(select 1 from public.standings where season_id=s and team_id=h and points=5)
+  or not exists(select 1 from public.standings where season_id=s and team_id=a and points=2) then raise exception 'Draw correction duplicated points'; end if;
  -- Fresh fixture exercises an opposing partner dispute and its audit identity.
  insert into public.fixtures(season_id,division_id,home_team_id,away_team_id,week_number,play_by,available_from,status) values(s,d,h,a,2,current_date+7,current_date,'open') returning id into f;
  perform set_config('request.jwt.claim.sub',home_cap::text,true);
