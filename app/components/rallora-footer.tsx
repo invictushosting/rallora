@@ -14,6 +14,9 @@ export default function RalloraFooter({ club = "", note }: { club?: string; note
         <nav aria-label="Footer navigation">
           <Link href={helpHref("", slug)}>Help &amp; guides</Link>
           {slug && <><Link href={`/clubs/${slug}`}>League centre</Link><Link href={`/clubs/${slug}/admin`}>Club administration</Link></>}
+          <Link href="/privacy">Privacy</Link>
+          <Link href="/terms">Player terms</Link>
+          <Link href="/cookies">Cookies</Link>
           <a href="mailto:support@rallora.app">Contact support</a>
         </nav>
         <span className={styles.copyright}>© {new Date().getFullYear()} Rallora · A Protego Solutions product.</span>

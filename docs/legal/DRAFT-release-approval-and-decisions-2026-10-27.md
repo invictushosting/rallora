@@ -1,0 +1,84 @@
+# Rallora legal and operational release sign-off pack — 27 October 2026
+
+**Decision: NOT APPROVED FOR PUBLICATION, EXECUTION OR PRODUCTION DEPLOYMENT.** This register tracks unanswered questions and necessary evidence. It is not legal advice and no owner or sign-off is implied.
+
+
+## Mailbox verification — completed 4 November 2026
+The owner confirmed completion of the independent external receive-and-reply test and explicitly approved recording it in PR #245. See https://github.com/invictushosting/rallora/pull/245#issuecomment-6633360007 . This supersedes earlier incomplete/failed observations. No private message details are retained here. LEG-09 remains OPEN for daily monitoring, case handling and owner-only continuity evidence; the mailbox test itself is COMPLETE.
+
+## Current completion evidence — 7 November 2026
+See `compliance-closeout-2026-11-07.md`, `production-security-evidence-2026-11-07.md`, `storage-and-cookie-audit-2026-11-07.md` and `supplier-evidence-register-2026-11-07.md`. Current main is integrated, including support replies and all-player match actions. Owner decisions on 7 November: include under-18s and keep public league pages; minimum age is 16. Junior-specific controls and age assurance remain open. ICO reference ZC281332 for Protego Solutions Ltd is verified from the ICO confirmation email of 22 October 2026; current register certificate/expiry remains to be checked. These records close evidence tasks only, not legal or business approvals.
+
+## Resumption checkpoint — 4 November 2026
+See `docs/legal/compliance-resumption-2026-11-04.md` for verified PR/CI state, integration work and ordered next actions. October mailbox and production-schema observations remain historical evidence, not fresh verification. All legal approvals remain open.
+
+## Owner-only control checklist
+The owner remains the sole nominated operational privacy contact. Mailbox receive/reply verification is complete. Daily review, secure case tracking and absence/account-recovery arrangements remain open in `DRAFT-owner-only-privacy-monitoring-checklist-2026-10-27.md`. No deputy or new access grant is implied.
+
+## External legal handoff
+The review brief and *partially assigned* operational responsibility matrix are in `docs/legal/DRAFT-solicitor-review-handoff-2026-10-27.md`. It identifies all source drafts, counsel questions, business inputs, and required acceptance evidence. The Protego business owner explicitly confirmed they will serve as the **sole** operational privacy contact. No deputy will be nominated under the present arrangement. Formal identity/contact for records, mailbox/admin access, daily monitoring and owner-absence contingency remain unverified; this does not appoint a statutory DPO.
+
+## Source drafts / release scope
+- Player notice: `app/privacy/page.tsx`
+- Player terms: `app/terms/page.tsx`
+- Cookie notice: `app/cookies/page.tsx`
+- Club SaaS + pilot agreement: `docs/legal/DRAFT-club-saas-and-pilot-agreement.md`
+- Article 28 club DPA: `docs/legal/DRAFT-data-processing-agreement.md`
+- Processing inventory: `docs/legal/processing-inventory-working.md`
+- Operational rights requests: `docs/legal/DRAFT-privacy-rights-operations-sop.md`
+- Release runbook: `docs/legal/compliance-release-runbook-2026-10-27.md`
+
+## Working decision worksheet
+`docs/legal/DRAFT-retention-and-role-mapping-2026-10-27.md` contains proposed role allocations and possible retention review approaches, grounded in read-only schema evidence. **Six retention proposals are owner-approved for club/legal review on 7 November; final policy and deletion timers remain unapproved.** LEG-02, LEG-06 and LEG-09 remain OPEN pending named business leads, club controller instructions and counsel review.
+
+## Required decisions (all OPEN until evidence + responsible person's approval)
+
+| ID | Approval owner / accountable role (to nominate) | Question and evidence required | Blocks |
+|---|---|---|---|
+| LEG-01 | Protego company decision-maker + UK privacy counsel | Validate Protego's exact legal entity and address, contact and any DPO/UK representative necessity; confirm privacy inbox staffed | Notices + contracts |
+| LEG-02 | Provider and club controller contacts + privacy counsel | Map controller/processor/any joint roles across account, league administration, results, support, billing, player discovery and Rallora Social; log written instructions | Privacy notice + DPA |
+| LEG-03 | Provider privacy counsel | For each controller processing purpose establish and document correct lawful basis; distinguish necessary service terms from optional marketing consent | Privacy notice |
+| LEG-04 | Engineering + privacy counsel | Inventory actual cookies, local storage, third-party scripts and analytics across unauthenticated and signed-in journeys, purposes and expiry; define consent/cookie-reject controls where required | Cookies |
+| LEG-05 | Engineering + procurement + privacy counsel | Verify actual suppliers (Supabase, Vercel, Resend, Google Workspace, any logging/analytics/payment/integration provider), contracts, region, onward transfers and UK transfer mechanisms; not assumed from hosting alone | Privacy notice + DPA |
+| LEG-06 | Provider privacy lead + clubs + counsel | **PARTIAL: owner approved six proposals for club/legal review on 7 November; see retention-schedule-owner-approved-for-review-2026-11-07.md.** Complete remaining categories and club/legal review; set explicit active/inactive account, league, results, support, data subject rights, audit/event and backup retention + disposal periods; legal holds and club export/return on exit | Privacy notice + DPA + release |
+| LEG-07 | Club pilot owners + commercial lead + counsel | **PARTIAL: owner selected three months free then review; pricing/product access reviewed internally for Leagues and future Socials.** Complete plans, trial start/end, price/VAT, renewal, cancellation, SLA/support, liability/indemnities, governing law, logo publicity rights and signatories; zero-cost pilot cannot become charged without affirmative agreement | Club agreement |
+| LEG-08 | Product lead + safeguarding/privacy counsel | Approve minimum age, any juniors/safeguarding controls, user-generated content/moderation, player photos/social visibility, sporting disputes, appeals and Playtomic integration rights | Terms + notice |
+| LEG-09 | Protego business owner (sole nominated privacy contact) | **Mailbox receive/reply COMPLETE, confirmed by owner on 4 November.** Confirm daily queue reviews, owner-only absence/loss-of-access contingency, missed-mail escalation, identity procedure, service response timelines, secure exports/deletions and incident/breach process. **No deputy assigned; continuity risk unresolved.** | Privacy requests |
+| LEG-10 | Engineering lead + security reviewer | Independently assess worker-token RPC execution grants, outbox failures, Resend idempotency, endpoint schedule and no sensitive data leaks; exercise real Auth and mail via isolated environment | Notification deploy |
+| LEG-11 | Product + privacy counsel | Finalise Terms publication version/hash and recorded acceptance wording, renewal process for existing accounts and version mismatch policies; distinguish contract acceptance from GDPR consent | Signup release |
+| LEG-12 | Release owner + DBA/security | Obtain restorable backup, non-production Auth test environment, migration rehearsal, rollback drill, production smoke checklist and explicit authorisation | Deploy |
+
+## Sign-off evidence template (copy for each ID)
+- Decision ID:
+- Owner name / role:
+- Approved resolution:
+- Evidence link / document / vendor DPA:
+- Legal reviewer:
+- Date / timezone:
+- Accepted residual risk and mitigation:
+- Status: OPEN / BLOCKED / APPROVED
+
+## Release order after all approvals
+1. Finish privacy inventory, subprocessor and retention schedules and obtain signed legal review.
+2. Generate final immutable Terms version/hash and update all three registration paths, acceptance trigger and existing-user renewal design consistently. Run negative acceptance tests.
+3. Confirm owner-only privacy monitoring and a proportionate, legally reviewed absence and access-recovery contingency; complete delivery failure alert procedure.
+4. Verify real Supabase Auth + Resend flows with synthetic users before any production change.
+5. Compare production schema, record backup + recovery evidence, update runbook migration order and obtain explicit release approval.
+6. Deploy in controlled sequence and record smoke-test outcomes; monitor failed outbox rows and response due dates.
+
+## Externally published guidance checked
+- ICO, right to be informed checklist: https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/individual-rights/right-to-be-informed/
+- ICO, contracts between controllers and processors: https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/accountability-and-governance/contracts/
+- ICO, responding to data subject access requests (updated Dec 2025): https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/right-of-access/what-should-we-consider-when-responding-to-a-request/
+
+**Deadline caution:** the dashboard's internal 21-day marker is not the UK GDPR statutory deadline. ICO guidance describes the usual SAR response requirement as without undue delay and at the latest one calendar month from the relevant receipt event, subject to specific rules on identity, fee and permitted extensions. Human review is required; never calculate the legal deadline solely from the dashboard marker.
+
+**No publication, legal sign-off, product billing decision, or live deployment is authorised by this document.**
+
+## Retention proposal approval — 7 November 2026
+On 7 November 2026, Ste approved the six retention proposals below for incorporation into the compliance drafts and review by clubs/legal counsel. This records business approval of the proposals only: it is not club/controller approval, legal sign-off, permission to delete data or authorisation to publish/deploy.
+
+The six proposals, original approval scope, exceptions and outstanding categories are recorded in `retention-schedule-owner-approved-for-review-2026-11-07.md`. LEG-06 remains open overall. No automatic deletion, production release, general operating-control acceptance or approval of pilot terms is inferred.
+
+## Owner commercial direction — 7 November 2026
+Ste selected **three months free, followed by a review**, superseding the proposed first-full-season offer. Payment/pricing must be reviewed internally by Rallora, taking account of Rallora Leagues and the future Rallora Socials product, which is not yet built. No price, automatic payment, bundle or Socials delivery date is approved. See `pilot-and-product-commercial-decisions-2026-11-07.md`. Exact pilot dates, club acceptance and final contract/legal review remain open.

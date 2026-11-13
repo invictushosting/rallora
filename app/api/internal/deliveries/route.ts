@@ -29,5 +29,31 @@ export async function POST(request:NextRequest) {
   const finished=await db.rpc('rallora_finish_delivery',{p_token:token,p_id:job.id,p_provider_id:providerId,p_error:failure});
   if(finished.error) return NextResponse.json({error:'Delivery acknowledgement failed; the queue will recover automatically'},{status:503,headers});
  }
- return NextResponse.json({accepted,failed},{headers});
+ // Separate durable privacy queue. Never put request content or player identity in email.
+ const privacyClaim=await db.rpc('rallora_claim_privacy_notifications',{p_token:token});
+ if(privacyClaim.error) return NextResponse.json({error:'Privacy notification queue unavailable'},{status:503,headers});
+ const privacyJobs=privacyClaim.data as Array<{id:string;caseId:string}>;
+ if(!Array.isArray(privacyJobs)) return NextResponse.json({error:'Invalid privacy notification batch'},{status:503,headers});
+ let privacyAccepted=0,privacyFailed=0;
+ for(const job of privacyJobs){
+  let providerId:string|null=null,failure:string|null=null;
+  try {
+   const result=await sendRalloraEmail({
+    to:'support@rallora.app',
+    subject:'Rallora privacy request received — administrator review required',
+    idempotencyKey:`rallora-privacy-notice-${job.id}`,
+    text:`A privacy rights request requires administrator review. Case reference: ${job.caseId}. Open the restricted Rallora platform privacy dashboard. No personal information is included in this notification.`,
+    html:`<p>A privacy rights request requires administrator review.</p><p>Case reference: <code>${escapeEmailHtml(job.caseId)}</code></p><p>Sign in to the restricted Rallora platform privacy dashboard. No personal information is included in this email.</p>`
+   });
+   providerId=result.id;privacyAccepted++;
+  } catch {
+   failure='Provider did not accept privacy notice; the notification will be retried.';
+   privacyFailed++;
+  }
+  const ack=await db.rpc('rallora_finish_privacy_notification',{
+   p_token:token,p_id:job.id,p_provider_id:providerId,p_error:failure
+  });
+  if(ack.error) return NextResponse.json({error:'Privacy notification acknowledgement failed'},{status:503,headers});
+ }
+ return NextResponse.json({accepted,failed,privacyAccepted,privacyFailed},{headers});
 }
