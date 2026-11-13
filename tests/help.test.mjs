@@ -86,8 +86,18 @@ test('draw questions find player instructions and explain confirmation and point
  assert.equal(article.slug,'submit-and-confirm-results');
  assert.equal(helpAnswerSection(article,'draw').id,'draw');
  const text=JSON.stringify(article.sections.find(s=>s.id==='draw'));
- assert.match(text,/Match outcome/);
+ assert.match(text,/Who won/);
  assert.match(text,/opposing player must confirm/);
  assert.match(text,/configured draw points/);
  assert.match(JSON.stringify(HELP_ARTICLES.find(a=>a.slug==='club-results')),/Official outcome/);
+});
+
+test('result help explains the inline editor and named set entry',()=>{
+ const player=JSON.stringify(HELP_ARTICLES.find(a=>a.slug==='submit-and-confirm-results'));
+ const club=JSON.stringify(HELP_ARTICLES.find(a=>a.slug==='club-results'));
+ assert.match(player,/Home and away stay fixed/);
+ assert.match(player,/Review result/);
+ assert.match(club,/Edit result directly on its card/);
+ assert.match(club,/Save corrected result/);
+ assert.match(club,/locked as history/);
 });
