@@ -18,7 +18,8 @@ import styles from "./club.module.css";
 import ClubSponsors from "@/app/components/club-sponsors";
 import ClubFooter from "@/app/components/club-footer";
 import { SPONSOR_FIELDS, type Sponsor } from "@/lib/sponsors";
-import {scoreSets} from "@/lib/leagues/scores";
+import MatchScore from "@/app/components/match-score";
+import EditResult from "@/app/components/edit-result";
 import {
   makeFixtureDeadlineIcs, makeResultsCsv, type ExportFixture,
 } from "@/lib/leagues/exports";
@@ -55,7 +56,7 @@ type Fixture = {
 };
 type Result = {
   fixture_id: string; home_score: string | null;
-  away_score: string | null; status: string; confirmed_at: string | null;
+  away_score: string | null; winner_team_id: string | null; status: string; confirmed_at: string | null;
 };
 type Standing = {
   team_id: string; division_id: string; played: number; won: number;
@@ -288,7 +289,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
             : Promise.resolve({ data: [] as Team[], error: null }),
           fixtureIds.length
             ? supabase.from("results")
-              .select("fixture_id,home_score,away_score,status,confirmed_at")
+              .select("fixture_id,home_score,away_score,winner_team_id,status,confirmed_at")
               .in("fixture_id", fixtureIds)
               .in("status", ["confirmed", "admin_override"])
             : Promise.resolve({ data: [] as Result[], error: null }),
@@ -437,6 +438,16 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
       </div>
     </div>;
   }
+  async function refreshResult(fixture: Fixture) {
+    // Preserve filters and scroll position after an inline correction.
+    const [result, standings] = await Promise.all([
+      supabase.from("results").select("fixture_id,home_score,away_score,winner_team_id,status,confirmed_at").eq("fixture_id", fixture.id).single(),
+      supabase.from("standings").select("team_id,division_id,played,won,drawn,lost,points,score_diff").eq("season_id", fixture.season_id),
+    ]);
+    if (result.error || standings.error) { setExportNotice("Result saved. Refresh the page to load the updated result and table."); return; }
+    setData(current => ({ ...current, results: current.results.map(row => row.fixture_id === fixture.id ? result.data : row), standings: standings.data ?? [] }));
+    setExportNotice("Result corrected and league table updated.");
+  }
   function fixtureRow(fixture: Fixture) {
     const result = results.get(fixture.id);
     const resolved = isConfirmed(result);
@@ -450,19 +461,12 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
           (fixture.week_number ? `Week ${fixture.week_number}` : "League fixture")}</span>
         <span>{dateLabel(fixture.play_by)}</span>
       </div>
-      {resolved ? <div className={styles.resultCard}>
-        <div className={styles.resultPair}><span className={styles.pairSide}>HOME</span><strong>{fixturePlayerLabel(fixture,fixture.home_team_id,teamLabel(fixture.home_team_id, teamNames))}</strong></div>
-        <div className={styles.setScore}>
-          <div className={styles.setHeaders}>{scoreSets(result?.home_score).map((_, index)=><span key={index}>SET {index + 1}</span>)}</div>
-          <div className={styles.setRow}>{scoreSets(result?.home_score).map((score,index)=>{const away=Number(scoreSets(result?.away_score)[index]);const home=Number(score);return <strong key={index} className={home>away?styles.setWon:""}>{score}</strong>;})}</div>
-          <div className={styles.setRow}>{scoreSets(result?.away_score).map((score,index)=>{const home=Number(scoreSets(result?.home_score)[index]);const away=Number(score);return <strong key={index} className={away>home?styles.setWon:""}>{score}</strong>;})}</div>
-        </div>
-        <div className={`${styles.resultPair} ${styles.resultPairAway}`}><span className={styles.pairSide}>AWAY</span><strong>{fixturePlayerLabel(fixture,fixture.away_team_id,teamLabel(fixture.away_team_id, teamNames))}</strong></div>
-      </div> : <div className={styles.match}>
+      {resolved ? <MatchScore homeLabel={fixturePlayerLabel(fixture,fixture.home_team_id,teamLabel(fixture.home_team_id,teamNames))} awayLabel={fixturePlayerLabel(fixture,fixture.away_team_id,teamLabel(fixture.away_team_id,teamNames))} homeScore={result?.home_score} awayScore={result?.away_score} outcome={result?.winner_team_id===fixture.home_team_id?"home":result?.winner_team_id===fixture.away_team_id?"away":["forfeit","double_forfeit"].includes(fixture.status)?null:"draw"}/> : <div className={styles.match}>
         <div className={styles.matchTeam}>{homePlayers.length ? homePlayers.map((name, index)=><strong key={index}>{name}</strong>) : <strong>Players to be confirmed</strong>}</div>
         <span className={styles.score}>vs</span>
         <div className={styles.matchTeam}>{awayPlayers.length ? awayPlayers.map((name, index)=><strong key={index}>{name}</strong>) : <strong>Players to be confirmed</strong>}</div>
       </div>}
+      {resolved && chatAccess.manager && <div className={styles.fixtureBottom}><EditResult fixtureId={fixture.id} homeId={fixture.home_team_id} awayId={fixture.away_team_id} homeLabel={fixturePlayerLabel(fixture,fixture.home_team_id,teamLabel(fixture.home_team_id,teamNames))} awayLabel={fixturePlayerLabel(fixture,fixture.away_team_id,teamLabel(fixture.away_team_id,teamNames))} onSaved={()=>{void refreshResult(fixture).catch(()=>setExportNotice("Result saved. Refresh the page to load the updated result and table."));}}/></div>}
       {!resolved && arrangementPanel(fixture)}
       {(chatAccess.manager || chatAccess.teamIds.has(fixture.home_team_id) || chatAccess.teamIds.has(fixture.away_team_id)) && <div className={styles.fixtureBottom}><Link className={styles.bookingAction} href={`/clubs/${slug}/matches/${fixture.id}`}>Match chat</Link></div>}
       {(resolved || fixture.status === "disputed") && <div className={styles.fixtureBottom}>

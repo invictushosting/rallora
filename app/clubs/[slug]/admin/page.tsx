@@ -3,6 +3,9 @@
 import RalloraLogo from "@/app/components/rallora-logo";
 import SupportForm from "@/app/components/support-form";
 import Loading from "@/app/loading";
+import MatchScore from "@/app/components/match-score";
+import EditResult from "@/app/components/edit-result";
+import ResultForm, { type ResultValues } from "@/app/components/result-form";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
@@ -349,14 +352,14 @@ export default function ClubAdministration() {
     return {tone:"red",label:"Court not booked"};
   };
   const disputedCount = view.fixtures.filter((fixture)=>fixture.status==="disputed").length;
-  async function resolveDisputedResult(fixture:AdminFixture){
-    const home=(document.getElementById(`resolve-home-${fixture.id}`) as HTMLInputElement|null)?.value.trim() || fixture.submitted_home_score || "";
-    const away=(document.getElementById(`resolve-away-${fixture.id}`) as HTMLInputElement|null)?.value.trim() || fixture.submitted_away_score || "";
-    const winner=(document.getElementById(`resolve-winner-${fixture.id}`) as HTMLSelectElement|null)?.value || null;
-    const notes=(document.getElementById(`resolve-notes-${fixture.id}`) as HTMLTextAreaElement|null)?.value.trim() || null;
-    if(!home||!away||!winner){setReminderNotice("Enter both scores and choose the winning pairing or Draw before confirming.");return;}
-    setResultBusy(fixture.id); const reply=await supabase.rpc("rallora_admin_resolve_result",{p_fixture_id:fixture.id,p_home_score:home,p_away_score:away,p_winner_team_id:winner==="draw"?null:winner,p_notes:notes}); setResultBusy("");
-    if(reply.error){setReminderNotice(reply.error.message);return;} document.getElementById(`result-${fixture.id}`)?.hidePopover(); setRevision(v=>v+1); setReminderNotice("Disputed result resolved and standings updated.");
+  async function resolveDisputedResult(fixture:AdminFixture,values:ResultValues){
+    const {home,away,winner,notes}=values;
+    setResultBusy(fixture.id);
+    try {
+      const reply=await supabase.rpc("rallora_admin_resolve_result",{p_fixture_id:fixture.id,p_home_score:home,p_away_score:away,p_winner_team_id:winner==="draw"?null:winner,p_notes:notes||null});
+      if(reply.error)throw reply.error;
+      document.getElementById(`result-${fixture.id}`)?.hidePopover(); setRevision(v=>v+1); setReminderNotice("Result resolved and standings updated.");
+    } finally {setResultBusy("");}
   }
   const demoMode = view.club.slug==="rallora-demo";
   async function sendFixtureReminder(fixture: AdminFixture) {
@@ -445,12 +448,12 @@ export default function ClubAdministration() {
           <div className={styles.fixtureActions}>
             <span className={styles.bookingHealth} data-tone={bookingHealth(fixture).tone}><i aria-hidden="true" />{bookingHealth(fixture).label}</span>
             {fixture.status==="disputed" && <button className={styles.fixtureTakeAction} type="button" onClick={()=>document.getElementById(`result-${fixture.id}`)?.showPopover()}>Take action</button>}
-            {fixture.status==="confirmed" && <button className={styles.fixtureResult} type="button" onClick={()=>document.getElementById(`result-${fixture.id}`)?.showPopover()}>See result</button>}
+            {fixture.status==="confirmed" && <button className={styles.fixtureResult} type="button" onClick={()=>document.getElementById(`result-${fixture.id}`)?.showPopover()}>See result</button>}{fixture.status==="confirmed"&&<EditResult fixtureId={fixture.id} homeId={fixture.home_team_id} awayId={fixture.away_team_id} homeLabel={fixture.home_label||"Home"} awayLabel={fixture.away_label||"Away"} onSaved={()=>{setRevision(v=>v+1);setReminderNotice("Result corrected and standings updated.");}}/>}
             {demoMode && bookingForFixture(fixture.id) && <a className={styles.playtomicView} href="https://app.playtomic.com/" target="_blank" rel="noreferrer">View in Playtomic ↗</a>}
             {fixture.status!=="confirmed" && fixture.status!=="disputed" && <button className={styles.fixtureReminder} type="button" disabled={Boolean(resultBusy)} onClick={()=>void sendFixtureReminder(fixture)}>{fixtureView==="awaiting"?"Request result":"Send reminder"}</button>}
           </div>
-          {fixture.status==="disputed" && <div id={`result-${fixture.id}`} popover="auto" className={styles.resultPopover}><button className={styles.resultPopoverClose} type="button" popoverTarget={`result-${fixture.id}`} popoverTargetAction="hide" aria-label="Close result">×</button><span className={styles.disputeEyebrow}>DISPUTED RESULT</span><h3>{fixture.home_label || "Players"} <span>vs</span> {fixture.away_label || "Players"}</h3><strong className={styles.resultScore}>{fixture.submitted_home_score || "—"} : {fixture.submitted_away_score || "—"}</strong><div className={styles.disputeNote}><strong>Information from the disputing team</strong><p>{fixture.dispute_note || "No additional information was provided with this dispute."}</p></div><div className={styles.resolveFields}><label>Home score<input id={`resolve-home-${fixture.id}`} defaultValue={fixture.submitted_home_score || ""}/></label><label>Away score<input id={`resolve-away-${fixture.id}`} defaultValue={fixture.submitted_away_score || ""}/></label><label>Match outcome<select id={`resolve-winner-${fixture.id}`} defaultValue=""><option value="">Choose outcome</option><option value="draw">Draw</option><option value={fixture.home_team_id}>{fixture.home_label || "Home"}</option><option value={fixture.away_team_id}>{fixture.away_label || "Away"}</option></select></label><label>Organiser note<textarea id={`resolve-notes-${fixture.id}`} maxLength={1000} placeholder="Optional note about the decision"/></label></div><div className={styles.disputeActions}><button type="button" disabled={resultBusy===fixture.id} onClick={()=>void resolveDisputedResult(fixture)}>{resultBusy===fixture.id?"Saving…":"Confirm resolved result"}</button>{bookingForFixture(fixture.id)&&<a href="https://app.playtomic.com/" target="_blank" rel="noreferrer">View in Playtomic ↗</a>}</div></div>}
-          {fixture.status==="confirmed" && <div id={`result-${fixture.id}`} popover="auto" className={styles.resultPopover}><button className={styles.resultPopoverClose} type="button" popoverTarget={`result-${fixture.id}`} popoverTargetAction="hide" aria-label="Close result">×</button><span className={styles.eyebrow}>CONFIRMED RESULT</span><h3>{fixture.home_label || "Players"} <span>vs</span> {fixture.away_label || "Players"}</h3><strong className={styles.resultScore}>{fixture.result_score || "Result confirmed"}</strong><p>Week {fixture.week_number} · Result confirmed in Rallora</p></div>}
+          {fixture.status==="disputed" && <div id={`result-${fixture.id}`} popover="auto" className={styles.resultPopover}><button className={styles.resultPopoverClose} type="button" popoverTarget={`result-${fixture.id}`} popoverTargetAction="hide" aria-label="Close result">×</button><span className={styles.disputeEyebrow}>DISPUTED RESULT</span><h3>{fixture.home_label || "Players"} <span>vs</span> {fixture.away_label || "Players"}</h3><strong className={styles.resultScore}>{fixture.submitted_home_score || "—"} : {fixture.submitted_away_score || "—"}</strong><div className={styles.disputeNote}><strong>Information from the disputing team</strong><p>{fixture.dispute_note || "No additional information was provided with this dispute."}</p></div><ResultForm homeId={fixture.home_team_id} awayId={fixture.away_team_id} homeLabel={fixture.home_label||"Home"} awayLabel={fixture.away_label||"Away"} initial={{home:fixture.submitted_home_score||"",away:fixture.submitted_away_score||""}} admin disabled={Boolean(resultBusy)} onSave={values=>resolveDisputedResult(fixture,values)}/></div>}
+          {fixture.status==="confirmed" && <div id={`result-${fixture.id}`} popover="auto" className={styles.resultPopover}><button className={styles.resultPopoverClose} type="button" popoverTarget={`result-${fixture.id}`} popoverTargetAction="hide" aria-label="Close result">×</button><span className={styles.eyebrow}>CONFIRMED RESULT</span><h3>{fixture.home_label || "Players"} <span>vs</span> {fixture.away_label || "Players"}</h3><MatchScore homeLabel={fixture.home_label||"Home"} awayLabel={fixture.away_label||"Away"} homeScore={fixture.home_score} awayScore={fixture.away_score} outcome={fixture.winner_team_id===fixture.home_team_id?"home":fixture.winner_team_id===fixture.away_team_id?"away":"draw"}/><p>Week {fixture.week_number} · Result confirmed in Rallora</p><EditResult fixtureId={fixture.id} homeId={fixture.home_team_id} awayId={fixture.away_team_id} homeLabel={fixture.home_label||"Home"} awayLabel={fixture.away_label||"Away"} onSaved={()=>{setRevision(v=>v+1);setReminderNotice("Result corrected and standings updated.");}}/></div>}
         </article>)}
         {!fixtureRows.length && <div className={styles.fixtureEmpty}>No fixtures in this view.</div>}
       </div>
