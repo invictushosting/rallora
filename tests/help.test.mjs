@@ -97,7 +97,7 @@ test('result help explains the inline editor and named set entry',()=>{
  const club=JSON.stringify(HELP_ARTICLES.find(a=>a.slug==='club-results'));
  assert.match(player,/Home and away stay fixed/);
  assert.match(player,/Review result/);
- assert.match(club,/Edit result directly on its card/);
+ assert.match(club,/Edit result on the match’s result card/);
  assert.match(club,/Save corrected result/);
- assert.match(club,/locked as history/);
+ assert.match(club,/locked to protect the league history/);
 });

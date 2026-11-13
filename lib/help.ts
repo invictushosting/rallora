@@ -5,7 +5,7 @@ export type HelpCategory = "players" | "captains" | "clubs" | "playtomic";
 export type HelpSection = { id: string; title: string; steps: string[]; note?: string };
 export type HelpArticle = {
   slug: string; category: HelpCategory; title: string; summary: string;
-  keywords: string[]; sections: HelpSection[]; related: string[];
+  keywords: string[]; sections: HelpSection[]; related: string[]; reviewed?: string;
 };
 export const HELP_REVIEWED = "4 November 2026";
 export const HELP_CATEGORIES: { id: HelpCategory; title: string; description: string }[] = [
@@ -177,11 +177,41 @@ export const HELP_ARTICLES: HelpArticle[] = [
     ], related: ["arrange-a-match", "emails-and-ratings", "club-results"],
   },
   {
-    slug: "club-results", category: "clubs", title: "Review results and resolve disputes", summary: "Monitor fixtures, investigate disagreements and correct official scores.",
+    slug: "club-results", category: "clubs", title: "Check results and correct scores", summary: "Find a match result, fix a score or resolve a dispute.", reviewed: "13 November 2026",
     keywords: ["dispute", "disputed", "resolve", "official", "result", "override", "correction", "reopen", "standings", "points", "draw", "drawn"],
     sections: [
-      { id: "monitor", title: "Find the fixtures needing attention", steps: ["Use the fixture totals and filters in club admin to review To book, Booked, Awaiting result, Disputed result and Played.", "Open the result details for the correct fixture and check the pairings, submitted score and any dispute note.", "Ask the captains for clarification where needed before deciding the official result." ] },
-      { id: "resolve", title: "Resolve or correct a result", steps: ["Sign in with your club organiser account, open the club hub Results tab and find the match. Press Edit result directly on its card. You can also use Edit result beside See result or inside the confirmed result details in Club admin → Played. There is no need to find the fixture again in another menu.", "The editor loads the latest saved result. Correct each pairing’s games beside their names. If the scores were reversed, use Swap scores between pairings; this swaps the games and winner while keeping the player labels fixed. Then select the winning pairing or Draw under Who won?. Add a correction note if helpful. Press Review result, check the named score rows and outcome, then Save corrected result. The card and league table update automatically. For disputes, open Take action and follow the same score-entry and review steps. A draw awards the configured draw points.", "Check the public result and table after saving. Players do not see the admin Edit result button. Cycles with a prepared successor remain locked as history; the editor shows the reason if a save is blocked. For a missing result or reopening, the existing Result recovery tools remain available in league management (Official outcome in that form)."], note: "A court booking or finished Playtomic booking does not establish the official match score. The result is confirmed through Rallora’s result flow." },
+      {
+        id: "monitor", title: "Find a result", steps: [
+          "Sign in with your club admin account and open your club’s league page.",
+          "Select the league, then open Results. Use the division filter or search for a player to find the match.",
+          "Check the player names and scores. Each pairing’s row shows their games in each set. Home and Away are fixed labels for the fixture.",
+        ], note: "You can also view confirmed results in Club admin: choose Played, then See result beside the match.",
+      },
+      {
+        id: "resolve", title: "Correct a confirmed result", steps: [
+          "Press Edit result on the match’s result card. The current score opens in an editing window.",
+          "Correct the games beside each pairing’s names. Leave any unplayed sets blank.",
+          "If the scores were entered against the wrong pairings, press Swap scores between pairings. This swaps the scores and changes the selected winner. Check both before continuing.",
+          "Under Who won?, select the winning pairing or Draw. For a draw, each pairing receives the draw points set for that league.",
+          "Add a correction note if useful, then press Review result.",
+          "Check the scores and winner in the preview. Press Save corrected result to apply the change. The result and league table update automatically.",
+        ], note: "Only authorised club admins and organisers can edit official results. The Edit result button is also available beside See result and inside the result details in Club admin → Played.",
+      },
+      {
+        id: "disputes", title: "Resolve a disputed result", steps: [
+          "Open Club admin, choose Total fixtures, then select the Disputed result filter.",
+          "Find the match and press Take action. Read the dispute note and check the correct score with the players if needed.",
+          "Enter the agreed scores beside the correct player names. Under Who won?, select the winner or Draw, then press Review result.",
+          "Check the preview and press Save corrected result. This makes the result official and updates the league table.",
+        ], note: "A completed court booking does not confirm the score. Match results must be entered and confirmed in Rallora.",
+      },
+      {
+        id: "recovery", title: "Missing results or locked rounds", steps: [
+          "For a missing result, or a confirmed result that needs to be reopened for review, use Result recovery in the Fixtures section of Club admin.",
+          "Select the correct fixture before making a change. In this form, the winner or Draw is selected under Official outcome.",
+          "If the next round has already been prepared, earlier results are locked to protect the league history. Contact Rallora support if one of these results needs correcting.",
+        ],
+      },
     ], related: ["submit-and-confirm-results", "club-reminders", "playtomic-booking-matching"],
   },
   {
