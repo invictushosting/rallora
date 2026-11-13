@@ -10,4 +10,4 @@ The existing `rallora_admin_resolve_result` RPC continues to enforce fixture acc
 
 Updated `/help/submit-and-confirm-results` and `/help/club-results`.
 
-Validation: TypeScript, ESLint (existing warnings only), all 126 Node tests, and the production build. Browser visual/interaction QA remains outstanding: the managed preview launcher passed Vite flags to Next.js and could not start. No live league scores were changed during development.
+Validation: TypeScript, ESLint (existing warnings only), all 126 Node tests, and the production build. Production browser checks confirmed named score rows, organiser-only editing, loading the latest saved result, swapping scores, reviewing a correction and closing without saving. Player checks confirmed incomplete-set validation and the review step without submitting. A global 620px table minimum discovered in browser QA was overridden for both score tables so three sets fit the editor. Mobile-device QA remains outstanding. No live league scores were changed during development or these checks.
