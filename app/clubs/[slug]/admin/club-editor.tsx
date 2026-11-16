@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import styles from "./editor.module.css";
 import LeagueAutomation from "./league-automation";
+import RoundDateEditor from "./round-date-editor";
 import BoxPlacement from "./box-placement";
 import PlayerManagement from "./player-management";
 import CompetitionSchedule from "./competition-schedule";
@@ -833,7 +834,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
       </div>
       <button disabled={busy || !divisions.length} type="submit">Add pairing</button>
     </form></div>}
-    {activeTab === "fixtures" && <div><LeagueAutomation seasons={seasons} fixtures={fixtures} slug={club.slug} onSaved={onSaved} /><form className={styles.form} onSubmit={createFixture}>
+    {activeTab === "fixtures" && <div><RoundDateEditor seasons={seasons} fixtures={fixtures} onSaved={onSaved} /><LeagueAutomation seasons={seasons} fixtures={fixtures} slug={club.slug} onSaved={onSaved} /><form className={styles.form} onSubmit={createFixture}>
       <h3>Create a fixture</h3>
       <label>Division<select value={fixtureDivisionId}
         onChange={(event) => {
@@ -910,3 +911,4 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
     </form></div>}
   </section>;
 }
+
