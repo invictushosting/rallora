@@ -197,7 +197,7 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_delivery_worker_schema_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261106081243_all_player_match_actions.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_all_player_match_actions_assertions.sql
-      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261116114357_edit_playing_round_dates.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261116115640_edit_playing_round_dates.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_round_date_edit_assertions.sql
 
   support-safety:
