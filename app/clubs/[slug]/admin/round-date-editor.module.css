@@ -1,0 +1,7 @@
+.editor{border:1px solid #cddbed;border-radius:14px;margin-bottom:24px;background:#f7fbff;padding:18px}
+.editor>summary{cursor:pointer;font-weight:850;color:#173354;padding:4px 0;min-height:36px}
+.content{display:grid;gap:16px;margin-top:16px}
+.content>p{margin:0;font-size:14px;line-height:1.6;color:#526d91}
+.review{display:flex!important;flex-direction:row!important;align-items:flex-start;gap:10px!important}
+.review input{width:20px!important;min-height:20px!important;flex:0 0 20px;margin:0}
+.notice{padding:12px;background:#e7f7ed;border:1px solid #acd8ba;border-radius:10px;color:#174d2d!important}
