@@ -8,6 +8,7 @@ import { captainContacts, type CaptainContact } from "@/lib/captain-contacts";
 import { captainContactsCsv } from "@/lib/leagues/exports";
 import styles from "./contacts.module.css";
 
+type ContactTeam = Parameters<typeof captainContacts>[3][number];
 type League = { id: string; name: string };
 // Supabase caps result sizes; paginate so downloads never silently omit teams.
 async function allRows<T>(query: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>): Promise<T[]> {
@@ -60,10 +61,15 @@ export default function CaptainContactsPage() {
           allRows((from, to) => db.from("rallora_team_applications").select("created_team_id,requested_by,captain_name,captain_phone,status").eq("club_id", club.id).eq("season_id", seasonId).eq("status", "approved").order("id").range(from, to)),
           allRows((from, to) => db.from("rallora_team_registration_requests").select("id,team_id,player_user_id,player_name,player_phone,status").eq("club_id", club.id).eq("season_id", seasonId).eq("status", "approved").order("id").range(from, to)),
         ]);
-        const teams = [];
+        const teams: ContactTeam[] = [];
         // Keep each IN query small even for clubs with many divisions.
         for (const division of divisions) {
-          teams.push(...await allRows((from, to) => db.from("teams").select("id,division_id,name,captain_email,player_one_name,player_two_name,player_one_email,player_two_email").eq("division_id", division.id).eq("is_active", true).order("id").range(from, to)));
+          teams.push(...await allRows<ContactTeam>(async (from, to) => {
+            const reply = await db.rpc("rallora_admin_season_teams",{p_season_id:seasonId}).select("id,division_id,name,captain_email,player_one_name,player_two_name,player_one_email,player_two_email").eq("division_id", division.id).eq("is_active", true).order("id").range(from, to);
+            if (reply.error) return {data:null,error:reply.error};
+            if (!Array.isArray(reply.data)) throw new Error("Captain contacts unavailable.");
+            return {data:reply.data as ContactTeam[],error:null};
+          }));
         }
         if (alive) setContacts(captainContacts(club.name, leagues.find(s => s.id === seasonId)?.name ?? "", divisions, teams, roster, applications, registrations));
       } catch (e) { if (alive) setError(e instanceof Error ? e.message : "Could not load captain contacts."); }

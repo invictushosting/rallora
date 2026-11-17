@@ -188,7 +188,7 @@ export default function ClubAdministration() {
           const fixtureIds = seasonFixtures.map((item) => item.id);
           const [teamsReply, resultsReply, submissionsReply, applicationRatingsReply] = await Promise.all([
             divisionIds.length
-              ? supabase.from("teams").select("id,division_id,name,player_one_name,player_two_name,player_one_email,player_two_email,player_one_rating,player_two_rating,roster_version")
+              ? supabase.rpc("rallora_admin_season_teams",{p_season_id:season.id}).select("id,division_id,name,player_one_name,player_two_name,player_one_email,player_two_email,player_one_rating,player_two_rating,roster_version")
                   .in("division_id", divisionIds).order("name", { ascending: true })
               : Promise.resolve({ data: [] as { id: string; division_id: string; name: string; player_one_name:string|null; player_two_name:string|null; player_one_email:string|null; player_two_email:string|null; player_one_rating:number|null; player_two_rating:number|null; roster_version:number }[], error: null }),
             fixtureIds.length
