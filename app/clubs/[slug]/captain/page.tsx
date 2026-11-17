@@ -5,7 +5,10 @@ import type {FixtureArrangement} from "./fixture-booking";
 import { MessageCircle } from "lucide-react";
 import BackLink from "@/app/components/back-link";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import MatchScore from "@/app/components/match-score";
+import ResultForm, { type ResultValues } from "@/app/components/result-form";
+import EditResult from "@/app/components/edit-result";
 import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import { captainResultState, OFFICIAL_RESULT_STATUSES, type CaptainSubmission, type OfficialResult } from "@/lib/leagues/result-workflow";
@@ -83,8 +86,8 @@ export default function CaptainCentre() {
           const [bookings,pairings,scores,confirmed]=await Promise.all([
             supabase.from("rallora_fixture_arrangements").select("fixture_id,starts_at,ends_at,court").in("fixture_id",ids),
             supabase.from("teams").select("id,name,player_one_name,player_two_name").in("id",teamIds),
-            supabase.from("result_submissions").select("id,fixture_id,submitting_team_id,submitted_by_user_id,home_score,away_score,notes,dispute_note,status,updated_at").in("fixture_id",ids).order("updated_at",{ascending:false}),
-            supabase.from("results").select("fixture_id,home_score,away_score,status").in("fixture_id",ids).in("status",OFFICIAL_RESULT_STATUSES),
+            supabase.from("result_submissions").select("id,fixture_id,submitting_team_id,submitted_by_user_id,home_score,away_score,winner_team_id,notes,dispute_note,status,updated_at").in("fixture_id",ids).order("updated_at",{ascending:false}),
+            supabase.from("results").select("fixture_id,home_score,away_score,winner_team_id,status").in("fixture_id",ids).in("status",OFFICIAL_RESULT_STATUSES),
           ]);
           if(bookings.error) throw bookings.error;
           booked=(bookings.data??[]) as FixtureArrangement[];
@@ -116,21 +119,18 @@ export default function CaptainCentre() {
     return()=>{loadVersion.current++;if(timer)clearTimeout(timer);data.subscription.unsubscribe();};
   },[slug,load,supabase]);
 
-  async function submit(event:FormEvent<HTMLFormElement>,fixture:Fixture) {
-    event.preventDefault();if(busy||loading||!team)return;
-    const fields=new FormData(event.currentTarget),home=String(fields.get("home")??"").trim(),away=String(fields.get("away")??"").trim(),winner=String(fields.get("winner")??"");
-    if(!home||!away||!winner){setNotice("Enter both scores and choose the winning pairing.");return;}
-    if(!window.confirm(`Submit ${fixturePlayerLabel(fixture,fixture.home_team_id,labels[fixture.home_team_id]??"Players")} ${home} – ${away} ${fixturePlayerLabel(fixture,fixture.away_team_id,labels[fixture.away_team_id]??"Players")}? Either opposing player will be asked to confirm it.`))return;
+  async function submit(values:ResultValues,fixture:Fixture) {
+    if(busy||loading||!team)throw new Error("Please wait for match access to finish loading.");
+    const {home,away,winner,notes}=values;
     setBusy(fixture.id);
     try {
-      const args={p_fixture_id:fixture.id,p_home_score:home,p_away_score:away,p_winner_team_id:winner,p_notes:String(fields.get("notes")??"")};
+      const args={p_fixture_id:fixture.id,p_home_score:home,p_away_score:away,p_winner_team_id:winner==="draw"?null:winner,p_notes:notes};
       const reply=platformAdmin
         ?await supabase.rpc("rallora_platform_submit_captain_result",{...args,p_team_id:team.id})
         :await supabase.rpc("rallora_submit_captain_result",args);
       if(reply.error)throw reply.error;
       await load();
-    } catch(error){setNotice(error&&typeof error==="object"&&"message" in error?String(error.message):"The result could not be submitted. Please try again.");}
-    finally{setBusy("");}
+    } finally{setBusy("");}
   }
 
   async function review(id:string,decision:"confirm"|"dispute") {
@@ -195,17 +195,12 @@ export default function CaptainCentre() {
           <Link className={styles.matchLink} href={`/clubs/${slug}/matches/${fixture.id}`}><MessageCircle size={17} aria-hidden="true"/>{needsSubmit?"Arrange match":"Match chat"}{unread[fixture.id]>0&&<strong>{unread[fixture.id]} unread</strong>}</Link>
           <p className={styles.matchHint}>{booking?`Booked · ${new Date(booking.starts_at).toLocaleString("en-GB",{timeZone:"Europe/London",dateStyle:"medium",timeStyle:"short"})} UK time${booking.court?` · ${booking.court}`:""}`:needsSubmit?"Message opponents and agree a time.":"View messages and match arrangements."}</p>
         </div>
-        {needsSubmit?<form onSubmit={event=>void submit(event,fixture)}>
-          <h3 className={styles.resultHeading}>Submit result</h3>
-          <div><label>Home score<input name="home" required maxLength={100} autoComplete="off" placeholder="e.g. 6, 6"/></label><label>Away score<input name="away" required maxLength={100} autoComplete="off" placeholder="e.g. 4, 3"/></label></div>
-          <label>Winner<select name="winner" required><option value="">Choose winner</option><option value={fixture.home_team_id}>{fixturePlayerLabel(fixture,fixture.home_team_id,labels[fixture.home_team_id]??"Players")}</option><option value={fixture.away_team_id}>{fixturePlayerLabel(fixture,fixture.away_team_id,labels[fixture.away_team_id]??"Players")}</option></select></label>
-          <label>Notes<input name="notes" maxLength={1000}/></label><p className={styles.helper}>Enter games in set order, e.g. home 6, 6 and away 4, 3. Your opponents will confirm the result.</p>
-          <button disabled={Boolean(busy)}>{busy===fixture.id?"Submitting…":"Review & submit result"}</button>
-        </form>:<div className={styles.result}>
-          {score?<strong className={styles.finalResult}><small>{confirmed?"FINAL":"SUBMITTED"}</small>{score.home_score} <em>:</em> {score.away_score}</strong>:<strong>{label==="DRAFT"?"Cycle being prepared":label==="CANCELLED"?"Fixture cancelled":confirmed?"Result confirmed":"With your organiser"}</strong>}
+        {needsSubmit?<ResultForm key={fixture.id} homeId={fixture.home_team_id} awayId={fixture.away_team_id} homeLabel={fixturePlayerLabel(fixture,fixture.home_team_id,labels[fixture.home_team_id]??"Players")} awayLabel={fixturePlayerLabel(fixture,fixture.away_team_id,labels[fixture.away_team_id]??"Players")} yourTeamId={team?.id} disabled={Boolean(busy)} onSave={values=>submit(values,fixture)}/>:<div className={styles.resultDetails}>
+          {score?<MatchScore homeLabel={fixturePlayerLabel(fixture,fixture.home_team_id,labels[fixture.home_team_id]??"Players")} awayLabel={fixturePlayerLabel(fixture,fixture.away_team_id,labels[fixture.away_team_id]??"Players")} homeScore={score.home_score} awayScore={score.away_score} outcome={score.winner_team_id===fixture.home_team_id?"home":score.winner_team_id===fixture.away_team_id?"away":["forfeit","double_forfeit"].includes(fixture.status)?null:"draw"}/>:<strong>{label==="DRAFT"?"Cycle being prepared":label==="CANCELLED"?"Fixture cancelled":confirmed?"Result confirmed":"With your organiser"}</strong>}
           <span>{confirmed?"Official result":label.toLowerCase()}</span>
           {needsReview&&submission&&<div><button disabled={Boolean(busy)} onClick={()=>void review(submission.id,"confirm")}>Confirm result</button><button disabled={Boolean(busy)} onClick={()=>void review(submission.id,"dispute")}>Dispute</button></div>}
           {!confirmed&&submission?.dispute_note&&<p className={styles.helper}>{submission.dispute_note}</p>}
+          {platformAdmin&&official&&<EditResult fixtureId={fixture.id} homeId={fixture.home_team_id} awayId={fixture.away_team_id} homeLabel={fixturePlayerLabel(fixture,fixture.home_team_id,labels[fixture.home_team_id]??"Players")} awayLabel={fixturePlayerLabel(fixture,fixture.away_team_id,labels[fixture.away_team_id]??"Players")} onSaved={()=>void load()}/>}
         </div>}
       </article>;
     })}</section>

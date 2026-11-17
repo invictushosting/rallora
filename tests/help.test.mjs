@@ -79,3 +79,25 @@ test('late registration help explains admin permissions and fixtures', () => {
   assert.equal(suggestedHelp('/clubs/gsm-padel/admin/late-entry')[0],'add-late-team');
   assert.equal(suggestedHelp('/clubs/gsm-padel/admin/registrations')[0],'add-late-team');
 });
+
+
+test('draw questions find player instructions and explain confirmation and points', () => {
+ const article=searchHelp('draw')[0];
+ assert.equal(article.slug,'submit-and-confirm-results');
+ assert.equal(helpAnswerSection(article,'draw').id,'draw');
+ const text=JSON.stringify(article.sections.find(s=>s.id==='draw'));
+ assert.match(text,/Who won/);
+ assert.match(text,/opposing player must confirm/);
+ assert.match(text,/configured draw points/);
+ assert.match(JSON.stringify(HELP_ARTICLES.find(a=>a.slug==='club-results')),/Official outcome/);
+});
+
+test('result help explains the inline editor and named set entry',()=>{
+ const player=JSON.stringify(HELP_ARTICLES.find(a=>a.slug==='submit-and-confirm-results'));
+ const club=JSON.stringify(HELP_ARTICLES.find(a=>a.slug==='club-results'));
+ assert.match(player,/Home and away stay fixed/);
+ assert.match(player,/Review result/);
+ assert.match(club,/Edit result on the match’s result card/);
+ assert.match(club,/Save corrected result/);
+ assert.match(club,/locked to protect the league history/);
+});

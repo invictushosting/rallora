@@ -46,3 +46,15 @@ export function savedRoundWindows(value: unknown): RoundWindow[] {
 export function nextPlannedRound(windows: RoundWindow[], currentEnd?: string | null): RoundWindow | undefined {
   return currentEnd ? windows.find(w => w.starts_on > currentEnd) : windows[0];
 }
+
+/** Validate an edit without changing previous rounds or the competition finish. */
+export function validateRoundDateChange(start: string, oldEnd: string, end: string, plan: RoundWindow[], future: RoundWindow[], finish?: string | null): string {
+  if (!isDate(start) || !isDate(oldEnd) || !isDate(end) || end < start) return "Choose a deadline on or after the current round’s start date.";
+  if (finish && end > finish) return "The round cannot finish after the competition finish date.";
+  if (!plan.length) return future.length ? "Refresh the competition before editing its round plan." : "";
+  const index = plan.findIndex(w => w.starts_on === start && w.ends_on === oldEnd);
+  if (index < 0 || future.length !== plan.length - index - 1) return "The saved schedule does not match this round. Refresh the page or ask Rallora support to check it.";
+  const updated = [...plan.slice(0, index), { starts_on: start, ends_on: end }, ...future];
+  return validateRoundWindows(updated, plan[0].starts_on, finish ?? plan.at(-1)!.ends_on);
+}
+

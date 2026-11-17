@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { monthlyRounds, validateRoundWindows, savedRoundWindows, nextPlannedRound } from '../lib/competition-schedule.ts';
+import { monthlyRounds, validateRoundWindows, savedRoundWindows, nextPlannedRound, validateRoundDateChange } from '../lib/competition-schedule.ts';
 test('GSM monthly season gives three complete inclusive playing windows', () => {
  const rounds = monthlyRounds('2026-11-02', '2027-02-01');
  assert.deepEqual(rounds, [
@@ -11,6 +11,21 @@ test('GSM monthly season gives three complete inclusive playing windows', () => 
  assert.equal(validateRoundWindows(rounds,'2026-11-02','2027-02-01'),'');
  assert.deepEqual(nextPlannedRound(rounds,'2026-12-01'),rounds[1]);
  assert.equal(nextPlannedRound(rounds,'2027-02-01'),undefined);
+});
+test('extend GSM round 1 across December and leave a Christmas break without overlaps', () => {
+ const plan = monthlyRounds('2026-11-01','2027-03-31');
+ const future = [{starts_on:'2026-12-27',ends_on:'2026-12-31'}, ...plan.slice(2)];
+ assert.equal(validateRoundDateChange('2026-11-01','2026-11-30','2026-12-20',plan,future,'2027-03-31'),'');
+ assert.match(validateRoundDateChange('2026-11-01','2026-11-30','2026-12-20',plan,plan.slice(1),'2027-03-31'),/after the previous/);
+ assert.match(validateRoundDateChange('2026-11-01','2026-11-30','2026-02-30',plan,future,'2027-03-31'),/Choose a deadline/);
+ assert.match(validateRoundDateChange('2026-11-01','2026-11-30','2026-12-20',plan,[...future.slice(0,-1),{starts_on:'2027-03-01',ends_on:'2027-04-01'}],'2027-03-31'),/final round/);
+ assert.match(validateRoundDateChange('2026-11-01','2026-11-30','2026-12-20',plan,future.slice(1),'2027-03-31'),/does not match/);
+});
+test('editing later rounds retains earlier history and handles legacy schedules', () => {
+ const plan=monthlyRounds('2026-11-01','2027-03-31');
+ assert.equal(validateRoundDateChange('2026-12-01','2026-12-31','2027-01-05',plan,[{starts_on:'2027-01-06',ends_on:'2027-01-31'},...plan.slice(3)],'2027-03-31'),'');
+ assert.equal(validateRoundDateChange('2026-11-01','2026-11-30','2026-12-20',[],[],'2027-03-31'),'');
+ assert.match(validateRoundDateChange('2026-11-01','2026-11-30','2027-04-01',[],[],'2027-03-31'),/competition finish/);
 });
 test('monthly boundaries handle short months and retain original day without drift', () => {
  assert.deepEqual(monthlyRounds('2028-01-31','2028-03-30'),[
@@ -31,3 +46,4 @@ test('custom windows allow a holiday break but reject overlaps and missing cover
  assert.deepEqual(savedRoundWindows([{starts_on:'invalid',ends_on:'2026-12-01'}]),[]);
  assert.deepEqual(savedRoundWindows(plan),plan);
 });
+

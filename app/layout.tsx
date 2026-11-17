@@ -7,7 +7,7 @@ import ScrollToTop from "./components/scroll-to-top";
 import NavigationLoader from "./components/navigation-loader";
 import SuperAdminNavigation from "./components/super-admin-navigation";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://rallora-rho.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.rallora.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -16,12 +16,12 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
-      { url: "/brand/favicon.ico", sizes: "any" },
-      { url: "/brand/rallora-app-icon.svg", type: "image/svg+xml" },
-      { url: "/brand/favicon-32.png", sizes: "32x32", type: "image/png" },
-      { url: "/brand/favicon-16.png", sizes: "16x16", type: "image/png" }
+      { url: "/brand/favicon.ico?v=3", sizes: "any" },
+      { url: "/brand/rallora-app-icon.svg?v=3", type: "image/svg+xml" },
+      { url: "/brand/favicon-32.png?v=3", sizes: "32x32", type: "image/png" },
+      { url: "/brand/favicon-16.png?v=3", sizes: "16x16", type: "image/png" }
     ],
-    apple: [{ url: "/brand/apple-touch-icon-180.png", sizes: "180x180", type: "image/png" }],
+    apple: [{ url: "/brand/apple-touch-icon-180.png?v=3", sizes: "180x180", type: "image/png" }],
   },
   openGraph: {
     title: "Rallora",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     siteName: "Rallora",
     type: "website",
     images: [{
-      url: "/brand/rallora-social.png",
+      url: "/brand/rallora-social-master-v3.png",
       width: 1200,
       height: 630,
       alt: "Rallora: the padel league platform",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Rallora | The padel league platform",
     description: "Clubs. Players. Leagues. Connected.",
-    images: ["/brand/rallora-social.png"],
+    images: ["/brand/rallora-social-master-v3.png"],
   },
   appleWebApp: {
     capable: true,

@@ -5,7 +5,7 @@ export type HelpCategory = "players" | "captains" | "clubs" | "playtomic";
 export type HelpSection = { id: string; title: string; steps: string[]; note?: string };
 export type HelpArticle = {
   slug: string; category: HelpCategory; title: string; summary: string;
-  keywords: string[]; sections: HelpSection[]; related: string[];
+  keywords: string[]; sections: HelpSection[]; related: string[]; reviewed?: string;
 };
 export const HELP_REVIEWED = "4 November 2026";
 export const HELP_CATEGORIES: { id: HelpCategory; title: string; description: string }[] = [
@@ -95,11 +95,12 @@ export const HELP_ARTICLES: HelpArticle[] = [
   },
   {
     slug: "submit-and-confirm-results", category: "players", title: "Submit, confirm or dispute a result", summary: "Turn the match score into an official result and updated standings.",
-    keywords: ["result", "score", "scores", "confirm", "confirmation", "dispute", "disputed", "winner", "standings", "table", "points"],
+    keywords: ["result", "score", "scores", "confirm", "confirmation", "dispute", "disputed", "winner", "draw", "drawn", "standings", "table", "points"],
     sections: [
-      { id: "submit", title: "Submit the score", steps: ["After the match, open the correct fixture in the Match centre.", "Enter both pairings’ scores in the format shown, select the winning pairing and check the player names.", "Submit and confirm the prompt. Both opposing players are then asked to check the result."], note: "Scores are submitted in Rallora. The Playtomic connection does not import official league results." },
+      { id: "submit", title: "Submit the score", steps: ["After the match, open the correct fixture in the Match centre.", "Enter each pairing’s games in the row beside their names, one set at a time. Home and away stay fixed, even if you are the away pairing. Your row is marked Your pairing. Leave unplayed sets blank.", "Under Who won?, choose the winning pairing or Draw. Press Review result, check the named score rows and outcome, then Submit result. Use Back to scores to change anything before submitting. Both opposing players are then asked to check the result."], note: "Scores are submitted in Rallora. The Playtomic connection does not import official league results." },
+      { id: "draw", title: "Record a draw", steps: ["Enter the games actually played in each pairing’s named row, then choose Draw under Who won? (the match outcome). Do not select either pairing as the winner.", "Select Review result and check the score table and Draw outcome, then Submit result. Either opposing player must confirm the draw before it becomes official.", "Once confirmed, both teams receive the competition’s configured draw points. Contact the organiser if you are unsure whether your match is a draw under the league rules." ] },
       { id: "review", title: "Confirm or dispute", steps: ["Either opposing player opens the result awaiting review and checks the submitted score.", "Confirm it if correct. One opposing player’s confirmation makes the result official and updates the standings. Your own teammate cannot confirm your submission, and nobody needs to confirm twice.", "If it is wrong, choose the dispute action and add a clear note explaining the issue. The club organiser reviews it." ] },
-      { id: "status", title: "Understand the result status", steps: ["Awaiting confirmation means either opposing player still needs to review the submitted result.", "With organiser or Disputed result means the club needs to resolve it. Do not create another fixture or submit a duplicate entry.", "If an official result needs correcting, contact the organiser so they can review the score and use the official-result tools." ] },
+      { id: "status", title: "Understand the result status", steps: ["Awaiting confirmation means either opposing player still needs to review the submitted result.", "With organiser or Disputed result means the club needs to resolve it. Do not create another fixture or submit a duplicate entry.", "If an official result needs correcting, contact the organiser. Signed-in club organisers can use Edit result directly on the result card." ] },
     ], related: ["captain-access", "club-results", "arrange-a-match"],
   },
   {
@@ -113,12 +114,13 @@ export const HELP_ARTICLES: HelpArticle[] = [
   },
   {
     slug: "create-and-launch-competition", category: "clubs", title: "Create and launch a competition", summary: "From a private draft to open entry, divisions, fixtures and activation.",
-    keywords: ["create", "competition", "season", "league", "launch", "activate", "draft", "visible", "publish", "registration window", "format", "box"],
+    keywords: ["create", "competition", "season", "league", "launch", "activate", "draft", "visible", "publish", "registration window", "format", "box", "extend", "deadline", "round dates", "holiday"],
     sections: [
       { id: "draft", title: "Create the private draft", steps: ["From club admin, use Create your first competition or open the league builder in Seasons & Divisions.", "In Competition basics, enter the competition start and overall finish date. For rolling boxes, choose one month per round or set each round’s dates yourself. Check the playing schedule preview, then set registration dates, division sizes, scoring and promotion/relegation rules.", "Review the final step and create the private draft. Check every setting against the club’s published league rules." ] },
       { id: "entry", title: "Open and review registration", steps: ["Use Open registration on the competition readiness card. Check the registration dates too; publishing entry and being within its window are both needed for players to enter.", "Review pairing applications in Registrations. Check both player names, contact details, ratings and duplicate warnings before approving.", "When entry is complete, close registration before building the divisions. Publishing registration makes entry available without publishing a finished fixture list." ] },
       { id: "divisions", title: "Place teams and prepare fixtures", steps: ["Build the competition divisions from reviewed registrations. Use combined Playtomic ratings for initial placement if that is the club’s chosen method.", "Review the draft placements and manually move or swap teams where needed before activation. League tables follow your saved team placements automatically. Placement changes can clear untouched draft fixtures; generate fixtures again after your final adjustments.", "Open Fixtures & playing rounds. The first round’s dates are filled from your saved schedule. Generate fixtures, then use Preview competition to check the player-facing competition." ] },
       { id: "activate", title: "Activate when ready", steps: ["Check that entry is closed, each division has at least two teams and every team has fixtures.", "Confirm deadlines, scores, captain assignments and the public preview.", "Choose Activate. An active competition enables the match and result flow for players. Separate leagues at the same club can run together. Activating a later round completes only that league’s previous round. If activation is blocked, complete the missing readiness requirements shown."], note: "Opening registration and activating a competition are separate steps. Always check the public club hub after each publication change." },
+      { id: "edit-round-dates", title: "Extend or change round deadlines", steps: ["Open your club’s Admin Dashboard → Fixtures, expand Edit round dates and select the correct competition round.", "Set the Current round deadline. Review the start and deadline of every later round shown. For a holiday break, leave a gap between the current deadline and the next round’s start. Rounds must not overlap, and the final round must still end on the competition finish date.", "Check the dates, tick the review box and choose Save round dates. The current round and its outstanding fixture deadlines update together. Official results, bookings and division placements stay in place.", "Check the public fixtures and tell players about the new dates. Reminder checks use the updated deadlines; saving does not send an announcement. Prepare and activate the next round through the usual process when ready."], note: "Available for date-window competitions with fixtures in the current draft or active round. Completed rounds and rounds with a prepared successor are locked. A shorter deadline must include all recorded bookings and pending or accepted proposed times. The current start date and overall competition finish date stay the same. If no saved round plan appears, choose the next dates when preparing the next round." },
       { id: "next-round", title: "Move into the next playing round", steps: ["When the current round ends, check all results and resolve outstanding or disputed scores. Complete every fixture if your competition requires it.", "Open Fixtures & playing rounds and select the current competition round. The saved plan supplies the next start date and deadline. Choose Prepare next round to apply promotion/relegation and create the next fixtures as a private draft.", "Review the new boxes and fixtures, then activate the new round. Both team members keep their existing account access, and captain roles stay assigned. After the final planned round, review results and complete the competition."], note: "A saved monthly schedule does not automatically promote pairs or publish the next round. The organiser prepares, reviews and activates each one." },
     ], related: ["manage-teams-and-entries", "club-reminders", "club-results"],
   },
@@ -177,11 +179,41 @@ export const HELP_ARTICLES: HelpArticle[] = [
     ], related: ["arrange-a-match", "emails-and-ratings", "club-results"],
   },
   {
-    slug: "club-results", category: "clubs", title: "Review results and resolve disputes", summary: "Monitor fixtures, investigate disagreements and correct official scores.",
-    keywords: ["dispute", "disputed", "resolve", "official", "result", "override", "correction", "reopen", "standings", "points"],
+    slug: "club-results", category: "clubs", title: "Check results and correct scores", summary: "Find a match result, fix a score or resolve a dispute.", reviewed: "13 November 2026",
+    keywords: ["dispute", "disputed", "resolve", "official", "result", "override", "correction", "reopen", "standings", "points", "draw", "drawn"],
     sections: [
-      { id: "monitor", title: "Find the fixtures needing attention", steps: ["Use the fixture totals and filters in club admin to review To book, Booked, Awaiting result, Disputed result and Played.", "Open the result details for the correct fixture and check the pairings, submitted score and any dispute note.", "Ask the captains for clarification where needed before deciding the official result." ] },
-      { id: "resolve", title: "Resolve or correct a result", steps: ["Use the dispute resolution or official-result tools for the selected fixture.", "Enter and check both scores and the winning pairing before saving. This changes the official result and standings.", "If an already-confirmed result needs further investigation, use the available reopen control or contact Rallora support. Check the public table after any correction."], note: "A court booking or finished Playtomic booking does not establish the official match score. The result is confirmed through Rallora’s result flow." },
+      {
+        id: "monitor", title: "Find a result", steps: [
+          "Sign in with your club admin account and open your club’s league page.",
+          "Select the league, then open Results. Use the division filter or search for a player to find the match.",
+          "Check the player names and scores. Each pairing’s row shows their games in each set. Home and Away are fixed labels for the fixture.",
+        ], note: "You can also view confirmed results in Club admin: choose Played, then See result beside the match.",
+      },
+      {
+        id: "resolve", title: "Correct a confirmed result", steps: [
+          "Press Edit result on the match’s result card. The current score opens in an editing window.",
+          "Correct the games beside each pairing’s names. Leave any unplayed sets blank.",
+          "If the scores were entered against the wrong pairings, press Swap scores between pairings. This swaps the scores and changes the selected winner. Check both before continuing.",
+          "Under Who won?, select the winning pairing or Draw. For a draw, each pairing receives the draw points set for that league.",
+          "Add a correction note if useful, then press Review result.",
+          "Check the scores and winner in the preview. Press Save corrected result to apply the change. The result and league table update automatically.",
+        ], note: "Only authorised club admins and organisers can edit official results. The Edit result button is also available beside See result and inside the result details in Club admin → Played.",
+      },
+      {
+        id: "disputes", title: "Resolve a disputed result", steps: [
+          "Open Club admin, choose Total fixtures, then select the Disputed result filter.",
+          "Find the match and press Take action. Read the dispute note and check the correct score with the players if needed.",
+          "Enter the agreed scores beside the correct player names. Under Who won?, select the winner or Draw, then press Review result.",
+          "Check the preview and press Save corrected result. This makes the result official and updates the league table.",
+        ], note: "A completed court booking does not confirm the score. Match results must be entered and confirmed in Rallora.",
+      },
+      {
+        id: "recovery", title: "Missing results or locked rounds", steps: [
+          "For a missing result, or a confirmed result that needs to be reopened for review, use Result recovery in the Fixtures section of Club admin.",
+          "Select the correct fixture before making a change. In this form, the winner or Draw is selected under Official outcome.",
+          "If the next round has already been prepared, earlier results are locked to protect the league history. Contact Rallora support if one of these results needs correcting.",
+        ],
+      },
     ], related: ["submit-and-confirm-results", "club-reminders", "playtomic-booking-matching"],
   },
   {
@@ -259,3 +291,4 @@ export function helpAnswerSection(article: HelpArticle, query: string): HelpSect
   }).sort((a, b) => b.score - a.score);
   return ranked[0].section;
 }
+

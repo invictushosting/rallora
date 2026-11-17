@@ -51,3 +51,13 @@ official.
 Both members of a pairing use separate Rallora accounts. The club hub keeps separate Player login and Captain login links. Player login opens role-aware navigation: partners go directly to Fixtures & match chat; captains retain their centre. Joining via the original invitation links an existing or new account to the pairing. Creating an account alone does not claim a team place or submit another league registration.
 
 Registration receipts explain that partners join after club approval. Partner invitation emails use Create your account or sign in and preserve the original invitation URL. The invitation page explains player access and links claimed members directly to fixtures. The join-a-league guide answers the two-player login question and gives recovery steps for an unclaimed invitation.
+
+## Drawn results — 12 November 2026
+
+Player result forms now use **Match outcome**, with both pairings and an explicit **Draw** option. Blank selection still blocks submission. Draw sends a null winner through the existing result RPC and requires the same opposing-player review as a win. Pending and official drawn scores are labelled DRAW in the Match centre.
+
+Club admins can also select Draw when resolving a dispute or saving an official correction. Existing official draws preselect Draw in the recovery form. The database already supports null winners and awards both teams the competition’s configured draw points after confirmation. No database migration is needed.
+
+Updated `/help/submit-and-confirm-results` and `/help/club-results`, including searchable draw guidance for the floating helper. The SQL regression test covers a partner submitting a draw, opposing-partner confirmation, non-default draw points and win/draw corrections without double counting.
+
+Validation: lint (no errors), typecheck and unit tests pass; production build passes with the same placeholder Supabase environment used in CI. The tenant-safety SQL sequence (110 files) passes in disposable PGlite PostgreSQL, including the added draw checks; Python concurrency scripts were not run locally. The live database function definitions were inspected read-only to confirm null-winner support. Browser interaction remains unverified because Chromium could not launch (socket permission denied).
