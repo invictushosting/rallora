@@ -47,10 +47,10 @@ export function nextPlannedRound(windows: RoundWindow[], currentEnd?: string | n
   return currentEnd ? windows.find(w => w.starts_on > currentEnd) : windows[0];
 }
 
-/** Validate an edit without changing previous rounds or the competition finish. */
+/** Validate an edit while preserving previous rounds and matching the proposed finish. */
 export function validateRoundDateChange(start: string, oldEnd: string, end: string, plan: RoundWindow[], future: RoundWindow[], finish?: string | null): string {
   if (!isDate(start) || !isDate(oldEnd) || !isDate(end) || end < start) return "Choose a deadline on or after the current round’s start date.";
-  if (finish && end > finish) return "The round cannot finish after the competition finish date.";
+  if (finish && (!isDate(finish) || end > finish)) return "The round cannot finish after the competition finish date.";
   if (!plan.length) return future.length ? "Refresh the competition before editing its round plan." : "";
   const index = plan.findIndex(w => w.starts_on === start && w.ends_on === oldEnd);
   if (index < 0 || future.length !== plan.length - index - 1) return "The saved schedule does not match this round. Refresh the page or ask Rallora support to check it.";

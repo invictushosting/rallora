@@ -47,3 +47,11 @@ test('custom windows allow a holiday break but reject overlaps and missing cover
  assert.deepEqual(savedRoundWindows(plan),plan);
 });
 
+
+test('competition finish and all later monthly rounds can extend together', () => {
+ const plan=monthlyRounds('2026-11-01','2027-03-31');
+ const future=monthlyRounds('2027-01-01','2027-04-30');
+ assert.equal(validateRoundDateChange('2026-11-01','2026-11-30','2026-12-31',plan,future,'2027-04-30'),'');
+ assert.match(validateRoundDateChange('2026-11-01','2026-11-30','2026-12-31',plan,future,'2027-03-31'),/final round/);
+ assert.match(validateRoundDateChange('2026-11-01','2026-11-30','2026-12-31',plan,future,'2027-02-30'),/competition finish/);
+});
