@@ -28,6 +28,7 @@ jobs:
       - run: npm ci
       - run: node --experimental-strip-types --test tests/brand-colors.test.mjs
       - run: node --experimental-strip-types --test tests/communication.test.mjs
+      - run: node --experimental-strip-types --test tests/whatsapp.test.mjs
       - run: node --experimental-strip-types --test tests/fixture-messaging.test.mjs
       - run: node --experimental-strip-types --test tests/captain-contacts.test.mjs
       - run: node --experimental-strip-types --test tests/help.test.mjs
@@ -206,6 +207,11 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_round_date_edit_assertions.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261120142820_extend_competition_schedule.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_competition_finish_edit_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260929203854_allow_registration_published_draft_seasons_public_read.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260930153000_registration_open_window_policy.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261121140000_club_entry_fees.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261121140100_whatsapp_fixture_reminders.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_entry_fees_whatsapp_assertions.sql
 
   support-safety:
     runs-on: ubuntu-latest

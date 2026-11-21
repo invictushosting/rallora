@@ -1,177 +1,105 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import {
-  PAYMENT_METHODS, type PaymentMethodKey,
-  canShowRegistrationMethod, type CollectionOption,
-} from "@/lib/leagues/payments";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { createClient } from "@/lib/supabase";
+import { methodByKey } from "@/lib/leagues/payments";
 import styles from "./payment-setup.module.css";
 
-type PrizeType = "cash" | "non_cash" | "mixed";
-const MANUAL: readonly PaymentMethodKey[] = ["bank_transfer","cash_at_club"];
-
-/**
- * This preview contains no account credentials, bank numbers, registration
- * writer, payment link, billing API or persistent financial records.
- */
 type Season = { id: string; name: string; status: string };
-export default function PaymentSetup({ clubName,seasons }:{
-  clubName:string;seasons:Season[];
-}) {
-  const [seasonId,setSeasonId] = useState("");
-  const [manualMethods,setManualMethods] = useState<PaymentMethodKey[]>([]);
-  const [prizeType,setPrizeType] = useState<PrizeType>("cash");
-  const [nonCash,setNonCash] = useState("");
-  const [terms,setTerms] = useState("");
-  const [refundTerms,setRefundTerms] = useState("");
-  const [confirmation,setConfirmation] = useState(false);
-  const [message,setMessage] = useState("");
-  const chosenSeason = seasons.find(season=>season.id===seasonId);
+const defaults = { enabled: false, amount: "", method: "bank_transfer", instructions: "", refundTerms: "" };
 
-  const prizeDescriptionRequired = prizeType !== "cash";
-  const termsReady = confirmation && terms.trim().length>=20 &&
-    refundTerms.trim().length>=20 &&
-    (!prizeDescriptionRequired || nonCash.trim().length>=8);
-  const ready = useMemo(() => manualMethods.map(key => ({
-    key,readiness:"approved",clubEnabled:true,
-    seasonEnabled:true,termsPublished:termsReady,
-    merchantReady:false,
-  } satisfies CollectionOption)),[manualMethods,termsReady]);
-  const visible = ready.filter(canShowRegistrationMethod);
+export default function PaymentSetup({ clubName, seasons }: { clubName: string; seasons: Season[] }) {
+  const db = useMemo(() => createClient(), []);
+  const [seasonId, setSeasonId] = useState("");
+  const [draft, setDraft] = useState(defaults);
+  const [ready, setReady] = useState(false);
+  const [exists, setExists] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [notice, setNotice] = useState("");
 
-  function toggle(key: PaymentMethodKey) {
-    if (!MANUAL.includes(key)) return;
-    setManualMethods(existing => existing.includes(key)
-      ? existing.filter(item=>item!==key) : [...existing,key]);
-    setMessage("");
+  useEffect(() => {
+    if (!seasonId) return;
+    let active = true;
+    void db.from("rallora_club_entry_fees").select("enabled,amount_pence,method,instructions,refund_terms")
+      .eq("season_id", seasonId).maybeSingle().then(({ data, error }) => {
+        if (!active) return;
+        if (error) {
+          setNotice("Could not load the entry fee. Choose the competition again to retry.");
+          return;
+        }
+        setExists(Boolean(data));
+        setDraft(data ? { enabled: data.enabled, amount: (data.amount_pence / 100).toFixed(2),
+          method: data.method, instructions: data.instructions, refundTerms: data.refund_terms } : defaults);
+        setReady(true);
+      });
+    return () => { active = false; };
+  }, [db, seasonId]);
+
+  async function save(event: FormEvent) {
+    event.preventDefault();
+    if (!ready || saving || (!exists && !draft.enabled)) return;
+    const amount = Math.round(Number(draft.amount) * 100);
+    if (draft.enabled && (!/^\d+(\.\d{1,2})?$/.test(draft.amount) || amount < 1 || amount > 100000 ||
+        draft.instructions.trim().length < 5 || draft.refundTerms.trim().length < 5)) {
+      setNotice("Enter a fee between £0.01 and £1,000, payment instructions and refund terms.");
+      return;
+    }
+    setSaving(true);
+    setNotice("");
+    const reply = draft.enabled
+      ? await db.from("rallora_club_entry_fees").upsert({
+          season_id: seasonId, enabled: true, amount_pence: amount, method: draft.method,
+          instructions: draft.instructions.trim(), refund_terms: draft.refundTerms.trim(),
+        })
+      : await db.from("rallora_club_entry_fees").update({ enabled: false }).eq("season_id", seasonId);
+    setSaving(false);
+    if (reply.error) {
+      setNotice("Could not save the entry fee. Refresh and try again.");
+      return;
+    }
+    setExists(true);
+    setNotice(draft.enabled ? "Entry fee saved for new pair registrations." : "New pair registrations are free.");
   }
-  function buildBrief() {
-    const result = [
-      `${clubName} · ${chosenSeason?.name??"Illustrative new competition"} · Example entry setup`,
-      "DRAFT PREVIEW · NOT AVAILABLE TO PLAYERS",
-      "Collection options: " + (manualMethods.map(key=>
-        PAYMENT_METHODS.find(item=>item.key===key)?.label).filter(Boolean).join(", ")||"None selected"),
-      "Prize types: " + (prizeType==="cash"?"Cash":
-        prizeType==="mixed"?"Cash and non-cash":"Non-cash"),
-      ...(prizeDescriptionRequired ? ["Proposed non-cash prizes: "+nonCash.trim()]:[]),
-      "Entry terms: "+terms.trim(),
-      "Refund/cancellation terms: "+refundTerms.trim(),
-    ].join("\n");
-    void navigator.clipboard.writeText(result).then(()=>{
-      setMessage("Example draft copied. No payment instructions were published.");
-    }).catch(()=>{
-      setMessage("Copy blocked by the browser. Nothing was published.");
-    });
-  }
+
   return <section className={styles.root} aria-labelledby="methods-heading">
     <header className={styles.intro}>
-      <span>RALLORA LEAGUES · COLLECTION METHODS</span>
-      <h2 id="methods-heading">Choose how your club wants to collect entry fees.</h2>
-      <p>Clubs can plan manual collections now and explore approved merchant
-        checkout options later. This screen is a setup preview only.
-        No bank details, card numbers or account passwords are collected.</p>
-      <strong>NOT ACTIVE · NO PLAYER CHECKOUT OR PAYMENT STATUS CHANGES</strong>
+      <h2 id="methods-heading">League entry fees</h2>
+      <p>{clubName} collects the fee directly and records payment in Player entries. Existing entries keep the price they registered with.</p>
     </header>
     <div className={styles.content}>
-      <section aria-labelledby="manual-heading">
-        <label className={styles.field}>Competition to plan
-          <select className={styles.season} value={seasonId}
-            onChange={event=>{
-              setSeasonId(event.target.value);
-              setManualMethods([]); setPrizeType("cash"); setNonCash("");
-              setTerms("");setRefundTerms("");setConfirmation(false);setMessage("");
-            }}>
-            <option value="">Illustrative new competition</option>
-            {seasons.map(season=><option key={season.id} value={season.id}>
-              {season.name} · {season.status}</option>)}
+      <form onSubmit={save}>
+        <label className={styles.field}>Competition
+          <select value={seasonId} disabled={saving} onChange={event => {
+            setReady(false); setNotice(""); setSeasonId(event.target.value);
+          }}>
+            <option value="">Choose a competition</option>
+            {seasons.map(season => <option value={season.id} key={season.id}>{season.name} · {season.status}</option>)}
           </select>
-          <small>This is a preview for one competition at a time.
-            Switching season resets the example, without saving data.</small>
         </label>
-        <span className={styles.step}>01 / CLUB-MANAGED OPTIONS</span>
-        <h3 id="manual-heading">Manual collection</h3>
-        <p className={styles.help}>These will require an organiser to check a
-          genuine receipt before marking an entry as paid. Selecting one here
-          does not activate it for any season or player.</p>
-        <div className={styles.methods}>
-          {PAYMENT_METHODS.filter(method=>method.group==="club_managed")
-            .map(method=><label className={styles.method} key={method.key}>
-              <input type="checkbox"
-                checked={manualMethods.includes(method.key)}
-                onChange={()=>toggle(method.key)} />
-              <span><strong>{method.label}</strong>
-                <small>{method.description}</small></span>
-            </label>)}
-        </div>
-        <span className={styles.step}>02 / FUTURE CONNECTED CHECKOUT</span>
-        <h3>Merchant account integrations</h3>
-        <div className={styles.methods}>
-          {PAYMENT_METHODS.filter(method=>method.group==="integrated")
-            .map(method=><article className={styles.method} key={method.key}>
-              <span className={styles.future}>PLANNED</span>
-              <span><strong>{method.label}</strong>
-                <small>{method.description}</small></span>
-            </article>)}
-        </div>
-        <p className={styles.help}>These providers are potential integrations,
-          not approved or connected merchant accounts. Cash-prize eligibility,
-          merchant onboarding and transaction charges need separate confirmation.
-          Rallora will not present a player with an unavailable checkout button.</p>
-      </section>
-      <section aria-labelledby="prize-heading">
-        <span className={styles.step}>03 / PRIZE FORMAT</span>
-        <h3 id="prize-heading">Prizes are not always cash.</h3>
-        <div className={styles.choices} role="group" aria-label="Prize type">
-          {([["cash","Cash"],["non_cash","Physical prizes / vouchers"],
-            ["mixed","Cash + other prizes"]] as [PrizeType,string][])
-            .map(([key,label])=><button type="button" key={key}
-              aria-pressed={prizeType===key}
-              onClick={()=>setPrizeType(key)}>{label}</button>)}
-        </div>
-        {prizeDescriptionRequired&&<label className={styles.field}>
-          Describe the non-cash prizes
-          <textarea rows={3} maxLength={500} value={nonCash}
-            onChange={event=>setNonCash(event.target.value)}
-            placeholder="Example: two padel rackets and four coaching sessions, provided by club sponsor…" />
-          <small>Non-cash prizes are not added to the cash pot. Publish
-            descriptions and conditions separately before entry opens.</small>
-        </label>}
-        <span className={styles.step}>04 / PLAYER-FACING TERMS</span>
-        <h3>Prepare clear competition rules</h3>
-        <label className={styles.field}>Entry and eligibility
-          <textarea rows={3} maxLength={1200} value={terms}
-            onChange={event=>setTerms(event.target.value)}
-            placeholder="Who can enter, cost and whether the price is per player or pair, entry deadline…" />
-        </label>
-        <label className={styles.field}>Refund and cancellation terms
-          <textarea rows={3} maxLength={1200} value={refundTerms}
-            onChange={event=>setRefundTerms(event.target.value)}
-            placeholder="What happens if a pair withdraws, event is cancelled, or numbers are too low…" />
-        </label>
-        <label className={styles.confirm}><input type="checkbox"
-          checked={confirmation} onChange={event=>setConfirmation(event.target.checked)} />
-          I understand this is only a preview, not published entry rules
-          or an approved payment setup.</label>
-        <button className={styles.copy} type="button"
-          disabled={!termsReady || !manualMethods.length}
-          onClick={buildBrief}>Copy sample setup brief ↓</button>
-        {message&&<p role="status" className={styles.feedback}>{message}</p>}
-        <aside className={styles.example}>
-          <span className={styles.step}>PLAYER EXPERIENCE · FUTURE PREVIEW</span>
-          <h4>Choose how to pay {clubName}
-            {chosenSeason?` · ${chosenSeason.name}`:""}</h4>
-          {visible.length
-            ? visible.map(method=><div key={method.key}>
-              <strong>{PAYMENT_METHODS.find(x=>x.key===method.key)?.label}</strong>
-              <small>Club-managed · payment verification required</small>
-            </div>)
-            : <p>No player-facing methods are active. Complete the
-              real season setup, approval and published terms first.</p>}
-          <p><b>After registration:</b> Payment pending → independently
-            reconciled → Entry confirmed. Registration alone never counts
-            as money collected.</p>
-        </aside>
-      </section>
+        {ready && <>
+          <label className={styles.confirm}><input type="checkbox" checked={draft.enabled}
+            onChange={event => setDraft({ ...draft, enabled: event.target.checked })} /> Charge an entry fee per pair</label>
+          {draft.enabled && <>
+            <label className={styles.field}>Fee per pair (£)<input required type="number" min="0.01" max="1000" step="0.01"
+              value={draft.amount} onChange={event => setDraft({ ...draft, amount: event.target.value })} /></label>
+            <label className={styles.field}>Collection method
+              <select value={draft.method} onChange={event => setDraft({ ...draft, method: event.target.value })}>
+                {["bank_transfer", "cash_at_club"].map(key => <option key={key} value={key}>{methodByKey(key)?.label}</option>)}
+              </select>
+            </label>
+            <label className={styles.field}>Payment instructions for registered pairs
+              <textarea required minLength={5} maxLength={1000} rows={3} value={draft.instructions}
+                onChange={event => setDraft({ ...draft, instructions: event.target.value })} />
+            </label>
+            <label className={styles.field}>Refund and cancellation terms
+              <textarea required minLength={5} maxLength={1000} rows={3} value={draft.refundTerms}
+                onChange={event => setDraft({ ...draft, refundTerms: event.target.value })} />
+            </label>
+          </>}
+          <button className={styles.copy} disabled={saving || (!exists && !draft.enabled)}>{saving ? "Saving…" : "Save entry fee"}</button>
+        </>}
+        {notice && <p role="status" className={styles.feedback}>{notice}</p>}
+      </form>
     </div>
   </section>;
 }

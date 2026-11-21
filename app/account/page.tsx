@@ -5,6 +5,8 @@ import {createClient} from "@/lib/supabase";
 import {accountRecoveryNotice} from "@/lib/account-recovery";
 import RalloraLogo from "@/app/components/rallora-logo";
 import SupportForm from "@/app/components/support-form";
+import LeagueEntryPayments from "./league-entry-payments";
+import WhatsAppPreferences from "./whatsapp-preferences";
 import styles from "./account.module.css";
 
 type ClubAccess={club_id:string;role:string;clubs:{slug:string;name:string}|null};
@@ -152,6 +154,10 @@ export default function AccountPage(){
       {profileMessage&&<p role="status" className={styles.message}>{profileMessage}</p>}
       <p>Ready to play? <Link href="/register">Find a club and explore competitions</Link>.</p><p>Looking for a padel partner? <Link href="/players/discover">Explore Rallora Social player discovery</Link> (optional and off by default).</p>
     </section>}
+    {!profileLoading&&!signedIn&&<p><Link href="/login">Sign in</Link> to view your league entry payments and reminder preferences.</p>}
+    {signedIn&&<LeagueEntryPayments db={supabase}/>}
+    {signedIn&&process.env.NEXT_PUBLIC_RALLORA_WHATSAPP_NUMBER&&
+      <WhatsAppPreferences db={supabase} sender={process.env.NEXT_PUBLIC_RALLORA_WHATSAPP_NUMBER}/>}
     {signedIn&&<section className={styles.installSection} aria-labelledby="install-rallora-heading">
       <h2 id="install-rallora-heading">Rallora on your home screen</h2>
       <p>Add the Rallora icon for quick access to your leagues, fixtures and results.</p>

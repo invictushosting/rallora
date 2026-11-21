@@ -81,3 +81,30 @@ http://localhost:3000/**
 - Club and social writes remain disabled unless their authorization release has
   separately passed.
 - Mobile view looks clean.
+
+## League entry fees and WhatsApp reminders
+
+Apply the entry fee and WhatsApp migrations before deploying the application build. Both features are off by default at club level. A competition starts collecting only when its club saves an enabled fee.
+
+For WhatsApp, connect a Rallora-owned WhatsApp Business sender in Twilio and request Utility approval for the reminder template. Configure its template variables in this order.
+
+| Variable | Value |
+| --- | --- |
+| 1 | Club name |
+| 2 | Reminder title |
+| 3 | Fixture and timing details |
+| 4 | Rallora match centre link |
+
+Example template body:
+
+```
+Rallora fixture reminder from {{1}}.
+{{2}}
+Fixture details: {{3}}
+Open your match centre: {{4}}
+Reply STOP to turn off Rallora WhatsApp reminders.
+```
+
+Set the five WhatsApp environment variables listed in `.env.example` for the environment and set the Twilio inbound webhook to POST to the exact HTTPS URL in `TWILIO_WHATSAPP_INBOUND_URL`. This is normally `https://www.rallora.app/api/integrations/whatsapp`. The webhook uses the server-only Supabase service role key and validates Twilio’s signature. Use the primary Twilio auth token. If using a Twilio Messaging Service, forward inbound messages and opt-out events to this endpoint.
+
+With a test club and opted-in test number, verify that JOIN connects the number, a due fixture reminder reaches it, and STOP or Account opt-out suppresses a queued reminder. Check acceptance in Notifications & reminders and actual delivery in Twilio. Confirm the opt-in wording and privacy information before toggling WhatsApp on at a pilot club.

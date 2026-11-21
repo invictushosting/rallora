@@ -133,3 +133,21 @@ export function assessRegistrationPayment(
   }
   return paymentStatusFromVerifiedEvents(registration.feePence,recorded,cancelled);
 }
+
+export type EntryFeeQuote = {
+  version: string;
+  amount_pence: number;
+  method: "bank_transfer" | "cash_at_club";
+  refund_terms: string;
+};
+
+export type EntryPayment = Omit<EntryFeeQuote, "version"> & {
+  instructions: string;
+  payment_reference: string;
+  status: "awaiting_payment" | "paid" | "refunded";
+};
+
+const pounds = new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" });
+export function formatEntryFee(pence: number) {
+  return pounds.format(pence / 100);
+}
