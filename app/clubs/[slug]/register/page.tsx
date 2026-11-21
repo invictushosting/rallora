@@ -11,7 +11,8 @@ import {registrationStatus} from "@/lib/registration-status";
 import PlayerEmailFields from "@/app/components/player-email-fields";
 import {isAppleRelayEmail,playerEmails} from "@/lib/player-emails";
 import {registrationAccountIssue} from "@/lib/registration-account";
-import {formatEntryFee,methodByKey,type EntryFeeQuote,type EntryPayment} from "@/lib/leagues/payments";
+import StripeEntryCheckout from "@/app/components/stripe-entry-checkout";
+import {entryPaymentStatusLabel,formatEntryFee,methodByKey,type EntryFeeQuote,type EntryPayment} from "@/lib/leagues/payments";
 type Club={id:string;slug:string;name:string;logo_url:string|null;primary_color:string|null;player_registration_terms:string|null};
 type Season={registration_published:boolean;id:string;name:string;division_assignment_mode:"manual"|"combined_rating";registration_opens_at:string|null;registration_closes_at:string|null};
 export default function RegisterTeamPage(){
@@ -117,8 +118,9 @@ export default function RegisterTeamPage(){
  {club?.player_registration_terms&&step===1&&<aside className={styles.terms}><strong>Before you join</strong><p>{club.player_registration_terms}</p></aside>}
  {receipt?<div className={styles.applicationState} role="status"><strong>{receipt.title}</strong><p>{receipt.description}</p><p><strong>{season?.name}</strong></p>
  {paymentError&&<p>Could not load payment details. Refresh this page to try again.</p>}
- {payment&&<aside className={styles.terms}><strong>{formatEntryFee(payment.amount_pence)} per pair · {payment.status==="paid"?"Paid":payment.status==="refunded"?"Refunded":"Payment pending"}</strong>
- {payment.status==="awaiting_payment"&&existing==="pending"&&<><p>{methodByKey(payment.method)?.label}</p><p style={{whiteSpace:"pre-wrap"}}>{payment.instructions}</p><p>Payment reference {payment.payment_reference}</p></>}
+ {payment&&<aside className={styles.terms}><strong>{formatEntryFee(payment.amount_pence)} per pair · {entryPaymentStatusLabel[payment.status]}</strong>
+ {payment.status==="awaiting_payment"&&existing==="pending"&&<><p>{methodByKey(payment.method)?.label}</p><p style={{whiteSpace:"pre-wrap"}}>{payment.instructions}</p><p>Payment reference {payment.payment_reference}</p>
+ {payment.method==="stripe_connect"&&applicationId&&<StripeEntryCheckout entry={applicationId}/>}</>}
  <p><Link href="/account#league-payments">View your league payments in Account</Link></p>
  <p>Refund and cancellation terms</p><p style={{whiteSpace:"pre-wrap"}}>{payment.refund_terms}</p></aside>}
  {process.env.NEXT_PUBLIC_RALLORA_WHATSAPP_NUMBER&&<p><Link href="/account#whatsapp-reminders">Set up optional WhatsApp reminders</Link></p>}

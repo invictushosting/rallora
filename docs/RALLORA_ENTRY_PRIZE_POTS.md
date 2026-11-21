@@ -1,6 +1,6 @@
 # Rallora Leagues: paid entry & prize pot feature
 
-The league entry fee implementation supports a fixed GBP fee per new pair, collected directly by the club via bank transfer or at the venue. The prize calculator remains a forecast. Integrated checkout, prize accounting and payouts are future phases.
+The league entry fee implementation supports a fixed GBP fee per new pair, collected directly by the club via bank transfer or at the venue. The prize calculator remains a forecast. Stripe Checkout is available in the isolated sandbox build. Live card checkout, prize accounting and payouts are future phases.
 
 ## Product: a season-level optional feature of Rallora Leagues
 
@@ -44,7 +44,12 @@ A late team joining a paid competition uses the normal registration and payment 
 
 The tables under `scripts/staging/004_league_entry_prizes.sql`, `005_payment_options_noncash.sql` and `006_manual_receipt_ledger.sql` are prototypes for payment and prize accounting. The live application path uses `20261121140000_club_entry_fees.sql`.
 
-## Phase 2: optional integrated checkout, only after written provider approval
+## Phase 2: club-owned Stripe Checkout
+
+The test integration uses club-owned Stripe accounts and direct GBP card charges. Club owners and admins link the account through Stripe Connect. Stripe-hosted Checkout takes the fee per pair from the saved entry. The club sees payments and handles refunds in Stripe. Rallora shows verified payment and refund status in Registrations and Account. Organisers still review and approve entries separately.
+
+The sandbox uses test keys, a preview origin and an isolated database. Test card payments are labelled in the app. Production payment enablement needs a separate release and account eligibility confirmation.
+
 
 One possible architecture is a provider-managed connected-club onboarding
 and explicit Rallora platform fee; this is NOT automatically allowed for

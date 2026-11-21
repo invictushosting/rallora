@@ -39,6 +39,7 @@ jobs:
       - run: node --experimental-strip-types --test tests/leagues-exports.test.mjs
       - run: node --experimental-strip-types --test tests/leagues-prize-budget.test.mjs
       - run: node --experimental-strip-types --test tests/leagues-payments.test.mjs
+      - run: node --experimental-strip-types --test tests/stripe-connect.test.mjs
       - run: node --experimental-strip-types --test tests/club-event-scheduler.test.mjs
       - run: node --experimental-strip-types --test tests/account-recovery.test.mjs tests/support-request.test.mjs tests/support-workspace.test.mjs
       - run: node --experimental-strip-types --test tests/email.test.mjs
@@ -212,6 +213,8 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261121140000_club_entry_fees.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261121140100_whatsapp_fixture_reminders.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_entry_fees_whatsapp_assertions.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261121153000_stripe_connect_sandbox.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_stripe_connect_assertions.sql
 
   support-safety:
     runs-on: ubuntu-latest

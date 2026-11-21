@@ -8,7 +8,9 @@ import styles from "./payment-setup.module.css";
 type Season = { id: string; name: string; status: string };
 const defaults = { enabled: false, amount: "", method: "bank_transfer", instructions: "", refundTerms: "" };
 
-export default function PaymentSetup({ clubName, seasons }: { clubName: string; seasons: Season[] }) {
+export default function PaymentSetup({
+  clubName, clubSlug, seasons,
+}: { clubName: string; clubSlug: string; seasons: Season[] }) {
   const db = useMemo(() => createClient(), []);
   const [seasonId, setSeasonId] = useState("");
   const [draft, setDraft] = useState(defaults);
@@ -16,6 +18,44 @@ export default function PaymentSetup({ clubName, seasons }: { clubName: string; 
   const [exists, setExists] = useState(false);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState("");
+  const [stripeStatus, setStripeStatus] = useState<{ available: boolean; connected: boolean; ready: boolean } | null>(null);
+  const [stripeNotice, setStripeNotice] = useState("");
+  const [connecting, setConnecting] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetch(`/api/integrations/stripe?club=${encodeURIComponent(clubSlug)}`, { signal: controller.signal })
+      .then(async response => {
+        if (response.status === 503) throw new Error("Stripe status unavailable");
+        const data = await response.json();
+        if (!controller.signal.aborted) setStripeStatus(data);
+      })
+      .catch(() => { if (!controller.signal.aborted) setStripeNotice("Could not check Stripe status. Refresh to try again."); });
+    if (new URLSearchParams(window.location.search).get("stripe") === "error") {
+      setStripeNotice("Could not connect Stripe. Check your Stripe account and try again.");
+    }
+    return () => controller.abort();
+  }, [clubSlug]);
+
+  async function connectStripe() {
+    setConnecting(true);
+    setStripeNotice("");
+    try {
+      const response = await fetch("/api/integrations/stripe", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ club: clubSlug }),
+      });
+      const data = await response.json();
+      if (response.ok && typeof data.url === "string" && data.url.startsWith("https://connect.stripe.com/")) {
+        window.location.assign(data.url);
+        return;
+      }
+      setStripeNotice(typeof data.error === "string" ? data.error : "Could not connect Stripe. Try again.");
+    } catch {
+      setStripeNotice("Could not connect Stripe. Try again.");
+    }
+    setConnecting(false);
+  }
 
   useEffect(() => {
     if (!seasonId) return;
@@ -38,10 +78,16 @@ export default function PaymentSetup({ clubName, seasons }: { clubName: string; 
   async function save(event: FormEvent) {
     event.preventDefault();
     if (!ready || saving || (!exists && !draft.enabled)) return;
+    const card = draft.method === "stripe_connect";
+    if (draft.enabled && card && !stripeStatus?.ready) {
+      setNotice("Connect a Stripe account that can accept test payments first.");
+      return;
+    }
     const amount = Math.round(Number(draft.amount) * 100);
-    if (draft.enabled && (!/^\d+(\.\d{1,2})?$/.test(draft.amount) || amount < 1 || amount > 100000 ||
-        draft.instructions.trim().length < 5 || draft.refundTerms.trim().length < 5)) {
-      setNotice("Enter a fee between £0.01 and £1,000, payment instructions and refund terms.");
+    if (draft.enabled && (!/^\d+(\.\d{1,2})?$/.test(draft.amount) || amount < (card ? 30 : 1) || amount > 100000 ||
+        (!card && draft.instructions.trim().length < 5) || draft.refundTerms.trim().length < 5)) {
+      setNotice(card ? "Enter a fee between £0.30 and £1,000 and add refund terms."
+        : "Enter a fee between £0.01 and £1,000, payment instructions and refund terms.");
       return;
     }
     setSaving(true);
@@ -49,7 +95,7 @@ export default function PaymentSetup({ clubName, seasons }: { clubName: string; 
     const reply = draft.enabled
       ? await db.from("rallora_club_entry_fees").upsert({
           season_id: seasonId, enabled: true, amount_pence: amount, method: draft.method,
-          instructions: draft.instructions.trim(), refund_terms: draft.refundTerms.trim(),
+          instructions: card ? "Pay online using Stripe Checkout." : draft.instructions.trim(), refund_terms: draft.refundTerms.trim(),
         })
       : await db.from("rallora_club_entry_fees").update({ enabled: false }).eq("season_id", seasonId);
     setSaving(false);
@@ -64,9 +110,18 @@ export default function PaymentSetup({ clubName, seasons }: { clubName: string; 
   return <section className={styles.root} aria-labelledby="methods-heading">
     <header className={styles.intro}>
       <h2 id="methods-heading">League entry fees</h2>
-      <p>{clubName} collects the fee directly and records payment in Player entries. Existing entries keep the price they registered with.</p>
+      <p>{clubName} collects the fee directly. You can check payment status in Player entries. Existing entries keep the price they registered with.</p>
     </header>
     <div className={styles.content}>
+      {stripeStatus?.available && <section aria-labelledby="stripe-test-heading">
+        <h3 id="stripe-test-heading">Stripe card payments</h3>
+        <p>{stripeStatus.ready ? "Connected. This club can accept test payments."
+          : stripeStatus.connected ? "Connected. Finish setup in Stripe to accept test payments."
+            : "Connect your club’s Stripe sandbox account to accept test payments."}</p>
+        {!stripeStatus.ready && <button type="button" className={styles.copy} disabled={connecting}
+          onClick={() => void connectStripe()}>{connecting ? "Opening Stripe…" : stripeStatus.connected ? "Continue Stripe setup" : "Connect Stripe"}</button>}
+      </section>}
+      {stripeNotice && <p role="status" className={styles.feedback}>{stripeNotice}</p>}
       <form onSubmit={save}>
         <label className={styles.field}>Competition
           <select value={seasonId} disabled={saving} onChange={event => {
@@ -80,17 +135,17 @@ export default function PaymentSetup({ clubName, seasons }: { clubName: string; 
           <label className={styles.confirm}><input type="checkbox" checked={draft.enabled}
             onChange={event => setDraft({ ...draft, enabled: event.target.checked })} /> Charge an entry fee per pair</label>
           {draft.enabled && <>
-            <label className={styles.field}>Fee per pair (£)<input required type="number" min="0.01" max="1000" step="0.01"
+            <label className={styles.field}>Fee per pair (£)<input required type="number" min={draft.method === "stripe_connect" ? "0.30" : "0.01"} max="1000" step="0.01"
               value={draft.amount} onChange={event => setDraft({ ...draft, amount: event.target.value })} /></label>
             <label className={styles.field}>Collection method
               <select value={draft.method} onChange={event => setDraft({ ...draft, method: event.target.value })}>
-                {["bank_transfer", "cash_at_club"].map(key => <option key={key} value={key}>{methodByKey(key)?.label}</option>)}
+                {["bank_transfer", "cash_at_club", ...(stripeStatus?.ready || draft.method === "stripe_connect" ? ["stripe_connect"] : [])].map(key => <option key={key} value={key}>{methodByKey(key)?.label}</option>)}
               </select>
             </label>
-            <label className={styles.field}>Payment instructions for registered pairs
+            {draft.method !== "stripe_connect" && <label className={styles.field}>Payment instructions for registered pairs
               <textarea required minLength={5} maxLength={1000} rows={3} value={draft.instructions}
                 onChange={event => setDraft({ ...draft, instructions: event.target.value })} />
-            </label>
+            </label>}
             <label className={styles.field}>Refund and cancellation terms
               <textarea required minLength={5} maxLength={1000} rows={3} value={draft.refundTerms}
                 onChange={event => setDraft({ ...draft, refundTerms: event.target.value })} />
