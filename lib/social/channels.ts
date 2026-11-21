@@ -18,6 +18,14 @@ export function formatSocialCaption(
 ): string {
   const heading = clean(title);
   const message = clean(body);
+  if (!heading) {
+    if (channel === "WhatsApp") return `${shortenSocial(message,1050)}\n\nFull details: ${clubUrl}`;
+    if (channel === "Instagram") return `${shortenSocial(message,1700)}\n\n#Padel #Rallora`;
+    if (channel === "Club website") return message;
+    if (channel === "Email") return `Subject: Club update\n\n${message}\n\nFull details: ${clubUrl}`;
+    return `${message}\n\n${clubUrl}`;
+  }
+
   if (channel === "WhatsApp") {
     return `*${heading}*\n\n${shortenSocial(message, 1050)}\n\nFull details: ${clubUrl}`;
   }
