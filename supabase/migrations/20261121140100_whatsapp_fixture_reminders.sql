@@ -32,6 +32,38 @@ alter table rallora_private.whatsapp_inbound_events enable row level security;
 alter table rallora_private.whatsapp_deliveries enable row level security;
 revoke all on rallora_private.whatsapp_preferences,rallora_private.whatsapp_inbound_events,rallora_private.whatsapp_deliveries from public,anon,authenticated;
 
+create table rallora_private.whatsapp_prompt_seen (
+  user_id uuid primary key references auth.users(id) on delete cascade
+);
+alter table rallora_private.whatsapp_prompt_seen enable row level security;
+revoke all on rallora_private.whatsapp_prompt_seen from public,anon,authenticated;
+
+create function rallora_private.claim_whatsapp_prompt(p_club_id uuid) returns boolean
+language plpgsql security definer set search_path='' as $$
+declare uid uuid:=auth.uid();
+begin
+  if uid is null or public.rallora_is_platform_admin() then return false; end if;
+  insert into rallora_private.whatsapp_prompt_seen(user_id)
+    select uid
+    where exists (
+      select 1 from public.rallora_team_roster_memberships m
+      join public.seasons s on s.id=m.season_id and s.club_id=m.club_id and s.status='active'
+      join public.clubs c on c.id=m.club_id and c.is_active
+      join public.rallora_communication_settings cs on cs.club_id=m.club_id and cs.enabled and cs.whatsapp_enabled
+      where m.player_user_id=uid and m.club_id=p_club_id
+    ) and not exists (
+      select 1 from rallora_private.whatsapp_preferences where user_id=uid
+    )
+    on conflict (user_id) do nothing;
+  return found;
+end $$;
+create function public.rallora_claim_whatsapp_prompt(p_club_id uuid) returns boolean
+language sql security invoker set search_path='' as $$
+  select rallora_private.claim_whatsapp_prompt(p_club_id)
+$$;
+revoke all on function rallora_private.claim_whatsapp_prompt(uuid),public.rallora_claim_whatsapp_prompt(uuid) from public,anon;
+grant execute on function rallora_private.claim_whatsapp_prompt(uuid),public.rallora_claim_whatsapp_prompt(uuid) to authenticated;
+
 create function rallora_private.whatsapp_preference(p_action text,p_phone text) returns jsonb
 language plpgsql security definer set search_path='' as $$
 declare uid uuid:=auth.uid(); preference rallora_private.whatsapp_preferences%rowtype; code text;

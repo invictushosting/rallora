@@ -94,11 +94,30 @@ begin
   insert into public.rallora_team_registration_requests(club_id,season_id,division_id,team_id,player_user_id,player_name,status)
     values(club,season,division,away,other_player,'Away One','approved') returning id into roster_request;
   insert into public.rallora_team_roster_memberships(registration_request_id,club_id,season_id,division_id,team_id,player_user_id,role)
-    values(roster_request,club,season,division,away,other_player,'captain');
+    values(roster_request,club,season,division,away,other_player,'player');
   update public.seasons set status='active',registration_published=false where id=season;
   select name into zone from pg_timezone_names where extract(hour from now() at time zone name)=12 limit 1;
   insert into public.rallora_communication_settings(club_id,enabled,whatsapp_enabled,timezone,send_hour,quiet_end_hour)
-    values(club,true,true,zone,0,23);
+    values(club,true,false,zone,0,23);
+  if has_function_privilege('anon','public.rallora_claim_whatsapp_prompt(uuid)','EXECUTE') then
+    raise exception 'Anonymous caller has access to player opt-in prompts';
+  end if;
+  perform set_config('request.jwt.claim.sub',other_player::text,true);
+  set local role authenticated;
+  if public.rallora_claim_whatsapp_prompt(club) then raise exception 'Prompt shown before club enabled WhatsApp'; end if;
+  reset role;
+  update public.rallora_communication_settings set whatsapp_enabled=true where club_id=club;
+
+  set local role authenticated;
+  if not public.rallora_claim_whatsapp_prompt(club) then raise exception 'Non-captain player did not receive prompt'; end if;
+  if public.rallora_claim_whatsapp_prompt(club) then raise exception 'Prompt appeared twice for one player account'; end if;
+  if public.rallora_whatsapp_preference('read')->>'status' <> 'off' then raise exception 'Prompt alone enabled WhatsApp'; end if;
+  perform set_config('request.jwt.claim.sub',payer::text,true);
+  if public.rallora_claim_whatsapp_prompt(club) then raise exception 'Player who enabled reminders was prompted again'; end if;
+  perform set_config('request.jwt.claim.sub',foreign_admin::text,true);
+  if public.rallora_claim_whatsapp_prompt(club) then raise exception 'Unrelated account received prompt'; end if;
+  reset role;
+  perform set_config('request.jwt.claim.sub',admin_id::text,true);
   update public.rallora_communication_settings set rules=jsonb_set(jsonb_set(rules,'{booking,email}','false'),'{booking,in_app}','false') where club_id=club;
   perform rallora_private.generate_reminders();
   if (select count(*) from rallora_private.whatsapp_deliveries d join public.rallora_delivery_queue q on q.id=d.delivery_id

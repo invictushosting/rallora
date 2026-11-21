@@ -13,6 +13,7 @@ import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import { captainResultState, OFFICIAL_RESULT_STATUSES, type CaptainSubmission, type OfficialResult } from "@/lib/leagues/result-workflow";
 import styles from "./captain.module.css";
+import WhatsAppReminderPrompt from "./whatsapp-reminder-prompt";
 
 type Team = { id:string; name:string; player_one_name:string|null; player_two_name:string|null;
   player_one_rating:number|null; player_two_rating:number|null; role?:string; season:{name:string;status:string;created_at:string} };
@@ -23,6 +24,7 @@ export default function CaptainCentre() {
   const supabase=useMemo(()=>createClient(),[]);
   const [team,setTeam]=useState<Team|null>(null), [captainTeams,setCaptainTeams]=useState<Team[]>([]);
   const [selectedId,setSelectedId]=useState(""), [viewerId,setViewerId]=useState("");
+  const [clubId,setClubId]=useState("");
   const [pairingSearch,setPairingSearch]=useState("");
   const [platformAdmin,setPlatformAdmin]=useState(false), [loading,setLoading]=useState(true);
   const [labels,setLabels]=useState<Record<string,string>>({}), [fixtures,setFixtures]=useState<Fixture[]>([]);
@@ -102,7 +104,7 @@ export default function CaptainCentre() {
       const threadSummary=await supabase.rpc("rallora_fixture_conversation_summaries",{p_club_id:club.data.id});
       if(version!==loadVersion.current)return;
       setUnread(Object.fromEntries(((threadSummary.data??[]) as {fixture_id:string;unread_count:number}[]).map(row=>[row.fixture_id,Number(row.unread_count)])));
-      setPlatformAdmin(isAdmin);setArrangements(booked);setViewerId(user.id);setCaptainTeams(available);setTeam(chosen??null);setFixtures(rows);setLabels(names);setSubmissions(submitted);setResults(official);
+      setClubId(club.data.id);setPlatformAdmin(isAdmin);setArrangements(booked);setViewerId(user.id);setCaptainTeams(available);setTeam(chosen??null);setFixtures(rows);setLabels(names);setSubmissions(submitted);setResults(official);
       setNotice(!chosen?(isAdmin?"This club has no pairings yet. Create or approve teams in club admin to inspect their captain view.":"Your account is not linked to a pairing for this club yet. Claim your partner invitation or ask the organiser to check your place. If your team was just approved, refresh this page or contact the organiser.")
         :chosen.season.status==="draft"?"This cycle is being prepared. Fixtures become available when the organiser activates it."
         :chosen.season.status==="completed"?"This cycle is complete. Its results are shown for reference.":"");
@@ -181,6 +183,8 @@ export default function CaptainCentre() {
         </select>
       </div>}
     </section>
+    {process.env.NEXT_PUBLIC_RALLORA_WHATSAPP_NUMBER&&clubId&&viewerId&&!platformAdmin&&captainTeams.some(item=>item.season.status==="active")&&
+      <WhatsAppReminderPrompt key={`${viewerId}:${clubId}`} db={supabase} clubId={clubId} clubSlug={slug}/>}
     {notice&&<p className={styles.notice} role="status">{notice}</p>}
     {!loading&&!team&&<Link href={platformAdmin?`/clubs/${slug}/admin`:viewerId?`/account?club=${encodeURIComponent(slug)}&return=captain`:"/login"}>{platformAdmin?"Open club admin":viewerId?"Open your account":"Sign in to your Rallora account"} →</Link>}
     {!loading&&team&&!notice&&fixtures.length===0&&<p className={styles.notice}>There are no fixtures available for this pairing yet.</p>}

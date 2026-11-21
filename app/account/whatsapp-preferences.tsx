@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase";
 import styles from "./account.module.css";
 
@@ -8,6 +8,7 @@ type Preference = { status: "off" } | { status: "active"; phone: string } |
   { status: "pending"; phone: string; code: string };
 
 export default function WhatsAppPreferences({ db, sender }: { db: ReturnType<typeof createClient>; sender: string }) {
+  const section = useRef<HTMLElement>(null);
   const [preference, setPreference] = useState<Preference|null>(null);
   const [number, setNumber] = useState("");
   const [consent, setConsent] = useState(false);
@@ -35,6 +36,10 @@ export default function WhatsAppPreferences({ db, sender }: { db: ReturnType<typ
 
   useEffect(() => { void update("read"); }, [update]);
 
+  useEffect(() => {
+    if (window.location.hash === "#whatsapp-reminders") section.current?.scrollIntoView();
+  }, []);
+
   function request(event: FormEvent) {
     event.preventDefault();
     const phone = number.replace(/[\s()-]/g, "");
@@ -45,7 +50,7 @@ export default function WhatsAppPreferences({ db, sender }: { db: ReturnType<typ
     if (consent) void update("request", phone);
   }
 
-  return <section id="whatsapp-reminders" className={styles.passwordSection} aria-labelledby="whatsapp-heading">
+  return <section ref={section} id="whatsapp-reminders" className={styles.passwordSection} aria-labelledby="whatsapp-heading">
     <h2 id="whatsapp-heading">WhatsApp reminders</h2>
     <p>Get reminders from Rallora about arranging fixtures, upcoming matches and outstanding results when your club enables WhatsApp.</p>
     {preference?.status === "active" && <>
