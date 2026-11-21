@@ -48,3 +48,10 @@ test("leading whitespace and CRLF are cleaned for every destination", () => {
     assert.ok(formatted.includes("Text\nLine"));
   }
 });
+
+test('generated captions with their own heading have no empty heading or stray bold markers',()=>{
+ for(const channel of ['Instagram','Facebook','WhatsApp']){
+  const text=formatSocialCaption(channel,'',message,url);
+  assert.ok(text.startsWith(message));assert.ok(!text.startsWith('**'));assert.ok(!text.startsWith('\n'));
+ }
+});
