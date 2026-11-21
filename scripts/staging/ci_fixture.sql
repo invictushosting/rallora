@@ -3,6 +3,7 @@
 -- Used only inside an ephemeral GitHub Actions Postgres container.
 create role authenticated nologin;
 create role anon nologin;
+create role service_role nologin bypassrls;
 create schema auth;
 create table auth.users (id uuid primary key, email text);
 create function auth.uid() returns uuid language sql stable as $fn$

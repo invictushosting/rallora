@@ -585,7 +585,7 @@ export default function ClubAdministration() {
       seasons={view.summaries.map(({season,teams})=>({
         id:season.id,name:season.name,status:season.status,teams,
       }))} />
-    <PaymentSetup clubName={view.club.name}
+    <PaymentSetup clubName={view.club.name} clubSlug={view.club.slug}
       seasons={view.summaries.map(({season})=>({
         id:season.id,name:season.name,status:season.status,
       }))} />

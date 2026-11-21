@@ -11,9 +11,9 @@ export const COMMUNICATION_TYPES = [
 ] as const;
 export type CommunicationKey=typeof COMMUNICATION_TYPES[number]['key'];
 export type CommunicationRule={enabled:boolean;email:boolean;in_app:boolean;hours?:number;repeat_hours?:number};
-export type CommunicationSettings={club_id:string;enabled:boolean;timezone:string;send_hour:number;quiet_end_hour:number;daily_limit:number;rules:Record<CommunicationKey,CommunicationRule>};
+export type CommunicationSettings={club_id:string;enabled:boolean;whatsapp_enabled:boolean;timezone:string;send_hour:number;quiet_end_hour:number;daily_limit:number;rules:Record<CommunicationKey,CommunicationRule>};
 export function defaultCommunicationSettings(clubId:string):CommunicationSettings {
- return {club_id:clubId,enabled:false,timezone:'Europe/London',send_hour:9,quiet_end_hour:20,daily_limit:3,rules:Object.fromEntries(COMMUNICATION_TYPES.map(type=>[type.key,{enabled:true,email:true,in_app:true,...(type.hours?{hours:type.hours}:{}),...(type.key==='overdue'?{repeat_hours:72}:{})}])) as CommunicationSettings['rules']};
+ return {club_id:clubId,enabled:false,whatsapp_enabled:false,timezone:'Europe/London',send_hour:9,quiet_end_hour:20,daily_limit:3,rules:Object.fromEntries(COMMUNICATION_TYPES.map(type=>[type.key,{enabled:true,email:true,in_app:true,...(type.hours?{hours:type.hours}:{}),...(type.key==='overdue'?{repeat_hours:72}:{})}])) as CommunicationSettings['rules']};
 }
 export type DeliveryMessage={id:string;to:string;title:string;body:string;actionUrl:string;brand:{name:string;sender:string;logoUrl:string|null;primaryColour:string|null;replyTo:string}};
 // Fixed application origin: neither scheduler requests nor queued values choose an external action destination.

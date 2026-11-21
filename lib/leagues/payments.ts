@@ -16,7 +16,7 @@ export const PAYMENT_METHODS: readonly PaymentMethod[] = [
     description:"The club collects money itself and records a verified receipt.",
     checkout:false,requiresReview:false },
   { key:"stripe_connect",label:"Stripe Connect",group:"integrated",
-    description:"Future connected card checkout, subject to explicit competition-model approval.",
+    description:"Card checkout paid directly to the club’s connected Stripe account.",
     checkout:true,requiresReview:true },
   { key:"mollie_connect",label:"Mollie Connect",group:"integrated",
     description:"Future connected merchant checkout, subject to eligibility and approval.",
@@ -133,3 +133,28 @@ export function assessRegistrationPayment(
   }
   return paymentStatusFromVerifiedEvents(registration.feePence,recorded,cancelled);
 }
+
+export type EntryFeeQuote = {
+  version: string;
+  amount_pence: number;
+  method: "bank_transfer" | "cash_at_club" | "stripe_connect";
+  refund_terms: string;
+};
+
+export type EntryPayment = Omit<EntryFeeQuote, "version"> & {
+  instructions: string;
+  payment_reference: string;
+  status: "awaiting_payment" | "paid" | "partially_refunded" | "refunded";
+};
+
+const pounds = new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" });
+export function formatEntryFee(pence: number) {
+  return pounds.format(pence / 100);
+}
+
+export const entryPaymentStatusLabel = {
+  awaiting_payment: "Payment pending",
+  paid: "Paid",
+  partially_refunded: "Partially refunded",
+  refunded: "Refunded",
+} as const satisfies Record<EntryPayment["status"], string>;

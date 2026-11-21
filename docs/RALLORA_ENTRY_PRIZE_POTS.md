@@ -1,8 +1,6 @@
 # Rallora Leagues: paid entry & prize pot feature
 
-Status: **planning UI + synthetic staging SQL only**. Rallora does not take,
-hold, refund or distribute player money. No fee configuration is attached
-to a live season yet. Do NOT label a forecast as "collected" or "available to pay".
+The league entry fee implementation supports a fixed GBP fee per new pair, collected directly by the club via bank transfer or at the venue. The prize calculator remains a forecast. Stripe Checkout is available in the isolated sandbox build. Live card checkout, prize accounting and payouts are future phases.
 
 ## Product: a season-level optional feature of Rallora Leagues
 
@@ -36,71 +34,22 @@ Real provider fees and refunds change this example.
 No Rallora transaction fee has been set. Provider cost fields are user
 inputs, not a quote or approval. Never advertise zero fees as a promise.
 
-## Development sprint: choosing payment methods and prize formats
+## Phase 1: club-managed collection
 
-A club-only, ephemeral **Collection Methods** panel now exists beside the
-Entry & Prize Pot calculator, accessible only through the verified organiser
-dashboard. It lets a club plan bank transfer, cash at club, or both, and
-shows Stripe Connect, Mollie Connect, PayPal, Revolut Business and Adyen
-clearly as future integrations, NOT connected processors.
+Club staff select one collection method per competition in League entry fees. The player sees the amount and refund terms before submitting. A subsequent change to price or terms applies to future entries. The application snapshots the accepted amount, instructions and terms and assigns a payment reference. Singles and standby places have no charge while waiting for a pair.
 
-The club can draft eligibility, refund and cancellation wording and note
-cash, physical/voucher/coaching, or mixed prizes. Example setup text can
-be copied, but is not published or persisted; the page collects NO IBAN,
-account number, merchant token or card information. Non-cash prizes are
-not added to the numeric cash pot. The prize budget calculator is still
-independent, so clubs should choose **no cash prizes** there if their event
-awards only physical items; unify the two configurations before real season
-publication.
+Reconcile the payment against the club’s own records using the payment reference. Record the full receipt in Registrations before approving the pair. Record a correction before approval if a receipt was entered in error. Process refunds through the club and record a full refund when it has been issued. Rallora records the club operator and time for those changes. The payer can see their payment status under Account.
 
-`lib/leagues/payments.ts` supplies a typed provider catalog, readiness
-checks and an *internal-only* verified-event payment-state model.
-No registration or client request can automatically mark itself as paid.
-A real server must validate receipt authenticity, club, competition, amount,
-currency and registration against trusted sources before adding an event.
-Duplicate notifications cannot count twice; conflicts fail closed.
+A late team joining a paid competition uses the normal registration and payment flow. The club must reopen registration for that entry if it has already closed. Existing applications keep their original fee status and rolling cycles carry team membership forward. Configure any future paid intake separately.
 
-Proposed extra tables `scripts/staging/005_payment_options_noncash.sql`
-record club/season-scoped payment-method and physical prize drafts.
-No browser role is permitted to mark merchant approvals or delivery complete.
-Synthetic two-club CI tests are NOT a replacement for real Supabase staging.
-The code does not submit payment forms, connect merchant accounts, hold funds
-or write payment details to any live database.
+The tables under `scripts/staging/004_league_entry_prizes.sql`, `005_payment_options_noncash.sql` and `006_manual_receipt_ledger.sql` are prototypes for payment and prize accounting. The live application path uses `20261121140000_club_entry_fees.sql`.
 
-## Phase 1: club-managed collections, Rallora tracks only after approval
+## Phase 2: club-owned Stripe Checkout
 
-Consider an optional organiser-managed offline route with explicit manually
-reconciled receipt records after the database/staging/security work. Show
-"payment pending", "reconciled", "refunded", "disputed" separately. An admin
-clicking "paid" is not a verified bank receipt: require source, date,
-amount, currency, actor and an auditable correction/reversal trail. Never
-collect card credentials or private banking details in notes.
+The test integration uses club-owned Stripe accounts and direct GBP card charges. Club owners and admins link the account through Stripe Connect. Stripe-hosted Checkout takes the fee per pair from the saved entry. The club sees payments and handles refunds in Stripe. Rallora shows verified payment and refund status in Registrations and Account. Organisers still review and approve entries separately.
 
-**No offline status writer is enabled in current code.** The initial planner
-is read-only and stores nothing in Supabase.
+The sandbox uses test keys, a preview origin and an isolated database. Test card payments are labelled in the app. Production payment enablement needs a separate release and account eligibility confirmation.
 
-### Staged manual receipt reconciliation (not a live feature)
-
-`scripts/staging/006_manual_receipt_ledger.sql` defines a proposed
-append-only receipt audit for an approved bank-transfer or cash-at-club
-option. A future trusted worker would write only after an authorised club
-owner/admin checks evidence, amount, registration, currency and source. Each
-unique source reference must be fingerprinted server-side, not saved as a raw
-bank statement reference; the same source cannot be counted twice within
-the same club and season. Correct an erroneous receipt with a same-club,
-same-registration reversal, never by overwriting the original.
-
-Browser sessions, captains and ordinary organisers receive no INSERT,
-UPDATE or DELETE privilege. Only owner/admin and platform operators
-can read the detailed receipt audit. The synthetic CI fixture tests
-duplicate reference, unapproved method, foreign-club verifier, cross-club
-references, reversal, immutability, and suspended-user visibility. **No
-real Supabase migration, receipt verifier API or live paid-registration
-status update is enabled.** The original payment-events ledger in 004 and
-the manual audit in 006 will need a single reconciler for actual balances
-before a real checkout or money dashboard can launch.
-
-## Phase 2: optional integrated checkout, only after written provider approval
 
 One possible architecture is a provider-managed connected-club onboarding
 and explicit Rallora platform fee; this is NOT automatically allowed for
@@ -171,5 +120,4 @@ minor entrants, anti-fraud limits and bank/payout identity checks.
 - `scripts/staging/ci_league_prizes_assertions.sql`: two-club RLS,
   non-author edit, duplicate event and wrong-season roster checks.
 - `tests/leagues-prize-budget.test.mjs`: projection and allocation tests.
-- NO production migration, provider credentials, checkout, payment webhook,
-  payout, wallet or user charge have been performed.
+- Manual collection records club-confirmed receipts. Automated payment confirmation and prize payouts require a separate integration.
