@@ -207,6 +207,9 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261120142820_extend_competition_schedule.sql
       - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_competition_finish_edit_assertions.sql
 
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261127150000_reconcile_player_accounts.sql
+      - run: psql -v ON_ERROR_STOP=1 -f scripts/staging/ci_account_reconciliation_assertions.sql
+
   support-safety:
     runs-on: ubuntu-latest
     timeout-minutes: 5

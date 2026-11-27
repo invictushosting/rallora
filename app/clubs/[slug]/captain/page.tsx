@@ -63,6 +63,10 @@ export default function CaptainCentre() {
           });
         }
       }else{
+        if(user.email_confirmed_at){
+          const reconciliation=await supabase.rpc("rallora_reconcile_my_player_account");
+          if(reconciliation.error)throw new Error("We couldn’t check your team access. Please try again.");
+        }
         const roster=await supabase.from("rallora_team_roster_memberships")
         .select("team_id,role,teams(id,name,player_one_name,player_two_name,player_one_rating,player_two_rating),seasons(name,status,created_at)")
         .eq("club_id",club.data.id).eq("player_user_id",user.id);

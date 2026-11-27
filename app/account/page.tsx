@@ -42,6 +42,10 @@ export default function AccountPage(){
       if(error||!data.user){setSignedIn(false);setProfileLoading(false);return}
       setSignedIn(true);
       setEmail(data.user.email??"");
+      if(data.user.email_confirmed_at){
+        const reconciliation=await supabase.rpc("rallora_reconcile_my_player_account");
+        if(reconciliation.error)setMessage("We couldn’t check your team access. You can try again from Sign in.");
+      }
       const [profile,clubsReply]=await Promise.all([
         supabase.from("rallora_player_profiles").select("display_name,phone,playing_level,home_town,preferred_club_ids,partner_preference").eq("user_id",data.user.id).maybeSingle(),
         supabase.from("clubs").select("id,name,town").eq("is_active",true).order("name")

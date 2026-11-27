@@ -22,6 +22,10 @@ export default function LoginPage(){
       setSignedIn(Boolean(user));
       if(!user)return;
       setEmail(user.email??"");
+      if(user.email_confirmed_at){
+        const reconciliation=await supabase.rpc("rallora_reconcile_my_player_account");
+        if(reconciliation.error)throw new Error("We couldn’t check your team access. Please try again.");
+      }
       const [platform,memberships,roster]=await Promise.all([
         supabase.from("rallora_platform_admins").select("user_id").eq("user_id",user.id).maybeSingle(),
         supabase.from("rallora_club_memberships").select("role,clubs(slug,name,is_active)").eq("user_id",user.id).eq("status","active"),
@@ -59,7 +63,7 @@ export default function LoginPage(){
     <h1>{signedIn?"Welcome back":"Sign in to Rallora"}</h1>
     {loading?<p role="status">Finding your club…</p>:signedIn?<>
       <p className={styles.email}>Signed in as {email}</p>
-      {destinations.length>0?<><p>Choose where you’d like to go.</p><nav className={styles.destinations} aria-label="Your club areas">{destinations.map(item=><Link key={item.href} href={item.href}><strong>{item.club}</strong><span>{item.label}</span></Link>)}</nav></>:!error&&<p>Your Rallora account is ready. You can <Link href="/account">complete your player profile</Link> or <Link href="/register">explore clubs and competitions</Link>. If your partner registered you, return to your team invitation and claim your place to connect this account to your pairing.</p>}
+      {destinations.length>0?<><p>Choose where you’d like to go.</p><nav className={styles.destinations} aria-label="Your club areas">{destinations.map(item=><Link key={item.href} href={item.href}><strong>{item.club}</strong><span>{item.label}</span></Link>)}</nav></>:!error&&<p>Your Rallora account is ready. You can <Link href="/account">complete your player profile</Link> or <Link href="/register">explore clubs and competitions</Link>. If your team is already approved and you expected to see it here, ask your organiser to check your registration email.</p>}
       {error&&<button type="button" disabled={busy} onClick={()=>void load()}>Try again</button>}
       <div className={styles.accountLinks}><Link href="/account">Profile & security</Link><button type="button" disabled={busy} onClick={()=>void signOut()}>Use a different account</button></div>
     </>:<><p>Both team members can sign in with their own Rallora account. Use your Rallora email and password to access fixtures and match chat.</p>

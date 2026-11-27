@@ -30,6 +30,10 @@ export default function JoinTeamPage(){
    const {data:{user}}=await supabase.auth.getUser();
    setSignedIn(Boolean(user)); setEmail(user?.email??"");
    if(!user||!validInviteId)return;
+   if(user.email_confirmed_at){
+     const reconciliation=await supabase.rpc("rallora_reconcile_my_player_account");
+     if(reconciliation.error){setError("We couldn’t check your team access. Please try again.");return}
+   }
    const r=await supabase.from("rallora_team_member_invites").select("id,invited_name,invited_email,status,team_id,teams(name),clubs!inner(slug)").eq("id",inviteId).eq("clubs.slug",slug).maybeSingle();
    if(r.error){setError(r.error.message);return}
    setInvite(r.data as unknown as Invite|null);
@@ -85,7 +89,7 @@ export default function JoinTeamPage(){
  }
  async function claim(){if(!inviteId)return;setBusy(true);setError("");const r=await supabase.rpc("rallora_claim_team_invite",{p_invite_id:inviteId});setBusy(false);if(r.error){setError(r.error.message);return}setMessage("You’ve joined your team. Use your own login to view fixtures and join match chat.");await load()}
 
- return <main className={styles.page}><section className={styles.card}><BackLink href={slug?`/clubs/${slug}`:"/"}>Back to club</BackLink><span className={styles.eyebrow}>TEAM INVITE</span><h1>Join your Rallora team</h1><p>Both team members can have their own Rallora login. Use the email address that received this invitation to create your account or sign in, then claim your team place.</p>
+ return <main className={styles.page}><section className={styles.card}><BackLink href={slug?`/clubs/${slug}`:"/"}>Back to club</BackLink><span className={styles.eyebrow}>TEAM INVITE</span><h1>Join your Rallora team</h1><p>Both team members can have their own Rallora login. Use the email address that received this invitation to create your account or sign in. Once your email is verified, Rallora can link your team automatically.</p>
  <aside className={styles.terms}><strong>Your player access</strong><p>Both players can arrange matches, record court bookings, submit scores and confirm or dispute an opposing team’s result.</p></aside>
  {!validInviteId&&<p className={styles.error} role="alert">This invite link is incomplete or invalid. Ask your captain for the full invitation link.</p>}
  {!loading&&!signedIn&&validInviteId&&<>

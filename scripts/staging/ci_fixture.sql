@@ -3,8 +3,15 @@
 -- Used only inside an ephemeral GitHub Actions Postgres container.
 create role authenticated nologin;
 create role anon nologin;
+create role service_role nologin;
 create schema auth;
-create table auth.users (id uuid primary key, email text);
+create table auth.users (
+  id uuid primary key,
+  email text,
+  email_confirmed_at timestamptz,
+  banned_until timestamptz,
+  deleted_at timestamptz
+);
 create function auth.uid() returns uuid language sql stable as $fn$
   select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
 $fn$;
