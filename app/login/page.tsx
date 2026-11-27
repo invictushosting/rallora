@@ -22,6 +22,8 @@ export default function LoginPage(){
       setSignedIn(Boolean(user));
       if(!user)return;
       setEmail(user.email??"");
+      const reconciliation=await supabase.rpc("rallora_reconcile_my_team_invites");
+      const moves=await supabase.rpc("rallora_reconcile_my_roster_moves");
       const [platform,memberships,roster]=await Promise.all([
         supabase.from("rallora_platform_admins").select("user_id").eq("user_id",user.id).maybeSingle(),
         supabase.from("rallora_club_memberships").select("role,clubs(slug,name,is_active)").eq("user_id",user.id).eq("status","active"),
@@ -31,6 +33,7 @@ export default function LoginPage(){
       if(platform.error||memberships.error||roster.error)throw new Error("We couldn’t load your club access. Please try again.");
       const links=loginDestinations(Boolean(platform.data),(memberships.data??[]) as unknown as ClubRole[],(roster.data??[]) as unknown as ClubRole[]);
       setDestinations(links);
+      if(!links.length&&(reconciliation.error||moves.error))setError("We couldn’t check your team invitations. Please try again.");
       if(links.length===1)router.replace(links[0].href);
     }catch(caught){if(version===loadVersion.current)setError(caught instanceof Error?caught.message:"We couldn’t load your account. Please try again.")}
     finally{if(version===loadVersion.current)setLoading(false)}
@@ -59,7 +62,7 @@ export default function LoginPage(){
     <h1>{signedIn?"Welcome back":"Sign in to Rallora"}</h1>
     {loading?<p role="status">Finding your club…</p>:signedIn?<>
       <p className={styles.email}>Signed in as {email}</p>
-      {destinations.length>0?<><p>Choose where you’d like to go.</p><nav className={styles.destinations} aria-label="Your club areas">{destinations.map(item=><Link key={item.href} href={item.href}><strong>{item.club}</strong><span>{item.label}</span></Link>)}</nav></>:!error&&<p>Your Rallora account is ready. You can <Link href="/account">complete your player profile</Link> or <Link href="/register">explore clubs and competitions</Link>. If your partner registered you, return to your team invitation and claim your place to connect this account to your pairing.</p>}
+      {destinations.length>0?<><p>Choose where you’d like to go.</p><nav className={styles.destinations} aria-label="Your club areas">{destinations.map(item=><Link key={item.href} href={item.href}><strong>{item.club}</strong><span>{item.label}</span></Link>)}</nav></>:!error&&<p>Your Rallora account is ready. You can <Link href="/account">complete your player profile</Link> or <Link href="/register">explore clubs and competitions</Link>. If your partner registered you, check that you signed in with the invited email address, or ask your club organiser to check the team link.</p>}
       {error&&<button type="button" disabled={busy} onClick={()=>void load()}>Try again</button>}
       <div className={styles.accountLinks}><Link href="/account">Profile & security</Link><button type="button" disabled={busy} onClick={()=>void signOut()}>Use a different account</button></div>
     </>:<><p>Both team members can sign in with their own Rallora account. Use your Rallora email and password to access fixtures and match chat.</p>

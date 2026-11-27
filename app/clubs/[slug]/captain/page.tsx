@@ -1,5 +1,6 @@
 "use client";
 
+import {BYE_LABEL} from "@/lib/leagues/fixture-discovery";
 import {fixturePlayerLabel} from "@/lib/fixture-rosters";
 import type {FixtureArrangement} from "./fixture-booking";
 import { MessageCircle } from "lucide-react";
@@ -48,6 +49,7 @@ export default function CaptainCentre() {
       if(access.error)throw access.error;
       const isAdmin=access.data===true;
       let available:Team[]=[];
+      let invitationsUnavailable=false;
       if(isAdmin){
         // Use the real club roster, including pairings without an assigned captain.
         // RLS still checks the signed-in administrator on every query.
@@ -63,6 +65,9 @@ export default function CaptainCentre() {
           });
         }
       }else{
+        const reconciliation=await supabase.rpc("rallora_reconcile_my_team_invites",{p_club_id:club.data.id});
+        const moves=await supabase.rpc("rallora_reconcile_my_roster_moves",{p_club_id:club.data.id});
+        invitationsUnavailable=Boolean(reconciliation.error||moves.error);
         const roster=await supabase.from("rallora_team_roster_memberships")
         .select("team_id,role,teams(id,name,player_one_name,player_two_name,player_one_rating,player_two_rating),seasons(name,status,created_at)")
         .eq("club_id",club.data.id).eq("player_user_id",user.id);
@@ -103,7 +108,7 @@ export default function CaptainCentre() {
       if(version!==loadVersion.current)return;
       setUnread(Object.fromEntries(((threadSummary.data??[]) as {fixture_id:string;unread_count:number}[]).map(row=>[row.fixture_id,Number(row.unread_count)])));
       setPlatformAdmin(isAdmin);setArrangements(booked);setViewerId(user.id);setCaptainTeams(available);setTeam(chosen??null);setFixtures(rows);setLabels(names);setSubmissions(submitted);setResults(official);
-      setNotice(!chosen?(isAdmin?"This club has no pairings yet. Create or approve teams in club admin to inspect their captain view.":"Your account is not linked to a pairing for this club yet. Claim your partner invitation or ask the organiser to check your place. If your team was just approved, refresh this page or contact the organiser.")
+      setNotice(!chosen?(isAdmin?"This club has no pairings yet. Create or approve teams in club admin to inspect their captain view.":invitationsUnavailable?"We couldn’t check your team invitations. Refresh the page to try again.":"Your account is not linked to a pairing for this club yet. Check that you signed in with the invited email address or ask the organiser to check the team link.")
         :chosen.season.status==="draft"?"This cycle is being prepared. Fixtures become available when the organiser activates it."
         :chosen.season.status==="completed"?"This cycle is complete. Its results are shown for reference.":"");
     } catch(error) {
@@ -186,6 +191,9 @@ export default function CaptainCentre() {
     {!loading&&team&&!notice&&fixtures.length===0&&<p className={styles.notice}>There are no fixtures available for this pairing yet.</p>}
     {!loading&&team&&fixtures.length>0&&<section className={styles.actionCentre}><div><span>NEXT UP</span><h2>{actionCount?`${actionCount} match${actionCount===1?"":"es"} need your attention`:"You’re all caught up"}</h2></div><p>{actionCount?"Submit scores or review an opponent result below.":"No match actions are waiting right now."}</p></section>}
     <section className={styles.grid}>{fixtureCards.map(({fixture,official,submission,confirmed,needsReview,needsSubmit,action,label})=>{
+      if(fixture.status==="bye")return <article className={styles.card} key={fixture.id}>
+        <h2>{BYE_LABEL}</h2><p>{fixturePlayerLabel(fixture,fixture.home_team_id,labels[fixture.home_team_id]??"Players")} / {fixturePlayerLabel(fixture,fixture.away_team_id,labels[fixture.away_team_id]??"Players")}</p>
+      </article>;
       const score=official??submission;
       const booking=arrangements.find(item=>item.fixture_id===fixture.id);
       return <article className={`${styles.card} ${action?styles.actionCard:""}`} key={fixture.id}>

@@ -117,7 +117,7 @@ export default function PlatformControlCentre() {
             const divisionIds = (divisionRows ?? []).map(d => d.id as string);
             const [fixtureCount, teamCount] = await Promise.all([
               supabase.from("fixtures").select("id", { count: "exact", head: true })
-                .in("season_id", ids),
+                .in("season_id", ids).neq("status","bye"),
               divisionIds.length
                 ? supabase.from("teams").select("id", { count: "exact", head: true })
                     .in("division_id", divisionIds)
