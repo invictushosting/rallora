@@ -14,3 +14,9 @@ export function fixtureMatchesQuery(
 export function fixtureIsPublished(fixture: { status: string }): boolean {
   return fixture.status !== "cancelled";
 }
+
+export const BYE_LABEL = "BYE – No match required";
+
+export function fixtureIsCompetitive(fixture: { status: string }): boolean {
+  return fixture.status !== "bye" && fixtureIsPublished(fixture);
+}

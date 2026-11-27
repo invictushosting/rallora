@@ -85,7 +85,7 @@ export default function JoinTeamPage(){
  }
  async function claim(){if(!inviteId)return;setBusy(true);setError("");const r=await supabase.rpc("rallora_claim_team_invite",{p_invite_id:inviteId});setBusy(false);if(r.error){setError(r.error.message);return}setMessage("You’ve joined your team. Use your own login to view fixtures and join match chat.");await load()}
 
- return <main className={styles.page}><section className={styles.card}><BackLink href={slug?`/clubs/${slug}`:"/"}>Back to club</BackLink><span className={styles.eyebrow}>TEAM INVITE</span><h1>Join your Rallora team</h1><p>Both team members can have their own Rallora login. Use the email address that received this invitation to create your account or sign in, then claim your team place.</p>
+ return <main className={styles.page}><section className={styles.card}><BackLink href={slug?`/clubs/${slug}`:"/"}>Back to club</BackLink><span className={styles.eyebrow}>TEAM INVITE</span><h1>Join your Rallora team</h1><p>Both team members can have their own Rallora login. Use the email address that received this invitation to create your account or sign in. If the page still shows Claim team place, use it to connect to your team.</p>
  <aside className={styles.terms}><strong>Your player access</strong><p>Both players can arrange matches, record court bookings, submit scores and confirm or dispute an opposing team’s result.</p></aside>
  {!validInviteId&&<p className={styles.error} role="alert">This invite link is incomplete or invalid. Ask your captain for the full invitation link.</p>}
  {!loading&&!signedIn&&validInviteId&&<>

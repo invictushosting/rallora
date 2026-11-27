@@ -30,3 +30,11 @@ test('retired fixtures are hidden while cancelled court bookings can be rearrang
  const fixtures=[{id:'retired',status:'cancelled',arrangement_status:'cancelled'},{id:'rebook',status:'open',arrangement_status:'cancelled'},{id:'upcoming',status:'open'},{id:'history',status:'confirmed'}];
  assert.deepEqual(fixtures.filter(fixtureIsPublished).map(f=>f.id),['rebook','upcoming','history']);
 });
+
+test('byes stay visible while competitive progress excludes them', async () => {
+  const { fixtureIsPublished, fixtureIsCompetitive } = await import('../lib/leagues/fixture-discovery.ts');
+  const bye = { status: 'bye' };
+  assert.equal(fixtureIsPublished(bye), true);
+  assert.equal(fixtureIsCompetitive(bye), false);
+  assert.equal(fixtureIsCompetitive({ status: 'confirmed' }), true);
+});
