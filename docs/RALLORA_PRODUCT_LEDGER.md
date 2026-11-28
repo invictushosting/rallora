@@ -211,3 +211,15 @@ Public multi-club product -> tested core tenant RLS -> remaining DB/RPC permissi
 club-owner editing -> captain/result workflows -> club invitations and self-service ->
 billing -> end-to-end acceptance -> domain cutover. Do not rush or silently skip the
 restorable backup merely to show a working demo.
+
+## Social Studio upgrade — 20 November 2026 (branch, not deployed)
+
+See `RALLORA_SOCIAL_PRODUCT_PLAN.md` for the agreed marketing-product scope and growth roadmap. This branch adds three frame choices, identical preview/PNG artwork, league/result search, source fingerprints and score rechecks, seven-day local draft expiry, review controls, caption downloads and public confirmed-result player sharing. No AI service, cloud-draft writes or connected publishing is enabled. Club-logo/font/sponsor brand kits and shared approval history remain later work.
+
+## Connected club gallery — local branch, 21 November 2026
+
+Seven approved designs are now connected in the local app to published leagues: three result designs, roundup grid, paginated carousel, current standings and division-leader spotlight. Full selected-source reload and club/user checks guard handoffs. Club branding comes from the profile; photos remain session-only. Additional records continue on pages; source-query limits fail explicitly. The application now lists all published seasons with paginated reads rather than assuming two seasons/400 fixtures. Club news remains in its legacy editor. The five marketing/movement designs remain previews. No production deployment, schema change, model call or social account connection has occurred. See `RALLORA_SOCIAL_PRODUCT_PLAN.md` for implementation limits and release acceptance.
+
+## Club campaigns — local branch, 21 November 2026
+
+The remaining five design families are now connected locally to verified registration/deadline, published event, active sponsor and stored cycle-movement records. Club campaigns excludes closed/hidden registrations, missing deadlines, private/cancelled/past events, mismatched sponsor scopes, private successor cycles and changed pairings. Every manual handoff verifies access, branding, current source data and relevant clock eligibility. See the product plan for limits. Chromium remains blocked by an environment socket restriction; browser release acceptance is outstanding. No live release, model service, shared draft store or direct publishing connection is claimed.

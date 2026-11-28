@@ -19,6 +19,8 @@ import ClubSponsors from "@/app/components/club-sponsors";
 import ClubFooter from "@/app/components/club-footer";
 import { SPONSOR_FIELDS, type Sponsor } from "@/lib/sponsors";
 import MatchScore from "@/app/components/match-score";
+import ShareResult from "@/app/components/share-result";
+import { scoreSets } from "@/lib/leagues/scores";
 import EditResult from "@/app/components/edit-result";
 import {
   makeFixtureDeadlineIcs, makeResultsCsv, type ExportFixture,
@@ -457,6 +459,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
         <span className={styles.score}>vs</span>
         <div className={styles.matchTeam}>{awayPlayers.length ? awayPlayers.map((name, index)=><strong key={index}>{name}</strong>) : <strong>Players to be confirmed</strong>}</div>
       </div>}
+      {resolved && clubState.kind === "ready" && <div className={styles.fixtureBottom}><ShareResult club={clubState.club} match={{id:fixture.id,seasonId:fixture.season_id,season:clubState.seasons.find(s=>s.id===fixture.season_id)?.name??"League",week:fixture.week_number,division:data.divisions.find(d=>d.id===fixture.division_id)?.name??"Division",home:fixturePlayerLabel(fixture,fixture.home_team_id,teamLabel(fixture.home_team_id,teamNames)),away:fixturePlayerLabel(fixture,fixture.away_team_id,teamLabel(fixture.away_team_id,teamNames)),homeScore:scoreSets(result?.home_score).join("  ")||"–",awayScore:scoreSets(result?.away_score).join("  ")||"–",score:`${scoreSets(result?.home_score).join(" / ")||"–"} : ${scoreSets(result?.away_score).join(" / ")||"–"}`,confirmedAt:result?.confirmed_at??fixture.play_by}}/></div>}
       {resolved && chatAccess.manager && <div className={styles.fixtureBottom}><EditResult fixtureId={fixture.id} homeId={fixture.home_team_id} awayId={fixture.away_team_id} homeLabel={fixturePlayerLabel(fixture,fixture.home_team_id,teamLabel(fixture.home_team_id,teamNames))} awayLabel={fixturePlayerLabel(fixture,fixture.away_team_id,teamLabel(fixture.away_team_id,teamNames))} onSaved={()=>{void refreshResult(fixture).catch(()=>setExportNotice("Result saved. Refresh the page to load the updated result and table."));}}/></div>}
       {!resolved && arrangementPanel(fixture)}
       {(chatAccess.manager || chatAccess.teamIds.has(fixture.home_team_id) || chatAccess.teamIds.has(fixture.away_team_id)) && <div className={styles.fixtureBottom}><Link className={styles.bookingAction} href={`/clubs/${slug}/matches/${fixture.id}`}>Match chat</Link></div>}
