@@ -1,5 +1,7 @@
 "use client";
 
+import {BYE_LABEL} from "@/lib/leagues/fixture-discovery";
+
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -133,7 +135,7 @@ export default function MatchConversationPage() {
   const date = (value: string) => new Date(value).toLocaleString("en-GB", { timeZone: context?.timezone ?? "Europe/London", dateStyle: "medium", timeStyle: "short" });
   return <main className={styles.page}><div className={styles.shell}>
     <nav><BackLink href={context?.manager ? `/clubs/${slug}/admin/matches` : `/clubs/${slug}?view=fixtures`}>{context?.manager ? "Back to match inbox" : "Back to fixtures"}</BackLink><Link href="/notifications">Your notifications</Link></nav>
-    {loading ? <p role="status">Loading match conversation…</p> : error ? <section className={styles.panel}><h1>Match conversation</h1><p role="alert">{error}</p><button onClick={() => void load()}>Try again</button><Link href="/login">Sign in</Link></section> : context && <>
+    {loading ? <p role="status">Loading match conversation…</p> : error ? <section className={styles.panel}><h1>Match conversation</h1><p role="alert">{error}</p><button onClick={() => void load()}>Try again</button><Link href="/login">Sign in</Link></section> : context?.status==="bye" ? <section className={styles.panel}><h1>{BYE_LABEL}</h1><p>Check any existing court booking separately with your club.</p></section> : context && <>
       <header className={styles.hero}><span>MATCH CENTRE · {context.club}</span><h1>{context.home} <em>vs</em> {context.away}</h1><p>{context.league} · {context.division} · Play {context.available_from && <>{new Date(context.available_from + "T12:00:00").toLocaleDateString("en-GB")} – </>}{new Date(context.play_by + "T12:00:00").toLocaleDateString("en-GB")}</p><p>Private to this fixture’s current players and club organisers.</p></header>
       {!context.writable && <p className={styles.banner}>This fixture is read-only. Messages remain available for reference.</p>}
       {context.help_requested && <aside className={styles.banner}><strong>Organiser help requested</strong><p>This match is flagged in the club’s match inbox.</p>{context.manager && context.writable && <button disabled={busy} onClick={() => void resolveHelp()}>Mark help request resolved</button>}</aside>}

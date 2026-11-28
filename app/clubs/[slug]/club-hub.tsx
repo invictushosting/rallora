@@ -2,7 +2,7 @@
 
 import {useFixtureChatAccess} from "@/lib/hooks/use-fixture-chat-access";
 import {fixturePlayerLabel} from "@/lib/fixture-rosters";
-import {fixtureMatchesQuery, fixtureIsPublished} from "@/lib/leagues/fixture-discovery";
+import {BYE_LABEL, fixtureMatchesQuery, fixtureIsPublished, fixtureIsCompetitive} from "@/lib/leagues/fixture-discovery";
 import {registrationWindowState} from "@/lib/registration-window";
 import {useRegistrationWindow} from "@/lib/hooks/use-registration-window";
 import BackLink from "@/app/components/back-link";
@@ -299,8 +299,8 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
           .filter((team) => divisionIds.has(team.division_id));
         const teamIds = new Set(teams.map((team) => team.id));
         const publishedFixtures = fixtures.filter(
-          (fixture) => fixtureIsPublished(fixture) && teamIds.has(fixture.home_team_id) &&
-            teamIds.has(fixture.away_team_id),
+          (fixture) => fixtureIsPublished(fixture) && (fixture.status === "bye" ||
+            (teamIds.has(fixture.home_team_id) && teamIds.has(fixture.away_team_id))),
         );
         const publishedFixtureIds = new Set(publishedFixtures.map((fixture) => fixture.id));
         if (alive) {
@@ -365,14 +365,14 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
     .filter((row) => row.division_id === id)
     .sort((a, b) => b.points - a.points || b.score_diff - a.score_diff ||
       teamLabel(a.team_id, teamNames).localeCompare(teamLabel(b.team_id, teamNames)));
-  const confirmed = data.fixtures.filter((fixture) =>
-    isConfirmed(results.get(fixture.id))).length;
+  const competitiveFixtures = data.fixtures.filter(fixtureIsCompetitive);
+  const confirmed = competitiveFixtures.filter((fixture) => isConfirmed(results.get(fixture.id))).length;
   const availableFixturesForTab = data.fixtures.filter((fixture) =>
     tab === "results" ? isConfirmed(results.get(fixture.id)) :
       !isConfirmed(results.get(fixture.id)));
   const fixtureCountsByDivision = new Map(data.divisions.map((division) =>
     [division.id, availableFixturesForTab.filter((fixture) =>
-      fixture.division_id === division.id).length] as const));
+      fixture.division_id === division.id && fixtureIsCompetitive(fixture)).length] as const));
   const divisionNames = new Map(data.divisions.map((division) =>
     [division.id, division.name] as const));
   const divisionOrder = new Map(data.divisions.map((division) =>
@@ -435,6 +435,11 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
     setExportNotice("Result corrected and league table updated.");
   }
   function fixtureRow(fixture: Fixture) {
+    if (fixture.status === "bye") return <li key={fixture.id} className={styles.fixture}>
+      <div className={styles.fixtureTop}><span>{divisionNames.get(fixture.division_id)}</span><span>{fixture.fixture_group_name}</span></div>
+      <strong>{BYE_LABEL}</strong>
+      <p>{fixturePlayerLabel(fixture,fixture.home_team_id,teamLabel(fixture.home_team_id,teamNames))} / {fixturePlayerLabel(fixture,fixture.away_team_id,teamLabel(fixture.away_team_id,teamNames))}</p>
+    </li>;
     const result = results.get(fixture.id);
     const resolved = isConfirmed(result);
     const homePlayers = fixture.home_player_names?.filter((name): name is string=>Boolean(name?.trim())) ?? playerNames(data.teams.find(team => team.id === fixture.home_team_id));
@@ -623,7 +628,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
             <div className={styles.metrics}>
               <article><span>Divisions</span><strong>{data.divisions.length}</strong></article>
               <article><span>Player pairs</span><strong>{data.teams.length}</strong></article>
-              <article><span>Fixtures</span><strong>{data.fixtures.length}</strong></article>
+              <article><span>Fixtures</span><strong>{competitiveFixtures.length}</strong></article>
               <article><span>Final results</span><strong>{confirmed}</strong></article>
             </div>
             {content.announcements.length > 0 && <section className={styles.announcements}>
@@ -663,7 +668,7 @@ export default function ClubLeagueHub({ slugOverride, previewSeasonId }: { slugO
               <span className={styles.kicker}>{currentSeason?.name}</span>
               <h2>{TABS.find((value) => value.id === tab)?.label}</h2>
             </div><span className={styles.sectionCount}>
-              {tab === "fixtures" ? data.fixtures.length - confirmed :
+              {tab === "fixtures" ? competitiveFixtures.length - confirmed :
                 tab === "results" ? confirmed :
                 tab === "teams" ? data.teams.length : data.divisions.length}
             </span></div>
