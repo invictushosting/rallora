@@ -8,13 +8,44 @@ type Activity={id:string;actor_label:string;detail:string;created_at:string};
 type Workspace={players:SupportPlayer[];messages:Message[];activities:Activity[];diagnostics:Record<string,string|null>;screenshotUrl:string|null;threadingEnabled:boolean;emailEnabled:boolean};
 function date(value:string|null){return value?new Date(value).toLocaleString('en-GB'):'Never';}
 function PlayerCard({player,onResend,disabled}:{player:SupportPlayer;onResend?:(inviteId:string)=>void;disabled?:boolean}){
+ const [checking,setChecking]=useState(false);
+ const [notice,setNotice]=useState('');
+ const [linkedSeasons,setLinkedSeasons]=useState<string[]>([]);
+ const [checkedPlayer,setCheckedPlayer]=useState<SupportPlayer|null>(null);
+ const currentPlayer=checkedPlayer??player;
+
+ async function reconcile(seasonId:string){
+  if(checking||!player.userId)return;
+  setChecking(true);setNotice('');
+  try{
+   const response=await fetch('/api/platform/support/players',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({userId:player.userId,seasonId})
+   });
+   const result=await response.json();
+   if(!response.ok)throw Error(result.error);
+   if(result.linked){
+    setLinkedSeasons(seasons=>[...seasons,seasonId]);
+    const lookup=await fetch(`/api/platform/support/players?q=${encodeURIComponent(player.email)}&exact=true`,{cache:'no-store'});
+    if(lookup.ok){
+     const updated=(await lookup.json()).players.find((candidate:SupportPlayer)=>candidate.userId===player.userId);
+     if(updated)setCheckedPlayer(updated);
+    }
+   }
+   setNotice(result.linked?'Verified team access linked.':'No eligible link found. Check the approved registration, current team and account email.');
+  }catch(e){setNotice(e instanceof Error?e.message:'Team access could not be checked.');}
+  finally{setChecking(false);}
+ }
+
  return <article className={styles.player}>
   <h4>{player.name||player.email}</h4><p>{player.email}</p>{player.playtomicEmail&&<p>Playtomic email: {player.playtomicEmail}</p>}
-  <ul className={styles.checks}>{playerAccessChecks(player).map(check=><li key={check}>{check}</li>)}</ul>
+  <ul className={styles.checks}>{playerAccessChecks(currentPlayer).map(check=><li key={check}>{check}</li>)}</ul>
   <p className={styles.muted}>Last sign-in: {date(player.lastSignIn)}</p>
-  {player.teams.map(team=><div className={styles.team} key={team.id}><strong>{team.players}</strong><p>{team.club} · {team.season} · {team.division}{!team.active?' · Inactive team':''}</p><p>{team.fixtures} fixtures · {team.openFixtures} open and available</p><div className={styles.actions}><a href={`/clubs/${team.slug}/admin/registrations`}>Open registrations</a><a href={`/clubs/${team.slug}/admin`}>Club admin</a><a href={`/clubs/${team.slug}/captain?team=${team.id}`}>View as captain</a><a href={`/clubs/${team.slug}?season=${team.seasonId}&view=fixtures`}>View fixtures</a></div></div>)}
+  {currentPlayer.teams.map(team=><div className={styles.team} key={team.id}><strong>{team.players}</strong><p>{team.club} · {team.season} · {team.division}{!team.active?' · Inactive team':''}</p><p>{team.fixtures} fixtures · {team.openFixtures} open and available</p><div className={styles.actions}>{team.active&&!team.hasAccess&&player.userId&&player.confirmedAt&&!linkedSeasons.includes(team.seasonId)&&<button type="button" disabled={checking} onClick={()=>void reconcile(team.seasonId)}>Check and link team access</button>}<a href={`/clubs/${team.slug}/admin/registrations`}>Open registrations</a><a href={`/clubs/${team.slug}/admin`}>Club admin</a><a href={`/clubs/${team.slug}/captain?team=${team.id}`}>View as captain</a><a href={`/clubs/${team.slug}?season=${team.seasonId}&view=fixtures`}>View fixtures</a></div></div>)}
   {player.registrations.map((r,i)=><p key={i}>Registration: <strong>{r.status}</strong> · {r.captain} / {r.partner} · {r.season}</p>)}
-  {player.invites.map(invite=><div key={invite.id} className={styles.invite}><span>Invitation: <strong>{invite.status}</strong> · {invite.season}</span>{invite.status==='pending'&&<div className={styles.actions}><a href={`/clubs/${invite.slug}/join-team?invite=${invite.id}`}>Open claim link</a><button type="button" onClick={()=>void navigator.clipboard.writeText(`${window.location.origin}/clubs/${invite.slug}/join-team?invite=${invite.id}`).catch(()=>window.prompt('Copy invitation link',`${window.location.origin}/clubs/${invite.slug}/join-team?invite=${invite.id}`))}>Copy claim link</button>{onResend&&player.teams.some(t=>t.active&&t.id===invite.teamId)&&<button type="button" disabled={disabled} onClick={()=>onResend(invite.id)}>Resend invitation</button>}</div>}</div>)}
+  {currentPlayer.invites.map(invite=><div key={invite.id} className={styles.invite}><span>Invitation: <strong>{invite.status}</strong> · {invite.season}</span>{invite.status==='pending'&&<div className={styles.actions}><a href={`/clubs/${invite.slug}/join-team?invite=${invite.id}`}>Open claim link</a><button type="button" onClick={()=>void navigator.clipboard.writeText(`${window.location.origin}/clubs/${invite.slug}/join-team?invite=${invite.id}`).catch(()=>window.prompt('Copy invitation link',`${window.location.origin}/clubs/${invite.slug}/join-team?invite=${invite.id}`))}>Copy claim link</button>{onResend&&currentPlayer.teams.some(t=>t.active&&t.id===invite.teamId)&&<button type="button" disabled={disabled} onClick={()=>onResend(invite.id)}>Resend invitation</button>}</div>}</div>)}
+  {notice&&<p role="status">{notice}</p>}
  </article>;
 }
 export function SupportPlayerSearch(){

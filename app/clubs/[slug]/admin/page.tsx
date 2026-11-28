@@ -1,5 +1,7 @@
 "use client";
 
+import {BYE_LABEL, fixtureIsCompetitive} from "@/lib/leagues/fixture-discovery";
+
 import RalloraLogo from "@/app/components/rallora-logo";
 import SupportForm from "@/app/components/support-form";
 import Loading from "@/app/loading";
@@ -224,12 +226,12 @@ export default function ClubAdministration() {
             season,
             divisions: divisionIds.length,
             teams: roster.length,
-            fixtures: fixtureIds.length,
+            fixtures: seasonFixtures.filter(fixtureIsCompetitive).length,
             confirmed: (resultsReply.data ?? [])
               .filter((result) => knownFixtureIds.has(result.fixture_id)).length,
-            outstanding: seasonFixtures.filter((fixture) => !["confirmed","cancelled"].includes(fixture.status)).length,
+            outstanding: seasonFixtures.filter((fixture) => fixtureIsCompetitive(fixture) && fixture.status !== "confirmed").length,
             awaitingResult: seasonFixtures.filter((fixture) => fixture.status === "played" || fixture.status === "awaiting_result").length,
-            overdue: seasonFixtures.filter((fixture) => !["confirmed","cancelled"].includes(fixture.status) && fixture.play_by && fixture.play_by < new Date().toISOString().slice(0,10)).length,
+            overdue: seasonFixtures.filter((fixture) => fixtureIsCompetitive(fixture) && fixture.status !== "confirmed" && fixture.play_by && fixture.play_by < new Date().toISOString().slice(0,10)).length,
             registrations: registrationReply.count ?? 0,
             divisionSummaries,
           };
@@ -304,9 +306,11 @@ export default function ClubAdministration() {
     awaitingResult: acc.awaitingResult + item.awaitingResult,
     overdue: acc.overdue + item.overdue,
   }), { divisions: 0, teams: 0, fixtures: 0, confirmed: 0, outstanding: 0, awaitingResult: 0, overdue: 0 });
-  const confirmedBookings = view.playtomicBookings.filter((booking)=>booking.match_state==="confirmed" && booking.matched_player_count===4);
+  const byeIds = new Set(view.fixtures.filter(fixture=>fixture.status==="bye").map(fixture=>fixture.id));
+  const competitiveBookings = view.playtomicBookings.filter(booking=>!booking.matched_fixture_id||!byeIds.has(booking.matched_fixture_id));
+  const confirmedBookings = competitiveBookings.filter((booking)=>booking.match_state==="confirmed" && booking.matched_player_count===4);
   const bookedFixtureIds = new Set(confirmedBookings.filter((booking)=>booking.booking_status!=="CANCELED").map((booking)=>booking.matched_fixture_id).filter(Boolean));
-  const possibleBookings = view.playtomicBookings.filter((booking)=>booking.match_state==="possible" && booking.matched_player_count===3).length;
+  const possibleBookings = competitiveBookings.filter((booking)=>booking.match_state==="possible" && booking.matched_player_count===3).length;
   const finishedWithoutResult = confirmedBookings.filter((booking)=>booking.booking_status==="FINISHED" && booking.matched_fixture_id && !view.fixtures.some((fixture)=>fixture.id===booking.matched_fixture_id && fixture.status==="confirmed")).length;
   const firstCompetition = view.summaries[0];
   const publishedCompetition = view.summaries.find(({season})=>season.registration_published);
@@ -334,6 +338,7 @@ export default function ClubAdministration() {
   const closeFixtureView = () => { setFixtureView(null); fixtureOpener.current?.focus(); };
   const fixtureRows = view.fixtures.filter((fixture)=>{
     if (!fixtureView || fixtureView==="all") return true;
+    if(fixture.status==="bye")return false;
     const booking = confirmedBookings.find((item)=>item.matched_fixture_id===fixture.id && item.booking_status!=="CANCELED");
     if (fixtureView==="disputed") return fixture.status==="disputed";
     if (fixtureView==="booked") return Boolean(booking && booking.booking_status!=="FINISHED");
@@ -443,7 +448,9 @@ export default function ClubAdministration() {
       </div>
       {reminderNotice && <p className={styles.fixtureNotice} role="status">{reminderNotice}</p>}
       <div className={styles.fixtureList}>
-        {fixtureRows.map((fixture)=><article className={styles.fixtureOperationRow} key={fixture.id}>
+        {fixtureRows.map((fixture)=>fixture.status==="bye"?<article className={styles.fixtureOperationRow} key={fixture.id}>
+          <div className={styles.fixtureOperationMain}><strong>{BYE_LABEL}</strong><p>{fixture.home_label} / {fixture.away_label}</p></div>
+        </article>:<article className={styles.fixtureOperationRow} key={fixture.id}>
           <div className={styles.fixtureOperationMain}><strong>{fixture.home_label || "Players"} <span>vs</span> {fixture.away_label || "Players"}</strong><div className={styles.fixtureMeta}><span>Week {fixture.week_number}</span><span>Play by {fixture.play_by}</span><b data-status={fixture.status}>{fixture.status==="confirmed"?"Played":fixture.status.replaceAll("_"," ")}</b></div></div>
           <div className={styles.fixtureActions}>
             <span className={styles.bookingHealth} data-tone={bookingHealth(fixture).tone}><i aria-hidden="true" />{bookingHealth(fixture).label}</span>
@@ -459,7 +466,7 @@ export default function ClubAdministration() {
       </div>
     </section>}
     <div id="club-leagues" tabIndex={-1} role="region" aria-labelledby="club-leagues-heading" className={styles.sectionHeading}><div><span className={styles.eyebrow}>LEAGUE MANAGEMENT</span><h2 id="club-leagues-heading">Leagues</h2></div>
-      <p>Manage leagues, divisions, fixtures and results.</p></div>
+      <p>Manage leagues, divisions, fixtures and results.</p><Link href={`/clubs/${slug}/admin/withdrawals`}>Withdraw Team &amp; Manage Byes</Link></div>
     <section className={styles.grid}>
       {view.summaries.map(({ season, divisions, teams, fixtures, confirmed, outstanding, awaitingResult, overdue, divisionSummaries }) =>
         <article className={styles.card} key={season.id}>

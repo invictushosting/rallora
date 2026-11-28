@@ -1,5 +1,7 @@
 "use client";
 
+import {fixtureIsCompetitive} from "@/lib/leagues/fixture-discovery";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
@@ -274,7 +276,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const scheduleError = validateRoundWindows(plannedRounds, competitionStart, competitionFinish);
   const formatLocked = Boolean(editingSeason && editingSeason.registrations > 0);
   const archivedSeasonIds = new Set(seasons.map(season => season.previous_season_id).filter(Boolean));
-  const recoveryOptions = fixtures.filter(fixture => fixture.status !== "cancelled" && !archivedSeasonIds.has(fixture.season_id));
+  const recoveryOptions = fixtures.filter(fixture => fixtureIsCompetitive(fixture) && !archivedSeasonIds.has(fixture.season_id));
   const recoveredFixture = recoveryOptions.find(fixture => fixture.id === recoveryFixture);
   const recoveryDivision = divisions.find(division => division.id === recoveredFixture?.division_id);
   const recoveryTeams = recoveryDivision?.teams ?? [];
@@ -284,7 +286,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
   const managedHome = managedDivision?.teams.find((team)=>team.id===selectedManagedFixture?.home_team_id)?.name ?? "Home";
   const managedAway = managedDivision?.teams.find((team)=>team.id===selectedManagedFixture?.away_team_id)?.name ?? "Away";
   const managedArchived = Boolean(selectedManagedFixture && archivedSeasonIds.has(selectedManagedFixture.season_id));
-  const managedLocked = managedArchived || selectedManagedFixture?.status==="confirmed" || selectedManagedFixture?.status==="cancelled";
+  const managedLocked = managedArchived || selectedManagedFixture?.status==="confirmed" || (selectedManagedFixture?.status==="cancelled" || selectedManagedFixture?.status==="bye");
 
   useEffect(() => {
     if (!seasons.some((season) => season.id === divisionSeasonId)) {
@@ -553,7 +555,7 @@ export default function ClubEditor({ club, seasons, onSaved, fixtures = [] }: Pr
     return !season.registration_published && season.divisions.length > 0 &&
       season.divisions.every(division => division.teams.length >= 2 &&
         division.teams.every(team => fixtures.some(fixture => fixture.season_id === season.id &&
-          fixture.division_id === division.id && fixture.status !== "cancelled" &&
+          fixture.division_id === division.id && fixtureIsCompetitive(fixture) &&
           (fixture.home_team_id === team.id || fixture.away_team_id === team.id))));
   }
 

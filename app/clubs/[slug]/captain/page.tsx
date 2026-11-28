@@ -1,5 +1,6 @@
 "use client";
 
+import {BYE_LABEL} from "@/lib/leagues/fixture-discovery";
 import {fixturePlayerLabel} from "@/lib/fixture-rosters";
 import type {FixtureArrangement} from "./fixture-booking";
 import { MessageCircle } from "lucide-react";
@@ -63,6 +64,10 @@ export default function CaptainCentre() {
           });
         }
       }else{
+        if(user.email_confirmed_at){
+          const reconciliation=await supabase.rpc("rallora_reconcile_my_player_account");
+          if(reconciliation.error)throw new Error("We couldn’t check your team access. Please try again.");
+        }
         const roster=await supabase.from("rallora_team_roster_memberships")
         .select("team_id,role,teams(id,name,player_one_name,player_two_name,player_one_rating,player_two_rating),seasons(name,status,created_at)")
         .eq("club_id",club.data.id).eq("player_user_id",user.id);
@@ -186,6 +191,9 @@ export default function CaptainCentre() {
     {!loading&&team&&!notice&&fixtures.length===0&&<p className={styles.notice}>There are no fixtures available for this pairing yet.</p>}
     {!loading&&team&&fixtures.length>0&&<section className={styles.actionCentre}><div><span>NEXT UP</span><h2>{actionCount?`${actionCount} match${actionCount===1?"":"es"} need your attention`:"You’re all caught up"}</h2></div><p>{actionCount?"Submit scores or review an opponent result below.":"No match actions are waiting right now."}</p></section>}
     <section className={styles.grid}>{fixtureCards.map(({fixture,official,submission,confirmed,needsReview,needsSubmit,action,label})=>{
+      if(fixture.status==="bye")return <article className={styles.card} key={fixture.id}>
+        <h2>{BYE_LABEL}</h2><p>{fixturePlayerLabel(fixture,fixture.home_team_id,labels[fixture.home_team_id]??"Players")} / {fixturePlayerLabel(fixture,fixture.away_team_id,labels[fixture.away_team_id]??"Players")}</p>
+      </article>;
       const score=official??submission;
       const booking=arrangements.find(item=>item.fixture_id===fixture.id);
       return <article className={`${styles.card} ${action?styles.actionCard:""}`} key={fixture.id}>
